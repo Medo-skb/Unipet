@@ -33,7 +33,7 @@ public class DefaultController {
 	public String copy(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 //		resultMap = 서비스객체.함수(map);
-
+ 
 		return new Gson().toJson(resultMap); 
 	}
 	
