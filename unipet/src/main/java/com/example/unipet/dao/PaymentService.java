@@ -9,7 +9,7 @@ import com.example.unipet.common.Message;
 import com.example.unipet.mapper.DefaultMapper;
 
 @Service
-public class DefaultService {
+public class PaymentService {
 
 	@Autowired 
 	DefaultMapper defaultMapper;

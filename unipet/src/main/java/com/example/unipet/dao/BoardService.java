@@ -6,13 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.unipet.common.Message;
-import com.example.unipet.mapper.DefaultMapper;
+import com.example.unipet.mapper.BoardMapper;
 
 @Service
-public class DefaultService {
+public class BoardService {
 
 	@Autowired 
-	DefaultMapper defaultMapper;
+	BoardMapper BoardMapper;
 	
 	// 조회 -> get, 수정 -> edit, 삽입 -> add, 삭제 -> remove
 	// ex) 학생목록 : getStudentList, 학생수정 -> editStudent
@@ -43,8 +43,6 @@ public class DefaultService {
 		}
 		return resultMap;
 	}
-	
-	
 	
 	
 	

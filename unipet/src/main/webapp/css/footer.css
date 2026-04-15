@@ -1,0 +1,64 @@
+/* 푸터 전체 */
+.site-footer {
+    width: 100%;
+    min-width: 1400px;
+    border-top: 1px solid #bdbdbd;
+    background-color: #f3f3f3;
+}
+
+/* 내부 정렬 */
+.site-footer .footer-inner {
+    width: 100%;
+    max-width: 1400px;
+    min-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+/* 메뉴 */
+.site-footer .footer-top {
+    height: 68px;
+    display: flex;
+    align-items: center;
+    gap: 42px;
+    white-space: nowrap;
+}
+
+/* 메뉴-정보 사이 선 */
+.site-footer .footer-divider {
+    width: 100%;
+    min-width: 1400px;
+    height: 1px;
+    background-color: #c9c9c9;
+}
+
+/* 메뉴 */
+.site-footer .footer-menu {
+    text-decoration: none;
+    color: #111;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* 회사 정보 */
+.site-footer .footer-bottom {
+    padding: 18px 0 22px;
+}
+
+/* 상호명 */
+.site-footer .company-name {
+    margin: 0 0 8px 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: #111;
+}
+
+/* 정보 */
+.site-footer .company-info {
+    margin: 0;
+    font-size: 12px;
+    color: #7a7a7a;
+    line-height: 1.45;
+}

@@ -44,4 +44,8 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="output" path="target/classes"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="unipet/src/main/java"/>
+	<classpathentry kind="src" path="unipet/src/test/java"/>
+	<classpathentry kind="output" path="bin"/>
 </classpath>
