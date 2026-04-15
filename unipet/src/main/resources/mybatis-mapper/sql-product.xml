@@ -1,0 +1,52 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.unipet.mapper.ProductMapper">
+	<select id="selectCategoryList" resultType="hashmap">
+
+    SELECT 
+        'ANIMAL' AS CAT_TYPE,
+        m.A_MAIN_TYPE AS MAIN_NAME,
+        s.A_SUB_TYPE AS SUB_NAME,
+        s.A_SUB_NO AS SUB_NO  /* ← 이 별칭이 반드시 있어야 함! */
+    FROM PC_ANIMAL_MAIN m
+    INNER JOIN PC_ANIMAL_SUB s ON m.A_MAIN_NO = s.A_MAIN_NO
+    
+    UNION ALL
+    
+
+    SELECT 
+        'PRODUCT' AS CAT_TYPE,
+        m.I_MAIN_TYPE AS MAIN_NAME,
+        s.I_SUB_TYPE AS SUB_NAME,
+        s.I_SUB_NO AS SUB_NO  /* ← 여기도 마찬가지! */
+    FROM PC_ITEM_MAIN m
+    INNER JOIN PC_ITEM_SUB s ON m.I_MAIN_NO = s.I_MAIN_NO
+</select>
+
+	<select id="selectProductList" parameterType="hashmap" resultType="hashmap">
+    SELECT 
+        p.PRODUCT_NO,
+        p.PRODUCT_NAME,
+        p.PRODUCT_PRICE,
+        p.BRAND,
+        f.FILE_NAME
+    FROM PRODUCT p
+    
+    LEFT JOIN PRODUCT_FILE f ON p.PRODUCT_NO = f.PRODUCT_NO AND f.IS_MAIN = 'Y'
+    WHERE p.PRODUCT_STATUS = 'Y'
+    
+    <if test="aSubNo != null and aSubNo != ''">
+        AND p.A_SUB_NO = #{aSubNo}
+    </if>
+    
+    <if test="iSubNo != null and iSubNo != ''">
+        AND p.I_SUB_NO = #{iSubNo}
+    </if>
+   
+    <if test="keyword != null and keyword != ''">
+        AND p.PRODUCT_NAME LIKE CONCAT('%', #{keyword}, '%')
+    </if>
+
+    ORDER BY p.PRODUCT_NO DESC
+</select>
+</mapper>
