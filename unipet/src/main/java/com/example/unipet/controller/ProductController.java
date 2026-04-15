@@ -23,7 +23,7 @@ public class ProductController {
 	ProductService productService;
 
 	// [페이지 이동] 쇼핑몰 메인 (shopMain + shopSearch 통합)
-	@RequestMapping("/main.do")
+	@RequestMapping("/product.do")
 	public String main() {
 		return "product";
 	}
