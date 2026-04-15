@@ -9,28 +9,27 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.example.unipet.dao.DefaultService;
+import com.example.unipet.dao.BoardService;
 import com.google.gson.Gson;
 
 import ch.qos.logback.core.model.Model;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
-public class DefaultController {
+public class BoardController {
 	
 	@Autowired
-	DefaultService defaultService;
+	BoardService BoardService;
 	
-	// 웹브라우저로 접속하는 주소, return은 jsp파일
-	@RequestMapping("/copy.do") 
-	public String copy(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception{
-		return "/copy";
+	
+	@RequestMapping("/board.do") 
+	public String board(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception{
+		return "/board";
 	}
 	
-	// ajax가 호출하는 주소
-	@RequestMapping(value = "/copy.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@RequestMapping(value = "/board.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
-	public String copy(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+	public String board(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 //		resultMap = 서비스객체.함수(map);
 
