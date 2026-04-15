@@ -1,0 +1,65 @@
+#container{
+    width: 700px;
+    border: 1px solid black;
+    margin: 0px auto;
+    
+}
+
+#top{
+    margin: 10px;
+}
+
+#sort-area{
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.s-button {
+    background-color: #eee;
+    border-radius: 5px;
+    width: 100px;
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+}
+
+#search{
+    display: flex;
+    justify-content: center;
+    gap:20px;
+    margin: 10px;
+}
+
+.input-group{
+    display: flex;
+    gap: 10px;
+}
+
+#date-range{
+    width: 110px;
+    text-align: center;
+}
+
+#bottom{
+    display: grid;
+    gap: 10px;
+    grid-template-columns: 300px auto;
+    grid-template-rows: 400px;
+    border: 1px solid black;
+    
+}
+
+#left{
+    border: 1px solid black;
+}
+
+#right{
+    border: 1px solid black;
+}
+
+#map{
+    width:100%;
+    height:100%;
+}
+
