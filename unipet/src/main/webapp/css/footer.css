@@ -1,13 +1,19 @@
+/* 푸터 전체 */
 .site-footer {
     width: 100%;
+    min-width: 1400px;
     border-top: 1px solid #bdbdbd;
+    background-color: #f3f3f3;
 }
 
 /* 내부 정렬 */
 .site-footer .footer-inner {
-    max-width: 1000px;     /* 전체 콘텐츠 영역 */
-    margin: 0 auto;        /* 가운데 정렬 */
-    padding: 0 40px;       /* 좌우 여백 */
+    width: 100%;
+    max-width: 1400px;
+    min-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+    box-sizing: border-box;
 }
 
 /* 메뉴 */
@@ -22,6 +28,7 @@
 /* 메뉴-정보 사이 선 */
 .site-footer .footer-divider {
     width: 100%;
+    min-width: 1400px;
     height: 1px;
     background-color: #c9c9c9;
 }

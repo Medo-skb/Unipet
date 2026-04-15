@@ -49,7 +49,6 @@
             </div>
         </div>
     </header>
-    <div class="site-header-spacer"></div>
 </body>
 </html>
 
