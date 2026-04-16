@@ -1,0 +1,60 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.example.unipet.mapper.PaymentMapper">
+	<!-- 한개 검색 -->
+	<select id="selectPayment" resultType="com.example.unipet.model.Payment">
+        SELECT 
+            r.RSV_NO,        
+            r.RSV_DATE,      
+            r.END_DATE,      
+            r.REQUEST,
+            r.RSV_STATUS,    
+
+            s.STORE_NAME,    
+ 
+            m.MENU_NAME,     
+            m.MENU_PRICE,    
+            m.M_STATUS,     
+  
+            u.USER_NAME,    
+            u.PHONE          
+            
+        FROM reservation r
+        INNER JOIN store s ON r.STORE_NO = s.STORE_NO
+        INNER JOIN store_menu m ON r.MENU_NO = m.MENU_NO
+        INNER JOIN users u ON r.USER_ID = u.USER_ID
+        WHERE r.RSV_NO = 11
+    </select>
+    
+    <insert id="insertPayment" parameterType="hashmap">
+        INSERT INTO payment_master (
+            USER_ID,
+            RSV_NO,
+            ORD_NAME,
+            TOTALPRICE,
+            TID,
+            PAY_TYPE,    METHOD_NO,   PAY_STATUS,
+            PAY_DATE
+        ) VALUES (
+            #{userId},
+            #{rsvNo},
+            #{ordName},
+            #{totalPrice},
+            #{tid},
+            #{payType},
+            NULL,
+            'PAID',
+            NOW()
+        )
+    </insert>
+
+    <update id="updateRsvStatus" parameterType="hashmap">
+        UPDATE reservation
+        SET 
+            RSV_STATUS = '결제완료'
+        WHERE 
+            RSV_NO = #{rsvNo}
+    </update>
+    
+</mapper>
