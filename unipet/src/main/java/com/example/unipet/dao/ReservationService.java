@@ -1,18 +1,20 @@
 package com.example.unipet.dao;
 
 import java.util.HashMap;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.unipet.common.Message;
-import com.example.unipet.mapper.DefaultMapper;
+import com.example.unipet.mapper.ReservationMapper;
+import com.example.unipet.model.Store;
 
 @Service
-public class DefaultService {
+public class ReservationService {
 
 	@Autowired 
-	DefaultMapper defaultMapper;
+	ReservationMapper reservationMapper;
 	
 	// 조회 -> get, 수정 -> edit, 삽입 -> add, 삭제 -> remove
 	// ex) 학생목록 : getStudentList, 학생수정 -> editStudent
@@ -25,14 +27,12 @@ public class DefaultService {
 	// 수정, 삭제, 삽입 -> updateXXX, deleteXXX, insertXXX
 	//	int result = defaultMapper.updateXXX();
 	
-	public HashMap<String, Object> getItem(HashMap<String, Object> map){
+	public HashMap<String, Object> getStoreList(HashMap<String, Object> map){
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 		try {
-//			List<User> list = defaultMapper.selectUserList(map);
-//			User info = defaultMapper.selectUser(map);
-//			int result = defaultMapper.updateXXX(map);
+			List<Store> list = reservationMapper.selectStoreList(map);
 			
-//			resultMap.put("list", list);
+			resultMap.put("list", list);
 			resultMap.put("result", "success");
 			resultMap.put("message", Message.MSG_ADD);
 		} catch (Exception e) {
@@ -43,8 +43,6 @@ public class DefaultService {
 		}
 		return resultMap;
 	}
-	
-	
 	
 	
 	
