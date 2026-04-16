@@ -1,0 +1,58 @@
+#container{
+    width: 600px;
+    border: 1px solid black;
+    margin: 0px auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+#top{
+}
+
+.b-button{
+    width: 100px;
+    height: 30px;
+    line-height: 30px;
+    background-color: blue;
+    color: white;
+    text-align: center;
+}
+
+.img-area{
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin: 10px 0px;
+}
+
+.img{
+    width: 200px;
+    height: 200px;
+    line-height: 200px;
+    border: 1px solid black;
+    text-align: center;
+
+}
+
+.intro, .menu {
+    margin: 20px 0px;
+}
+
+#bottom{
+    display: grid;
+    gap: 10px;
+    grid-template-columns: 300px auto;
+    grid-template-rows: 200px;
+    /* border: 1px solid black; */
+}
+
+.rev-cont{
+    margin: 15px 0px;
+}
+
+.map{
+    border: 1px solid black;
+}
+
+
+

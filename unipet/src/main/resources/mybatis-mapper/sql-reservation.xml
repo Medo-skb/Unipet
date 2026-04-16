@@ -4,8 +4,16 @@
 <mapper namespace="com.example.unipet.mapper.ReservationMapper">
 	<!-- 여러개 검색 -->
 	<select id="selectStoreList" parameterType="hashmap" resultType="com.example.unipet.model.Store">
-		SELECT STORE_NAME, LAT, LNG
-		FROM STORE
+		SELECT S.*, C.KOR AS STORE_TYPE
+		FROM STORE S
+		LEFT JOIN CODE C ON S.S_CATEGORY = C.VALUE
+		WHERE TYPE = 'S_CATEGORY'
+		AND lat BETWEEN #{swLat} AND #{neLat}  -- 남쪽 위도와 북쪽 위도 사이
+		AND lng BETWEEN #{swLng} AND #{neLng}  -- 서쪽 경도와 동쪽 경도 사이
+		
+		<if test="storeType != null and storeType != ''">
+	      AND C.KOR = #{storeType}
+	    </if>
 	</select>
 	
 	<!-- 한개 검색 -->

@@ -37,4 +37,9 @@ public class ReservationController {
 
 		return new Gson().toJson(resultMap); 
 	}
+	
+	@RequestMapping("/reservation/store-detail.do") 
+	public String detail(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception{
+		return "/reservation/storeDetail";
+	}
 }
