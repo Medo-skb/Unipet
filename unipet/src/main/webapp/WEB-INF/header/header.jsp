@@ -10,14 +10,14 @@
     <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="/js/page-change.js"></script>
-    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/header.css">
 </head>
 <body>
     <header class="site-header">
         <div class="header-container">
             <div class="header-left">
-                <a href="#" class="logo-link">
-                    <img src="/img/logo.png" alt="로고" class="logo-image">
+                <a href="${pageContext.request.contextPath}/main.do" class="logo-link">
+                    <img src="${pageContext.request.contextPath}/img/main/logo.png" alt="로고" class="logo-image">
                 </a>
             </div>
 
@@ -42,7 +42,7 @@
                 </nav>
 
                 <a href="#" class="user-link">
-                    <img src="/img/login.png"
+                    <img src="${pageContext.request.contextPath}/img/main/login.png"
                         alt="로그인" 
                         class="user-icon">
                 </a>
