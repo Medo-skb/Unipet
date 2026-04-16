@@ -8,8 +8,8 @@ import lombok.Data;
 public class Payment {
 	// 1. 예약 기본 정보
     int rsvNo;
-    LocalDateTime rsvDate;  // 시작 시간
-    LocalDateTime endDate;  // 종료 시간
+    String rsvDate;  // 시작 시간
+    String endDate;  // 종료 시간
     String request;         // 요청 사항
     String rsvStatus;       // 예약 상황
 
@@ -25,4 +25,7 @@ public class Payment {
     String userName; 		// 이름
     String phone;    		// 전화번호
 
+    // 5. 계산 데이터
+    int deposit;    // 예약금
+    int balance;    // 잔액
 }

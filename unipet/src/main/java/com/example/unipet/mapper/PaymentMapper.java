@@ -6,19 +6,19 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 
 import com.example.unipet.model.Default;
+import com.example.unipet.model.Payment;
 
 @Mapper
 public interface PaymentMapper {
 	
-	// 여러개 리턴 -> selectXXXList
-	public List<Default> selectDefaultList(HashMap<String, Object> map);
 	// 한개 리턴 -> selectXXX
-	public Default selectDefault(HashMap<String, Object> map);
-	// 삭제 
-	public int deleteDefault(HashMap<String, Object> map);
-	// 수정
-	public int updateDefault(HashMap<String, Object> map);
-	// 삽입 
-	public int insertDefault(HashMap<String, Object> map);
+	public Payment selectPayment(HashMap<String, Object> map);
+
+	// 삽입 -> insertXXX (결제 내역 추가)
+	public int insertPayment(HashMap<String, Object> map);
+
+	// 수정 -> updateXXX (예약 상태 변경)
+	public int updateRsvStatus(HashMap<String, Object> map);
+	
 	
 }
