@@ -1,11 +1,12 @@
-/* 특정 이하에서 가로 스크롤 생성 */
+/* ============================= */
+/* 공통 레이아웃 */
+/* ============================= */
 @media (max-width: 1400px) {
     .page-layout {
         min-width: 1400px;
     }
 }
 
-/* 메인 컨테이너 */
 .container-main {
     width: 100%;
     max-width: 1400px;
@@ -15,12 +16,17 @@
     box-sizing: border-box;
 }
 
-/* 배너 섹션은 화면 전체 */
+.under {
+    height: 30px;
+}
+
+/* ============================= */
+/* 메인 배너 영역 */
+/* ============================= */
 .main-banner-section {
     width: 100%;
 }
 
-/* 배너 전체 */
 .banner-slider {
     position: relative;
     width: 100%;
@@ -28,14 +34,12 @@
     overflow: hidden;
 }
 
-/* 배너 이미지 */
 .banner-slide {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-
     opacity: 0;
     transition: opacity 0.8s ease-in-out;
     z-index: 1;
@@ -53,8 +57,6 @@
     object-fit: cover;
 }
 
-/* 버튼 기준용 내부 박스
-   배너는 풀폭이지만 버튼은 가운데 1400 기준으로 움직임 */
 .banner-overlay-inner {
     position: absolute;
     top: 0;
@@ -66,7 +68,6 @@
     pointer-events: none;
 }
 
-/* 버튼 */
 .banner-controls {
     position: absolute;
     right: 20px;
@@ -80,7 +81,6 @@
     pointer-events: auto;
 }
 
-/* 화살표 */
 .banner-btn {
     width: 24px;
     height: 24px;
@@ -98,7 +98,6 @@
     top: -2px;
 }
 
-/* dots */
 .banner-dots {
     position: absolute;
     left: 50%;
@@ -121,8 +120,349 @@
     background-color: #ffffff;
 }
 
-/* ------------------ 배너 아래 --------------------- */
+/* ============================= */
+/* 공통 섹션 제목 */
+/* ============================= */
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
 
-.under{
-    height: 30px;
+.section-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #222;
+    margin: 0;
+}
+
+/* ============================= */
+/* 최근 예약이 많은 업체 */
+/* ============================= */
+.main-store-section {
+    width: 100%;
+    margin-bottom: 60px;
+}
+
+.store-card-list {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.store-card {
+    width: calc((100% - 60px) / 4);
+    background: #ffffff;
+    border: 1px solid #ececec;
+    border-radius: 18px;
+    box-sizing: border-box;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    cursor: pointer;
+}
+
+.store-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.12);
+}
+
+.store-image-box {
+    position: relative;
+    width: 100%;
+    height: 220px;
+    background-color: #f4f4f4;
+    border-bottom: 1px solid #ececec;
+}
+
+.store-image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #b7b7b7;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.store-rank-badge {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background-color: #ff6b6b;
+    color: #fff;
+    font-size: 17px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(255, 107, 107, 0.35);
+}
+
+.store-card-body {
+    padding: 18px 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.store-name-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.store-name {
+    flex: 1;
+    font-size: 18px;
+    font-weight: 700;
+    color: #222;
+    line-height: 1.4;
+    word-break: keep-all;
+}
+
+.store-category {
+    flex-shrink: 0;
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background-color: #fff4ef;
+    color: #ff6b6b;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.store-best-menu {
+    font-size: 14px;
+    color: #555;
+    font-weight: 600;
+    line-height: 1.5;
+    min-height: 21px;
+}
+
+.store-address {
+    font-size: 14px;
+    color: #777;
+    line-height: 1.5;
+    word-break: keep-all;
+}
+
+/* ============================= */
+/* 인기상품 */
+/* ============================= */
+.main-product-section {
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 60px;
+}
+
+.product-card-list {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.product-card {
+    width: calc((100% - 60px) / 4);
+    background: #ffffff;
+    border: 1px solid #ececec;
+    border-radius: 18px;
+    box-sizing: border-box;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    cursor: pointer;
+}
+
+.product-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.12);
+}
+
+.product-image-box {
+    position: relative;
+    width: 100%;
+    height: 220px;
+    background-color: #f6f6f6;
+    border-bottom: 1px solid #ececec;
+}
+
+.product-image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    color: #b5b5b5;
+    letter-spacing: 2px;
+}
+
+.rank-badge {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background-color: #ff6b6b;
+    color: #ffffff;
+    font-size: 17px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(255, 107, 107, 0.35);
+    z-index: 2;
+}
+
+.product-card-body {
+    padding: 18px 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.product-name {
+    font-size: 17px;
+    font-weight: 600;
+    color: #222;
+    line-height: 1.5;
+    word-break: keep-all;
+    min-height: 52px;
+}
+
+.product-price {
+    font-size: 22px;
+    font-weight: 700;
+    color: #ff6b6b;
+}
+
+/* ============================= */
+/* 추천 영역 전체 */
+/* ============================= */
+.main-recommend-section {
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 60px;
+}
+
+.recommend-section-block {
+    margin-bottom: 60px;
+}
+
+/* ============================= */
+/* 추천 카드 공통 */
+/* ============================= */
+.recommend-card-list {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.recommend-card {
+    width: calc((100% - 60px) / 4);
+    background: #ffffff;
+    border: 1px solid #ececec;
+    border-radius: 18px;
+    box-sizing: border-box;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    cursor: pointer;
+}
+
+.recommend-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.12);
+}
+
+.recommend-image-box {
+    width: 100%;
+    height: 220px;
+    background-color: #f4f4f4;
+    border-bottom: 1px solid #ececec;
+}
+
+.recommend-image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #b7b7b7;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.recommend-card-body {
+    padding: 18px 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* ============================= */
+/* 추천 상품 정보 */
+/* ============================= */
+.recommend-name {
+    flex: 1;
+    font-size: 18px;
+    font-weight: 700;
+    color: #222;
+    line-height: 1.4;
+    word-break: keep-all;
+}
+
+.recommend-reason {
+    font-size: 14px;
+    color: #555;
+    font-weight: 600;
+    line-height: 1.5;
+    min-height: 42px;
+}
+
+.recommend-price {
+    font-size: 22px;
+    font-weight: 700;
+    color: #ff6b6b;
+}
+
+/* ============================= */
+/* 추천 업체 정보 */
+/* ============================= */
+.recommend-name-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.recommend-category {
+    flex-shrink: 0;
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background-color: #fff4ef;
+    color: #ff6b6b;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.recommend-address {
+    font-size: 14px;
+    color: #777;
+    line-height: 1.5;
+    word-break: keep-all;
 }
