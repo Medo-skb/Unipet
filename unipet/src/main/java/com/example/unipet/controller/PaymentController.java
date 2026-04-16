@@ -19,7 +19,7 @@ import jakarta.servlet.http.HttpServletRequest;
 public class PaymentController {
 	
 	@Autowired
-	DefaultService defaultService;
+	DefaultService defaultService; 
 	
 	
 	
