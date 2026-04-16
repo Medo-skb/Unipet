@@ -10,7 +10,7 @@
     <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="/js/page-change.js"></script>
-    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/main/main.css">
 </head>
 <body>
     <div class="page-layout">
@@ -20,15 +20,15 @@
             <div class="banner-slider" id="bannerSlider">
 
                 <div class="banner-slide active">
-                    <img src="${pageContext.request.contextPath}/img/banner_orange.png" alt="주황 배너" class="banner-image">
+                    <img src="/img/main/banner_orange.png" alt="주황 배너" class="banner-image">
                 </div>
 
                 <div class="banner-slide">
-                    <img src="${pageContext.request.contextPath}/img/banner_green.png" alt="초록 배너" class="banner-image">
+                    <img src="/img/main/banner_green.png" alt="초록 배너" class="banner-image">
                 </div>
 
                 <div class="banner-slide">
-                    <img src="${pageContext.request.contextPath}/img/banner_red.png" alt="빨강 배너" class="banner-image">
+                    <img src="/img/main/banner_red.png" alt="빨강 배너" class="banner-image">
                 </div>
 
                 <div class="banner-overlay-inner">
@@ -53,7 +53,7 @@
             </div>
         </div>
 
-        <script src="/js/main.js"></script>
+        <script src="/js/main/main.js"></script>
 
         <div style="height: 1000px;"></div>
 
