@@ -1,6 +1,6 @@
 package com.example.unipet.controller;
 
-import java.util.HashMap; 
+import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -11,117 +11,103 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.unipet.dao.UserService;
 import com.google.gson.Gson;
 
 @Controller
-
 public class UserController {
 
-	@Autowired
-	UserService userService;
-	
-	 @GetMapping("user/join.do")
-	    public String join() {
-	        return "/user/join";
-	    }
+    @Autowired
+    UserService userService;
 
-	@GetMapping("user/SignupUser.do")
-	public String SignupUser(Model model) throws Exception {
-		return "/user/signup-user";
-	}
+    @GetMapping("user/join.do")
+    public String join() {
+        return "/user/join";
+    }
 
-	@GetMapping("user/SignupBiz.do")
-	public String SignupBiz(Model model) throws Exception {
-		return "/user/signup-biz";
-	}
+    @GetMapping("user/SignupUser.do")
+    public String signupUser() {
+        return "/user/signup-user";
+    }
 
-	@PostMapping(value = "/check.dox", produces = "application/json;charset=UTF-8")
-	@ResponseBody
-	public String check(@RequestParam HashMap<String, Object> map) {
+    @GetMapping("user/SignupBiz.do")
+    public String signupBizPage(){
+        return "/user/signup-biz";
+    }
+    @GetMapping("user/login.do")
+    public String login() {
+        return "user/login";
+    }
 
-		HashMap<String, Object> resultMap = userService.checkUser(map);
-		return new Gson().toJson(resultMap);
-	}
+    
+    
 
-	@PostMapping(value = "/signupUser.dox", produces = "application/json;charset=UTF-8")
-	@ResponseBody
-	public String signupUser(@RequestParam HashMap<String, Object> map) {
+    @PostMapping(value = "/check.dox", produces = "application/json;charset=UTF-8")
+    @ResponseBody
+    public String check(@RequestParam HashMap<String, Object> map) {
+        HashMap<String, Object> resultMap = userService.checkUser(map);
+        return new Gson().toJson(resultMap);
+    }
 
-		HashMap<String, Object> resultMap = userService.signupUser(map);
-		return new Gson().toJson(resultMap);
-	}
+    @PostMapping(value = "/signupUser.dox", produces = "application/json;charset=UTF-8")
+    @ResponseBody
+    public String signupUser(@RequestParam HashMap<String, Object> map) {
+        HashMap<String, Object> resultMap = userService.signupUser(map);
+        return new Gson().toJson(resultMap);
+    }
 
-	@PostMapping(value = "/signupBiz.dox", produces = "application/json;charset=UTF-8")
-	@ResponseBody
-	public String signupBiz(@RequestParam HashMap<String, Object> map) {
+    @PostMapping(value = "/signupBiz.dox", produces = "application/json;charset=UTF-8")
+    @ResponseBody
+    public String signupBiz(@RequestParam HashMap<String, Object> map,
+                            @RequestParam("bizFile") MultipartFile bizFile) {
 
-		HashMap<String, Object> resultMap = userService.signupBiz(map);
-		return new Gson().toJson(resultMap);
+        HashMap<String, Object> resultMap = userService.signupBiz(map, bizFile);
+        return new Gson().toJson(resultMap);
+    }
 
-	}
-	
-	 @RequestMapping(value = "/sendSms.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
-	    @ResponseBody
-	    public String sendSms(@RequestParam HashMap<String, Object> map) throws Exception {
-	        HashMap<String, Object> resultMap = new HashMap<String, Object>();
-	        System.out.println("sendSms map : " + map);
+    @RequestMapping(value = "/sendSms.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+    @ResponseBody
+    public String sendSms(@RequestParam HashMap<String, Object> map) throws Exception {
+        HashMap<String, Object> resultMap = userService.sendSms(map);
+        return new Gson().toJson(resultMap);
+    }
 
-	        resultMap = userService.sendSms(map);
+    @RequestMapping(value = "/verifySms.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+    @ResponseBody
+    public String verifySms(@RequestParam HashMap<String, Object> map) throws Exception {
+        HashMap<String, Object> resultMap = userService.verifySms(map);
+        return new Gson().toJson(resultMap);
+    }
 
-	        return new Gson().toJson(resultMap);
-	    }
+    @RequestMapping(value = "/findId.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+    @ResponseBody
+    public String findId(@RequestParam HashMap<String, Object> map) throws Exception {
+        HashMap<String, Object> resultMap = userService.findId(map);
+        return new Gson().toJson(resultMap);
+    }
 
-	 @RequestMapping(value = "/verifySms.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
-	    @ResponseBody
-	    public String verifySms(@RequestParam HashMap<String, Object> map) throws Exception {
-	        HashMap<String, Object> resultMap = new HashMap<String, Object>();
-	        System.out.println("verifySms map : " + map);
+    @RequestMapping(value = "/sendResetLink.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+    @ResponseBody
+    public String sendResetLink(@RequestParam HashMap<String, Object> map) throws Exception {
+        HashMap<String, Object> resultMap = userService.sendResetLink(map);
+        return new Gson().toJson(resultMap);
+    }
 
-	        resultMap = userService.verifySms(map);
+    @RequestMapping(value = "/resetPwd.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+    @ResponseBody
+    public String resetPwd(@RequestParam HashMap<String, Object> map) throws Exception {
+        HashMap<String, Object> resultMap = userService.resetPwd(map);
+        return new Gson().toJson(resultMap);
+    }
 
-	        return new Gson().toJson(resultMap);
-	    }
-	 
-	   @RequestMapping(value = "/findId.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
-	    @ResponseBody
-	    public String findId(@RequestParam HashMap<String, Object> map) throws Exception {
-	        HashMap<String, Object> resultMap = new HashMap<String, Object>();
-	        System.out.println("findId map : " + map);
+  
 
-	        resultMap = userService.findId(map);
-
-	        return new Gson().toJson(resultMap);
-	    }
-	   
-	   @RequestMapping(value = "/sendResetLink.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
-	    @ResponseBody
-	    public String sendResetLink(@RequestParam HashMap<String, Object> map) throws Exception {
-	        HashMap<String, Object> resultMap = new HashMap<String, Object>();
-	        System.out.println("sendResetLink map : " + map);
-
-	        resultMap = userService.sendResetLink(map);
-
-	        return new Gson().toJson(resultMap);
-	    }
-	   
-	   @RequestMapping(value = "/resetPwd.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
-	    @ResponseBody
-	    public String resetPwd(@RequestParam HashMap<String, Object> map) throws Exception {
-	        HashMap<String, Object> resultMap = new HashMap<String, Object>();
-	        System.out.println("resetPwd map : " + map);
-
-	        resultMap = userService.resetPwd(map);
-
-	        return new Gson().toJson(resultMap);
-	    }
-	   
-	   
-	   
-
-
-
-	
-
+    @PostMapping(value = "/login.dox", produces = "application/json;charset=UTF-8")
+    @ResponseBody
+    public String loginProc(@RequestParam HashMap<String, Object> map) {
+        HashMap<String, Object> resultMap = userService.login(map);
+        return new Gson().toJson(resultMap);
+    }
 }

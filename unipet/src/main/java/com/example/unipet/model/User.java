@@ -1,43 +1,23 @@
 package com.example.unipet.model;
 
+import lombok.Data;
+
+@Data
 public class User {
-	 private String userId;
-	    private String pwd;
-	    private String userName;
-	    private String role;
 
-	    // ===== getter / setter =====
+    // 기본 회원 정보
+    private String userId;
+    private String pwd;
+    private String userName;
+    private String role;        // USER / BIZ
 
-	    public String getUserId() {
-	        return userId;
-	    }
+    // 사업자 관련
+    private String bizName;     // 업체명
+    private String bizNo;       // 사업자번호
+    private String bizStatus;   // WAIT / APPROVED
 
-	    public void setUserId(String userId) {
-	        this.userId = userId;
-	    }
-
-	    public String getPwd() {
-	        return pwd;
-	    }
-
-	    public void setPwd(String pwd) {
-	        this.pwd = pwd;
-	    }
-
-	    public String getUserName() {
-	        return userName;
-	    }
-
-	    public void setUserName(String userName) {
-	        this.userName = userName;
-	    }
-
-	    public String getRole() {
-	        return role;
-	    }
-
-	    public void setRole(String role) {
-	        this.role = role;
-	    }
+    // 파일 관련
+    private String bizFileName;
+    private String bizFilePath;
 
 }

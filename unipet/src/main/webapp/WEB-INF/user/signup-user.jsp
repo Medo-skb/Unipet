@@ -1,362 +1,458 @@
-<%@ page contentType="text/html; charset=UTF-8" %>
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>일반 회원가입</title>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+    <!DOCTYPE html>
+    <html lang="ko">
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>일반 회원가입</title>
 
-<style>
-    * { box-sizing: border-box; }
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #f8f8f8;
-        margin: 0;
-        padding: 30px 0;
-    }
-    .join-wrap {
-        width: 520px;
-        margin: 0 auto;
-        background: #fff;
-        padding: 30px;
-        border-radius: 12px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-    }
-    h2 {
-        text-align: center;
-        margin-bottom: 25px;
-    }
-    .form-group {
-        margin-bottom: 16px;
-    }
-    .form-group label {
-        display: block;
-        margin-bottom: 8px;
-        font-weight: bold;
-    }
-    .form-group input,
-    .form-group select {
-        width: 100%;
-        height: 42px;
-        padding: 0 12px;
-        border: 1px solid #ccc;
-        border-radius: 6px;
-    }
-    .row {
-        display: flex;
-        gap: 8px;
-    }
-    .row input {
-        flex: 1;
-    }
-    .row button {
-        width: 120px;
-        height: 42px;
-        border: none;
-        background: #4a6cf7;
-        color: #fff;
-        border-radius: 6px;
-        cursor: pointer;
-    }
-    .row button:hover {
-        background: #3451c6;
-    }
-    .submit-btn {
-        width: 100%;
-        height: 46px;
-        border: none;
-        background: #222;
-        color: white;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 16px;
-        margin-top: 10px;
-    }
-    .submit-btn:hover {
-        background: #000;
-    }
-    .check-line {
-        margin-top: 6px;
-        font-size: 13px;
-        color: #666;
-    }
-    .agree-box {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    .agree-box input[type="checkbox"] {
-        width: auto;
-        height: auto;
-    }
-</style>
-</head>
-<body>
+        <!-- jQuery -->
+        <script src="https://code.jquery.com/jquery-3.7.1.js"
+            integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
 
-<div class="join-wrap">
-    <h2>일반 회원가입</h2>
+        <!-- Vue -->
+        <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 
-    <form id="userForm">
+        <!-- 다음 주소 API -->
+        <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 
-        <div class="form-group">
-            <label for="userId">아이디</label>
-            <div class="row">
-                <input type="text" id="userId" name="userId" placeholder="아이디 입력">
-                <button type="button" onclick="checkId()">중복확인</button>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label for="pwd">비밀번호</label>
-            <input type="password" id="pwd" name="pwd" placeholder="비밀번호 입력">
-        </div>
-
-        <div class="form-group">
-            <label for="pwdCheck">비밀번호 확인</label>
-            <input type="password" id="pwdCheck" placeholder="비밀번호 다시 입력">
-        </div>
-		<div class="form-group">
-		           <label for="email">이메일</label>
-		           <input type="text" id="email" name="email" placeholder="이메일 입력">
-		       </div>
-
-        <div class="form-group">
-            <label for="userName">닉네임</label>
-            <input type="text" id="userName" name="userName" placeholder="닉네임 입력">
-        </div>
-
-        <div class="form-group">
-            <label for="phone">휴대폰 번호</label>
-            <div class="row">
-                <input type="text" id="phone" name="phone" placeholder="휴대폰 번호 입력">
-                <button type="button" onclick="sendSms()">인증발송</button>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label for="smsCode">인증번호</label>
-            <div class="row">
-                <input type="text" id="smsCode" placeholder="인증번호 입력">
-                <button type="button" onclick="verifySms()">인증확인</button>
-            </div>
-            <div class="check-line" id="phoneAuthText">휴대폰 인증을 진행해주세요.</div>
-        </div>
-
-        <div class="form-group">
-            <label for="postcode">우편번호</label>
-            <div class="row">
-                <input type="text" id="postcode" name="postcode" placeholder="우편번호" readonly>
-                <button type="button" onclick="execDaumPostcode()">주소검색</button>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label for="address">기본주소</label>
-            <input type="text" id="address" name="address" placeholder="기본주소" readonly>
-        </div>
-
-        <div class="form-group">
-            <label for="detailAddress">상세주소</label>
-            <input type="text" id="detailAddress" name="detailAddress" placeholder="상세주소 입력">
-        </div>
-
-       
-
-        <div class="form-group agree-box">
-            <input type="checkbox" id="marketingYn">
-            <label for="marketingYn" style="margin:0;">마케팅 수신 동의</label>
-        </div>
-
-        <button type="button" class="submit-btn" onclick="signupUser()">회원가입</button>
-    </form>
-</div>
-
-<script>
-    let phoneAuthYn = false;
-    let idCheckYn = false;
-
-    function execDaumPostcode() {  
-        new daum.Postcode({
-            oncomplete: function(data) {
-                let addr = "";
-
-                if (data.userSelectedType === 'R') {
-                    addr = data.roadAddress;
-                } else {
-                    addr = data.jibunAddress;
-                }
-
-                $("#postcode").val(data.zonecode);
-                $("#address").val(addr);
-                $("#detailAddress").focus();
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f8f8f8;
+                margin: 0;
+                padding: 30px 0;
             }
-        }).open();
-    }
 
-    function checkId() { //아ㅣ이디 중복체크
-        const userId = $("#userId").val().trim();
+            .join-wrap {
+                width: 600px;
+                margin: 0 auto;
+                background: #fff;
+                padding: 30px;
+                border-radius: 12px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            }
 
-        if (userId === "") {
-            alert("아이디를 입력해주세요.");
-            return;
-        }
+            h2 {
+                text-align: center;
+                margin-bottom: 25px;
+            }
 
-        $.ajax({
-            url: "/user/check.dox",
-            type: "POST",
-            dataType: "json",
-            data: { userId: userId },
-            success: function(res) {
-                alert(res.message);
-                idCheckYn = !!res.result;
+            .form-row {
+                margin-bottom: 16px;
+            }
+
+            .form-row label {
+                display: inline-block;
+                width: 120px;
+                font-weight: bold;
+                vertical-align: top;
+                padding-top: 10px;
+            }
+
+            .form-row input,
+            .form-row select {
+                width: 320px;
+                height: 40px;
+                padding: 0 10px;
+                border: 1px solid #ccc;
+                border-radius: 6px;
+            }
+
+            .form-row button {
+                height: 40px;
+                margin-left: 8px;
+                padding: 0 14px;
+                border: none;
+                background: #4a6cf7;
+                color: white;
+                border-radius: 6px;
+                cursor: pointer;
+            }
+
+            .form-row button:hover {
+                background: #3451c6;
+            }
+
+            .submit-btn {
+                width: 100%;
+                height: 46px;
+                border: none;
+                background: #222;
+                color: white;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 16px;
+                margin-top: 20px;
+            }
+
+            .submit-btn:hover {
+                background: #000;
+            }
+
+            .info-text {
+                font-size: 13px;
+                color: #666;
+                margin-left: 124px;
+                margin-top: 5px;
+            }
+
+            .agree-wrap {
+                margin-left: 124px;
+            }
+
+            .agree-wrap input[type="checkbox"] {
+                width: auto;
+                height: auto;
+            }
+
+            .agree-wrap label {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                white-space: nowrap;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="app">
+            <div class="join-wrap">
+                <h2>일반 회원가입</h2>
+
+                <!-- 아이디 입력 + 중복체크 -->
+                <div class="form-row">
+                    <label>아이디</label>
+                    <input v-model="userId" maxlength="20" placeholder="아이디 입력">
+                    <button @click="fnCheck">중복체크</button>
+                </div>
+
+                <!-- 비밀번호 입력 -->
+                <div class="form-row">
+                    <label>비밀번호</label>
+                    <input v-model="pwd" type="password" maxlength="15" placeholder="비밀번호 입력">
+                </div>
+
+                <!-- 비밀번호 확인 -->
+                <div class="form-row">
+                    <label>비밀번호 확인</label>
+                    <input v-model="pwdCheck" type="password" maxlength="15" placeholder="비밀번호 다시 입력">
+                </div>
+                <!-- 비밀번호 실시간 체크 메시지 -->
+                <div class="info-text" :style="{ color: pwd === pwdCheck && pwdCheck ? 'blue' : 'red' }">
+                    {{ pwdMsg }}
+                </div>
+                <!-- 이메일 입력 -->
+                <div class="form-row">
+                    <label>이메일</label>
+                    <input v-model="email" placeholder="이메일 입력">
+                </div>
+
+                <!-- 닉네임 입력 -->
+                <div class="form-row">
+                    <label>닉네임</label>
+                    <input v-model="userName" placeholder="닉네임 입력">
+                </div>
+
+                <!-- 휴대폰 번호 + 인증번호 발송 -->
+                <div class="form-row">
+                    <label>휴대폰 번호</label>
+                    <input v-model="phone" placeholder="휴대폰 번호 입력">
+                    <button @click="fnSendSms">인증발송</button>
+                </div>
+
+                <!-- 인증번호 입력 + 인증확인 -->
+                <div class="form-row">
+                    <label>인증번호</label>
+                    <input v-model="smsCode" placeholder="인증번호 입력">
+                    <button @click="fnVerifySms">인증확인</button>
+                </div>
+                <div class="info-text">{{ phoneAuthText }}</div>
+
+                <!-- 주소 -->
+                <div class="form-row">
+                    <label>우편번호</label>
+                    <input v-model="postcode" readonly placeholder="우편번호">
+                    <button @click="fnAddr">주소검색</button>
+                </div>
+
+                <div class="form-row">
+                    <label>기본주소</label>
+                    <input v-model="address" readonly placeholder="기본주소">
+                </div>
+
+                <div class="form-row">
+                    <label>상세주소</label>
+                    <input v-model="detailAddress" placeholder="상세주소 입력">
+                </div>
+
+                <!-- 마케팅 동의 -->
+                <div class="form-row">
+                    <label>수신 동의</label>
+                    <div class="agree-wrap">
+                        <label>
+                            <input type="checkbox" v-model="marketingYn"> 마케팅 수신 동의
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 회원가입 -->
+                <div class="form-row">
+                    <button class="submit-btn" @click="fnJoin">회원가입</button>
+                </div>
+            </div>
+        </div>
+    </body>
+
+    </html>
+
+    <script>
+        const app = Vue.createApp({
+            data() {
+                return {
+                    // 회원가입 입력값
+                    userId: "",
+                    pwd: "",
+                    pwdCheck: "",
+                    pwdMsg: "",
+                    email: "",
+                    nickname: "",
+                    userName: "",
+                    phone: "",
+                    smsCode: "",
+                    postcode: "",
+                    address: "",
+                    detailAddress: "",
+                    marketingYn: false,
+
+                    // 상태값
+                    idCheckYn: false,
+                    phoneAuthYn: false,
+                    phoneAuthText: "휴대폰 인증을 진행해주세요."
+                };
             },
-            error: function() {
-                alert("아이디 중복확인 중 오류가 발생했습니다.");
-            }
-        });
-    }
-
-    function sendSms() { //휴대폰인증번호 발송
-        const phone = $("#phone").val().trim();
-
-        if (phone === "") {
-            alert("휴대폰 번호를 입력해주세요.");
-            return;
-        }
-
-        $.ajax({
-            url: "/user/sendSms.dox",
-            type: "POST",
-            dataType: "json",
-            data: { phone: phone },
-            success: function(res) {
-                alert(res.message);
-                phoneAuthYn = false;
-                $("#phoneAuthText").text("인증번호를 입력 후 인증확인을 눌러주세요.");
-            },
-            error: function() {
-                alert("인증번호 발송 중 오류가 발생했습니다.");
-            }
-        });
-    }
-
-    function verifySms() {  //인증번호 확인
-        const smsCode = $("#smsCode").val().trim();
-
-        if (smsCode === "") {
-            alert("인증번호를 입력해주세요.");
-            return;
-        }
-
-        $.ajax({
-            url: "/user/verifySms.dox",
-            type: "POST",
-            dataType: "json",
-            data: { smsCode: smsCode },
-            success: function(res) {
-                alert(res.message);
-
-                if (res.result) {
-                    phoneAuthYn = true;
-                    $("#phoneAuthText").text("휴대폰 인증이 완료되었습니다.");
-                } else {
-                    phoneAuthYn = false;
-                    $("#phoneAuthText").text("휴대폰 인증이 완료되지 않았습니다.");
+            watch: {
+                pwd() {
+                    this.checkPwd();
+                },
+                pwdCheck() {
+                    this.checkPwd();
                 }
             },
-            error: function() {
-                alert("휴대폰 인증 중 오류가 발생했습니다.");
-            }
-        });
-    }
 
-    function signupUser() {
-        const userId = $("#userId").val().trim();
-        const email = $("#email").val().trim();
-        const pwd = $("#pwd").val().trim();
-        const pwdCheck = $("#pwdCheck").val().trim();
-        const userName = $("#userName").val().trim();
-        const phone = $("#phone").val().trim();
 
-        if (userId === "") {
-            alert("아이디를 입력해주세요.");
-            $("#userId").focus();
-            return;
-        }
 
-        if (!idCheckYn) {
-            alert("아이디 중복확인을 해주세요.");
-            return;
-        }
+            methods: {
+                //비밀번호 일치 여부 실시간 확인
+                checkPwd() {
+                    if (this.pwd === "" && this.pwdCheck === "") {
+                        this.pwdMsg = "";
+                        return;
+                    }
+                    if (this.pwdCheck.length === 0) {
+                        this.pwdMsg = "";
+                        return;
+                    }
 
-        if (email === "") {
-            alert("이메일을 입력해주세요.");
-            $("#email").focus();
-            return;
-        }
+                    if (this.pwd === this.pwdCheck) {
+                        this.pwdMsg = "비밀번호가 일치합니다.";
+                    } else {
+                        this.pwdMsg = "비밀번호가 일치하지 않습니다.";
+                    }
+                },
 
-        if (pwd === "") {
-            alert("비밀번호를 입력해주세요.");
-            $("#pwd").focus();
-            return;
-        }
 
-        if (pwd !== pwdCheck) {
-            alert("비밀번호가 일치하지 않습니다.");
-            $("#pwdCheck").focus();
-            return;
-        }
 
-        if (userName === "") {
-            alert("닉네임을 입력해주세요.");
-            $("#userName").focus();
-            return;
-        }
+                // 아이디 중복체크
+                fnCheck: function () {
+                    let self = this;
 
-        if (phone === "") {
-            alert("휴대폰 번호를 입력해주세요.");
-            $("#phone").focus();
-            return;
-        }
+                    if (self.userId.trim() === "") {
+                        alert("아이디를 입력해주세요.");
+                        return;
+                    }
 
-        if (!phoneAuthYn) {
-            alert("휴대폰 인증을 완료해주세요.");
-            return;
-        }
+                    $.ajax({
+                        url: "/check.dox",
+                        dataType: "json",
+                        type: "POST",
+                        data: {
+                            userId: self.userId
+                        },
+                        success: function (data) {
+                            alert(data.message);
+                            self.idCheckYn = !!data.result;
+                        },
+                        error: function () {
+                            alert("아이디 중복확인 중 오류가 발생했습니다.");
+                        }
+                    });
+                },
 
-        let formData = $("#userForm").serializeArray();
-        let obj = {};
+                // 휴대폰 인증번호 발송
+                fnSendSms: function () {
+                    let self = this;
 
-        $.each(formData, function(i, item) {
-            obj[item.name] = item.value;
-        });
+                    if (self.phone.trim() === "") {
+                        alert("휴대폰 번호를 입력해주세요.");
+                        return;
+                    }
 
-        obj.marketingYn = $("#marketingYn").is(":checked") ? "Y" : "N";
+                    $.ajax({
+                        url: "/sendSms.dox",
+                        dataType: "json",
+                        type: "POST",
+                        data: {
+                            phone: self.phone
+                        },
+                        success: function (data) {
+                            alert(data.message);
+                            self.phoneAuthYn = false;
+                            self.phoneAuthText = "인증번호를 입력 후 인증확인을 눌러주세요.";
+                        },
+                        error: function () {
+                            alert("인증번호 발송 중 오류가 발생했습니다.");
+                        }
+                    });
+                },
 
-        $.ajax({
-            url: "/user/signupUser.dox",
-            type: "POST",
-            dataType: "json",
-            data: obj,
-            success: function(res) {
-                alert(res.message);
+                // 인증번호 확인
+                fnVerifySms: function () {
+                    let self = this;
 
-                if (res.result) {
-                    location.href = "/user/login.do";
+                    if (self.smsCode.trim() === "") {
+                        alert("인증번호를 입력해주세요.");
+                        return;
+                    }
+
+                    $.ajax({
+                        url: "/verifySms.dox",
+                        dataType: "json",
+                        type: "POST",
+                        data: {
+                            smsCode: self.smsCode
+                        },
+                        success: function (data) {
+                            alert(data.message);
+
+                            if (data.result) {
+                                self.phoneAuthYn = true;
+                                self.phoneAuthText = "휴대폰 인증이 완료되었습니다.";
+                            } else {
+                                self.phoneAuthYn = false;
+                                self.phoneAuthText = "휴대폰 인증이 완료되지 않았습니다.";
+                            }
+                        },
+                        error: function () {
+                            alert("휴대폰 인증 중 오류가 발생했습니다.");
+                        }
+                    });
+                },
+
+                // 주소검색
+                fnAddr: function () {
+                    let self = this;
+
+                    new daum.Postcode({
+                        oncomplete: function (data) {
+                            let addr = "";
+
+                            if (data.userSelectedType === 'R') {
+                                addr = data.roadAddress;
+                            } else {
+                                addr = data.jibunAddress;
+                            }
+
+                            self.postcode = data.zonecode;
+                            self.address = addr;
+                        }
+                    }).open();
+                },
+
+                // 회원가입
+                fnJoin: function () {
+                    let self = this;
+
+                    if (self.userId.trim() === "") {
+                        alert("아이디를 입력해주세요.");
+                        return;
+                    }
+
+                    if (!self.idCheckYn) {
+                        alert("아이디 중복체크를 해주세요.");
+                        return;
+                    }
+
+                    if (self.pwd.trim() === "") {
+                        alert("비밀번호를 입력해주세요.");
+                        return;
+                    }
+
+                    if (self.pwd !== self.pwdCheck) {
+                        alert("비밀번호가 일치하지 않습니다.");
+                        return;
+                    }
+
+                    if (self.email.trim() === "") {
+                        alert("이메일을 입력해주세요.");
+                        return;
+                    }
+
+                    if (self.userName.trim() === "") {
+                        alert("닉네임을 입력해주세요.");
+                        return;
+                    }
+
+                    if (self.phone.trim() === "") {
+                        alert("휴대폰 번호를 입력해주세요.");
+                        return;
+                    }
+
+                    if (!self.phoneAuthYn) {
+                        alert("휴대폰 인증을 완료해주세요.");
+                        return;
+                    }
+
+                    let param = {
+                        userId: self.userId,
+                        pwd: self.pwd,
+                        email: self.email,
+                        userName: self.userName,
+                        phone: self.phone,
+                        nickname: self.userName,
+                        postcode: self.postcode,
+                        address: self.address,
+                        detailAddress: self.detailAddress,
+                        marketingYn: self.marketingYn ? "Y" : "N"
+                    };
+
+                    $.ajax({
+                        url: "/signupUser.dox",
+                        dataType: "json",
+                        type: "POST",
+                        data: param,
+                        success: function (data) {
+                            alert(data.message);
+
+                            if (data.result) {
+                                location.href = "/user/join.do";
+                            }
+                        },
+                        error: function () {
+                            alert("회원가입 중 오류가 발생했습니다.");
+                        }
+                    });
                 }
             },
-            error: function() {
-                alert("회원가입 중 오류가 발생했습니다.");
+
+            mounted() {
+                let self = this;
+                window.vueObj = self;
             }
+
+
         });
-    }
 
-    $("#userId").on("input", function() {
-        idCheckYn = false;
-    });
-</script>
-
-</body>
-</html>
+        app.mount('#app');
+    </script>
