@@ -1,0 +1,160 @@
+/* 헤더 전체 */
+.site-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    width: 100%;
+    min-width: 1400px;
+    padding: 10px 0;
+    background-color: #ffffff;
+    border-bottom: 1px solid #eeeeee;
+}
+
+/* 헤더 안쪽 컨테이너 */
+.site-header .header-container {
+    width: 100%;
+    max-width: 1400px;
+    min-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: nowrap;
+}
+
+/* 왼쪽 영역 */
+.site-header .header-left {
+    flex-shrink: 0;
+}
+
+/* 로고 링크 */
+.site-header .logo-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+/* 로고 이미지 */
+.site-header .logo-image {
+    width: 200px;
+    height: auto;
+    display: block;
+    object-fit: contain;
+}
+
+/* 가운데 검색 영역 */
+.site-header .header-center {
+    flex: 1;
+    min-width: 420px;
+    display: flex;
+    justify-content: center;
+}
+
+/* 검색 폼 */
+.site-header .search-form {
+    width: 100%;
+    max-width: 560px;
+    min-width: 420px;
+    height: 46px;
+    border: 2px solid #2f80ed;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    background-color: #ffffff;
+}
+
+/* 검색 입력창 */
+.site-header .search-input {
+    flex: 1;
+    height: 100%;
+    border: none;
+    outline: none;
+    padding: 0 18px;
+    font-size: 15px;
+    background-color: transparent;
+}
+
+/* 검색 버튼 */
+.site-header .search-btn {
+    width: 54px;
+    height: 100%;
+    border: none;
+    background-color: #ffffff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 돋보기 아이콘 */
+.site-header .search-btn svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: #2f80ed;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* 오른쪽 영역 */
+.site-header .header-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 22px;
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+}
+
+/* 메뉴 */
+.site-header .main-nav {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: nowrap;
+}
+
+/* 메뉴 링크 */
+.site-header .nav-link {
+    text-decoration: none;
+    color: #222222;
+    font-size: 18px;
+    font-weight: 600;
+    white-space: nowrap;
+    padding: 10px 22px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+/* hover */
+.site-header .nav-link:hover {
+    background-color: #bcdcff;
+    color: #222222;
+}
+
+/* 로그인 링크 */
+.site-header .user-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    flex-shrink: 0;
+    position: relative;
+    top: 2px;
+}
+
+/* 로그인 아이콘 */
+.site-header .user-icon {
+    width: 34px;
+    height: 34px;
+    display: block;
+}
