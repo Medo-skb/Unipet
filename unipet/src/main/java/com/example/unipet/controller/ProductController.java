@@ -25,7 +25,7 @@ public class ProductController {
 	// [페이지 이동] 쇼핑몰 메인 (shopMain + shopSearch 통합)
 	@RequestMapping("/product.do")
 	public String main() {
-		return "product";
+		return "product/product";
 	}
 
 	// [데이터 요청] 상품 리스트 가져오기 (AI추천, 필터 검색 포함)
