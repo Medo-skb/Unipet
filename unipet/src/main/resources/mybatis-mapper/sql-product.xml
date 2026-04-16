@@ -1,52 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.example.unipet.mapper.ProductMapper">
-	<select id="selectCategoryList" resultType="hashmap">
 
-    SELECT 
-        'ANIMAL' AS CAT_TYPE,
-        m.A_MAIN_TYPE AS MAIN_NAME,
-        s.A_SUB_TYPE AS SUB_NAME,
-        s.A_SUB_NO AS SUB_NO  /* ← 이 별칭이 반드시 있어야 함! */
-    FROM PC_ANIMAL_MAIN m
-    INNER JOIN PC_ANIMAL_SUB s ON m.A_MAIN_NO = s.A_MAIN_NO
-    
-    UNION ALL
-    
+	<!-- 동물 대분류 -->
+	<select id="selectAnimalMainList" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			A_MAIN_NO,
+			A_MAIN_TYPE
+		FROM PC_ANIMAL_MAIN
+		ORDER BY A_MAIN_NO
+	</select>
 
-    SELECT 
-        'PRODUCT' AS CAT_TYPE,
-        m.I_MAIN_TYPE AS MAIN_NAME,
-        s.I_SUB_TYPE AS SUB_NAME,
-        s.I_SUB_NO AS SUB_NO  /* ← 여기도 마찬가지! */
-    FROM PC_ITEM_MAIN m
-    INNER JOIN PC_ITEM_SUB s ON m.I_MAIN_NO = s.I_MAIN_NO
-</select>
+	<!-- 동물 소분류 -->
+	<select id="selectAnimalSubList" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			A_SUB_NO,
+			A_MAIN_NO,
+			A_SUB_TYPE
+		FROM PC_ANIMAL_SUB
+		ORDER BY A_MAIN_NO, A_SUB_NO
+	</select>
 
+	<!-- 상품 대분류 -->
+	<select id="selectItemMainList" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			I_MAIN_NO,
+			I_MAIN_TYPE
+		FROM PC_ITEM_MAIN
+		ORDER BY I_MAIN_NO
+	</select>
+
+	<!-- 상품 소분류 -->
+	<select id="selectItemSubList" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			I_SUB_NO,
+			I_MAIN_NO,
+			I_SUB_TYPE
+		FROM PC_ITEM_SUB
+		ORDER BY I_MAIN_NO, I_SUB_NO
+	</select>
+
+	<!-- 상품 목록 -->
 	<select id="selectProductList" parameterType="hashmap" resultType="hashmap">
-    SELECT 
-        p.PRODUCT_NO,
-        p.PRODUCT_NAME,
-        p.PRODUCT_PRICE,
-        p.BRAND,
-        f.FILE_NAME
-    FROM PRODUCT p
-    
-    LEFT JOIN PRODUCT_FILE f ON p.PRODUCT_NO = f.PRODUCT_NO AND f.IS_MAIN = 'Y'
-    WHERE p.PRODUCT_STATUS = 'Y'
-    
-    <if test="aSubNo != null and aSubNo != ''">
-        AND p.A_SUB_NO = #{aSubNo}
-    </if>
-    
-    <if test="iSubNo != null and iSubNo != ''">
-        AND p.I_SUB_NO = #{iSubNo}
-    </if>
-   
-    <if test="keyword != null and keyword != ''">
-        AND p.PRODUCT_NAME LIKE CONCAT('%', #{keyword}, '%')
-    </if>
+		SELECT 
+			P.PRODUCT_NO,
+			P.STORE_NO,
+			P.PRODUCT_NAME,
+			P.BRAND,
+			P.PRODUCT_PRICE,
+			P.STOCK_QTY,
+			P.A_SUB_NO,
+			P.I_SUB_NO,
+			P.PRODUCT_STATUS,
+			DATE_FORMAT(P.CDATE, '%Y-%m-%d %H:%i:%s') AS CDATE,
+			PA.A_MAIN_NO,
+			PA.A_SUB_TYPE,
+			PI.I_MAIN_NO,
+			PI.I_SUB_TYPE,
+			(
+				SELECT CONCAT(F.FILE_PATH, F.FILE_NAME)
+				FROM PRODUCT_FILE F
+				WHERE F.PRODUCT_NO = P.PRODUCT_NO
+				AND F.IS_MAIN = 'Y'
+				ORDER BY F.FILE_NO ASC
+				LIMIT 1
+			) AS MAIN_IMG
+		FROM PRODUCT P
+		INNER JOIN PC_ANIMAL_SUB PA ON P.A_SUB_NO = PA.A_SUB_NO
+		INNER JOIN PC_ITEM_SUB PI ON P.I_SUB_NO = PI.I_SUB_NO
+		WHERE 1=1
+		AND P.PRODUCT_STATUS = 'Y'
 
-    ORDER BY p.PRODUCT_NO DESC
-</select>
+		<if test="aMainNo != null and aMainNo != ''">
+			AND PA.A_MAIN_NO = #{aMainNo}
+		</if>
+
+		<if test="aSubNo != null and aSubNo != ''">
+			AND P.A_SUB_NO = #{aSubNo}
+		</if>
+
+		<if test="iMainNo != null and iMainNo != ''">
+			AND PI.I_MAIN_NO = #{iMainNo}
+		</if>
+
+		<if test="iSubNo != null and iSubNo != ''">
+			AND P.I_SUB_NO = #{iSubNo}
+		</if>
+
+		<if test="keyword != null and keyword != ''">
+			AND (
+				P.PRODUCT_NAME LIKE CONCAT('%', #{keyword}, '%')
+				OR P.BRAND LIKE CONCAT('%', #{keyword}, '%')
+			)
+		</if>
+
+		<choose>
+			<when test="sort == 'priceAsc'">
+				ORDER BY P.PRODUCT_PRICE ASC, P.PRODUCT_NO DESC
+			</when>
+			<when test="sort == 'priceDesc'">
+				ORDER BY P.PRODUCT_PRICE DESC, P.PRODUCT_NO DESC
+			</when>
+			<otherwise>
+				ORDER BY P.PRODUCT_NO DESC
+			</otherwise>
+		</choose>
+	</select>
+
+	<!-- 상품 상세 -->
+	<select id="selectProduct" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			P.PRODUCT_NO,
+			P.STORE_NO,
+			P.PRODUCT_NAME,
+			P.BRAND,
+			P.PRODUCT_PRICE,
+			P.STOCK_QTY,
+			P.A_SUB_NO,
+			P.I_SUB_NO,
+			P.PRODUCT_STATUS,
+			DATE_FORMAT(P.CDATE, '%Y-%m-%d %H:%i:%s') AS CDATE,
+			PA.A_MAIN_NO,
+			PA.A_SUB_TYPE,
+			PI.I_MAIN_NO,
+			PI.I_SUB_TYPE
+		FROM PRODUCT P
+		INNER JOIN PC_ANIMAL_SUB PA ON P.A_SUB_NO = PA.A_SUB_NO
+		INNER JOIN PC_ITEM_SUB PI ON P.I_SUB_NO = PI.I_SUB_NO
+		WHERE P.PRODUCT_NO = #{productNo}
+	</select>
+
+	<!-- 상품 파일 -->
+	<select id="selectProductFile" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			FILE_NO,
+			PRODUCT_NO,
+			FILE_PATH,
+			FILE_NAME,
+			ORIGIN_NAME,
+			FILE_SIZE,
+			FILE_EXT,
+			IS_DETAIL,
+			IS_MAIN
+		FROM PRODUCT_FILE
+		WHERE PRODUCT_NO = #{productNo}
+		ORDER BY IS_MAIN DESC, FILE_NO ASC
+	</select>
+
 </mapper>
