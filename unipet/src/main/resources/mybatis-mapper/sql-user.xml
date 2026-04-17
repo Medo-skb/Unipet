@@ -5,112 +5,164 @@
 
 <mapper namespace="com.example.unipet.mapper.UserMapper">
 
-    <!-- 아이디 중복확인 -->
+    <!-- ===================================================== -->
+    <!-- User 객체와 DB 컬럼 매핑 -->
+    <!-- ===================================================== -->
+    <resultMap id="userMap" type="com.example.unipet.model.User">
+        <result property="userId" column="user_id"/>
+        <result property="pwd" column="pwd"/>
+        <result property="userName" column="user_name"/>
+        <result property="role" column="role"/>
+        <result property="phone" column="phone"/>
+        <result property="email" column="email"/>
+        <result property="bizName" column="biz_name"/>
+        <result property="bizNo" column="biz_no"/>
+        <result property="bizStatus" column="biz_status"/>
+        <result property="bizFileName" column="biz_file_name"/>
+        <result property="bizFilePath" column="biz_file_path"/>
+    </resultMap>
+
+    <!-- ===================================================== -->
+    <!-- 1. 아이디 중복체크 -->
+    <!-- users 테이블에 동일한 아이디가 몇 개 있는지 조회 -->
+    <!-- ===================================================== -->
     <select id="checkUser" parameterType="hashmap" resultType="int">
         SELECT COUNT(*)
         FROM users
-        WHERE USER_ID = #{userId}
+        WHERE user_id = #{userId}
     </select>
 
-    <!-- 일반회원 가입 -->
+    <!-- ===================================================== -->
+    <!-- 2. 일반 회원가입 -->
+    <!-- ===================================================== -->
     <insert id="insertUser" parameterType="hashmap">
-        INSERT INTO users (
-            USER_ID,
-            USER_PWD,
-            EMAIL,
-            USER_NAME,
-            PHONE,
-            USER_ADDR,
-            FULL_ADDR,
-            ZIPCODE,
-            ROLE,
-            SOCIALTYPE,
-            CDATE
-        ) VALUES (
+        INSERT INTO users
+        (
+            user_id,
+            pwd,
+            user_name,
+            phone,
+            email,
+            role
+        )
+        VALUES
+        (
             #{userId},
             #{pwd},
-            #{email},
             #{userName},
             #{phone},
-            #{address},
-            #{detailAddress},
-            #{postcode},
-            'USER',
-            'LOCAL',
-            NOW()
+            #{email},
+            #{role}
         )
     </insert>
 
-    <!-- 사업자 공통 users 저장 -->
+    <!-- ===================================================== -->
+    <!-- 3. 사업자 회원가입 - users 테이블 저장 -->
+    <!-- ===================================================== -->
     <insert id="insertBizUser" parameterType="hashmap">
-        INSERT INTO users (
-            USER_ID,
-            USER_PWD,
-            USER_NAME,
-            ROLE,
-            SOCIALTYPE,
-            BIZ_STATUS,
-            CDATE
-        ) VALUES (
+        INSERT INTO users
+        (
+            user_id,
+            pwd,
+            user_name,
+            phone,
+            email,
+            role
+        )
+        VALUES
+        (
             #{userId},
             #{pwd},
             #{userName},
-            'BIZ',
-            'LOCAL',
-            'PENDING',
-            NOW()
+            #{phone},
+            #{email},
+            #{role}
         )
     </insert>
 
-    <!-- 사업자 전용 정보 저장 -->
+    <!-- ===================================================== -->
+    <!-- 4. 사업자 회원가입 - biz_info 테이블 저장 -->
+    <!-- ===================================================== -->
     <insert id="insertBizInfo" parameterType="hashmap">
-        INSERT INTO biz_info (
-            USER_ID,
-            BIZ_NAME,
-            BIZ_NO,
-            BIZ_FILE_NAME,
-            BIZ_FILE_PATH,
-            REG_DATE
-        ) VALUES (
+        INSERT INTO biz_info
+        (
+            user_id,
+            biz_name,
+            biz_no,
+            biz_status,
+            biz_file_name,
+            biz_file_path
+        )
+        VALUES
+        (
             #{userId},
             #{bizName},
             #{bizNo},
+            #{bizStatus},
             #{bizFileName},
-            #{bizFilePath},
-            NOW()
+            #{bizFilePath}
         )
     </insert>
 
-    <!-- 로그인 -->
-    <select id="selectUser" parameterType="hashmap" resultType="com.example.unipet.model.User">
+    <!-- ===================================================== -->
+    <!-- 5. 로그인용 사용자 조회 -->
+    <!-- users + biz_info LEFT JOIN -->
+    <!-- 일반회원도 조회되고, 사업자는 추가정보까지 같이 조회 -->
+    <!-- ===================================================== -->
+    <select id="selectUser" parameterType="hashmap" resultMap="userMap">
         SELECT
-            USER_ID AS userId,
-            USER_PWD AS pwd,
-            USER_NAME AS userName,
-            ROLE AS role,
-            EMAIL AS email,
-            PHONE AS phone,
-            BIZ_STATUS AS bizStatus
-        FROM users
-        WHERE USER_ID = #{userId}
+            u.user_id,
+            u.pwd,
+            u.user_name,
+            u.phone,
+            u.email,
+            u.role,
+            b.biz_name,
+            b.biz_no,
+            b.biz_status,
+            b.biz_file_name,
+            b.biz_file_path
+        FROM users u
+        LEFT JOIN biz_info b
+               ON u.user_id = b.user_id
+        WHERE u.user_id = #{userId}
     </select>
 
-    <!-- 아이디 찾기 -->
-    <select id="findId" parameterType="hashmap" resultType="com.example.unipet.model.User">
+    <!-- ===================================================== -->
+    <!-- 6. 아이디 찾기 -->
+    <!-- 이름 + 휴대폰번호로 조회 -->
+    <!-- ===================================================== -->
+    <select id="findId" parameterType="hashmap" resultMap="userMap">
         SELECT
-            USER_ID AS userId,
-            USER_NAME AS userName,
-            PHONE AS phone
+            user_id,
+            user_name,
+            phone
         FROM users
-        WHERE USER_NAME = #{userName}
-          AND PHONE = #{phone}
+        WHERE user_name = #{userName}
+          AND phone = #{phone}
     </select>
 
-    <!-- 비밀번호 변경 -->
+    <!-- ===================================================== -->
+    <!-- 7. 비밀번호 찾기용 회원 확인 -->
+    <!-- 아이디 + 휴대폰번호로 조회 -->
+    <!-- ===================================================== -->
+    <select id="checkUserForReset" parameterType="hashmap" resultMap="userMap">
+        SELECT
+            user_id,
+            user_name,
+            phone
+        FROM users
+        WHERE user_id = #{userId}
+          AND phone = #{phone}
+    </select>
+
+    <!-- ===================================================== -->
+    <!-- 8. 비밀번호 변경 -->
+    <!-- ===================================================== -->
     <update id="resetPwd" parameterType="hashmap">
         UPDATE users
-        SET USER_PWD = #{pwd}
-        WHERE USER_ID = #{userId}
+        SET pwd = #{pwd}
+        WHERE user_id = #{userId}
     </update>
 
 </mapper>
