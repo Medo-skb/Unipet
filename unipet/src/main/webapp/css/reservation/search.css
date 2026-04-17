@@ -96,6 +96,62 @@
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
+.store-card.is-member {
+    border-left: 4px solid #4a90e2; /* 유니펫 브랜드 컬러가 있다면 그 색상으로 */
+    background-color: #f8fbff;
+}
+
+/* 이름과 버튼을 감싸는 컨테이너 */
+.name-wrap {
+    display: flex;
+    justify-content: space-between; /* 이름은 왼쪽, 버튼은 오른쪽 끝 */
+    align-items: center;           /* 세로 중앙 정렬 */
+    margin: 5px 0;
+}
+
+.member-badge {
+    display: inline-block;
+    background-color: #4A90E2; /* 활성화 버튼 색상과 통일감 */
+    color: white;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: bold;
+    white-space: nowrap;      /* 배지 글자가 잘리지 않도록 설정 */
+    flex-shrink: 0;           /* 이름이 길어져도 배지 크기는 유지 */
+}
+
+
+.store-name {
+    margin: 0;
+    font-size: 17px;
+    color: #333;
+    flex: 1; 
+    display: flex;       /* 추가: 이름과 배지를 정렬 */
+    align-items: center; /* 추가: 세로 중앙 맞춤 */
+    gap: 6px;           /* 추가: 이름과 배지 사이 간격 */
+    overflow: hidden;    /* 부모의 말줄임표 설정을 위해 유지 */
+}
+
+/* 작고 깔끔한 상세보기 버튼 */
+.detail-btn-sm {
+    margin-left: 10px;
+    padding: 4px 10px;        /* 크기를 작게 조절 */
+    font-size: 11px;          /* 글자 크기 축소 */
+    background-color: #fff;   /* 배경을 흰색으로 하고 테두리만 줘도 깔끔합니다 */
+    color: #4A90E2;
+    border: 1px solid #4A90E2;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;      /* 버튼 글자가 줄바꿈되지 않도록 */
+    transition: all 0.2s;
+}
+
+.detail-btn-sm:hover {
+    background-color: #4A90E2;
+    color: #fff;
+}
+
 .store-img img {
     width: 120px;
     height: 100%;

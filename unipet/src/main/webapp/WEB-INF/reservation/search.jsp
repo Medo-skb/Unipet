@@ -52,14 +52,27 @@
 
                     <div v-for="(item, index) in list" 
                         :key="index" 
-                        class="store-card" 
+                        :class="['store-card', { 'is-member': item.sStatus === 'GEN' }]" 
                         @click="selectStore(item, index)">
                         
                         <div class="store-info">
                             <div class="info-top">
                                 <span class="category">{{ item.storeType }}</span>
+                                <span v-if="item.sStatus === 'GEN'" class="member-badge">유니펫 회원사</span>
                             </div>
-                            <h3 class="store-name">{{ item.storeName }}</h3>
+
+                            <div class="name-wrap">
+                                <div class="title-area">
+                                    <h3 class="store-name">
+                                        {{ item.storeName }}
+                                    </h3>
+                                </div>
+                                
+                                <button class="detail-btn-sm" @click.stop="fnGoDetail(item.storeNo)">
+                                    상세보기
+                                </button>
+                            </div>
+
                             <p class="store-addr">{{ item.sAddr }}</p>
                         </div>
                     </div>
@@ -92,7 +105,7 @@
                 list: [],
                 infowindow: null,
                 selectedType: '',
-                myMarker: null
+                myMarker: null,
             };
         },
         methods: {
@@ -165,19 +178,27 @@
                         const rawData = res.list || []; 
 
                         if (rawData.length > 0) {
-                            // [수정] 중복 제거 기준을 더 넓히거나, 데이터가 확실하다면 잠시 주석 처리해보세요.
+                            // [1] 중복 제거
                             const uniqueData = rawData.filter((item, index, arr) =>
                                 index === arr.findIndex((t) => (
-                                    // storeId가 모두 같거나 없을 가능성이 있으므로 업체명과 좌표를 같이 비교
                                     (t.storeName === item.storeName && t.lat === item.lat && t.lng === item.lng)
                                 ))
                             );
                             
-                            // 만약 위 코드로도 1개만 나온다면, 중복 제거 없이 바로 넣어보세요:
-                            // this.list = rawData; 
+                            // [2] 회원사(GEN) 상단 정렬
+                            const sortedData = uniqueData.sort((a, b) => {
+                                // sStatus가 'GEN'인 항목을 위로(-1), 아니면 뒤로(1)
+                                const aStatus = a.sStatus ? a.sStatus.toUpperCase() : '';
+                                const bStatus = b.sStatus ? b.sStatus.toUpperCase() : '';
+
+                                if (aStatus === 'GEN' && bStatus !== 'GEN') return -1;
+                                if (aStatus !== 'GEN' && bStatus === 'GEN') return 1;
+                                return 0;
+                            });
                             
-                            this.list = uniqueData;
-                            console.log("2. 화면에 뿌릴 리스트 개수:", this.list.length);
+                            // [3] 결과 반영
+                            this.list = sortedData;
+                            console.log("2. 정렬 및 중복제거 완료:", this.list.length);
 
                             this.$nextTick(() => {
                                 this.createMarkers();
@@ -190,11 +211,12 @@
                 });
             },
 
+
             createMarkers() {
                 // [1] self 선언: 이벤트 리스너(function) 내부에서 Vue 인스턴스에 접근하기 위해 반드시 필요합니다.
                 const self = this;
 
-                // [2] 기존 마커 제거: 지도가 지저분해지지 않도록 새로 그리기 전에 싹 지웁니다.
+                // [2] 기존 마커 제거
                 if (this.markers && Array.isArray(this.markers)) {
                     this.markers.forEach(m => {
                         if (m) m.setMap(null);
@@ -202,29 +224,22 @@
                 }
                 this.markers = []; // 마커 배열 초기화
 
-                // [3] 인포윈도우 초기화: 딱 하나만 만들어서 재사용합니다.
+                // [3] 인포윈도우 초기화: 딱 하나만 만들어서 재사용
                 if (!this.infowindow) {
                     this.infowindow = new kakao.maps.InfoWindow({ zIndex: 10 });
                 }
 
                 // [4] 예외 처리: 데이터가 없으면 함수 종료
                 if (!this.list || this.list.length === 0) {
-                    console.warn("지도에 표시할 업체 리스트가 없습니다.");
                     return;
                 }
 
-                console.log("마커 생성 시작 - 대상 개수:", this.list.length);
-
                 // [5] 리스트를 돌며 마커 생성
                 this.list.forEach((item, index) => {
-                    // 좌표가 문자열로 들어올 경우를 대비해 숫자로 변환
                     const lat = parseFloat(item.lat);
                     const lng = parseFloat(item.lng);
 
-                    if (isNaN(lat) || isNaN(lng)) {
-                        console.error(`${index}번 업체 좌표 오류:`, item.storeName);
-                        return; // 좌표가 이상하면 이번 루프는 건너뜀
-                    }
+                    if (isNaN(lat) || isNaN(lng)) return;
 
                     const markerPosition = new kakao.maps.LatLng(lat, lng);
                     
@@ -234,19 +249,21 @@
                         map: self.map
                     });
 
-                    // 중요: 마커 객체에 인덱스를 저장 (나중에 리스트 클릭 시 찾기 위함)
+                    // 마커 객체에 인덱스 저장
                     marker.listIndex = index;
 
-                    // 말풍선(InfoWindow)에 들어갈 HTML 구성
-                    const sName = String(item.storeName || "이름 없음");
-                    const sAddr = String(item.sAddr || "주소 없음");
+                    // [어제 성공한 포인트] 이벤트 내부에서 직접 HTML 변수를 생성합니다.
+                    const sName = item.storeName || "이름 없음";
+                    const sAddr = item.sAddr || "주소 없음";
+                    const badge = item.sStatus === 'GEN' ? '<span style="color:#4A90E2; font-size:10px; margin-left:5px; font-weight:bold;">(유니펫 회원사)</span>' : '';
+
                     const content = 
                         '<div style="padding:10px; min-width:150px; background:#fff; border:1px solid #4A90E2; border-radius:5px;">' +
-                        '    <div style="font-weight:bold; font-size:14px; color:#000; margin-bottom:5px;">' + sName + '</div>' +
+                        '    <div style="font-weight:bold; font-size:14px; color:#000; margin-bottom:5px;">' + sName + badge + '</div>' +
                         '    <div style="font-size:12px; color:#666; line-height:1.4;">' + sAddr + '</div>' +
                         '</div>';
 
-                    // [이벤트 1] 마우스 오버: 말풍선 열기
+                    // [이벤트 1] 마우스 오버: 말풍선 열기 (self 사용)
                     kakao.maps.event.addListener(marker, 'mouseover', function() {
                         self.infowindow.setContent(content);
                         self.infowindow.open(self.map, marker);
@@ -257,35 +274,48 @@
                         self.infowindow.close();
                     });
 
-                    // 생성된 마커를 배열에 담기 (나중에 관리하기 위함)
+                    // 생성된 마커를 배열에 담기
                     this.markers.push(marker);
                 });
-
-                console.log("마커 생성 완료 - 실제 생성 개수:", this.markers.length);
             },
 
             selectStore(item, index) {
-                if (!this.infowindow || !this.markers[index]) {
-                    console.error("인포윈도우나 마커를 찾을 수 없음", index);
-                    return;
-                }
+                // [1] 예외 처리
+                if (!this.infowindow || !this.markers || !this.markers[index]) return;
 
-                this.infowindow.close();
+                // [2] 지도 중심 이동
                 const moveLatLon = new kakao.maps.LatLng(parseFloat(item.lat), parseFloat(item.lng));
                 this.map.panTo(moveLatLon);
 
+                // [3] 해당 마커 찾기
                 const targetMarker = this.markers[index];
-                const sName = String(item.storeName || "");
-                const sAddr = String(item.sAddr || "");
-                const content = '<div style="padding:10px; min-width:150px; background:#fff; border:1px solid #4A90E2;">' +
-                                '    <div style="font-weight:bold; font-size:14px; color:#000; margin-bottom:5px;">' + sName + '</div>' +
-                                '    <div style="font-size:12px; color:#666;">' + sAddr + '</div>' +
-                                '</div>';
 
+                // [4] 직접 HTML 생성 (createMarkers와 동일한 스타일)
+                const sName = item.storeName || "이름 없음";
+                const sAddr = item.sAddr || "주소 없음";
+                const badge = item.sStatus === 'GEN' ? '<span style="color:#4A90E2; font-size:10px; margin-left:5px; font-weight:bold;">(유니펫 회원사)</span>' : '';
+
+                const content = 
+                    '<div style="padding:10px; min-width:150px; background:#fff; border:1px solid #4A90E2; border-radius:5px;">' +
+                    '    <div style="font-weight:bold; font-size:14px; color:#000; margin-bottom:5px;">' + sName + badge + '</div>' +
+                    '    <div style="font-size:12px; color:#666; line-height:1.4;">' + sAddr + '</div>' +
+                    '</div>';
+
+                // [5] 내용 교체 및 열기
+                this.infowindow.close();
                 this.infowindow.setContent(content);
                 this.infowindow.open(this.map, targetMarker);
+            },
+
+            fnGoDetail(storeNo) {
+                if (storeNo) {
+                    location.href = "/reservation/store-detail.do?storeNo=" + storeNo;
+                } else {
+                    alert("업체 정보를 불러올 수 없습니다.");
+                }
             }
         }, 
+        
         mounted() {
             this.initMap();
         }

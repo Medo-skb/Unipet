@@ -1,6 +1,7 @@
 package com.example.unipet.controller;
 
-import java.util.HashMap; 
+import java.util.HashMap;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -38,8 +39,43 @@ public class ReservationController {
 		return new Gson().toJson(resultMap); 
 	}
 	
-	@RequestMapping("/reservation/store-detail.do") 
-	public String detail(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception{
+	@RequestMapping("/reservation/store-detail.do")
+	public String detail(HttpServletRequest request, Model model,  @RequestParam HashMap<String, Object> map) throws Exception{
+		request.setAttribute("map", map);
 		return "/reservation/storeDetail";
 	}
+	
+	
+//	@RequestMapping(value = "/reservation/store-detail.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+//	@ResponseBody
+//	public String sDetail(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+//		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+//		resultMap = reservationService.getStoreInfo(map);
+//		
+//		return new Gson().toJson(resultMap); 
+//	}
+//	public String sMenu(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+//		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+//		resultMap = reservationService.getStoreMenu(map);
+//		
+//		return new Gson().toJson(resultMap); 
+//	}
+	
+	@RequestMapping(value = "/reservation/store-detail.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String sDetail(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+	    // 1. 가게 정보 (Map 형태) 담기
+	    HashMap<String, Object> storeInfo = reservationService.getStoreInfo(map);
+	    resultMap.put("info", storeInfo.get("info"));
+
+	    // 2. 메뉴 목록 (List 형태) 담기
+	    HashMap<String, Object> menuList = reservationService.getStoreMenu(map);
+	    resultMap.put("menuList", menuList.get("list"));
+
+	    // Gson으로 변환하면 { "info": {...}, "menuList": [...] } 구조가 됩니다.
+	    return new Gson().toJson(resultMap); 
+	}
+	
 }
