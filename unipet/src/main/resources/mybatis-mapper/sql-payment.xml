@@ -3,7 +3,7 @@
 	
 <mapper namespace="com.example.unipet.mapper.PaymentMapper">
 	<!-- 한개 검색 -->
-	<select id="selectPayment" resultType="com.example.unipet.model.Payment">
+	<select id="selectRsvPayment" resultType="com.example.unipet.model.Payment">
         SELECT 
             r.RSV_NO,        
             r.RSV_DATE,      
@@ -16,7 +16,8 @@
             m.MENU_NAME,     
             m.MENU_PRICE,    
             m.M_STATUS,     
-  
+
+			u.user_id,  
             u.USER_NAME,    
             u.PHONE          
             
@@ -27,34 +28,101 @@
         WHERE r.RSV_NO = 11
     </select>
     
-    <insert id="insertPayment" parameterType="hashmap">
-        INSERT INTO payment_master (
+    <select id="selectUser" parameterType="hashmap" resultType="com.example.unipet.model.Payment">
+        SELECT 
             USER_ID,
-            RSV_NO,
-            ORD_NAME,
-            TOTALPRICE,
-            TID,
-            PAY_TYPE,    METHOD_NO,   PAY_STATUS,
-            PAY_DATE
+            USER_NAME,
+            PHONE
+		FROM USERS 
+        <!-- WHERE USER_ID = #{userId} -->
+		where USER_ID = 'test_user01'
+    </select>
+    
+	<insert id="insertPayment" parameterType="hashmap">
+	    INSERT INTO payment_master (
+	        USER_ID,        /* 유저 ID */
+	        METHOD_NO,      /* 결제수단 번호 */
+	        RSV_NO,         /* 예약 번호 */
+	        ORD_NO,         /* 쇼핑몰 번호 */
+	        SUB_NO,         /* 구독 번호 */
+	        ORD_NAME,       /* 주문명 */
+	        TOTALPRICE,     /* 총 결제금액 */
+	        TID,            /* 외부 거래번호 */
+	        PAY_STATUS,     /* 상태 */
+	        PAY_DATE        /* 실결제 시각 */
+	    ) VALUES (
+	        #{userId}, 
+	        #{methodNo}, 
+	        #{rsvNo}, 
+	        #{ordNo}, 
+	        #{subNo}, 
+	        #{ordName}, 
+	        #{totalprice}, 
+	        #{tid}, 
+	        #{payStatus},
+	        NOW()
+	    )
+	</insert>
+	
+	<insert id="insertPaymentMethod" parameterType="hashmap" useGeneratedKeys="true" keyProperty="methodNo">
+        INSERT INTO PAYMENT_METHOD (
+            USER_ID, 
+            PM_NAME, 
+            BILINGKEY, 
+            IS_DEFAULT, 
+            CDATE
         ) VALUES (
-            #{userId},
-            #{rsvNo},
-            #{ordName},
-            #{totalPrice},
-            #{tid},
-            #{payType},
-            NULL,
-            'PAID',
+            #{userId}, 
+            #{pmName}, 
+            #{customerUid}, 
+            'Y', 
             NOW()
         )
     </insert>
+    
+    <insert id="insertSub" parameterType="hashmap">
+        INSERT INTO SUBSCRIPTION (
+            USER_ID, 
+            METHOD_NO, 
+            START_DATE, 
+            EXPIRE_DATE, 
+            STATUS
+        ) VALUES (
+            #{userId}, 
+            #{methodNo}, 
+            NOW(), 
+            DATE_ADD(NOW(), INTERVAL 1 MONTH), 
+            'ACTIVE'
+        )
+    </insert>
+	
+	<select id="selectMethod" parameterType="hashmap" resultType="java.lang.Integer">
+	    SELECT METHOD_NO
+	      FROM PAYMENT_METHOD
+	     WHERE USER_ID = #{userId}
+	       AND BILINGKEY = #{customerUid}
+	     LIMIT 1
+	</select>
 
     <update id="updateRsvStatus" parameterType="hashmap">
         UPDATE reservation
         SET 
-            RSV_STATUS = '결제완료'
+            RSV_STATUS = 'FIN'
         WHERE 
             RSV_NO = #{rsvNo}
+    </update>
+    
+    <update id="updateAllDefaultN" parameterType="hashmap">
+        UPDATE PAYMENT_METHOD
+           SET IS_DEFAULT = 'N'
+         WHERE USER_ID = #{userId}
+    </update>
+    
+    <update id="updateDefault" parameterType="hashmap">
+        UPDATE PAYMENT_METHOD
+           SET IS_DEFAULT = 'Y',
+               CDATE = NOW()
+         WHERE METHOD_NO = #{methodNo}
     </update>
     
 </mapper>

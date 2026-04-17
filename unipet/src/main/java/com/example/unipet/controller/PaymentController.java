@@ -23,14 +23,19 @@ public class PaymentController {
 	PaymentService paymentService; 
 	
 	@RequestMapping("/payment/pay-rsv.do") 
-	public String copy(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception{
+	public String rsv(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception{
 		return "/payment/pay-rsv";
+	}
+	
+	@RequestMapping("/payment/sub.do") 
+	public String sub(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception{
+		return "/payment/sub";
 	}
 	
 	// ajax가 호출하는 주소
 	@RequestMapping(value = "/payment/rsv.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
-	public String copy(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+	public String rsv(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 		resultMap = paymentService.getPayment(map);
  
@@ -38,14 +43,21 @@ public class PaymentController {
 	}
 	
 	@RequestMapping(value = "/payment/add.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
-	@ResponseBody
-	public String savePayment(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
-	    // 1. 서비스 호출을 통해 DB 저장 및 예약 상태 업데이트 수행
-	    HashMap<String, Object> resultMap = paymentService.addPayment(map);
-	    
-	    // 2. 최종 결과를 JSON 문자열로 변환하여 반환
-	    return new Gson().toJson(resultMap); 
-	}
+    @ResponseBody
+    public String savePayment(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+        // 서비스 내부에서 insertPayment와 updateRsvStatus를 순차적으로 실행
+        // map에는 payStatus('PAY' 또는 'FAL')가 포함되어 있어야 함
+        HashMap<String, Object> resultMap = paymentService.addPayment(map);
+        
+        return new Gson().toJson(resultMap); 
+    }
 	
+	@RequestMapping(value = "/payment/info.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+    @ResponseBody
+    public String userInfo(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+        HashMap<String, Object> resultMap = paymentService.getUser(map);
+        
+        return new Gson().toJson(resultMap); 
+    }
 
 }
