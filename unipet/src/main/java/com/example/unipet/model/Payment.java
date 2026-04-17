@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class Payment {
-	// 1. 예약 기본 정보
+	// 1. 예약 기본 정보 (RESERVATION 테이블 JOIN 결과)
     int rsvNo;
     String rsvDate;  // 시작 시간
     String endDate;  // 종료 시간
@@ -21,11 +21,15 @@ public class Payment {
     int menuPrice; 			// 메뉴 가격
     String mStatus;			// 판매 상황
 
-    // 4. 사용자 정보 (USERS 테이블 Join 결과) - 포트원 전송 및 확인용
+    // 4. 사용자 정보 (USERS 테이블 Join 결과)
+    String userId;
     String userName; 		// 이름
     String phone;    		// 전화번호
-
+    
     // 5. 계산 데이터
     int deposit;    // 예약금
     int balance;    // 잔액
+
+    
+    
 }

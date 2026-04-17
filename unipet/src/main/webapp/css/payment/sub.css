@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <style>
+        /* 기본 스타일 세팅 */
+        body { font-family: 'Pretendard', sans-serif; background-color: #ffffff; color: #3c4043; }
+        .subs-wrapper { max-width: 1000px; margin: 0px auto; text-align: center; }
+        
+        .subs-header h1 { font-size: 2.5rem; margin-bottom: 10px; font-weight: 500; }
+        .subs-header p { font-size: 1.1rem; color: #5f6368; margin-bottom: 50px; }
+
+        /* 카드 컨테이너 */
+        .plan-container { 
+            display: flex; 
+            flex-direction: row;       /* 가로 방향 배치 강제 */
+            justify-content: center;   /* 가운데 정렬 */
+            align-items: stretch;      /* 카드 높이를 동일하게 맞춤 */
+            gap: 30px;                 /* 카드 사이 간격 */
+            margin-top: 50px;
+            width: 100%;
+        }
+
+        /* 공통 카드 스타일 */
+        .plan-card {
+            border: 1px solid #dadce0;
+            border-radius: 24px;
+            width: 420px;
+            padding: 40px;
+            text-align: left;
+            transition: box-shadow 0.3s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 프리미엄 카드 포인트 (헤더의 하늘색 활용) */
+        .plan-card.premium { border: 2px solid #03A9F4; box-shadow: 0 4px 20px rgba(3, 169, 244, 0.1); }
+
+        .plan-name { font-size: 1.8rem; font-weight: 600; margin-bottom: 15px; text-align: center; }
+        .plan-desc { font-size: 0.95rem; color: #5f6368; line-height: 1.5; margin-bottom: 25px; min-height: 50px; text-align: center; }
+
+        /* 가격 스타일 */
+        .plan-price {
+            font-size: 2rem;
+            font-weight: 700;
+            text-align: center; /* 가격 중앙 정렬 */
+            margin: 20px 0 30px 0;
+            width: 100%;
+        }
+        .plan-price span { font-size: 1.2rem; color: #5f6368; font-weight: 400; }
+        .price-discount { color: #1e8e3e; } /* 할인가 초록색 */
+
+        /* 버튼 스타일 */
+        .subs-btn {
+            display: block;
+            width: 80%;           /* 너비를 약간 줄이고 */
+            margin: 0 auto 40px;  /* 상하 0, 좌우 auto로 중앙 배치 */
+            padding: 14px 0;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: center;   /* 텍스트 중앙 정렬 */
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        .btn-basic { background-color: #f1f3f4; color: #3c4043; border: none; }
+        .btn-premium { background-color: #03A9F4; color: #fff; border: none; }
+        .btn-premium:hover { background-color: #0288d1; }
+
+        /* 혜택 리스트 */
+        .benefit-title { font-weight: 600; font-size: 1rem; margin-bottom: 20px; }
+        .benefit-list { list-style: none; padding: 0; margin: 0; }
+        .benefit-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 16px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+        /* 아이콘 포인트 (노란색/하늘색 활용) */
+        .benefit-item::before {
+            content: '✦';
+            color: #FFC107; /* 로고의 노란색 */
+            margin-right: 12px;
+            font-size: 1.1rem;
+        }
+        .benefit-item span { color: #3c4043; }

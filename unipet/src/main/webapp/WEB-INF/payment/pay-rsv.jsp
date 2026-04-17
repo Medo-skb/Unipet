@@ -88,6 +88,7 @@
             // 1. 초기 예약 정보 로드
             fnGetInfo: function () {
                 let self = this;
+
                 $.ajax({
                     url: "/payment/rsv.dox",
                     dataType: "json",
@@ -96,53 +97,51 @@
                         self.info = data.info;
                         self.deposit = data.deposit;
                         self.balance = data.info.menuPrice - data.deposit;
+                        console.log(data);
                     }
                 });
             },
-
-            // 2. 포트원 결제창 호출 (버튼 클릭 시 실행)
+            // 2. 포트원 결제창 호출
             fnPayment: function () {
                 let self = this;
-                
-                // 포트원 초기화
+
+                if(!self.info.userId) {
+                    alert("로그인이 필요한 서비스입니다.");
+                    return;
+                }
+
                 const { IMP } = window;
                 IMP.init("imp15084381"); 
 
-                // 결제 요청
                 IMP.request_pay({
-                    pg: "html5_inicis",           
+                    pg: "html5_inicis.INIpayTest",
                     pay_method: "card",
                     merchant_uid: "unipet_rsv_" + Date.now(), 
                     name: self.info.storeName + " 예약금", 
-                    amount: self.deposit,                 
-                    buyer_name: self.info.userName,       
-                    buyer_tel: self.info.phone            // 핸드폰 번호 (문자 발송용)
+                    amount: self.deposit, 
+                    buyer_name: self.info.userName,  
+                    buyer_tel: self.info.phone 
                 }, function (response) {
-                    console.log("포트원 응답:", response); 
-                    
-                    if (response.success) {
-                        // 결제 성공 시 DB 저장 로직 실행
-                        self.fnAddPayment(response); 
-                    } else {
-                        alert("결제 실패: " + response.error_msg);
-                    }
+                    // 성공하든 실패하든 일단 서버로 기록을 보냄
+                    self.fnAddPayment(response); 
                 });
             },
 
             // 3. 서버 DB에 결제 내역 저장
             fnAddPayment: function(rsp) {
-                const self = this;
+                let self = this;
                 
-                // [수정 포인트] METHOD_NO는 null로, payType에 실제 수단 저장
+                // 성공 여부에 따른 상태값 결정
+                let status = rsp.success ? "PAY" : "FAL";
+                
                 const param = {
-                    userId: self.info.userId,      // 결제자 ID
-                    methodNo: null,                // 일반 결제이므로 NULL 전송
-                    payType: rsp.pay_method,       // 'card', 'kakaopay' 등
-                    rsvNo: self.info.rsvNo,        // 예약 번호
-                    ordName: rsp.name,             // 주문명
-                    totalPrice: rsp.paid_amount,   // 실결제 금액
-                    tid: rsp.imp_uid,              // 포트원 고유 번호 (TID)
-                    payStatus: "PAY"              // 상태
+                    userId: self.info.userId,              
+                    payType: rsp.pay_method || "unknown", // 실패 시에는 값이 없을 수 있음
+                    rsvNo: self.info.rsvNo,        
+                    ordName: self.info.storeName + " 예약금", 
+                    totalPrice: self.deposit,   
+                    tid: rsp.imp_uid || "N/A",    
+                    payStatus: status              // ★ 여기서 PAY 또는 FAL 전송
                 };
 
                 $.ajax({
@@ -152,11 +151,15 @@
                     data: param,
                     success: function(data) {
                         if(data.result === "success") {
-                            alert("예약 및 결제가 완료되었습니다!");
-                            // 메인페이지로 이동
-                            // location.href = "/my-reservation.do"; 
+                            if(status === "PAY") {
+                                alert("예약 및 결제가 완료되었습니다!");
+                                // location.href = "/my-reservation.do"; 
+                            } else {
+                                // 결제 실패인데 DB 기록은 성공한 경우
+                                alert("결제 실패: " + rsp.error_msg + "\n(실패 내역이 기록되었습니다.)");
+                            }
                         } else {
-                            alert("결제는 성공했으나 시스템 기록에 실패했습니다. 관리자에게 문의하세요.");
+                            alert("시스템 오류가 발생했습니다.");
                         }
                     }
                 });
