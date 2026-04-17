@@ -7,6 +7,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="/css/reservation/storeDetail.css" rel="stylesheet">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=2198e0ed2782e12a610e46213693750e&libraries=services"></script>
     <title>Store Detail</title>
     
 </head>
@@ -15,9 +19,12 @@
         <!-- html 코드는 id가 app인 태그 안에서 작업 -->
         <div id="container">
             <div id="top">
-                <div>업체명</div>
-                <div>업종</div>
-                <div class="b-button">예약하기</div>
+                <div>{{ storeInfo.storeName }}</div>
+                <div id="top-sub">
+                    <div class="s-type">{{ storeInfo.storeType }}</div>
+                    <div class="button">예약하기</div>
+                </div>
+                
             </div>
             <div id="contents">
                 <div class="img-area">
@@ -27,15 +34,15 @@
                 <div class="intro">
                     <div>소개</div>
                     <hr>
-                    <div>소개합니다.</div>
+                    <div>{{ storeInfo.sContents }}</div>
                 </div>
                 <div class="menu">
                     <div>가격표</div>
                     <hr>
-                    <ul>
-                        <li>진료 10,000원</li>
-                        <li>미용 15,000원</li>
-                        <li>호텔 20,000원</li>
+                    <ul id="MenuList">
+                        <li v-for="item in storeMenuList" :key="item.menuNo">
+                            {{ item.menuName }} : {{ item.menuPrice.toLocaleString() }}원
+                        </li>
                     </ul>
                 </div>
                 <div id="bottom">
@@ -54,10 +61,8 @@
                             <span>⭐️⭐️⭐️⭐️⭐️</span>
                             <div>정말 잘해주세요!!</div>
                         </div>
-                        
-
                     </div>
-                    <div class="map">지도</div>
+                    <div id="map"></div>
                 </div>
                 
             </div>
@@ -70,23 +75,72 @@
     const app = Vue.createApp({
         data() {
             return {
-                
+                storeNo: '${map.storeNo}', 
+                storeInfo: {}, 
+                storeMenuList: []
             };
         },
         methods: {
-           fnUserList: function () {
+            fnGetStoreDetail() {
+                const self = this;
                 $.ajax({
-                    url: "",
-                    dataType: "json",
-                    type: "GET",
-                    data: {},
-                    success: function (data) {
-
+                    url: "/reservation/store-detail.dox",
+                    type: "POST",
+                    data: { storeNo: self.storeNo }, 
+                    success: function(data) {
+                        self.storeInfo = data.info;
+                        self.storeMenuList = data.menuList;
+                        
+                        // Vue가 데이터를 바인딩하고 DOM을 준비할 시간을 주기 위해 setTimeout 사용
+                        setTimeout(() => {
+                            self.drawMap();
+                        }, 100);
                     }
                 });
+            },
+
+            drawMap: function() {
+                // 1. 데이터 가져오기
+                const name = this.storeInfo.storeName;
+                const addr = this.storeInfo.sAddr;
+                const lat = this.storeInfo.lat;
+                const lng = this.storeInfo.lng;
+
+                const container = document.getElementById('map');
+                const moveLatLon = new kakao.maps.LatLng(lat, lng);
+                
+                const options = {
+                    center: moveLatLon,
+                    level: 3
+                };
+                const map = new kakao.maps.Map(container, options);
+
+                // 2. 마커 생성
+                const marker = new kakao.maps.Marker({
+                    position: moveLatLon
+                });
+                marker.setMap(map);
+
+                // 3. 말풍선 내용 정리 (좌표 제외, 업체명과 주소만)
+                // 스타일을 인라인으로 넣어서 CSS 간섭을 방지합니다.
+                var content = 
+                    '<div style="padding:10px; min-width:150px; background-color:white; border:1px solid #ccc; border-radius:5px; box-shadow: 2px 2px 5px rgba(0,0,0,0.1);">' +
+                    '    <div style="font-weight:bold; color:#000; font-size:14px; margin-bottom:5px; text-align:center;">' + name + '</div>' +
+                    '    <div style="font-size:12px; color:#333; line-height:1.4; text-align:center;">' + addr + '</div>' +
+                    '</div>';
+
+                const infowindow = new kakao.maps.InfoWindow({
+                    content: content
+                });
+                
+                // 마커 위에 말풍선 열기
+                infowindow.open(map, marker);
             }
         }, 
         mounted() {
+            if (this.storeNo) {
+                this.fnGetStoreDetail();
+            }
         }
     });
     app.mount('#app');

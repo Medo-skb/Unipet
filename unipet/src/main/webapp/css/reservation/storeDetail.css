@@ -9,13 +9,24 @@
 #top{
 }
 
-.b-button{
+#top-sub{
+    display: grid;
+    grid-template-columns: auto 150px;
+    grid-template-rows: 30px;
+    align-items: center;
+}
+.s-type{
+    justify-self: start;
+}
+
+.button{
     width: 100px;
     height: 30px;
     line-height: 30px;
     background-color: blue;
     color: white;
     text-align: center;
+    justify-self: end;
 }
 
 .img-area{
@@ -40,7 +51,7 @@
 
 #bottom{
     display: grid;
-    gap: 10px;
+    gap: 20px;
     grid-template-columns: 300px auto;
     grid-template-rows: 200px;
     /* border: 1px solid black; */
@@ -50,8 +61,10 @@
     margin: 15px 0px;
 }
 
-.map{
+#map{
     border: 1px solid black;
+    width: 100%;
+    height: 100%;
 }
 
 

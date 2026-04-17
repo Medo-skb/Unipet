@@ -13,8 +13,11 @@ public interface ReservationMapper {
 	
 	// 여러개 리턴 -> selectXXXList
 	public List<Store> selectStoreList(HashMap<String, Object> map);
+	
+	public List<Store> selectStoreMenu(HashMap<String, Object> map);
+	
 	// 한개 리턴 -> selectXXX
-	public Default selectDefault(HashMap<String, Object> map);
+	public Store selectStoreInfo(HashMap<String, Object> map);
 	// 삭제 
 	public int deleteDefault(HashMap<String, Object> map);
 	// 수정
