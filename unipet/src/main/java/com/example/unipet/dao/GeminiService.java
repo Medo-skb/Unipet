@@ -1,91 +1,55 @@
 package com.example.unipet.dao;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
-import com.example.unipet.config.GeminiConfig;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.example.unipet.model.ChatRequest;
+import com.example.unipet.model.ChatResponse;
 
 @Service
 public class GeminiService {
 
+    @Qualifier("geminiRestTemplate")
     @Autowired
-    private GeminiConfig geminiConfig;
+    private RestTemplate restTemplate;
 
-    public String getApiKeyTest() {
-        return geminiConfig.getApiKey();
-    }
+    @Value("${gemini.api.url}")
+    private String apiUrl;
 
-    public String callGeminiTest(String prompt) throws IOException, InterruptedException {
-        String apiKey = geminiConfig.getApiKey();
+    @Value("${gemini.api.key}")
+    private String geminiApiKey;
 
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+    public String getContents(String prompt) {
 
-        String escapedPrompt = prompt
-                .replace("\\", "\\\\")
-                .replace("\"", "\\\"")
-                .replace("\n", "\\n");
+        // Gemini 요청 주소
+        String requestUrl = apiUrl + "?key=" + geminiApiKey;
 
-        String requestBody = """
-            {
-              "contents": [
-                {
-                  "parts": [
-                    {
-                      "text": "%s"
-                    }
-                  ]
-                }
-              ]
-            }
-            """.formatted(escapedPrompt);
+        // 요청 객체 생성
+        String finalPrompt = """
+        		너는 반려동물 플랫폼 UNIPET의 챗봇이다.
+        		강아지, 고양이, 기타 동물 등 반려동물 관련 질문에 답변한다.
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .header("Content-Type", "application/json")
-                .header("x-goog-api-key", apiKey)
-                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                .build();
+        		규칙:
+        		- 답변은 한국어로 한다.
+        		- 답변은 최대 3문장으로 짧고 명확하게 한다.
+        		- 너무 길어질 경우 핵심만 요약한다.
+        		- 확실하지 않은 정보는 추측하지 말고 모른다고 답한다.
+        		- 실시간 정보(시간, 날씨 등)는 제공하지 않는다.
 
-        HttpClient client = HttpClient.newHttpClient();
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        		사용자 질문:
+        		""" + prompt;
 
-        System.out.println("Gemini 응답 코드: " + response.statusCode());
-        System.out.println("Gemini 응답 바디: " + response.body());
+        		ChatRequest request = new ChatRequest(finalPrompt);
 
-        return response.body();
-    }
-    
-    public String callGeminiTextOnly(String prompt) throws IOException, InterruptedException {
-        String responseBody = callGeminiTest(prompt);
+        // Gemini API 호출
+        ChatResponse response = restTemplate.postForObject(requestUrl, request, ChatResponse.class);
 
-        JsonObject root = JsonParser.parseString(responseBody).getAsJsonObject();
-        JsonArray candidates = root.getAsJsonArray("candidates");
+        // 응답 텍스트 반환
+        String message = response.getCandidates().get(0).getContent().getParts().get(0).getText();
 
-        if (candidates == null || candidates.size() == 0) {
-            return "응답 없음";
-        }
-
-        JsonObject firstCandidate = candidates.get(0).getAsJsonObject();
-        JsonObject content = firstCandidate.getAsJsonObject("content");
-        JsonArray parts = content.getAsJsonArray("parts");
-
-        if (parts == null || parts.size() == 0) {
-            return "응답 없음";
-        }
-
-        JsonObject firstPart = parts.get(0).getAsJsonObject();
-
-        return firstPart.get("text").getAsString();
+        return message;
     }
 }
