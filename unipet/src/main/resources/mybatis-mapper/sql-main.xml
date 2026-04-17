@@ -3,7 +3,7 @@
 	
 <mapper namespace="com.example.unipet.mapper.MainMapper">
 	<!-- 예약 많은 업체 -->
-	<select id="selectPopularStoreList" resultType="com.example.unipet.model.Main">
+	<select id="selectPopularStoreList" parameterType="hashmap" resultType="com.example.unipet.model.Main">
 	    SELECT 
 		    s.STORE_NO AS storeNo,
 		    s.STORE_NAME AS storeName,
@@ -47,23 +47,175 @@
 	</select>
 
 	<!-- 사람들이 많이 찜한 인기상품 -->
-	<select id="selectPopularProductList" resultType="com.example.unipet.model.Main">
+	<select id="selectPopularProductList" parameterType="hashmap" resultType="com.example.unipet.model.Main">
 	    SELECT
 	        p.PRODUCT_NO AS productNo,
 	        p.PRODUCT_NAME AS productName,
 	        p.PRODUCT_PRICE AS productPrice,
-	        p.I_SUB_NO AS iSubNo
+	        p.I_SUB_NO AS iSubNo,
+	        pf.FILE_PATH AS filePath,
+	        pf.FILE_NAME AS fileName
 	    FROM PRODUCT p
 	    JOIN WISH w
 	        ON p.PRODUCT_NO = w.PRODUCT_NO
+	    LEFT JOIN PRODUCT_FILE pf
+	        ON p.PRODUCT_NO = pf.PRODUCT_NO
+	        AND pf.IS_MAIN = 'Y'
 	    WHERE p.PRODUCT_STATUS = 'Y'
 	    GROUP BY
 	        p.PRODUCT_NO,
 	        p.PRODUCT_NAME,
 	        p.PRODUCT_PRICE,
-	        p.I_SUB_NO
+	        p.I_SUB_NO,
+	        pf.FILE_PATH,
+	        pf.FILE_NAME
 	    ORDER BY COUNT(w.WISH_NO) DESC
 	    LIMIT 4
 	</select>
 	
+	<!-- 카테고리별 랜덤 업체 조회 -->
+	<select id="selectStoreByCategoryList" parameterType="hashmap" resultType="com.example.unipet.model.Main">
+	    SELECT
+	        s.STORE_NO AS storeNo,
+	        s.STORE_NAME AS storeName,
+	        s.S_CATEGORY AS sCategory,
+	        s.S_ADDR AS sAddr,
+	        c.KOR AS sCategoryName
+	    FROM STORE s
+	    LEFT JOIN CODE c
+	        ON s.S_CATEGORY = c.VALUE
+	       AND c.TYPE = 'S_CATEGORY'
+	    WHERE s.S_STATUS != 'EXT'
+	      AND s.S_CATEGORY = #{category}
+	    ORDER BY RAND()
+	    LIMIT 4
+	</select>
+	
+	<!-- 상품 카테고리 조회 -->
+	<select id="selectAnimalMainCategoryList" resultType="com.example.unipet.model.Main">
+	    SELECT
+	        A_MAIN_NO AS aMainNo,
+	        A_MAIN_TYPE AS aMainType
+	    FROM PC_ANIMAL_MAIN
+	    ORDER BY A_MAIN_NO ASC
+	</select>
+	
+	<!-- 카테고리별 랜덤 상품 조회 -->
+	<select id="selectProductByCategoryList" parameterType="hashmap" resultType="com.example.unipet.model.Main">
+	    SELECT
+	        p.PRODUCT_NO AS productNo,
+	        p.PRODUCT_NAME AS productName,
+	        p.PRODUCT_PRICE AS productPrice,
+	        pam.A_MAIN_NO AS aMainNo,
+	        pam.A_MAIN_TYPE AS aMainType
+	    FROM PRODUCT p
+	    LEFT JOIN PC_ANIMAL_SUB pas
+	        ON pas.A_SUB_NO = p.A_SUB_NO
+	    LEFT JOIN PC_ANIMAL_MAIN pam
+	        ON pam.A_MAIN_NO = pas.A_MAIN_NO
+	    WHERE pam.A_MAIN_NO = #{aMainNo}
+	      AND p.PRODUCT_STATUS = 'Y'
+	    ORDER BY RAND()
+	    LIMIT 4
+	</select>
+	
+	<!-- 통합검색 업체 -->
+	<select id="selectSearchStoreList" parameterType="hashmap" resultType="com.example.unipet.model.Main">
+		SELECT 
+			STORE_NO AS storeNo,
+			STORE_NAME AS storeName,
+			S_ADDR AS sAddr,
+			S_CATEGORY AS sCategory
+		FROM STORE
+		WHERE S_STATUS != 'EXT'
+		  AND S_CATEGORY = #{sCategory}
+		  AND (
+				STORE_NAME LIKE CONCAT('%', #{keyword}, '%')
+				OR S_ADDR LIKE CONCAT('%', #{keyword}, '%')
+			  )
+		ORDER BY STORE_NAME ASC
+		LIMIT 4
+	</select>
+	
+	<!-- 업체 전체 개수 조회 -->
+	<select id="selectSearchStoreCount" parameterType="hashmap" resultType="int">
+		SELECT COUNT(*)
+		FROM STORE
+		WHERE S_STATUS != 'EXT'
+		  AND S_CATEGORY = #{sCategory}
+		  AND (
+				STORE_NAME LIKE CONCAT('%', #{keyword}, '%')
+				OR S_ADDR LIKE CONCAT('%', #{keyword}, '%')
+			  )
+	</select>
+
+	<!-- 통합검색 상품 -->
+	<select id="selectSearchProductList" parameterType="hashmap" resultType="com.example.unipet.model.Main">
+		SELECT 
+			P.PRODUCT_NO AS productNo,
+			P.PRODUCT_NAME AS productName,
+			P.BRAND AS brand,
+			PAM.A_MAIN_TYPE AS aMainType,
+			PAS.A_SUB_TYPE AS aSubType,
+			PIS.I_SUB_TYPE AS iSubType
+		FROM PRODUCT P
+		LEFT JOIN PC_ITEM_SUB PIS ON PIS.I_SUB_NO = P.I_SUB_NO
+		LEFT JOIN PC_ANIMAL_SUB PAS ON PAS.A_SUB_NO = P.A_SUB_NO
+		LEFT JOIN PC_ANIMAL_MAIN PAM ON PAM.A_MAIN_NO = PAS.A_MAIN_NO
+		WHERE (
+			P.PRODUCT_NAME LIKE CONCAT('%', #{keyword}, '%')
+			OR P.BRAND LIKE CONCAT('%', #{keyword}, '%')
+			OR PAM.A_MAIN_TYPE LIKE CONCAT('%', #{keyword}, '%')
+			OR PAS.A_SUB_TYPE LIKE CONCAT('%', #{keyword}, '%')
+			OR PIS.I_SUB_TYPE LIKE CONCAT('%', #{keyword}, '%')
+		)
+		ORDER BY P.PRODUCT_NO DESC
+		LIMIT 4
+	</select>
+	
+	<!-- 상품 개수 -->
+	<select id="selectSearchProductCount" parameterType="hashmap" resultType="int">
+		SELECT COUNT(*)
+		FROM PRODUCT P
+		LEFT JOIN PC_ITEM_SUB PIS ON PIS.I_SUB_NO = P.I_SUB_NO
+		LEFT JOIN PC_ANIMAL_SUB PAS ON PAS.A_SUB_NO = P.A_SUB_NO
+		LEFT JOIN PC_ANIMAL_MAIN PAM ON PAM.A_MAIN_NO = PAS.A_MAIN_NO
+		WHERE (
+			P.PRODUCT_NAME LIKE CONCAT('%', #{keyword}, '%')
+			OR P.BRAND LIKE CONCAT('%', #{keyword}, '%')
+			OR PAM.A_MAIN_TYPE LIKE CONCAT('%', #{keyword}, '%')
+			OR PAS.A_SUB_TYPE LIKE CONCAT('%', #{keyword}, '%')
+			OR PIS.I_SUB_TYPE LIKE CONCAT('%', #{keyword}, '%')
+		)
+	</select>
+	
+	<!-- 통합검색 커뮤니티 -->
+	<select id="selectSearchBoardList" parameterType="hashmap" resultType="com.example.unipet.model.Main">
+		SELECT 
+			B.BOARD_NO AS boardNo,
+			B.TITLE AS title,
+			B.B_CONTENT AS bContent,
+			BTS.B_MAIN_NO AS bMainNo
+		FROM BOARD B
+		LEFT JOIN BOARD_TYPE_SUB BTS ON B.B_SUB_NO = BTS.B_SUB_NO
+		WHERE BTS.B_MAIN_NO = #{bMainNo}
+		  AND (
+			B.TITLE LIKE CONCAT('%', #{keyword}, '%')
+			OR B.B_CONTENT LIKE CONCAT('%', #{keyword}, '%')
+		  )
+		ORDER BY B.BOARD_NO DESC
+		LIMIT 4
+	</select>
+	
+	<!-- 커뮤니티 개수 조회 -->
+	<select id="selectSearchBoardCount" parameterType="hashmap" resultType="int">
+		SELECT COUNT(*)
+		FROM BOARD B
+		LEFT JOIN BOARD_TYPE_SUB BTS ON B.B_SUB_NO = BTS.B_SUB_NO
+		WHERE BTS.B_MAIN_NO = #{bMainNo}
+		  AND (
+			B.TITLE LIKE CONCAT('%', #{keyword}, '%')
+			OR B.B_CONTENT LIKE CONCAT('%', #{keyword}, '%')
+		  )
+	</select>
 </mapper>

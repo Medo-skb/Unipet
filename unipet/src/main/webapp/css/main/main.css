@@ -466,3 +466,50 @@
     line-height: 1.5;
     word-break: keep-all;
 }
+/* 
+.store-card-list,
+.product-card-list,
+.recommend-card-list {
+    min-height: 50px;
+} */
+
+/* ============================= */
+/* 카테고리 탭 */
+/* ============================= */
+.category-tab-wrap {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+}
+
+.category-tab-btn {
+    min-width: 90px;
+    height: 42px;
+    padding: 0 18px;
+    border: 1px solid #e5e5e5;
+    border-radius: 999px;
+    background-color: #ffffff;
+    color: #444;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.category-tab-btn:hover {
+    border-color: #ff6b6b;
+    color: #ff6b6b;
+}
+
+.category-tab-btn.active {
+    background-color: #ff6b6b;
+    border-color: #ff6b6b;
+    color: #ffffff;
+}
+
+.empty-text {
+    margin-top: 20px;
+    font-size: 15px;
+    color: #888;
+}

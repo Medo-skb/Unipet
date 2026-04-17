@@ -22,8 +22,8 @@
             </div>
 
             <div class="header-center">
-                <form class="search-form">
-                    <input type="text" class="search-input" placeholder="검색어를 입력하세요">
+                <form class="search-form" action="${pageContext.request.contextPath}/main/search.do" method="get">
+                    <input type="text" name="keyword" class="search-input" placeholder="검색어를 입력하세요">
                     <button type="submit" class="search-btn" aria-label="검색">
                         <svg viewBox="0 0 24 24" aria-hidden="true">
                             <circle cx="11" cy="11" r="7"></circle>
