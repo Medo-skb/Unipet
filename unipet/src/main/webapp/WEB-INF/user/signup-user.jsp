@@ -274,7 +274,7 @@
                     }
 
                     $.ajax({
-                        url: "/check.dox",
+                        url: "/user/check.dox",
                         dataType: "json",
                         type: "POST",
                         data: {
@@ -300,7 +300,7 @@
                     }
 
                     $.ajax({
-                        url: "/sendSms.dox",
+                        url: "user/sendSms.dox",
                         dataType: "json",
                         type: "POST",
                         data: {
@@ -327,7 +327,7 @@
                     }
 
                     $.ajax({
-                        url: "/verifySms.dox",
+                        url: "user/verifySms.dox",
                         dataType: "json",
                         type: "POST",
                         data: {
@@ -428,7 +428,7 @@
                     };
 
                     $.ajax({
-                        url: "/signupUser.dox",
+                        url: "user/signupUser.dox",
                         dataType: "json",
                         type: "POST",
                         data: param,
