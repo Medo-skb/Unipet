@@ -18,5 +18,17 @@ public class Store {
 	private String menuName;
 	private int menuPrice;
 	private String mStatus;
+	private String fileNo;
+	private String filePath;
+	private String fileName;
+	private String originName;
+	private String isMain;
+	private String slotNo;
+	private String slotDate;
+	private String slotTime;
+	private String capacity;
+	private String curCount;
+	private String isAvailable;
+	
 	
 }

@@ -1,0 +1,179 @@
+#container{
+    width: 600px;
+    border: 1px solid black;
+    margin: 0px auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* 날짜/시간 영역 전체 */
+#datetime-area {
+    width: 100%;
+    max-width: 800px; /* 원하는 최대 너비 */
+    margin: 0 auto;
+}
+
+/* 1. 전체 영역 레이아웃 (Grid 5:5 비율) */
+.cal-slot {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    max-width: 650px;
+    margin: 10px 0;
+    /* 높이를 내부 콘텐츠에 맞춤 */
+    align-items: stretch; 
+}
+
+/* 2. 캘린더 박스 */
+#calendar-area {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 3. 캘린더 헤더 (년/월) */
+.calendar-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    gap: 15px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    border-bottom: 1px solid #eee;
+}
+
+.calendar-header button {
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 0.7rem;
+}
+
+/* 4. ★ 핵심: 달력 그리드 강제 고정 ★ */
+.calendar-main {
+    display: grid !important;
+    grid-template-columns: repeat(7, 1fr) !important;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* 요일 (일~토) */
+.day-header {
+    text-align: center;
+    padding: 8px 0;
+    font-size: 0.75rem;
+    color: #999;
+    background-color: #fafafa;
+    /* 테두리가 있다면 너비에 포함되도록 설정 */
+    box-sizing: border-box; 
+    border-bottom: 1px solid #eee;
+}
+
+/* ★ 날짜 칸 (크기 축소 및 가로 정렬 고정) ★ */
+.day-cell {
+    aspect-ratio: 1 / 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 0.8rem;
+    box-sizing: border-box; /* 패딩과 테두리가 너비를 먹지 않게 함 */
+    border-bottom: 1px solid #f9f9f9;
+    border-right: 1px solid #f9f9f9;
+}
+
+/* 7번째 날짜(토요일)마다 오른쪽 테두리 제거 */
+.day-header:nth-child(7n),
+.day-cell:nth-child(7n) {
+    border-right: none;
+}
+
+/* 선택된 날짜 (동그란 파란색) */
+.day-cell.selected span {
+    background-color: #3b82f6;
+    color: #fff;
+    width: 28px;  /* 크기 적절히 조절 */
+    height: 28px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    font-weight: bold;
+}
+
+.day-cell.empty {
+    cursor: default;
+    background: none !important;
+}
+
+/* 오늘 날짜 */
+.day-cell.today { color: #3b82f6; font-weight: bold; }
+
+/* 5. 오른쪽 시간 슬롯 (2열 정렬) */
+#time-slot-area {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    
+    /* 달력 높이에 맞추기 위한 설정 */
+    height: 320px; /* 달력의 평균 높이에 맞춰 조정 (필요시 값 변경) */
+    overflow-y: auto; /* 세로 스크롤 생성 */
+    padding-right: 5px; /* 스크롤바와 버튼 사이 여백 */
+}
+
+#time-slot-area::-webkit-scrollbar {
+    width: 6px;
+}
+#time-slot-area::-webkit-scrollbar-thumb {
+    background-color: #e5e7eb;
+    border-radius: 10px;
+}
+#time-slot-area::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+.time-btn {
+    box-shadow: none !important;
+    border: 1px solid #3b82f6;
+    background-color: #fff;
+    color: #3b82f6;
+    padding: 10px 0; /* 슬롯이 많으므로 패딩을 살짝 줄임 */
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+}
+
+/* 마우스를 올렸을 때 (Hover) */
+.time-btn:hover:not(:disabled) {
+    background-color: #eff6ff; /* 아주 연한 파란색 배경 */
+}
+
+/* ★ 클릭했을 때 (Active) - 들어가는 느낌 대신 색상 반전 ★ */
+.time-btn:active:not(:disabled) {
+    background-color: #3b82f6;
+    color: #fff;
+    transform: none; /* 버튼이 눌리는 물리적 움직임 제거 */
+}
+
+/* 선택된 상태 스타일 (이미 선택된 버튼일 경우) */
+.time-btn.selected {
+    background-color: #3b82f6;
+    color: #fff;
+}
+
+/* 예약 불가(disabled) 상태 */
+.time-btn:disabled {
+    background-color: #f3f4f6;
+    border-color: #d1d5db;
+    color: #9ca3af;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+

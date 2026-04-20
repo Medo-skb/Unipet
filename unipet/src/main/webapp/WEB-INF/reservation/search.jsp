@@ -68,7 +68,7 @@
                                     </h3>
                                 </div>
                                 
-                                <button class="detail-btn-sm" @click.stop="fnGoDetail(item.storeNo)">
+                                <button class="detail-btn-sm" @click.stop="fnGoDetail(item)">
                                     상세보기
                                 </button>
                             </div>
@@ -307,11 +307,38 @@
                 this.infowindow.open(this.map, targetMarker);
             },
 
-            fnGoDetail(storeNo) {
-                if (storeNo) {
-                    location.href = "/reservation/store-detail.do?storeNo=" + storeNo;
-                } else {
-                    alert("업체 정보를 불러올 수 없습니다.");
+            fnGoDetail(item) {
+                const self = this;
+                console.log("선택된 업체 데이터:", item);
+
+                // 1. 데이터가 없는 경우 예외 처리
+                if (!item) {
+                    alert("업체 정보를 확인할 수 없습니다.");
+                    return;
+                }
+
+                // 2. 회원사(GEN) 처리: 기존에 잘 작동하던 .do 페이지로 이동
+                if (item.sStatus === 'GEN') {
+                    if (item.storeNo) {
+                        location.href = "/reservation/store-detail.do?storeNo=" + item.storeNo;
+                    } else {
+                        alert("회원사 번호가 없습니다.");
+                    }
+                } 
+                // 3. 비회원사 처리: 네이버 지도 검색결과로 이동
+                else {
+                    // 주소에서 '부평구' 같은 구 단위 추출 (안전한 방식)
+                    let addrPart = "";
+                    if (item.sAddr) {
+                        const addrArray = item.sAddr.split(' ');
+                        addrPart = addrArray.length > 1 ? addrArray[1] : addrArray[0];
+                    }
+                    
+                    const keyword = addrPart + " " + item.storeName;
+                    // 네이버 지도 검색 URL (가장 범용적인 query 방식 사용)
+                    const naverMapUrl = "https://map.naver.com/v5/search/" + encodeURIComponent(keyword.trim());
+                    
+                    window.open(naverMapUrl, '_blank');
                 }
             }
         }, 

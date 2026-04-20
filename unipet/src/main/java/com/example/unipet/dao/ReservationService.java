@@ -61,10 +61,44 @@ public class ReservationService {
 		return resultMap;
 	}
 	
-	public HashMap<String, Object> getStoreMenu(HashMap<String, Object> map){
+	public HashMap<String, Object> getStoreMenuList(HashMap<String, Object> map){
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 		try {
-			List<Store> list = reservationMapper.selectStoreMenu(map);
+			List<Store> list = reservationMapper.selectStoreMenuList(map);
+			
+			resultMap.put("list", list);
+			resultMap.put("result", "success");
+			resultMap.put("message", Message.MSG_ADD);
+		} catch (Exception e) {
+			// TODO: handle exception
+			System.out.println(e.getMessage());
+			resultMap.put("result", "fail");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
+		}
+		return resultMap;
+	}
+	
+	public HashMap<String, Object> getStoreImgList(HashMap<String, Object> map){
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+		try {
+			List<Store> list = reservationMapper.selectStoreImgList(map);
+			
+			resultMap.put("list", list);
+			resultMap.put("result", "success");
+			resultMap.put("message", Message.MSG_ADD);
+		} catch (Exception e) {
+			// TODO: handle exception
+			System.out.println(e.getMessage());
+			resultMap.put("result", "fail");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
+		}
+		return resultMap;
+	}
+	
+	public HashMap<String, Object> getStoreSlotList(HashMap<String, Object> map){
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+		try {
+			List<Store> list = reservationMapper.selectStoreSlotList(map);
 			
 			resultMap.put("list", list);
 			resultMap.put("result", "success");

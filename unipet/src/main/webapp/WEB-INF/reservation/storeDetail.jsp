@@ -22,14 +22,17 @@
                 <div>{{ storeInfo.storeName }}</div>
                 <div id="top-sub">
                     <div class="s-type">{{ storeInfo.storeType }}</div>
-                    <div class="button">예약하기</div>
+                    <div class="button" @click="fnRsv(storeInfo.storeNo)">예약하기</div>
                 </div>
                 
             </div>
             <div id="contents">
                 <div class="img-area">
-                    <div class="img">img1</div>
-                    <div class="img">img2</div>
+                    <div v-for="file in storeImgList" :key="file.fileNo" class="image-item" :data-fno="file.fileNo">
+                        <img :src="file.filePath + file.fileName" 
+                            :alt="file.originName" 
+                            :class="{ 'main-img': file.isMain === 'Y' }">
+                    </div>
                 </div>
                 <div class="intro">
                     <div>소개</div>
@@ -77,7 +80,8 @@
             return {
                 storeNo: '${map.storeNo}', 
                 storeInfo: {}, 
-                storeMenuList: []
+                storeMenuList: [],
+                storeImgList:[]
             };
         },
         methods: {
@@ -88,8 +92,10 @@
                     type: "POST",
                     data: { storeNo: self.storeNo }, 
                     success: function(data) {
+                        console.log(data);
                         self.storeInfo = data.info;
                         self.storeMenuList = data.menuList;
+                        self.storeImgList = data.imgList;
                         
                         // Vue가 데이터를 바인딩하고 DOM을 준비할 시간을 주기 위해 setTimeout 사용
                         setTimeout(() => {
@@ -135,7 +141,17 @@
                 
                 // 마커 위에 말풍선 열기
                 infowindow.open(map, marker);
-            }
+            },
+
+            fnRsv(storeNo) {
+                if (!storeNo) {
+                    alert("업체 정보가 로드되지 않았습니다.");
+                    return;
+                }
+                // URL 파라미터로 storeNo를 담아서 이동
+                // contextPath가 필요한 경우 앞에 붙여주세요 (예: /myProject/reservation/...)
+                location.href = "/reservation/store-reservation.do?storeNo=" + storeNo;
+            },
         }, 
         mounted() {
             if (this.storeNo) {
