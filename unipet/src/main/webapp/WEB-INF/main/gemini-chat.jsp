@@ -33,8 +33,8 @@
                 {{ buttonText }}
             </button>
         </div>
-        <div class="chat-input">
-            <textarea
+        <div class="chat-input" >
+            <textarea spellcheck="false" autocorrect="off" autocomplete="off"
                 v-model="userInput"
                 @keydown.enter.exact.prevent="sendMessage()"
                 placeholder="메시지를 입력하세요...">
@@ -60,14 +60,15 @@
                 ],
                 isLoading: false,
                 quickButtons: [
+                    "UNIPET",
                     "예약금 정보",
                     "환불 규정",
-                    "이용 안내"
+                    
                 ],
                 faqMap: {
-                    "예약금 정보": "예약금은 서비스 예약 확정을 위해 미리 결제하는 금액입니다. 예약 취소 시 환불 여부는 업체 정책에 따라 달라질 수 있습니다.",
+                    "UNIPET": `UNIPET에서 병원, 미용, 위탁기관 예약 서비스를 한번에 간편하게 이용해보세요! 또한 쇼핑을 통해 다양한 반려동물 상품도 만나보실 수 있습니다.`,
+                    "예약금 정보": "예약금은 서비스 예약 확정을 위해 미리 결제하는 금액입니다. 예약금은 총 금액의 10% 입니다.",
                     "환불 규정": "환불 규정은 예약한 업체의 정책에 따라 다르며, 예약 취소 시점에 따라 환불 금액이 달라질 수 있습니다.",
-                    "이용 안내": "원하는 업체를 선택한 뒤 예약 가능한 날짜와 시간을 확인하고 예약을 진행하면 됩니다."
                 },
                 
             };

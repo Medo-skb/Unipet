@@ -22,7 +22,7 @@ public class MainController {
 
 	@Autowired
     MainService mainService;
-    
+
 	// 메인페이지
     @RequestMapping("/main.do")
 	public String main(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception {
@@ -46,20 +46,25 @@ public class MainController {
     
     // 업체 전체 검색
     @RequestMapping("/main/search/store.do")
-    public String mainSearchStore(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception {
-    	return "main/main-search-store";
+    public String searchStore(@RequestParam HashMap<String, Object> map, Model model) {
+        model.addAttribute("keyword", map.get("keyword"));
+        model.addAttribute("sCategory", map.get("sCategory"));
+        return "main/main-search-store";
     }
     
     // 상품 전체 검색
     @RequestMapping("/main/search/product.do")
-    public String mainSearchProduct(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception {
-    	return "main/main-search-product";
+    public String mainSearchProduct(Model model, @RequestParam HashMap<String, Object> map) {
+        model.addAttribute("keyword", map.get("keyword"));
+        return "/main/main-search-product";
     }
     
     // 커뮤니티 전체 검색
     @RequestMapping("/main/search/board.do")
-    public String mainSearchBoard(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception {
-    	return "main/main-search-board";
+    public String mainSearchBoard(Model model, @RequestParam HashMap<String, Object> map) {
+        model.addAttribute("keyword", map.get("keyword"));
+        model.addAttribute("bMainNo", map.get("bMainNo"));
+        return "/main/main-search-board";
     }
     
     // 챗봇

@@ -1,0 +1,257 @@
+@charset "UTF-8";
+
+/* 전체 페이지 */
+.search-page {
+    background-color: #f8f9fb;
+    min-height: 100vh;
+    padding: 40px 20px 80px;
+    box-sizing: border-box;
+}
+
+.search-container {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* 상단 제목 영역 */
+.search-page-title-box {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 28px 32px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    margin-bottom: 30px;
+}
+
+.search-page-title {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+    color: #222;
+}
+
+.search-page-keyword {
+    margin: 10px 0 0;
+    font-size: 15px;
+    color: #666;
+}
+
+.search-page-keyword span {
+    font-weight: 700;
+    color: #222;
+}
+
+/* 큰 섹션 */
+.search-section {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 28px 32px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    margin-bottom: 24px;
+}
+
+.search-section-title {
+    margin: 0 0 22px;
+    font-size: 24px;
+    font-weight: 700;
+    color: #222;
+    padding-bottom: 12px;
+}
+
+/* 하위 구역 */
+.search-subsection {
+    margin-bottom: 28px;
+}
+
+.search-subsection:last-child {
+    margin-bottom: 0;
+}
+
+.search-subsection-title {
+    margin: 0 0 16px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #333;
+}
+
+/* 리스트 */
+.search-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* 기본 카드 */
+.search-card {
+    border: 1px solid #e8ebf0;
+    border-radius: 14px;
+    padding: 18px 20px;
+    background: #fcfcfd;
+    transition: all 0.2s ease;
+}
+
+.search-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
+    border-color: #dcdfe5;
+}
+
+/* 업체/상품 카드 확장형 */
+.search-card.search-card-row {
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+}
+
+.search-thumb-wrap {
+    width: 120px;
+    min-width: 120px;
+    height: 120px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #f1f3f5;
+    border: 1px solid #eceff3;
+    flex-shrink: 0;
+}
+
+.search-thumb {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #f1f3f5, #e5e9ee);
+}
+
+.search-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.search-card-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #222;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.search-card-price {
+    font-size: 24px;
+    font-weight: 800;
+    color: #e53935;
+    margin-bottom: 8px;
+    line-height: 1.2;
+}
+
+.search-card-rating {
+    font-size: 14px;
+    color: #2563eb;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.search-card-menu {
+    font-size: 15px;
+    color: #444;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.search-card-desc,
+.search-card-brand,
+.search-card-meta {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.6;
+}
+
+.search-card-brand {
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #555;
+}
+
+.search-card-meta {
+    color: #888;
+}
+
+/* 게시글 내용 */
+.board-content {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* 결과 없음 */
+.search-empty {
+    border: 1px dashed #d9dde3;
+    border-radius: 12px;
+    padding: 20px;
+    background: #fafbfc;
+    font-size: 14px;
+    color: #888;
+    text-align: center;
+}
+
+/* 더보기 */
+.search-more-wrap {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+.search-more-btn {
+    display: inline-block;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background-color: #f2f4f7;
+    color: #333;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.search-more-btn:hover {
+    background-color: #e8ecf2;
+}
+
+@media (max-width: 768px) {
+    .search-page {
+        padding: 24px 14px 60px;
+    }
+
+    .search-page-title-box,
+    .search-section {
+        padding: 22px 18px;
+        border-radius: 14px;
+    }
+
+    .search-page-title {
+        font-size: 24px;
+    }
+
+    .search-section-title {
+        font-size: 21px;
+    }
+
+    .search-subsection-title {
+        font-size: 17px;
+    }
+
+    .search-card.search-card-row {
+        gap: 14px;
+    }
+
+    .search-thumb-wrap {
+        width: 90px;
+        min-width: 90px;
+        height: 90px;
+    }
+
+    .search-card-title {
+        font-size: 16px;
+    }
+
+    .search-card-price {
+        font-size: 20px;
+    }
+}
