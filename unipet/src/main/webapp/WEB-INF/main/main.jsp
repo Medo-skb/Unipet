@@ -29,7 +29,7 @@
             <div class="banner-slider" id="bannerSlider">
 
                 <div class="banner-slide active">
-                    <img src="${pageContext.request.contextPath}/img/main/banner_orange.png" class="banner-image">
+                    <img src="${pageContext.request.contextPath}/img/main/banner_1.png" class="banner-image">
                 </div>
 
                 <div class="banner-slide">

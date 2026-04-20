@@ -23,7 +23,8 @@
 
             <div class="header-center">
                 <form class="search-form" action="${pageContext.request.contextPath}/main/search.do" method="get">
-                    <input type="text" name="keyword" class="search-input" placeholder="검색어를 입력하세요">
+                    <input spellcheck="false" autocorrect="off" autocomplete="off"
+                    type="text" name="keyword" class="search-input" placeholder="검색어를 입력하세요">
                     <button type="submit" class="search-btn" aria-label="검색">
                         <svg viewBox="0 0 24 24" aria-hidden="true">
                             <circle cx="11" cy="11" r="7"></circle>
@@ -35,13 +36,13 @@
 
             <div class="header-right">
                 <nav class="main-nav">
-                    <a href="#" class="nav-link">예약</a>
-                    <a href="#" class="nav-link">쇼핑</a>
+                    <a href="${pageContext.request.contextPath}/reservation/search.do" class="nav-link">예약</a>
+                    <a href="${pageContext.request.contextPath}/product.do" class="nav-link">쇼핑</a>
                     <a href="#" class="nav-link">커뮤니티</a>
                     <a href="#" class="nav-link">관광지</a>
                 </nav>
 
-                <a href="#" class="user-link">
+                <a href="${pageContext.request.contextPath}/user/login.do" class="user-link">
                     <img src="${pageContext.request.contextPath}/img/main/login.png"
                         alt="로그인" 
                         class="user-icon">

@@ -1,0 +1,10 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.example.unipet.mapper.AdminMapper">
+	<!-- 여러개 검색 -->
+	<select id="selectAdminBiz" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+		
+	</select>
+	
+</mapper>

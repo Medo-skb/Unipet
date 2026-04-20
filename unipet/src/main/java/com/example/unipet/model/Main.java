@@ -12,7 +12,9 @@ public class Main {
     String sAddr;
     String sCategoryName;
     String popularMenuName;
-
+    String menuName1;
+    Integer menuPrice1;
+    
     // 상품 정보
 	int productNo;
 	String productName;
@@ -23,6 +25,9 @@ public class Main {
 	String aMainType;
 	String brand;
 	String aSubType;
+	double rating;
+	int reviewCount;
+	
 	
 	// 커뮤니티
 	int boardNo;

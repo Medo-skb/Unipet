@@ -120,21 +120,53 @@
 	</select>
 	
 	<!-- 통합검색 업체 -->
-	<select id="selectSearchStoreList" parameterType="hashmap" resultType="com.example.unipet.model.Main">
+	<select id="selectSearchStoreList" parameterType="map" resultType="com.example.unipet.model.Main">
 		SELECT 
-			STORE_NO AS storeNo,
-			STORE_NAME AS storeName,
-			S_ADDR AS sAddr,
-			S_CATEGORY AS sCategory
-		FROM STORE
-		WHERE S_STATUS != 'EXT'
-		  AND S_CATEGORY = #{sCategory}
+		    S.STORE_NO AS storeNo,
+		    S.STORE_NAME AS storeName,
+		    S.S_ADDR AS sAddr,
+		    S.S_CATEGORY AS sCategory,
+		
+		    M.MENU_NAME AS menuName1,
+		    M.MENU_PRICE AS menuPrice1
+		
+		FROM STORE S
+		LEFT JOIN (
+		    SELECT
+		        X.STORE_NO,
+		        X.MENU_NAME,
+		        X.MENU_PRICE,
+		        ROW_NUMBER() OVER (
+		            PARTITION BY X.STORE_NO
+		            ORDER BY X.RESERVE_COUNT DESC, X.MENU_NO ASC
+		        ) AS RN
+		    FROM (
+		        SELECT
+		            SM.STORE_NO,
+		            SM.MENU_NO,
+		            SM.MENU_NAME,
+		            SM.MENU_PRICE,
+		            IFNULL(RC.RESERVE_COUNT, 0) AS RESERVE_COUNT
+		        FROM STORE_MENU SM
+		        LEFT JOIN (
+		            SELECT
+		                R.MENU_NO,
+		                COUNT(*) AS RESERVE_COUNT
+		            FROM reservation R
+		            GROUP BY R.MENU_NO
+		        ) RC
+		            ON SM.MENU_NO = RC.MENU_NO
+		    ) X
+		) M
+		    ON S.STORE_NO = M.STORE_NO
+		   AND M.RN = 1
+		WHERE S.S_STATUS != 'EXT'
+		  AND S.S_CATEGORY = #{sCategory}
 		  AND (
-				STORE_NAME LIKE CONCAT('%', #{keyword}, '%')
-				OR S_ADDR LIKE CONCAT('%', #{keyword}, '%')
-			  )
-		ORDER BY STORE_NAME ASC
-		LIMIT 4
+		        S.STORE_NAME LIKE CONCAT('%', #{keyword}, '%')
+		        OR S.S_ADDR LIKE CONCAT('%', #{keyword}, '%')
+		      )
+		ORDER BY S.STORE_NAME ASC
 	</select>
 	
 	<!-- 업체 전체 개수 조회 -->
@@ -152,25 +184,40 @@
 	<!-- 통합검색 상품 -->
 	<select id="selectSearchProductList" parameterType="hashmap" resultType="com.example.unipet.model.Main">
 		SELECT 
-			P.PRODUCT_NO AS productNo,
-			P.PRODUCT_NAME AS productName,
-			P.BRAND AS brand,
-			PAM.A_MAIN_TYPE AS aMainType,
-			PAS.A_SUB_TYPE AS aSubType,
-			PIS.I_SUB_TYPE AS iSubType
+		    P.PRODUCT_NO AS productNo,
+		    P.PRODUCT_NAME AS productName,
+		    P.PRODUCT_PRICE AS productPrice,
+		    P.BRAND AS brand,
+		    PAM.A_MAIN_TYPE AS aMainType,
+		    PAS.A_SUB_TYPE AS aSubType,
+		    PIS.I_SUB_TYPE AS iSubType,
+		    IFNULL(RV.RATING, 0) AS rating,
+		    IFNULL(RV.REVIEW_COUNT, 0) AS reviewCount
 		FROM PRODUCT P
-		LEFT JOIN PC_ITEM_SUB PIS ON PIS.I_SUB_NO = P.I_SUB_NO
-		LEFT JOIN PC_ANIMAL_SUB PAS ON PAS.A_SUB_NO = P.A_SUB_NO
-		LEFT JOIN PC_ANIMAL_MAIN PAM ON PAM.A_MAIN_NO = PAS.A_MAIN_NO
-		WHERE (
-			P.PRODUCT_NAME LIKE CONCAT('%', #{keyword}, '%')
-			OR P.BRAND LIKE CONCAT('%', #{keyword}, '%')
-			OR PAM.A_MAIN_TYPE LIKE CONCAT('%', #{keyword}, '%')
-			OR PAS.A_SUB_TYPE LIKE CONCAT('%', #{keyword}, '%')
-			OR PIS.I_SUB_TYPE LIKE CONCAT('%', #{keyword}, '%')
-		)
+		LEFT JOIN PC_ITEM_SUB PIS
+		    ON PIS.I_SUB_NO = P.I_SUB_NO
+		LEFT JOIN PC_ANIMAL_SUB PAS
+		    ON PAS.A_SUB_NO = P.A_SUB_NO
+		LEFT JOIN PC_ANIMAL_MAIN PAM
+		    ON PAM.A_MAIN_NO = PAS.A_MAIN_NO
+		LEFT JOIN (
+		    SELECT
+		        R.PRODUCT_NO,
+		        ROUND(AVG(R.RATING), 1) AS RATING,
+		        COUNT(*) AS REVIEW_COUNT
+		    FROM REVIEW R
+		    GROUP BY R.PRODUCT_NO
+		) RV
+		    ON RV.PRODUCT_NO = P.PRODUCT_NO
+		WHERE P.PRODUCT_STATUS = 'Y'
+		  AND (
+		        P.PRODUCT_NAME LIKE CONCAT('%', #{keyword}, '%')
+		        OR P.BRAND LIKE CONCAT('%', #{keyword}, '%')
+		        OR PAM.A_MAIN_TYPE LIKE CONCAT('%', #{keyword}, '%')
+		        OR PAS.A_SUB_TYPE LIKE CONCAT('%', #{keyword}, '%')
+		        OR PIS.I_SUB_TYPE LIKE CONCAT('%', #{keyword}, '%')
+		      )
 		ORDER BY P.PRODUCT_NO DESC
-		LIMIT 4
 	</select>
 	
 	<!-- 상품 개수 -->
@@ -204,7 +251,6 @@
 			OR B.B_CONTENT LIKE CONCAT('%', #{keyword}, '%')
 		  )
 		ORDER BY B.BOARD_NO DESC
-		LIMIT 4
 	</select>
 	
 	<!-- 커뮤니티 개수 조회 -->
