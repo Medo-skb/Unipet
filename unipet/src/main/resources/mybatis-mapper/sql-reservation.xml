@@ -27,7 +27,7 @@
 		    AND S.STORE_NO = #{storeNo}
 	</select>
 	
-	<select id="selectStoreMenu" parameterType="hashmap" resultType="com.example.unipet.model.Store">
+	<select id="selectStoreMenuList" parameterType="hashmap" resultType="com.example.unipet.model.Store">
 	    SELECT S.STORE_NO, STORE_NAME, MENU_NAME, MENU_PRICE, M_STATUS 
 	    FROM STORE S
 	    LEFT JOIN STORE_MENU M ON S.STORE_NO = M.STORE_NO
@@ -36,6 +36,28 @@
 		    AND S.STORE_NO = #{storeNo}
 	</select>
 	
+	<select id="selectStoreImgList" parameterType="hashmap" resultType="com.example.unipet.model.Store">
+    SELECT 
+        STORE_NO, FILE_NO, FILE_PATH, FILE_NAME, ORIGIN_NAME, IS_MAIN
+    FROM 
+        STORE_FILE
+    WHERE 
+        STORE_NO = #{storeNo}
+    ORDER BY 
+        IS_MAIN DESC, FILE_NO ASC
+   </select>
+	
+	<select id="selectStoreSlotList" parameterType="hashmap" resultType="com.example.unipet.model.Store">
+    SELECT 
+        SLOT_NO, STORE_NO, SLOT_DATE, DATE_FORMAT(SLOT_TIME, '%H:%i') AS SLOT_TIME, 
+        CAPACITY, CUR_COUNT, IS_AVAILABLE
+    FROM 
+        RSV_SLOT
+    WHERE 
+        STORE_NO = #{storeNo}
+        AND SLOT_DATE = #{targetDate}  ORDER BY 
+        SLOT_TIME ASC
+</select>
 	
 	<!-- 한개 검색 -->
 	<select id="selectUser" parameterType="hashmap" resultType="com.example.unipet.model.Default">

@@ -14,7 +14,11 @@ public interface ReservationMapper {
 	// 여러개 리턴 -> selectXXXList
 	public List<Store> selectStoreList(HashMap<String, Object> map);
 	
-	public List<Store> selectStoreMenu(HashMap<String, Object> map);
+	public List<Store> selectStoreMenuList(HashMap<String, Object> map);
+	
+	public List<Store> selectStoreImgList(HashMap<String, Object> map);
+	
+	public List<Store> selectStoreSlotList(HashMap<String, Object> map);
 	
 	// 한개 리턴 -> selectXXX
 	public Store selectStoreInfo(HashMap<String, Object> map);

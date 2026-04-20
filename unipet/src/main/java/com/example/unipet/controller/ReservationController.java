@@ -45,22 +45,6 @@ public class ReservationController {
 		return "/reservation/storeDetail";
 	}
 	
-	
-//	@RequestMapping(value = "/reservation/store-detail.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
-//	@ResponseBody
-//	public String sDetail(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
-//		HashMap<String, Object> resultMap = new HashMap<String, Object>();
-//		resultMap = reservationService.getStoreInfo(map);
-//		
-//		return new Gson().toJson(resultMap); 
-//	}
-//	public String sMenu(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
-//		HashMap<String, Object> resultMap = new HashMap<String, Object>();
-//		resultMap = reservationService.getStoreMenu(map);
-//		
-//		return new Gson().toJson(resultMap); 
-//	}
-	
 	@RequestMapping(value = "/reservation/store-detail.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
 	public String sDetail(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
@@ -71,11 +55,34 @@ public class ReservationController {
 	    resultMap.put("info", storeInfo.get("info"));
 
 	    // 2. 메뉴 목록 (List 형태) 담기
-	    HashMap<String, Object> menuList = reservationService.getStoreMenu(map);
+	    HashMap<String, Object> menuList = reservationService.getStoreMenuList(map);
 	    resultMap.put("menuList", menuList.get("list"));
+	    
+	    HashMap<String, Object> imgList = reservationService.getStoreImgList(map);
+	    resultMap.put("imgList", imgList.get("list"));
 
 	    // Gson으로 변환하면 { "info": {...}, "menuList": [...] } 구조가 됩니다.
 	    return new Gson().toJson(resultMap); 
+	}
+	
+	@RequestMapping("/reservation/store-reservation.do")
+	public String reservation(HttpServletRequest request, Model model,  @RequestParam HashMap<String, Object> map) throws Exception{
+		request.setAttribute("map", map);
+		return "/reservation/reservation";
+	}
+	
+	@RequestMapping(value = "/reservation/store-reservation.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String rsv(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+//		resultMap = 서비스객체.함수(map);
+		
+		resultMap = reservationService.getStoreSlotList(map);
+		
+//		HashMap<String, Object> petList = reservationService.getPetList(map);
+//	    resultMap.put("petList", petList.get("list"));
+
+		return new Gson().toJson(resultMap); 
 	}
 	
 }
