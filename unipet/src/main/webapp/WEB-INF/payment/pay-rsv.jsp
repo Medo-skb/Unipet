@@ -139,7 +139,8 @@
                     payType: rsp.pay_method || "unknown", // 실패 시에는 값이 없을 수 있음
                     rsvNo: self.info.rsvNo,        
                     ordName: self.info.storeName + " 예약금", 
-                    totalPrice: self.deposit,   
+                    payFlg : "RSV",
+                    totalprice: self.deposit,   
                     tid: rsp.imp_uid || "N/A",    
                     payStatus: status              // ★ 여기서 PAY 또는 FAL 전송
                 };

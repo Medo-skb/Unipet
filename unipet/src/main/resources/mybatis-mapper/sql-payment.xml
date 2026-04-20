@@ -25,31 +25,39 @@
         INNER JOIN store s ON r.STORE_NO = s.STORE_NO
         INNER JOIN store_menu m ON r.MENU_NO = m.MENU_NO
         INNER JOIN users u ON r.USER_ID = u.USER_ID
-        WHERE r.RSV_NO = 11
+        WHERE r.RSV_NO = 11 <!-- 테스트용 하드코딩 -->
     </select>
     
     <select id="selectUser" parameterType="hashmap" resultType="com.example.unipet.model.Payment">
         SELECT 
             USER_ID,
             USER_NAME,
-            PHONE
+            PHONE,
+            email
 		FROM USERS 
         <!-- WHERE USER_ID = #{userId} -->
 		where USER_ID = 'test_user01'
     </select>
+	
+	<select id="selectSubStatus" parameterType="String" resultType="int">
+	    SELECT COUNT(*)
+	    FROM subscription
+	    WHERE USER_ID = #{userId}
+	      AND sub_STATUS = 'Y'
+	</select>
     
 	<insert id="insertPayment" parameterType="hashmap">
 	    INSERT INTO payment_master (
-	        USER_ID,        /* 유저 ID */
-	        METHOD_NO,      /* 결제수단 번호 */
-	        RSV_NO,         /* 예약 번호 */
-	        ORD_NO,         /* 쇼핑몰 번호 */
-	        SUB_NO,         /* 구독 번호 */
-	        ORD_NAME,       /* 주문명 */
-	        TOTALPRICE,     /* 총 결제금액 */
-	        TID,            /* 외부 거래번호 */
-	        PAY_STATUS,     /* 상태 */
-	        PAY_DATE        /* 실결제 시각 */
+	        USER_ID,      
+	        METHOD_NO,  
+	        RSV_NO,   
+	        ORD_NO,        
+	        SUB_NO,    
+	        ORD_NAME,      
+	        TOTALPRICE,   
+	        TID,        
+	        PAY_STATUS,  
+	        PAY_DATE       
 	    ) VALUES (
 	        #{userId}, 
 	        #{methodNo}, 
@@ -63,46 +71,48 @@
 	        NOW()
 	    )
 	</insert>
-	
-	<insert id="insertPaymentMethod" parameterType="hashmap" useGeneratedKeys="true" keyProperty="methodNo">
-        INSERT INTO PAYMENT_METHOD (
-            USER_ID, 
-            PM_NAME, 
-            BILINGKEY, 
-            IS_DEFAULT, 
-            CDATE
-        ) VALUES (
-            #{userId}, 
-            #{pmName}, 
-            #{customerUid}, 
-            'Y', 
-            NOW()
-        )
-    </insert>
     
-    <insert id="insertSub" parameterType="hashmap">
-        INSERT INTO SUBSCRIPTION (
-            USER_ID, 
-            METHOD_NO, 
-            START_DATE, 
-            EXPIRE_DATE, 
-            STATUS
-        ) VALUES (
-            #{userId}, 
-            #{methodNo}, 
-            NOW(), 
-            DATE_ADD(NOW(), INTERVAL 1 MONTH), 
-            'ACTIVE'
-        )
-    </insert>
+    <insert id="insertSub" parameterType="hashmap" useGeneratedKeys="true" keyProperty="subNo">
+	    INSERT INTO subscription (
+	        USER_ID, 
+	        METHOD_NO, 
+	        S_DATE, 
+	        E_DATE, 
+	        N_DATE, 
+	        SUB_PRICE, 
+	        SUB_STATUS, 
+	        IS_AUTO 
+	    ) VALUES (
+	        #{userId},  
+	        #{methodNo},  
+	        NOW(), 
+	        DATE_ADD(NOW(), INTERVAL 1 MONTH), 
+	        DATE_ADD(NOW(), INTERVAL 1 MONTH), 
+	        #{totalprice}, 
+	        'Y',         
+	        'Y'
+   	 )
+	</insert>
 	
-	<select id="selectMethod" parameterType="hashmap" resultType="java.lang.Integer">
-	    SELECT METHOD_NO
-	      FROM PAYMENT_METHOD
-	     WHERE USER_ID = #{userId}
-	       AND BILINGKEY = #{customerUid}
-	     LIMIT 1
-	</select>
+	<insert id="insertPaymentMethod" parameterType="hashmap">
+	    INSERT INTO payment_method (
+	        USER_ID, 
+	        PM_NAME, 
+	        BILLINGKEY, 
+	        IS_DEFAULT, 
+	        CDATE
+	    ) VALUES (
+	        #{userId}, 
+	        #{pmName},    
+	        #{issuedBillingKey}, 
+	        'Y',
+	        NOW()
+	    )
+	    ON DUPLICATE KEY UPDATE 
+	        BILLINGKEY = #{issuedBillingKey},
+	        PM_NAME = #{pmName},
+	        CDATE = NOW()
+	</insert>	
 
     <update id="updateRsvStatus" parameterType="hashmap">
         UPDATE reservation
@@ -110,19 +120,6 @@
             RSV_STATUS = 'FIN'
         WHERE 
             RSV_NO = #{rsvNo}
-    </update>
-    
-    <update id="updateAllDefaultN" parameterType="hashmap">
-        UPDATE PAYMENT_METHOD
-           SET IS_DEFAULT = 'N'
-         WHERE USER_ID = #{userId}
-    </update>
-    
-    <update id="updateDefault" parameterType="hashmap">
-        UPDATE PAYMENT_METHOD
-           SET IS_DEFAULT = 'Y',
-               CDATE = NOW()
-         WHERE METHOD_NO = #{methodNo}
     </update>
     
 </mapper>

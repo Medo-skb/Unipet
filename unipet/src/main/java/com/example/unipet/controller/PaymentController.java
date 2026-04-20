@@ -1,20 +1,23 @@
 package com.example.unipet.controller;
 
+import java.io.PrintWriter;
 import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.example.unipet.dao.DefaultService;
 import com.example.unipet.dao.PaymentService;
 import com.google.gson.Gson;
 
-import ch.qos.logback.core.model.Model;
+
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class PaymentController {
@@ -28,8 +31,38 @@ public class PaymentController {
 	}
 	
 	@RequestMapping("/payment/sub.do") 
-	public String sub(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception{
+	public String sub(HttpServletRequest request, HttpServletResponse response, Model model, @RequestParam HashMap<String, Object> map) throws Exception{
+		HttpSession session = request.getSession();
+//	    String userId = (String) session.getAttribute("userId");
+		String userId = "test_user01";
+		request.setAttribute("totalprice", map.get("totalprice"));
+	    if (userId == null) {
+	        return "redirect:/login.do"; // 로그인 안 했으면 로그인부터!
+	    }
+	    int isSubscribed = paymentService.getSubStatus(userId); 
+	    
+	    if (isSubscribed > 0) {
+	        // 인코딩 설정 (한글 깨짐 방지)
+	        response.setContentType("text/html; charset=UTF-8");
+	        PrintWriter out = response.getWriter();
+	        
+	        // 자바스크립트 직접 실행
+	        out.println("<script>");
+	        out.println("alert('이미 프리미엄 멤버십을 이용 중입니다.');");
+	        out.println("location.href='/main.do';");
+	        out.println("</script>");
+	        
+	        out.flush();
+	        return null; 
+	    }
+		
 		return "/payment/sub";
+	}
+	
+	@RequestMapping("/payment/pay-sub.do") 
+	public String paySub(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception{
+		request.setAttribute("totalprice", map.get("totalprice"));
+		return "/payment/pay-sub";
 	}
 	
 	// ajax가 호출하는 주소
@@ -56,6 +89,14 @@ public class PaymentController {
     @ResponseBody
     public String userInfo(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
         HashMap<String, Object> resultMap = paymentService.getUser(map);
+        
+        return new Gson().toJson(resultMap); 
+    }
+	
+	@RequestMapping(value = "/payment/billing.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+    @ResponseBody
+    public String billing(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+        HashMap<String, Object> resultMap = paymentService.getBillingKey(map);
         
         return new Gson().toJson(resultMap); 
     }

@@ -1,0 +1,120 @@
+/* =========================================
+   Premium 정기결제 폼 전용 CSS (pay-sub.css)
+========================================= */
+
+/* 전체 배경 및 중앙 정렬 */
+.payment-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 120px); /* 헤더 높이 제외 */
+    background-color: #f8f9fa; /* 눈이 편안한 연회색 배경 */
+    padding: 50px 20px;
+}
+
+/* 결제 정보 입력 카드 */
+.payment-card {
+    background: #ffffff;
+    padding: 50px 40px;
+    border-radius: 20px; /* 부드러운 모서리 */
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08); /* 고급스러운 그림자 효과 */
+    width: 100%;
+    max-width: 480px;
+    box-sizing: border-box;
+}
+
+/* 상단 타이틀 영역 */
+.payment-title {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.payment-title h2 {
+    margin: 0 0 12px 0;
+    font-size: 28px;
+    font-weight: 700;
+    color: #222;
+    letter-spacing: -0.5px;
+}
+
+.payment-title p {
+    margin: 0;
+    color: #666;
+    font-size: 16px;
+}
+
+/* 가격 하이라이트 */
+.price-highlight {
+    color: #e50914; /* 프리미엄 레드 */
+    font-weight: 700;
+    font-size: 20px;
+}
+
+/* 폼 그룹 (라벨 + 인풋) */
+.form-group {
+    margin-bottom: 24px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+}
+
+/* 입력창 (Input) 기본 스타일 */
+.form-control {
+    width: 100%;
+    padding: 15px 16px;
+    border: 1px solid #dcdcdc;
+    border-radius: 12px;
+    font-size: 16px;
+    color: #333;
+    background-color: #fbfbfb;
+    transition: all 0.2s ease; /* 부드러운 전환 효과 */
+    box-sizing: border-box;
+}
+
+/* 입력창 포커스 (클릭 시) 효과 */
+.form-control:focus {
+    outline: none;
+    border-color: #222; /* 검은색 테두리로 강조 */
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05); /* 은은한 링 효과 */
+}
+
+/* 나란히 배치되는 폼 (유효기간 등) */
+.form-row {
+    display: flex;
+    gap: 16px;
+}
+
+.form-row .form-group {
+    flex: 1; /* 반반씩 공간 차지 */
+    margin-bottom: 24px;
+}
+
+/* 결제 버튼 */
+.btn-submit {
+    width: 100%;
+    padding: 16px;
+    background-color: #4596ff; /* 프리미엄 레드 */
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    margin-top: 10px;
+}
+
+.btn-submit:hover {
+    background-color: #b20710; /* 마우스 올렸을 때 살짝 어두워짐 */
+}
+
+.btn-submit:active {
+    transform: scale(0.98); /* 클릭 시 살짝 눌리는 애니메이션 */
+}

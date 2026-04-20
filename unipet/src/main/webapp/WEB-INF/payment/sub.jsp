@@ -11,7 +11,7 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="/js/page-change.js"></script>
     <script src="/js/main/main.js"></script>
-    <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
+    <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/header.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/payment/sub.css">
 </head>
@@ -71,7 +71,7 @@
                 // 변수 - (key : value)
                 userId : "${sessionId}",
                 info : {},
-                totalprice : 100,
+                totalprice : 1000,
             };
         },
         methods: {
@@ -86,70 +86,20 @@
                     data: param,
                     success: function (data) {
                         self.info = data.info;
+                        console.log(data);
                     }
                 });
             },
-            fnPaySubs: function () {
+            fnPaySubs: function() {
                 let self = this;
-                
-                // 데이터가 잘 로드됐는지 최종 확인
+
                 if (!self.info.userId) {
-                    alert("사용자 정보를 불러올 수 없습니다.");
+                    alert("로그인이 필요한 서비스입니다.");
+                    pageChange("/login.do");
                     return;
                 }
 
-                const { IMP } = window;
-                IMP.init("imp15084381"); // 사용자님의 가맹점 식별코드
-
-                IMP.request_pay({
-                    pg: "html5_inicis.INIpayTest", // 테스트용 PG사
-                    pay_method: "card",
-                    merchant_uid: "subs_" + new Date().getTime(), // 주문번호 (매번 중복되지 않게)
-                    
-                    // ★ 정기결제의 핵심: customer_uid가 있어야 빌링키가 발급됨
-                    customer_uid: "unipet_user_" + self.info.userId, 
-                    
-                    name: "유니펫 프리미엄 멤버십",
-                    amount: self.totalprice, // 테스트 결제 금액
-                    
-                    // [서버에서 긁어온 정보 바인딩]
-                    buyer_name: self.info.userName,
-                    buyer_tel: self.info.phone,
-                }, function (rsp) {
-                    if (rsp.success) {
-                        // 결제 성공 시, 아까 설계한 '3단계 DB 인서트' 로직으로 이동
-                        self.fnAddSubs(rsp);
-                    } else {
-                        alert("결제 실패: " + rsp.error_msg);
-                    }
-                });
-            },
-            fnAddSubs: function(rsp) {
-                let self = this;
-
-                let param = {
-                    userId: self.info.userId,
-                    subNo: self.info.subNo,             // 서버에서 구독 분기를 타게 만드는 핵심 키
-                    totalprice: self.totalprice,        // XML의 #{totalprice}와 매칭
-                    tid: rsp.imp_uid,                   // 포트원 거래 고유번호
-                    pmName : rsp.card_name || rsp.pay_method, // PM_NAME 컬럼으로 들어갈 값
-                    customerUid : rsp.customer_uid,      // 발급된 빌링키 식별자
-                    payStatus: "PAY",                   // 결제 성공 상태
-                    ordName: "유니펫 프리미엄 멤버십"     // 결제명
-                };
-
-                $.ajax({
-                    url: "/payment/add.dox",
-                    type: "POST",
-                    dataType: "json",
-                    data: param,
-                    success: function(data) {
-                        if(data.result === "success") {
-                            alert("축하합니다! 프리미엄 구독이 시작되었습니다.");
-                            location.href = "/main.do";
-                        }
-                    }
-                });
+                pageChange("/payment/pay-sub.do", { totalprice: self.totalprice });
             }
         }, // methods
         mounted() {
