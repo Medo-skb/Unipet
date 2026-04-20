@@ -5,19 +5,33 @@ import lombok.Data;
 @Data
 public class User {
 
-    // 기본 회원 정보
     private String userId;
     private String pwd;
     private String userName;
-    private String role;        // USER / BIZ
+    private String nickname;
 
-    // 사업자 관련
-    private String bizName;     // 업체명
-    private String bizNo;       // 사업자번호
-    private String bizStatus;   // WAIT / APPROVED
+    private String role;
+    private String phone;
+    private String email;
 
-    // 파일 관련
+    private String userAddr;     // 🔥 추가
+    private String fullAddr;     // 🔥 추가
+    private String zipcode;      // 🔥 추가
+    private String userStatus;   // 🔥 추가
+    private String cdate;        // 🔥 추가
+
+    private String bizName;
+    private String bizNo;
+    private String bizStatus;
     private String bizFileName;
     private String bizFilePath;
 
+    // 사업자 로그인용
+    private String storeUserId;
+    private String storeUserPwd;
+    private String ceoName;
+
+    // 소셜 구분용
+    private String socialType;
+    private String socialId;
 }

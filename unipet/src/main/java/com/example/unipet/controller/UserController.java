@@ -5,17 +5,21 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import com.example.unipet.dao.UserService;
+import com.example.unipet.model.User;
 import com.google.gson.Gson;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,237 +28,198 @@ import jakarta.servlet.http.HttpSession;
 @Controller
 public class UserController {
 
-	@Autowired
-	UserService userService;
+    @Autowired
+    private UserService userService;
 
-	@Value("${kakao.client-id}")
-	private String kakaoClientId;
+    @Value("${kakao.client-id:}")
+    private String kakaoClientId;
 
-	@Value("${kakao.redirect-uri}")
-	private String kakaoRedirectUri;
+    @Value("${kakao.redirect-uri:}")
+    private String kakaoRedirectUri;
 
-	@Value("${naver.client-id}")
-	private String naverClientId;
+    @Value("${naver.client-id:}")
+    private String naverClientId;
 
-	@Value("${naver.client-secret}")
-	private String naverClientSecret;
+    @Value("${naver.client-secret:}")
+    private String naverClientSecret;
 
-	@Value("${naver.redirect-uri}")
-	private String naverRedirectUri;
+    @Value("${naver.redirect-uri:}")
+    private String naverRedirectUri;
 
-	// =========================================================
-	// 1. 페이지 이동용 메서드
-	// =========================================================
+    private final Gson gson = new Gson();
+    private final SecureRandom random = new SecureRandom();
 
-	// 로그인 페이지 이동
-	@GetMapping("/user/login.do")
-	public String login() {
-		return "user/login";
-	}
+    // ✅ 메인 (JSP 없이 바로 응답)
+    @GetMapping("/main.do")
+    @ResponseBody
+    public HashMap<String, Object> main(HttpSession session) {
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("message", "로그인 성공");
+        map.put("sessionId", session.getAttribute("sessionId"));
+        map.put("sessionName", session.getAttribute("sessionName"));
+        map.put("sessionRole", session.getAttribute("sessionRole"));
+        return map;
+    }
 
-	// 회원가입 유형 선택 페이지 이동
-	@GetMapping("/user/join.do")
-	public String join() {
-		return "user/join";
-	}
+    // 로그인 (AJAX)
+    @PostMapping("/user/login.dox")
+    @ResponseBody
+    public HashMap<String, Object> login(@RequestParam HashMap<String, Object> map, HttpSession session) {
+        HashMap<String, Object> result = userService.login(map, session);
 
-	// 일반 사용자 회원가입 페이지 이동
-	@GetMapping("/user/SignupUser.do")
-	public String signupUserPage() {
-		return "user/signup-user";
-	}
+        if (Boolean.TRUE.equals(result.get("result"))) {
+            result.put("url", "/main.do"); // 🔥 여기 중요
+        }
 
-	// 사업자 회원가입 페이지 이동
-	@GetMapping("/user/SignupBiz.do")
-	public String signupBizPage() {
-		return "user/signup-biz";
-	}
+        return result;
+    }
 
-	// 아이디 찾기 페이지 이동
-	@GetMapping("/user/find-id.do")
-	public String findIdPage() {
-		return "user/find-id";
-	}
+    // 로그아웃
+    @GetMapping("/user/logout.do")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/main.do";
+    }
 
-	// 비밀번호 찾기 페이지 이동
-	@GetMapping("/user/find-pwd.do")
-	public String findPwdPage() {
-		return "user/find-pwd";
-	}
+    // ===================== 카카오 =====================
 
-	// 새 비밀번호 설정 페이지 이동
-	@GetMapping("/user/new-pwd.do")
-	public String newPwdPage() {
-		return "user/new-pwd";
-	}
+    @GetMapping("/user/kakao/login")
+    public void kakaoLogin(HttpServletResponse response) throws IOException {
+        String url = "https://kauth.kakao.com/oauth/authorize"
+                + "?client_id=" + kakaoClientId
+                + "&redirect_uri=" + URLEncoder.encode(kakaoRedirectUri, StandardCharsets.UTF_8)
+                + "&response_type=code";
 
-	// =========================================================
-	// 2. 일반 회원가입 / 로그인 처리
-	// =========================================================
+        response.sendRedirect(url);
+    }
 
-	// 아이디 중복 체크
-	@PostMapping(value = "/user/check.dox", produces = "application/json;charset=UTF-8")
-	@ResponseBody
-	public String check(@RequestParam HashMap<String, Object> map) {
-		HashMap<String, Object> resultMap = userService.checkUser(map);
-		return new Gson().toJson(resultMap);
-	}
+    @GetMapping("/user/kakao/callback")
+    public void kakaoCallback(@RequestParam("code") String code,
+                              HttpSession session,
+                              HttpServletResponse response) throws Exception {
 
-	// 일반 회원가입 처리
-	@PostMapping(value = "/user/signupUser.dox", produces = "application/json;charset=UTF-8")
-	@ResponseBody
-	public String signupUser(@RequestParam HashMap<String, Object> map) {
-		HashMap<String, Object> resultMap = userService.signupUser(map);
-		return new Gson().toJson(resultMap);
-	}
+        RestTemplate restTemplate = new RestTemplate();
 
-	// 사업자 회원가입 처리
-	@PostMapping(value = "/user/signupBiz.dox", produces = "application/json;charset=UTF-8")
-	@ResponseBody
-	public String signupBiz(@RequestParam HashMap<String, Object> map, @RequestParam("bizFile") MultipartFile bizFile) {
+        // 토큰 요청
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-		HashMap<String, Object> resultMap = userService.signupBiz(map, bizFile);
-		return new Gson().toJson(resultMap);
-	}
+        String tokenUrl = "https://kauth.kakao.com/oauth/token"
+                + "?grant_type=authorization_code"
+                + "&client_id=" + kakaoClientId
+                + "&redirect_uri=" + kakaoRedirectUri
+                + "&code=" + code;
 
-	// 일반 로그인 처리
-	@PostMapping(value = "/user/login.dox", produces = "application/json;charset=UTF-8")
-	@ResponseBody
-	public String loginProc(@RequestParam HashMap<String, Object> map, HttpSession session) {
-		HashMap<String, Object> resultMap = userService.login(map);
+        ResponseEntity<String> tokenResponse = restTemplate.postForEntity(tokenUrl, null, String.class);
+        Map<String, Object> tokenMap = gson.fromJson(tokenResponse.getBody(), HashMap.class);
 
-		if (Boolean.TRUE.equals(resultMap.get("result"))) {
-			session.setAttribute("sessionId", resultMap.get("sessionId"));
-			session.setAttribute("sessionName", resultMap.get("sessionName"));
-			session.setAttribute("sessionRole", resultMap.get("sessionRole"));
-		}
+        String accessToken = tokenMap.get("access_token").toString();
 
-		return new Gson().toJson(resultMap);
-	}
+        // 사용자 정보 요청
+        HttpHeaders userHeader = new HttpHeaders();
+        userHeader.setBearerAuth(accessToken);
 
-	// =========================================================
-	// 3. 카카오 로그인 (SecurityConfig 없이 직접 구현)
-	// =========================================================
+        HttpEntity<String> entity = new HttpEntity<>(userHeader);
 
-	// 카카오 로그인 시작
-	@GetMapping("/user/kakao/login")
-	public void kakaoLogin(HttpServletResponse response) throws IOException {
+        ResponseEntity<String> userResponse = restTemplate.exchange(
+                "https://kapi.kakao.com/v2/user/me",
+                HttpMethod.GET,
+                entity,
+                String.class
+        );
 
-		String url = "https://kauth.kakao.com/oauth/authorize" + "?client_id="
-				+ URLEncoder.encode(kakaoClientId, StandardCharsets.UTF_8) + "&redirect_uri="
-				+ URLEncoder.encode(kakaoRedirectUri, StandardCharsets.UTF_8) + "&response_type=code";
+        Map<String, Object> userMap = gson.fromJson(userResponse.getBody(), HashMap.class);
 
-		response.sendRedirect(url);
-	}
+        String socialId = userMap.get("id").toString();
 
-	// 카카오 콜백
-	/*
-	 * @GetMapping("/user/kakao/callback") public String
-	 * kakaoCallback(@RequestParam("code") String code, HttpSession session) throws
-	 * Exception {
-	 * 
-	 * HashMap<String, Object> userInfo = userService.kakaoLogin(code);
-	 * 
-	 * session.setAttribute("sessionId", userInfo.get("userId"));
-	 * session.setAttribute("sessionName", userInfo.get("userName"));
-	 * session.setAttribute("sessionRole", "USER");
-	 * 
-	 * return "redirect:/main.do"; }
-	 */
+        HashMap<String, Object> socialMap = new HashMap<>();
+        socialMap.put("userId", "kakao_" + socialId);
+        socialMap.put("userName", "카카오회원");
+        socialMap.put("nickname", "카카오회원");
+        socialMap.put("email", "");
+        socialMap.put("role", "USER");
+        socialMap.put("socialType", "KAKAO");
+        socialMap.put("socialId", socialId);
 
-	// =========================================================
-	// 4. 네이버 로그인 (SecurityConfig 없이 직접 구현)
-	// =========================================================
+        User user = userService.socialLogin(socialMap);
 
-	// 네이버 로그인 시작
-	@GetMapping("/user/naver/login")
-	public void naverLogin(HttpServletResponse response, HttpSession session) throws IOException {
+        session.setAttribute("sessionId", user.getUserId());
+        session.setAttribute("sessionName", user.getUserName());
+        session.setAttribute("sessionRole", user.getRole());
 
-		String state = String.valueOf(new SecureRandom().nextInt(1000000));
-		session.setAttribute("naverState", state);
+        // 🔥 main.do로 이동
+        response.sendRedirect("/main.do");
+    }
 
-		String url = "https://nid.naver.com/oauth2.0/authorize" + "?response_type=code" + "&client_id="
-				+ URLEncoder.encode(naverClientId, StandardCharsets.UTF_8) + "&redirect_uri="
-				+ URLEncoder.encode(naverRedirectUri, StandardCharsets.UTF_8) + "&state="
-				+ URLEncoder.encode(state, StandardCharsets.UTF_8);
+    // ===================== 네이버 =====================
 
-		response.sendRedirect(url);
-	}
+    @GetMapping("/user/naver/login")
+    public void naverLogin(HttpSession session, HttpServletResponse response) throws IOException {
+        String state = Long.toHexString(random.nextLong());
+        session.setAttribute("naverState", state);
 
-	// 네이버 콜백
-	/*
-	 * @GetMapping("/user/naver/callback") public String
-	 * naverCallback(@RequestParam("code") String code,
-	 * 
-	 * @RequestParam("state") String state, HttpSession session) throws Exception {
-	 * 
-	 * String savedState = (String) session.getAttribute("naverState");
-	 * 
-	 * if (savedState == null || !savedState.equals(state)) { return
-	 * "redirect:/user/login.do"; }
-	 * 
-	 * HashMap<String, Object> userInfo = userService.naverLogin(code, state);
-	 * 
-	 * session.setAttribute("sessionId", userInfo.get("userId"));
-	 * session.setAttribute("sessionName", userInfo.get("userName"));
-	 * session.setAttribute("sessionRole", "USER");
-	 * 
-	 * return "redirect:/main.do"; }
-	 */
+        String url = "https://nid.naver.com/oauth2.0/authorize"
+                + "?response_type=code"
+                + "&client_id=" + naverClientId
+                + "&redirect_uri=" + URLEncoder.encode(naverRedirectUri, StandardCharsets.UTF_8)
+                + "&state=" + state;
 
-	// =========================================================
-	// 5. 휴대폰 인증 처리
-	// =========================================================
+        response.sendRedirect(url);
+    }
 
-	// 인증번호 발송
-	@PostMapping(value = "/user/sendSms.dox", produces = "application/json;charset=UTF-8")
-	@ResponseBody
-	public String sendSms(@RequestParam HashMap<String, Object> map) {
-		HashMap<String, Object> resultMap = userService.sendSms(map);
-		return new Gson().toJson(resultMap);
-	}
+    @GetMapping("/user/naver/callback")
+    public void naverCallback(@RequestParam("code") String code,
+                              @RequestParam("state") String state,
+                              HttpSession session,
+                              HttpServletResponse response) throws Exception {
 
-	// 인증번호 확인
-	@PostMapping(value = "/user/verifySms.dox", produces = "application/json;charset=UTF-8")
-	@ResponseBody
-	public String verifySms(@RequestParam HashMap<String, Object> map) {
-		HashMap<String, Object> resultMap = userService.verifySms(map);
-		return new Gson().toJson(resultMap);
-	}
+        RestTemplate restTemplate = new RestTemplate();
 
-	// =========================================================
-	// 6. 아이디 / 비밀번호 찾기 처리
-	// =========================================================
+        String tokenUrl = "https://nid.naver.com/oauth2.0/token"
+                + "?grant_type=authorization_code"
+                + "&client_id=" + naverClientId
+                + "&client_secret=" + naverClientSecret
+                + "&code=" + code
+                + "&state=" + state;
 
-	// 이름 + 휴대폰번호로 아이디 찾기
-	@PostMapping(value = "/user/findId.dox", produces = "application/json;charset=UTF-8")
-	@ResponseBody
-	public String findId(@RequestParam HashMap<String, Object> map) {
-		HashMap<String, Object> resultMap = userService.findId(map);
-		return new Gson().toJson(resultMap);
-	}
+        ResponseEntity<String> tokenResponse = restTemplate.getForEntity(tokenUrl, String.class);
+        Map<String, Object> tokenMap = gson.fromJson(tokenResponse.getBody(), HashMap.class);
 
-	// 아이디 + 휴대폰번호로 회원 확인 (비밀번호 찾기용)
-	@PostMapping(value = "/user/checkUserForReset.dox", produces = "application/json;charset=UTF-8")
-	@ResponseBody
-	public String checkUserForReset(@RequestParam HashMap<String, Object> map) {
-		HashMap<String, Object> resultMap = userService.checkUserForReset(map);
-		return new Gson().toJson(resultMap);
-	}
+        String accessToken = tokenMap.get("access_token").toString();
 
-	// 비밀번호 재설정 확인용
-	@PostMapping(value = "/user/sendResetLink.dox", produces = "application/json;charset=UTF-8")
-	@ResponseBody
-	public String sendResetLink(@RequestParam HashMap<String, Object> map) {
-		HashMap<String, Object> resultMap = userService.sendResetLink(map);
-		return new Gson().toJson(resultMap);
-	}
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
 
-	// 새 비밀번호 변경
-	@PostMapping(value = "/user/resetPwd.dox", produces = "application/json;charset=UTF-8")
-	@ResponseBody
-	public String resetPwd(@RequestParam HashMap<String, Object> map) {
-		HashMap<String, Object> resultMap = userService.resetPwd(map);
-		return new Gson().toJson(resultMap);
-	}
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<String> userResponse = restTemplate.exchange(
+                "https://openapi.naver.com/v1/nid/me",
+                HttpMethod.GET,
+                entity,
+                String.class
+        );
+
+        Map<String, Object> userMap = gson.fromJson(userResponse.getBody(), HashMap.class);
+        Map<String, Object> profile = (Map<String, Object>) userMap.get("response");
+
+        String socialId = profile.get("id").toString();
+
+        HashMap<String, Object> socialMap = new HashMap<>();
+        socialMap.put("userId", "naver_" + socialId);
+        socialMap.put("userName", "네이버회원");
+        socialMap.put("nickname", "네이버회원");
+        socialMap.put("email", "");
+        socialMap.put("role", "USER");
+        socialMap.put("socialType", "NAVER");
+        socialMap.put("socialId", socialId);
+
+        User user = userService.socialLogin(socialMap);
+
+        session.setAttribute("sessionId", user.getUserId());
+        session.setAttribute("sessionName", user.getUserName());
+        session.setAttribute("sessionRole", user.getRole());
+
+        // 🔥 main.do로 이동
+        response.sendRedirect("/main.do");
+    }
 }
