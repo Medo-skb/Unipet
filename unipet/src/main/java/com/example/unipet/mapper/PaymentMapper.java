@@ -22,14 +22,10 @@ public interface PaymentMapper {
 	// 수정 -> updateXXX (예약 상태 변경)
 	public int updateRsvStatus(HashMap<String, Object> map);
 	
-	public Integer selectMethod(HashMap<String, Object> map);
+	public int selectSubStatus(String userId);
 	
-	public void updateAllDefaultN(HashMap<String, Object> map);
+	// 빌링키 등록 및 업데이트
+	public int insertPaymentMethod(HashMap<String, Object> map);
 	
-	public void updateDefault(HashMap<String, Object> map);
-	
-	public void insertPaymentMethod(HashMap<String, Object> map);
-	
-	public void insertSub(HashMap<String, Object> map);
 	
 }

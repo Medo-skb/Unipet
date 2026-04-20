@@ -25,6 +25,7 @@ public class Payment {
     String userId;
     String userName; 		// 이름
     String phone;    		// 전화번호
+    String email;
     
     // 5. 계산 데이터
     int deposit;    // 예약금
