@@ -17,14 +17,11 @@
 <body>
     <div class="page-layout">
 
-        <!-- ============================= -->
         <!-- 헤더 -->
-        <!-- ============================= -->
         <jsp:include page="/WEB-INF/header/header.jsp" />
 
-        <!-- ============================= -->
+ 
         <!-- 메인 배너 영역 -->
-        <!-- ============================= -->
         <section class="main-banner-section">
             <div class="banner-slider" id="bannerSlider">
 
@@ -33,11 +30,11 @@
                 </div>
 
                 <div class="banner-slide">
-                    <img src="${pageContext.request.contextPath}/img/main/banner_green.png" class="banner-image">
+                    <img src="${pageContext.request.contextPath}/img/main/banner_2.png" class="banner-image">
                 </div>
 
                 <div class="banner-slide">
-                    <img src="${pageContext.request.contextPath}/img/main/banner_red.png" class="banner-image">
+                    <img src="${pageContext.request.contextPath}/img/main/banner_3.png" class="banner-image">
                 </div>
 
                 <div class="banner-overlay-inner">
@@ -57,18 +54,21 @@
 
         <script src="${pageContext.request.contextPath}/js/main/main.js"></script>
 
-        <!-- ============================= -->
+ 
         <!-- 메인 컨텐츠 -->
-        <!-- ============================= -->
         <div id="app">
             <div class="container-main">
 
                 <div class="under"></div>
 
-                <!-- ============================= -->
-                <!-- 기본 출력 영역 -->
-                <!-- ============================= -->
+                <!-- 멤버십 배너 -->
+                <div class="membership-banner-wrap">
+                    <img src="${pageContext.request.contextPath}/img/main/membership_banner.png" 
+                        class="membership-banner-img" 
+                        alt="멤버십 배너">
+                </div>
 
+         
                 <!-- 최근 예약이 많은 업체 -->
                 <section class="main-store-section">
                     <div class="section-header">
@@ -217,13 +217,11 @@
                             해당 동물 카테고리의 상품이 없습니다.
                         </div>
                     </div>
-
             </div>
         </div>
 
-        <!-- ============================= -->
+ 
         <!-- 푸터 -->
-        <!-- ============================= -->
         <jsp:include page="/WEB-INF/footer/footer.jsp" />
 
     </div>
