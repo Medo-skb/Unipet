@@ -85,4 +85,43 @@ public class ReservationController {
 		return new Gson().toJson(resultMap); 
 	}
 	
+	@RequestMapping(value = "/reservation/pet-list.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String petList(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+//		resultMap = 서비스객체.함수(map);
+		
+		resultMap = reservationService.getPetList(map);
+		
+		return new Gson().toJson(resultMap); 
+	}
+	
+	@RequestMapping(value = "/reservation/store-menu.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String sMenu(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+		resultMap = reservationService.getStoreMenuList(map);
+	    
+	    // Gson으로 변환하면 { "info": {...}, "menuList": [...] } 구조가 됩니다.
+	    return new Gson().toJson(resultMap); 
+	}
+	
+	@RequestMapping("/reservation/confirm.do")
+	public String confirm(HttpServletRequest request, Model model,  @RequestParam HashMap<String, Object> map) throws Exception{
+		return "/reservation/confirm";
+	}
+	
+	@RequestMapping("/reservation/add-reservation.dox")
+	@ResponseBody
+	public String addReservation(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+	    
+	    // 1. 서비스 호출 (reservation INSERT + rsv_log INSERT)
+	    // 앞서 Service에서 useGeneratedKeys 설정을 했으므로 map에 rsvNo가 담겨 돌아옵니다.
+	    resultMap = reservationService.addReservation(map);
+	    
+	    return new Gson().toJson(resultMap);
+	}
+	
 }

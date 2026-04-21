@@ -1,0 +1,101 @@
+/* 카드 레이아웃 */
+.confirm-card {
+    background: #ffffff;
+    border-radius: 5px;
+    border: 1px solid black;
+    /* box-shadow: 0 4px 15px rgba(0,0,0,0.05); 은은한 그림자 */
+    padding: 30px;
+    max-width: 600px;
+    margin: 20px auto;
+}
+
+.info-item {
+    display: flex;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+
+.label {
+    width: 180px; /* 라벨 너비 고정으로 정렬 유지 */
+    font-weight: bold;
+    color: #333;
+}
+
+.value.highlight {
+    color: #ff4757; /* 결제 금액 강조 */
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+/* 헤더 부분 (클릭 영역) */
+.notice-header {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 10px 0;
+    user-select: none;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* 화살표와 글자 사이 간격 */
+}
+
+.notice-title {
+    font-weight: bold;
+    font-size: 1rem;
+    color: #555;
+}
+
+.arrow {
+    font-size: 0.7rem; /* 화살표 크기 살짝 축소 */
+    color: #ff9f43;    /* 포인트 컬러로 시선 집중 */
+    width: 15px;       /* 화살표가 바뀌어도 텍스트 위치가 고정되도록 너비 설정 */
+    display: inline-block;
+    transition: transform 0.2s ease; /* 회전 애니메이션용 */
+}
+
+/* 내용 영역 */
+.notice-content {
+    margin-top: 5px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: #777;
+    line-height: 1.6;
+    border-left: 3px solid #ff9f43; /* 왼쪽 포인트 선 추가 (선택사항) */
+}
+
+/* 펼쳐질 때 애니메이션 효과 (선택사항) */
+.fade-enter-active, .fade-leave-active {
+    transition: opacity 0.3s ease;
+}
+.fade-enter-from, .fade-leave-to {
+    opacity: 0;
+}
+
+/* 버튼 스타일 */
+.confirm-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.btn-confirm {
+    background-color: #c0c9ff; /* 스크린샷의 연보라색 */
+    border: none;
+    padding: 10px 40px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.btn-cancel {
+    background-color: #dee2ff;
+    border: none;
+    padding: 10px 40px;
+    border-radius: 8px;
+    cursor: pointer;
+}

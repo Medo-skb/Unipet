@@ -28,7 +28,7 @@
 	</select>
 	
 	<select id="selectStoreMenuList" parameterType="hashmap" resultType="com.example.unipet.model.Store">
-	    SELECT S.STORE_NO, STORE_NAME, MENU_NAME, MENU_PRICE, M_STATUS 
+	    SELECT S.STORE_NO, STORE_NAME, MENU_NO, MENU_NAME, MENU_PRICE, M_STATUS 
 	    FROM STORE S
 	    LEFT JOIN STORE_MENU M ON S.STORE_NO = M.STORE_NO
 	    WHERE
@@ -63,8 +63,52 @@
 	<select id="selectUser" parameterType="hashmap" resultType="com.example.unipet.model.Default">
 	</select>
 	
+	<select id="checkSlotAvailability" parameterType="hashmap" resultType="int">
+	    SELECT COUNT(*)
+	    FROM rsv_slot
+	    WHERE SLOT_NO = #{slotNo}
+	      AND IS_AVAILABLE = 'Y'
+	    <![CDATA[
+	      AND CUR_COUNT < CAPACITY
+	    ]]>
+	</select>
+	
 	<!-- 삽입 -->
 	<insert id="insertUser" parameterType="hashmap">
+	</insert>
+	
+	<insert id="insertReservation" parameterType="hashmap" useGeneratedKeys="true" keyProperty="rsvNo" keyColumn="RSV_NO">
+	    INSERT INTO reservation (
+	        SLOT_NO, RSV_DATE, RSV_START_TIME, RSV_END_TIME,
+	        STORE_NO, USER_ID, PET_NO, MENU_NO,
+	        REQUEST, RSV_STATUS, CDATE
+	    ) VALUES (
+	        #{slotNo},
+	        #{date},
+	        #{time},
+	        DATE_ADD(STR_TO_DATE(CONCAT(#{date}, ' ', #{time}), '%Y-%m-%d %H:%i'), 
+	                 INTERVAL (SELECT slot FROM store_policy WHERE store_no = #{storeNo}) MINUTE),
+	        #{storeNo},
+	        #{userId},
+	        #{petNo},
+	        #{menuNo},
+	        #{request},
+	        'WAI',
+	        NOW()
+	    )
+	</insert>
+	
+	<insert id="insertRsvLog" parameterType="hashmap">
+	    INSERT INTO rsv_log (
+	        RSV_NO, 
+	        ACTION, 
+	        NEW_STATUS, 
+	        ACTOR_TYPE, 
+	        ACTOR_ID, 
+	        LOG_DATE, 
+	        REMARK
+	    ) VALUES (
+	        #{rsvNo},             'CREATE',             'WAI',                'USER',               #{userId},            NOW(),                '신규 예약 신청 완료'    )
 	</insert>
 	
 	<!-- 삭제 -->
@@ -74,5 +118,24 @@
 	<!-- 수정 -->
 	<update id="updateUser" parameterType="hashmap">
 	</update>
+	
+	<update id="updateRsvSlotCount" parameterType="hashmap">
+	    UPDATE rsv_slot s
+	    SET 
+	        s.CUR_COUNT = s.CUR_COUNT + 1,
+	        s.IS_AVAILABLE = CASE 
+	                            WHEN s.CUR_COUNT + 1 >= s.CAPACITY THEN 'N'
+	                            ELSE 'Y'
+	                         END
+	    WHERE s.SLOT_NO = #{slotNo}
+	      AND EXISTS (
+	          /* 전달받은 예약번호(rsvNo)의 상태가 'COM'인 경우에만 업데이트 수행 */
+	          SELECT 1 
+	          FROM reservation r 
+	          WHERE r.rsv_no = #{rsvNo} 
+	            AND r.rsv_status = 'COM'
+	      )
+	</update>
+	
 	
 </mapper>
