@@ -11,21 +11,37 @@ import com.example.unipet.model.Payment;
 @Mapper
 public interface PaymentMapper {
 	
-	// 한개 리턴 -> selectXXX
+	// 예약 한개 리턴
 	public Payment selectRsvPayment(HashMap<String, Object> map);
 	
+	// 유저 한개 리턴
 	public Payment selectUser(HashMap<String, Object> map);
 
-	// 삽입 -> insertXXX (결제 내역 추가)
+	// 오늘자 구독 갱신자 여럿 리턴
+	public List<HashMap<String, Object>> selectTodaySub();
+	
+	// 결제할 상품 목록
+	public List<HashMap<String, Object>> selectProductList(HashMap<String, Object> map);
+	
+	// 결제 내역 추가
 	public int insertPayment(HashMap<String, Object> map);
 
-	// 수정 -> updateXXX (예약 상태 변경)
+	// 예약 상태 변경
 	public int updateRsvStatus(HashMap<String, Object> map);
 	
+	// 구독 상태 검색
 	public int selectSubStatus(String userId);
 	
 	// 빌링키 등록 및 업데이트
 	public int insertPaymentMethod(HashMap<String, Object> map);
+	
+	// 구독 내역 추가
+	public int insertSub(HashMap<String, Object> map);
+	
+	// 구독 내역 업데이트
+	public int updateSub(HashMap<String, Object> map);
+	
+	//
 	
 	
 }

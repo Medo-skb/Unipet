@@ -9,7 +9,8 @@ public class Payment {
 	// 1. 예약 기본 정보 (RESERVATION 테이블 JOIN 결과)
     int rsvNo;
     String rsvDate;  // 시작 시간
-    String endDate;  // 종료 시간
+    String rsvStartTime;  // 종료 시간
+    String rsvEndTime;  // 종료 시간
     String request;         // 요청 사항
     String rsvStatus;       // 예약 상황
 
@@ -26,6 +27,8 @@ public class Payment {
     String userName; 		// 이름
     String phone;    		// 전화번호
     String email;
+    String userAddr;
+    String fullAddr;
     
     // 5. 계산 데이터
     int deposit;    // 예약금

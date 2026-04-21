@@ -6,26 +6,27 @@
 	<select id="selectRsvPayment" resultType="com.example.unipet.model.Payment">
         SELECT 
             r.RSV_NO,        
-            r.RSV_DATE,      
-            r.END_DATE,      
+            r.RSV_DATE,
+            r.RSV_START_TIME,      
+            r.RSV_END_TIME,      
             r.REQUEST,
             r.RSV_STATUS,    
 
             s.STORE_NAME,    
  
-            m.MENU_NAME,     
-            m.MENU_PRICE,    
-            m.M_STATUS,     
+            m.MENU_NAME, 
+            m.MENU_PRICE, 
+            m.M_STATUS, 
 
-			u.user_id,  
-            u.USER_NAME,    
+			u.user_id, 
+            u.USER_NAME, 
             u.PHONE          
             
         FROM reservation r
         INNER JOIN store s ON r.STORE_NO = s.STORE_NO
         INNER JOIN store_menu m ON r.MENU_NO = m.MENU_NO
         INNER JOIN users u ON r.USER_ID = u.USER_ID
-        WHERE r.RSV_NO = 11 <!-- 테스트용 하드코딩 -->
+        WHERE r.RSV_NO = 1 <!-- 테스트용 하드코딩 -->
     </select>
     
     <select id="selectUser" parameterType="hashmap" resultType="com.example.unipet.model.Payment">
@@ -33,7 +34,9 @@
             USER_ID,
             USER_NAME,
             PHONE,
-            email
+            email,
+            user_addr,
+            full_addr
 		FROM USERS 
         <!-- WHERE USER_ID = #{userId} -->
 		where USER_ID = 'test_user01'
@@ -44,6 +47,35 @@
 	    FROM subscription
 	    WHERE USER_ID = #{userId}
 	      AND sub_STATUS = 'Y'
+	</select>
+    
+     <select id="selectTodaySub" resultType="hashmap">
+	    SELECT 
+	        s.SUB_NO,
+	        s.USER_ID,
+	        s.SUB_PRICE,
+	        s.METHOD_NO,
+	        pm.BILLINGKEY  
+	        FROM subscription s
+	    JOIN payment_method pm ON s.METHOD_NO = pm.METHOD_NO
+	    WHERE s.SUB_STATUS = 'Y'
+	    AND s.IS_AUTO = 'Y'   
+	    AND DATE(s.N_DATE) = CURDATE()
+     </select>
+     
+     <select id="selectProductList" resultType="hashmap">
+	    SELECT 
+	        c.CART_NO,
+	        p.PRODUCT_NAME,
+	        p.PRODUCT_PRICE,
+	        c.QTY
+	    FROM cart c
+	    JOIN product p ON c.PRODUCT_NO = p.PRODUCT_NO
+	    WHERE c.USER_ID = #{userId}
+	      AND c.CART_NO IN 
+	      <foreach collection="list" item="id" open="(" separator="," close=")">
+	          #{id}
+	      </foreach>
 	</select>
     
 	<insert id="insertPayment" parameterType="hashmap">
@@ -94,32 +126,35 @@
    	 )
 	</insert>
 	
-	<insert id="insertPaymentMethod" parameterType="hashmap">
+	<insert id="insertPaymentMethod" parameterType="hashmap" useGeneratedKeys="true" keyProperty="methodNo">
 	    INSERT INTO payment_method (
-	        USER_ID, 
-	        PM_NAME, 
-	        BILLINGKEY, 
-	        IS_DEFAULT, 
-	        CDATE
-	    ) VALUES (
-	        #{userId}, 
-	        #{pmName},    
-	        #{issuedBillingKey}, 
-	        'Y',
-	        NOW()
-	    )
-	    ON DUPLICATE KEY UPDATE 
-	        BILLINGKEY = #{issuedBillingKey},
-	        PM_NAME = #{pmName},
-	        CDATE = NOW()
-	</insert>	
+			USER_ID, 
+			PM_NAME, 
+			BILLINGKEY, 
+			IS_DEFAULT
+		) VALUES (
+			#{userId}, 
+			#{pmName}, 
+			#{billingKey}, 
+			'Y')
+	</insert>
 
     <update id="updateRsvStatus" parameterType="hashmap">
         UPDATE reservation
         SET 
-            RSV_STATUS = 'FIN'
+            RSV_STATUS = 'CNF'
         WHERE 
             RSV_NO = #{rsvNo}
     </update>
+    
+    <update id="updateSub" parameterType="hashmap">
+	    UPDATE subscription
+	    SET 
+	        S_DATE = NOW(),   
+	        E_DATE = DATE_ADD(NOW(), INTERVAL 1 MONTH),    
+	        N_DATE = DATE_ADD(NOW(), INTERVAL 1 MONTH)
+	        WHERE SUB_NO = #{subNo}
+	</update>
+   
     
 </mapper>

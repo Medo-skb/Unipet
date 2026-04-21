@@ -1,0 +1,100 @@
+/* 전체 컨테이너 */
+.pay-container {
+    max-width: 1000px;
+    margin: 50px auto;
+    padding: 0 20px;
+    color: #333;
+    font-family: 'Pretendard', sans-serif;
+}
+
+/* 제목 섹션 */
+.pay-header {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 30px;
+    text-align: center;
+    color: #444;
+}
+
+/* 섹션 공통 스타일 */
+.pay-section {
+    background: #fff;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05); /* 부드러운 그림자 */
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.section-title::before {
+    content: "";
+    width: 4px;
+    height: 18px;
+    background-color: #3BB1E5; /* 검색창 보더 컬러와 매칭 */
+    margin-right: 10px;
+    border-radius: 2px;
+}
+
+/* 상품 리스트 스타일 */
+.item-card {
+    display: flex;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #f1f1f1;
+}
+.item-card:last-child { border-bottom: none; }
+.item-info { flex: 1; padding-left: 15px; }
+.item-name { font-weight: 600; font-size: 16px; }
+.item-price { color: #666; font-size: 14px; margin-top: 5px; }
+
+/* 입력 필드 (검색창 스타일 반영) */
+.input-group { margin-bottom: 15px; }
+.input-group label { display: block; font-size: 14px; margin-bottom: 8px; color: #555; }
+.input-field {
+    width: 100%;
+    padding: 12px 20px;
+    border: 1px solid #e1e1e1;
+    border-radius: 30px; /* 검색창과 동일한 라운드 */
+    outline: none;
+    transition: border-color 0.3s;
+}
+.input-field:focus { border-color: #3BB1E5; }
+
+/* 결제 요약 섹션 */
+.summary-box {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 12px;
+}
+.summary-row { display: flex; justify-content: space-between; margin-bottom: 10px; }
+.total-row {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #ddd;
+    font-size: 20px;
+    font-weight: 700;
+    color: #3BB1E5;
+}
+
+/* 결제 버튼 */
+.btn-submit {
+    width: 100%;
+    padding: 18px;
+    background: #3BB1E5;
+    color: white;
+    border: none;
+    border-radius: 35px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 20px;
+    box-shadow: 0 4px 10px rgba(59, 177, 229, 0.3);
+}
+.btn-submit:hover { background: #2a9cd1; }

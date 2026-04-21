@@ -13,6 +13,7 @@
     <script src="/js/main/main.js"></script>
     <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/header.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/footer.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/payment/pay-rsv.css">
 </head>
 <body>
@@ -24,10 +25,6 @@
             <h1>결제 상세 정보</h1>
             
             <table class="payment-table">
-                <tr>
-                    <th>예약 번호</th>
-                    <td>{{ info.rsvNo }}</td>
-                </tr>
                 <tr>
                     <th>예약 업체</th>
                     <td>{{ info.storeName }}</td>
@@ -41,11 +38,15 @@
                     <td>{{ info.rsvDate }}</td>
                 </tr>
                 <tr>
+                    <th>예약 시간</th>
+                    <td>{{info.rsvStartTime}} ~ {{info.rsvEndTime}}</td>
+                </tr>
+                <tr>
                     <th>예약자명</th>
                     <td>{{ info.userName }}</td>
                 </tr>
                 <tr>
-                    <th>메뉴 가격</th>
+                    <th>가격</th>
                     <td>{{ info.menuPrice }}원</td>
                 </tr>
             </table>
@@ -71,6 +72,9 @@
             </div>
         </div>
     </div>
+
+     <jsp:include page="/WEB-INF/footer/footer.jsp" />
+
 </body>
 </html> 
 
