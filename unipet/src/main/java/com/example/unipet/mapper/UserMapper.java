@@ -9,27 +9,19 @@ import com.example.unipet.model.User;
 @Mapper
 public interface UserMapper {
 
-    // 일반 로그인
     User selectUser(HashMap<String, Object> map);
-
-    // userId 단건 조회
-    User selectUserById(HashMap<String, Object> map);
-
-    // 사업자 로그인
     User selectStoreUser(HashMap<String, Object> map);
 
-    // 아이디 중복 체크
-    int checkUser(HashMap<String, Object> map);
-
-    // 일반 회원가입
     int insertUser(HashMap<String, Object> map);
-
-    // 사업자 회원가입
     int insertBizUser(HashMap<String, Object> map);
 
-    // 소셜 회원 조회
-    User selectSocialUser(HashMap<String, Object> map);
+    int checkUser(HashMap<String, Object> map);
+    int checkStoreUser(HashMap<String, Object> map);
 
-    // 소셜 회원 가입
+    User findId(HashMap<String, Object> map);
+    User checkUserForReset(HashMap<String, Object> map);
+    int resetPwd(HashMap<String, Object> map);
+
+    User selectSocialUser(HashMap<String, Object> map);
     int insertSocialUser(HashMap<String, Object> map);
 }
