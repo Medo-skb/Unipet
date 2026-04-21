@@ -87,10 +87,10 @@
 <body>
     <div id="app">
         <!-- html 코드는 id가 app인 태그 안에서 작업 -->
-         <button onclick="location.href='/user/SignupUser.do'">
+         <button onclick="location.href='/user/signupuser.do'">
              일반사용자
          </button>
-          <button onclick="location.href='/user/SignupBiz.do'">
+          <button onclick="location.href='/user/signupbiz.do'">
              사업자
          </button>
 

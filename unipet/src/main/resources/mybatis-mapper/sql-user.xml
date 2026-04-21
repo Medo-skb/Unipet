@@ -1,44 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.example.unipet.mapper.UserMapper">
 
-    <!-- 일반회원 users 매핑 -->
-    <resultMap id="userMap" type="com.example.unipet.model.User">
-        <id property="userId" column="USER_ID"/>
-        <result property="pwd" column="USER_PWD"/>
-        <result property="userName" column="USER_NAME"/>
-        <result property="nickname" column="NICKNAME"/>
-        <result property="phone" column="PHONE"/>
-        <result property="email" column="EMAIL"/>
-        <result property="userAddr" column="USER_ADDR"/>
-        <result property="fullAddr" column="FULL_ADDR"/>
-        <result property="zipcode" column="ZIPCODE"/>
-        <result property="userStatus" column="USER_STATUS"/>
-        <result property="socialType" column="SOCIALTYPE"/>
-        <result property="socialId" column="SOCIAL_ID"/>
-        <result property="cdate" column="CDATE"/>
-    </resultMap>
+    <!-- 사용자 일반 로그인 -->
+    <select id="selectUser" parameterType="hashmap" resultType="com.example.unipet.model.User">
+        SELECT
+            USER_ID AS userId,
+            USER_PWD AS pwd,
+            USER_NAME AS userName,
+            NICKNAME AS nickname,
+            PHONE,
+            EMAIL,
+            USER_ADDR AS userAddr,
+            FULL_ADDR AS fullAddr,
+            ZIPCODE,
+            SOCIALTYPE AS socialType,
+            CDATE AS cdate,
+            USER_STATUS AS userStatus
+        FROM users
+        WHERE USER_ID = #{userId}
+          AND USER_PWD = #{pwd}
+    </select>
 
-    <!-- 사업자 store_user 매핑 -->
-    <resultMap id="storeUserMap" type="com.example.unipet.model.User">
-        <result property="storeUserId" column="S_USER_ID"/>
-        <result property="storeUserPwd" column="S_USER_PWD"/>
-        <result property="ceoName" column="CEO_NAME"/>
-    </resultMap>
+    <!-- 사업자 로그인 -->
+    <select id="selectStoreUser" parameterType="hashmap" resultType="com.example.unipet.model.User">
+        SELECT
+            S_USER_ID AS sUserId,
+            S_USER_PWD AS sUserPwd,
+            CEO_NAME AS ceoName
+        FROM store_user
+        WHERE S_USER_ID = #{userId}
+          AND S_USER_PWD = #{pwd}
+    </select>
 
-    <!-- 일반회원 아이디 중복체크 -->
+    <!-- 아이디 중복 체크 -->
     <select id="checkUser" parameterType="hashmap" resultType="int">
         SELECT COUNT(*)
         FROM users
         WHERE USER_ID = #{userId}
     </select>
 
-    <!-- 일반회원 가입 -->
+    <!-- 일반 회원가입 -->
     <insert id="insertUser" parameterType="hashmap">
-        INSERT INTO users
-        (
+        INSERT INTO users (
             USER_ID,
             USER_PWD,
             EMAIL,
@@ -48,11 +55,10 @@
             USER_ADDR,
             FULL_ADDR,
             ZIPCODE,
-            USER_STATUS,
-            CDATE
-        )
-        VALUES
-        (
+            SOCIALTYPE,
+            CDATE,
+            USER_STATUS
+        ) VALUES (
             #{userId},
             #{pwd},
             #{email},
@@ -62,87 +68,33 @@
             #{userAddr},
             #{fullAddr},
             #{zipcode},
-            'NOR',
-            NOW()
+            #{socialType},
+            NOW(),
+            'NOR'
         )
     </insert>
 
-    <!-- 일반회원 로그인 조회 -->
-    <select id="selectUser" parameterType="hashmap" resultMap="userMap">
+    <!-- 소셜 로그인용 조회 -->
+    <select id="selectUserByUserId" parameterType="hashmap" resultType="com.example.unipet.model.User">
         SELECT
-            USER_ID,
-            USER_PWD,
-            EMAIL,
-            USER_NAME,
-            NICKNAME,
+            USER_ID AS userId,
+            USER_NAME AS userName,
+            NICKNAME AS nickname,
             PHONE,
-            USER_ADDR,
-            FULL_ADDR,
-            ZIPCODE,
-            USER_STATUS,
-            SOCIALTYPE,
-            SOCIAL_ID,
-            CDATE
-        FROM users
-        WHERE USER_ID = #{userId}
-          AND USER_STATUS = 'NOR'
-    </select>
-
-    <!-- userId 단건 조회 -->
-    <select id="selectUserById" parameterType="hashmap" resultMap="userMap">
-        SELECT
-            USER_ID,
-            USER_PWD,
             EMAIL,
-            USER_NAME,
-            NICKNAME,
-            PHONE,
-            USER_ADDR,
-            FULL_ADDR,
+            USER_ADDR AS userAddr,
+            FULL_ADDR AS fullAddr,
             ZIPCODE,
-            USER_STATUS,
-            SOCIALTYPE,
-            SOCIAL_ID,
-            CDATE
+            SOCIALTYPE AS socialType,
+            CDATE AS cdate,
+            USER_STATUS AS userStatus
         FROM users
         WHERE USER_ID = #{userId}
     </select>
 
-    <!-- 사업자 로그인 조회 -->
-    <select id="selectStoreUser" parameterType="hashmap" resultMap="storeUserMap">
-        SELECT
-            S_USER_ID,
-            S_USER_PWD,
-            CEO_NAME
-        FROM store_user
-        WHERE S_USER_ID = #{userId}
-    </select>
-
-    <!-- 소셜회원 조회 -->
-    <select id="selectSocialUser" parameterType="hashmap" resultMap="userMap">
-        SELECT
-            USER_ID,
-            USER_PWD,
-            EMAIL,
-            USER_NAME,
-            NICKNAME,
-            PHONE,
-            USER_ADDR,
-            FULL_ADDR,
-            ZIPCODE,
-            USER_STATUS,
-            SOCIALTYPE,
-            SOCIAL_ID,
-            CDATE
-        FROM users
-        WHERE SOCIALTYPE = #{socialType}
-          AND SOCIAL_ID = #{socialId}
-    </select>
-
-    <!-- 소셜회원 자동가입 -->
+    <!-- 소셜 회원 자동 등록 -->
     <insert id="insertSocialUser" parameterType="hashmap">
-        INSERT INTO users
-        (
+        INSERT INTO users (
             USER_ID,
             USER_PWD,
             EMAIL,
@@ -153,12 +105,9 @@
             FULL_ADDR,
             ZIPCODE,
             SOCIALTYPE,
-            SOCIAL_ID,
-            USER_STATUS,
-            CDATE
-        )
-        VALUES
-        (
+            CDATE,
+            USER_STATUS
+        ) VALUES (
             #{userId},
             '',
             #{email},
@@ -169,96 +118,9 @@
             '',
             '',
             #{socialType},
-            #{socialId},
-            'NOR',
-            NOW()
+            NOW(),
+            'NOR'
         )
     </insert>
-
-    <!-- 아이디 찾기 -->
-    <select id="findId" parameterType="hashmap" resultMap="userMap">
-        SELECT
-            USER_ID,
-            USER_NAME,
-            PHONE
-        FROM users
-        WHERE USER_NAME = #{userName}
-          AND PHONE = #{phone}
-          AND USER_STATUS = 'NOR'
-    </select>
-
-    <!-- 비밀번호 찾기 대상 확인 -->
-    <select id="checkUserForReset" parameterType="hashmap" resultMap="userMap">
-        SELECT
-            USER_ID,
-            USER_NAME,
-            PHONE
-        FROM users
-        WHERE USER_ID = #{userId}
-          AND PHONE = #{phone}
-          AND USER_STATUS = 'NOR'
-    </select>
-
-    <!-- 비밀번호 재설정 -->
-    <update id="resetPwd" parameterType="hashmap">
-        UPDATE users
-        SET USER_PWD = #{pwd}
-        WHERE USER_ID = #{userId}
-    </update>
-
-    <!-- 회원정보 조회 -->
-    <select id="getUserInfo" parameterType="hashmap" resultType="hashmap">
-        SELECT
-            USER_ID AS userId,
-            USER_NAME AS userName,
-            NICKNAME AS nickname,
-            PHONE AS phone,
-            EMAIL AS email,
-            USER_ADDR AS userAddr,
-            FULL_ADDR AS fullAddr,
-            ZIPCODE AS zipcode,
-            USER_STATUS AS userStatus,
-            SOCIALTYPE AS socialType,
-            SOCIAL_ID AS socialId,
-            CDATE AS cdate
-        FROM users
-        WHERE USER_ID = #{userId}
-    </select>
-
-    <!-- 회원정보 수정 -->
-    <update id="updateUser" parameterType="hashmap">
-        UPDATE users
-        SET
-            USER_NAME = #{userName},
-            NICKNAME = #{nickname},
-            PHONE = #{phone},
-            EMAIL = #{email},
-            USER_ADDR = #{userAddr},
-            FULL_ADDR = #{fullAddr},
-            ZIPCODE = #{zipcode}
-        WHERE USER_ID = #{userId}
-    </update>
-
-    <!-- 현재 비밀번호 확인 -->
-    <select id="checkPassword" parameterType="hashmap" resultType="hashmap">
-        SELECT USER_ID AS userId
-        FROM users
-        WHERE USER_ID = #{userId}
-          AND USER_PWD = #{oldPwd}
-    </select>
-
-    <!-- 비밀번호 변경 -->
-    <update id="changePwd" parameterType="hashmap">
-        UPDATE users
-        SET USER_PWD = #{newPwd}
-        WHERE USER_ID = #{userId}
-    </update>
-
-    <!-- 회원탈퇴 -->
-    <update id="deleteUser" parameterType="hashmap">
-        UPDATE users
-        SET USER_STATUS = 'DEL'
-        WHERE USER_ID = #{userId}
-    </update>
 
 </mapper>

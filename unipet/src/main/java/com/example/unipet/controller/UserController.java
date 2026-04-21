@@ -15,7 +15,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
 import com.example.unipet.dao.UserService;
@@ -34,6 +39,9 @@ public class UserController {
     @Value("${kakao.client-id:}")
     private String kakaoClientId;
 
+    @Value("${kakao.client-secret:}")
+    private String kakaoClientSecret;
+
     @Value("${kakao.redirect-uri:}")
     private String kakaoRedirectUri;
 
@@ -49,44 +57,62 @@ public class UserController {
     private final Gson gson = new Gson();
     private final SecureRandom random = new SecureRandom();
 
-    // ✅ 메인 (JSP 없이 바로 응답)
-    @GetMapping("/main.do")
-    @ResponseBody
-    public HashMap<String, Object> main(HttpSession session) {
-        HashMap<String, Object> map = new HashMap<>();
-        map.put("message", "로그인 성공");
-        map.put("sessionId", session.getAttribute("sessionId"));
-        map.put("sessionName", session.getAttribute("sessionName"));
-        map.put("sessionRole", session.getAttribute("sessionRole"));
-        return map;
+
+    @GetMapping("/user/login.do")
+    public String login() {
+        return "user/login";
     }
 
-    // 로그인 (AJAX)
+    @GetMapping("/user/join.do")
+    public String join() {
+        return "user/join";
+    }
+
+    @GetMapping("/user/signup-user.do")
+    public String signupUserPage() {
+        return "user/signup-user";
+    }
+
+    @GetMapping("/user/signup-biz.do")
+    public String signupBizPage() {
+        return "user/signup-biz";
+    }
+
     @PostMapping("/user/login.dox")
     @ResponseBody
-    public HashMap<String, Object> login(@RequestParam HashMap<String, Object> map, HttpSession session) {
+    public HashMap<String, Object> loginProc(@RequestParam HashMap<String, Object> map,
+                                             HttpSession session) {
         HashMap<String, Object> result = userService.login(map, session);
 
         if (Boolean.TRUE.equals(result.get("result"))) {
-            result.put("url", "/main.do"); // 🔥 여기 중요
+            result.put("url", "/main.do");
         }
 
         return result;
     }
 
-    // 로그아웃
+    @PostMapping("/user/check.dox")
+    @ResponseBody
+    public HashMap<String, Object> checkUser(@RequestParam HashMap<String, Object> map) {
+        return userService.checkUser(map);
+    }
+
+    @PostMapping("/user/signup-user.dox")
+    @ResponseBody
+    public HashMap<String, Object> signupUser(@RequestParam HashMap<String, Object> map) {
+        return userService.signupUser(map);
+    }
+
     @GetMapping("/user/logout.do")
     public String logout(HttpSession session) {
         session.invalidate();
-        return "redirect:/main.do";
+        return "redirect:/user/login.do";
     }
-
-    // ===================== 카카오 =====================
 
     @GetMapping("/user/kakao/login")
     public void kakaoLogin(HttpServletResponse response) throws IOException {
         String url = "https://kauth.kakao.com/oauth/authorize"
-                + "?client_id=" + kakaoClientId
+                + "?client_id=" + URLEncoder.encode(kakaoClientId, StandardCharsets.UTF_8)
                 + "&redirect_uri=" + URLEncoder.encode(kakaoRedirectUri, StandardCharsets.UTF_8)
                 + "&response_type=code";
 
@@ -94,64 +120,111 @@ public class UserController {
     }
 
     @GetMapping("/user/kakao/callback")
-    public void kakaoCallback(@RequestParam("code") String code,
+    public void kakaoCallback(@RequestParam(value = "code", required = false) String code,
+                              @RequestParam(value = "error", required = false) String error,
                               HttpSession session,
                               HttpServletResponse response) throws Exception {
 
+        if (error != null || code == null || code.isBlank()) {
+            response.sendRedirect("/user/login.do");
+            return;
+        }
+
         RestTemplate restTemplate = new RestTemplate();
 
-        // 토큰 요청
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        HttpHeaders tokenHeaders = new HttpHeaders();
+        tokenHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        String tokenUrl = "https://kauth.kakao.com/oauth/token"
-                + "?grant_type=authorization_code"
-                + "&client_id=" + kakaoClientId
-                + "&redirect_uri=" + kakaoRedirectUri
-                + "&code=" + code;
+        MultiValueMap<String, String> tokenParams = new LinkedMultiValueMap<>();
+        tokenParams.add("grant_type", "authorization_code");
+        tokenParams.add("client_id", kakaoClientId);
+        tokenParams.add("redirect_uri", kakaoRedirectUri);
+        tokenParams.add("code", code);
 
-        ResponseEntity<String> tokenResponse = restTemplate.postForEntity(tokenUrl, null, String.class);
+        if (kakaoClientSecret != null && !kakaoClientSecret.isBlank()) {
+            tokenParams.add("client_secret", kakaoClientSecret);
+        }
+
+        HttpEntity<MultiValueMap<String, String>> tokenRequest =
+                new HttpEntity<>(tokenParams, tokenHeaders);
+
+        ResponseEntity<String> tokenResponse = restTemplate.postForEntity(
+                "https://kauth.kakao.com/oauth/token",
+                tokenRequest,
+                String.class
+        );
+
         Map<String, Object> tokenMap = gson.fromJson(tokenResponse.getBody(), HashMap.class);
+        String accessToken = (tokenMap != null && tokenMap.get("access_token") != null)
+                ? tokenMap.get("access_token").toString()
+                : "";
 
-        String accessToken = tokenMap.get("access_token").toString();
+        if (accessToken.isBlank()) {
+            response.sendRedirect("/user/login.do");
+            return;
+        }
 
-        // 사용자 정보 요청
-        HttpHeaders userHeader = new HttpHeaders();
-        userHeader.setBearerAuth(accessToken);
+        HttpHeaders userHeaders = new HttpHeaders();
+        userHeaders.setBearerAuth(accessToken);
 
-        HttpEntity<String> entity = new HttpEntity<>(userHeader);
+        HttpEntity<String> userRequest = new HttpEntity<>(userHeaders);
 
         ResponseEntity<String> userResponse = restTemplate.exchange(
                 "https://kapi.kakao.com/v2/user/me",
                 HttpMethod.GET,
-                entity,
+                userRequest,
                 String.class
         );
 
         Map<String, Object> userMap = gson.fromJson(userResponse.getBody(), HashMap.class);
 
+        if (userMap == null || userMap.get("id") == null) {
+            response.sendRedirect("/user/login.do");
+            return;
+        }
+
         String socialId = userMap.get("id").toString();
+        String email = "";
+        String userName = "카카오회원";
+        String nickname = "카카오회원";
+
+        Object kakaoAccountObj = userMap.get("kakao_account");
+        if (kakaoAccountObj instanceof Map<?, ?> kakaoAccount) {
+            Object emailObj = kakaoAccount.get("email");
+            if (emailObj != null) {
+                email = emailObj.toString();
+            }
+
+            Object profileObj = kakaoAccount.get("profile");
+            if (profileObj instanceof Map<?, ?> profile) {
+                Object nicknameObj = profile.get("nickname");
+                if (nicknameObj != null && !nicknameObj.toString().isBlank()) {
+                    userName = nicknameObj.toString();
+                    nickname = nicknameObj.toString();
+                }
+            }
+        }
 
         HashMap<String, Object> socialMap = new HashMap<>();
         socialMap.put("userId", "kakao_" + socialId);
-        socialMap.put("userName", "카카오회원");
-        socialMap.put("nickname", "카카오회원");
-        socialMap.put("email", "");
-        socialMap.put("role", "USER");
+        socialMap.put("userName", userName);
+        socialMap.put("nickname", nickname);
+        socialMap.put("email", email);
         socialMap.put("socialType", "KAKAO");
-        socialMap.put("socialId", socialId);
 
         User user = userService.socialLogin(socialMap);
 
+        if (user == null) {
+            response.sendRedirect("/user/login.do");
+            return;
+        }
+
         session.setAttribute("sessionId", user.getUserId());
         session.setAttribute("sessionName", user.getUserName());
-        session.setAttribute("sessionRole", user.getRole());
+        session.setAttribute("sessionRole", "USER");
 
-        // 🔥 main.do로 이동
         response.sendRedirect("/main.do");
     }
-
-    // ===================== 네이버 =====================
 
     @GetMapping("/user/naver/login")
     public void naverLogin(HttpSession session, HttpServletResponse response) throws IOException {
@@ -160,7 +233,7 @@ public class UserController {
 
         String url = "https://nid.naver.com/oauth2.0/authorize"
                 + "?response_type=code"
-                + "&client_id=" + naverClientId
+                + "&client_id=" + URLEncoder.encode(naverClientId, StandardCharsets.UTF_8)
                 + "&redirect_uri=" + URLEncoder.encode(naverRedirectUri, StandardCharsets.UTF_8)
                 + "&state=" + state;
 
@@ -168,24 +241,45 @@ public class UserController {
     }
 
     @GetMapping("/user/naver/callback")
-    public void naverCallback(@RequestParam("code") String code,
-                              @RequestParam("state") String state,
+    public void naverCallback(@RequestParam(value = "code", required = false) String code,
+                              @RequestParam(value = "state", required = false) String state,
+                              @RequestParam(value = "error", required = false) String error,
                               HttpSession session,
                               HttpServletResponse response) throws Exception {
+
+        if (error != null || code == null || code.isBlank() || state == null || state.isBlank()) {
+            response.sendRedirect("/user/login.do");
+            return;
+        }
+
+        String sessionState = session.getAttribute("naverState") == null
+                ? "" : session.getAttribute("naverState").toString();
+
+        if (!state.equals(sessionState)) {
+            response.sendRedirect("/user/login.do");
+            return;
+        }
 
         RestTemplate restTemplate = new RestTemplate();
 
         String tokenUrl = "https://nid.naver.com/oauth2.0/token"
                 + "?grant_type=authorization_code"
-                + "&client_id=" + naverClientId
-                + "&client_secret=" + naverClientSecret
-                + "&code=" + code
-                + "&state=" + state;
+                + "&client_id=" + URLEncoder.encode(naverClientId, StandardCharsets.UTF_8)
+                + "&client_secret=" + URLEncoder.encode(naverClientSecret, StandardCharsets.UTF_8)
+                + "&code=" + URLEncoder.encode(code, StandardCharsets.UTF_8)
+                + "&state=" + URLEncoder.encode(state, StandardCharsets.UTF_8);
 
         ResponseEntity<String> tokenResponse = restTemplate.getForEntity(tokenUrl, String.class);
         Map<String, Object> tokenMap = gson.fromJson(tokenResponse.getBody(), HashMap.class);
 
-        String accessToken = tokenMap.get("access_token").toString();
+        String accessToken = (tokenMap != null && tokenMap.get("access_token") != null)
+                ? tokenMap.get("access_token").toString()
+                : "";
+
+        if (accessToken.isBlank()) {
+            response.sendRedirect("/user/login.do");
+            return;
+        }
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessToken);
@@ -200,26 +294,64 @@ public class UserController {
         );
 
         Map<String, Object> userMap = gson.fromJson(userResponse.getBody(), HashMap.class);
-        Map<String, Object> profile = (Map<String, Object>) userMap.get("response");
 
-        String socialId = profile.get("id").toString();
+        String socialId = "";
+        String email = "";
+        String userName = "네이버회원";
+        String nickname = "네이버회원";
+
+        if (userMap != null) {
+            Object responseObj = userMap.get("response");
+
+            if (responseObj instanceof Map<?, ?> profile) {
+                Object idObj = profile.get("id");
+                if (idObj != null) {
+                    socialId = idObj.toString();
+                }
+
+                Object emailObj = profile.get("email");
+                if (emailObj != null) {
+                    email = emailObj.toString();
+                }
+
+                Object nameObj = profile.get("name");
+                Object nicknameObj = profile.get("nickname");
+
+                if (nameObj != null && !nameObj.toString().isBlank()) {
+                    userName = nameObj.toString();
+                }
+
+                if (nicknameObj != null && !nicknameObj.toString().isBlank()) {
+                    nickname = nicknameObj.toString();
+                } else {
+                    nickname = userName;
+                }
+            }
+        }
+
+        if (socialId.isBlank()) {
+            response.sendRedirect("/user/login.do");
+            return;
+        }
 
         HashMap<String, Object> socialMap = new HashMap<>();
         socialMap.put("userId", "naver_" + socialId);
-        socialMap.put("userName", "네이버회원");
-        socialMap.put("nickname", "네이버회원");
-        socialMap.put("email", "");
-        socialMap.put("role", "USER");
+        socialMap.put("userName", userName);
+        socialMap.put("nickname", nickname);
+        socialMap.put("email", email);
         socialMap.put("socialType", "NAVER");
-        socialMap.put("socialId", socialId);
 
         User user = userService.socialLogin(socialMap);
 
+        if (user == null) {
+            response.sendRedirect("/user/login.do");
+            return;
+        }
+
         session.setAttribute("sessionId", user.getUserId());
         session.setAttribute("sessionName", user.getUserName());
-        session.setAttribute("sessionRole", user.getRole());
+        session.setAttribute("sessionRole", "USER");
 
-        // 🔥 main.do로 이동
         response.sendRedirect("/main.do");
     }
 }
