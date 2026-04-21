@@ -7,6 +7,8 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>UniPet Product</title>
 		<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+		<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+		<script src="/js/page-change.js"></script>
 		<style>
 			* {
 				box-sizing: border-box;
@@ -25,10 +27,47 @@
 				padding: 30px 0;
 			}
 
+			.top-bar {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				margin-bottom: 20px;
+			}
+
 			.title {
 				font-size: 30px;
 				font-weight: bold;
-				margin-bottom: 20px;
+			}
+
+			.cart-icon-wrap {
+				position: relative;
+				cursor: pointer;
+				font-size: 30px;
+				background: #fff;
+				border: 1px solid #ddd;
+				width: 56px;
+				height: 56px;
+				border-radius: 50%;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+
+			.cart-count {
+				position: absolute;
+				top: -6px;
+				right: -4px;
+				min-width: 22px;
+				height: 22px;
+				padding: 0 6px;
+				border-radius: 999px;
+				background: #ff7a00;
+				color: #fff;
+				font-size: 12px;
+				font-weight: bold;
+				display: flex;
+				align-items: center;
+				justify-content: center;
 			}
 
 			.container {
@@ -153,6 +192,10 @@
 			.sub-list {
 				display: none;
 				padding: 8px 0 8px 10px;
+			}
+
+			.sub-list.show {
+				display: block;
 			}
 
 			.sub-item {
@@ -308,443 +351,312 @@
 				padding: 50px;
 				text-align: center;
 			}
-
-			.detail-box {
-				margin-top: 30px;
-				background: #fff;
-				border: 1px solid #ddd;
-				border-radius: 12px;
-				padding: 25px;
-				display: none;
-			}
-
-			.detail-wrap {
-				display: flex;
-				gap: 30px;
-			}
-
-			.detail-left {
-				width: 420px;
-				flex-shrink: 0;
-			}
-
-			.detail-left img.main {
-				width: 100%;
-				height: 420px;
-				object-fit: cover;
-				border-radius: 10px;
-				background: #f3f3f3;
-			}
-
-			.thumb-list {
-				display: flex;
-				gap: 8px;
-				margin-top: 10px;
-				flex-wrap: wrap;
-			}
-
-			.thumb-list img {
-				width: 75px;
-				height: 75px;
-				object-fit: cover;
-				border: 1px solid #ddd;
-				border-radius: 8px;
-				background: #f3f3f3;
-			}
-
-			.detail-right {
-				flex: 1;
-			}
-
-			.detail-right h3 {
-				font-size: 28px;
-				margin-top: 0;
-				margin-bottom: 16px;
-			}
-
-			.detail-info {
-				line-height: 1.9;
-				font-size: 15px;
-			}
-
-			.price {
-				font-size: 30px;
-				color: #ff7a00;
-				font-weight: bold;
-				margin: 20px 0;
-			}
-
-			.btn-area button {
-				min-width: 130px;
-				height: 44px;
-				border: none;
-				border-radius: 8px;
-				cursor: pointer;
-				font-size: 15px;
-				font-weight: bold;
-			}
-
-			.btn-cart {
-				background: #e9ecef;
-				color: #333;
-				margin-right: 10px;
-			}
-
-			.btn-buy {
-				background: #ff7a00;
-				color: #fff;
-			}
 		</style>
 	</head>
 
 	<body>
+		<div id="app">
+			<div class="header">
+				<div class="wrap">
+					<div class="container">
+						<div class="sidebar">
+							<div class="category-tab-wrap">
+								<button type="button" class="category-tab" :class="{active : categoryTab == 'animal'}"
+									@click="fnShowCategoryTab('animal')">동물별</button>
 
-		<div class="wrap">
-			<div class="title">쇼핑몰</div>
+								<button type="button" class="category-tab" :class="{active : categoryTab == 'item'}"
+									@click="fnShowCategoryTab('item')">상품별</button>
+							</div>
 
-			<div class="container">
-				<div class="sidebar">
-					<div class="category-tab-wrap">
-						<button type="button" id="animalTabBtn" class="category-tab active"
-							onclick="fnShowCategoryTab('animal')">동물별</button>
-						<button type="button" id="itemTabBtn" class="category-tab"
-							onclick="fnShowCategoryTab('item')">상품별</button>
+							<div id="animalPanel" class="category-panel" :class="{active : categoryTab == 'animal'}">
+								<div class="category-title">동물 카테고리</div>
+
+								<div class="category-all"
+									:class="{active : selectedAMainNo == '' && selectedASubNo == ''}"
+									@click="fnSelectAnimalAll()">
+									동물 전체보기
+								</div>
+
+								<div v-for="main in animalMainList" :key="'animalMain' + main.A_MAIN_NO">
+									<div class="main-category"
+										:class="{active : selectedAMainNo == String(main.A_MAIN_NO)}"
+										@click="fnToggleAnimalSub(main.A_MAIN_NO)">
+										<span>{{main.A_MAIN_TYPE}}</span>
+										<span>+</span>
+									</div>
+
+									<div class="main-btns">
+										<span class="main-view-btn"
+											:class="{active : selectedAMainNo == String(main.A_MAIN_NO) && selectedASubNo == ''}"
+											@click.stop="fnSelectAnimalMain(main.A_MAIN_NO, main.A_MAIN_TYPE)">
+											{{main.A_MAIN_TYPE}} 전체보기
+										</span>
+									</div>
+
+									<div class="sub-list" :class="{show : openAnimalMainNo == main.A_MAIN_NO}">
+										<div v-for="sub in animalSubList.filter(s => s.A_MAIN_NO == main.A_MAIN_NO)"
+											:key="'animalSub' + sub.A_SUB_NO" class="sub-item"
+											:class="{active : selectedASubNo == String(sub.A_SUB_NO)}"
+											@click="fnSelectAnimalSub(sub.A_MAIN_NO, sub.A_SUB_NO, sub.A_SUB_TYPE)">
+											{{sub.A_SUB_TYPE}}
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div id="itemPanel" class="category-panel" :class="{active : categoryTab == 'item'}">
+								<div class="category-title">상품 카테고리</div>
+
+								<div class="category-all"
+									:class="{active : selectedIMainNo == '' && selectedISubNo == ''}"
+									@click="fnSelectItemAll()">
+									상품 전체보기
+								</div>
+
+								<div v-for="main in itemMainList" :key="'itemMain' + main.I_MAIN_NO">
+									<div class="main-category"
+										:class="{active : selectedIMainNo == String(main.I_MAIN_NO)}"
+										@click="fnToggleItemSub(main.I_MAIN_NO)">
+										<span>{{main.I_MAIN_TYPE}}</span>
+										<span>+</span>
+									</div>
+
+									<div class="main-btns">
+										<span class="main-view-btn"
+											:class="{active : selectedIMainNo == String(main.I_MAIN_NO) && selectedISubNo == ''}"
+											@click.stop="fnSelectItemMain(main.I_MAIN_NO, main.I_MAIN_TYPE)">
+											{{main.I_MAIN_TYPE}} 전체보기
+										</span>
+									</div>
+
+									<div class="sub-list" :class="{show : openItemMainNo == main.I_MAIN_NO}">
+										<div v-for="sub in itemSubList.filter(s => s.I_MAIN_NO == main.I_MAIN_NO)"
+											:key="'itemSub' + sub.I_SUB_NO" class="sub-item"
+											:class="{active : selectedISubNo == String(sub.I_SUB_NO)}"
+											@click="fnSelectItemSub(sub.I_MAIN_NO, sub.I_SUB_NO, sub.I_SUB_TYPE)">
+											{{sub.I_SUB_TYPE}}
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="content">
+							<div class="selected-filter-box">
+								<span class="filter-label">선택 필터</span>
+								<span class="filter-tag">{{selectedAnimalText}}</span>
+								<span class="filter-tag">{{selectedItemText}}</span>
+								<button type="button" class="filter-reset-btn" @click="fnResetFilter()">전체 초기화</button>
+							</div>
+
+							<div class="search-box">
+								<input type="text" v-model="keyword" placeholder="상품명 검색">
+								<select v-model="sort">
+									<option value="">최신순</option>
+									<option value="priceAsc">가격 낮은순</option>
+									<option value="priceDesc">가격 높은순</option>
+								</select>
+								<button type="button" @click="fnGetProductList()">검색</button>
+							</div>
+
+							<div v-if="productList.length == 0" class="empty-box">
+								조회된 상품이 없습니다.
+							</div>
+
+							<div v-else class="product-list">
+								<div class="product-card" v-for="item in productList" :key="item.PRODUCT_NO"
+									@click="fnMoveDetail(item.PRODUCT_NO)">
+									<img v-if="item.MAIN_IMG != null && item.MAIN_IMG != ''" :src="item.MAIN_IMG">
+									<img v-else src="http://localhost:8080/img/no-image.png">
+
+									<div class="product-name">{{item.PRODUCT_NAME}}</div>
+									<div class="product-info">브랜드 : {{item.BRAND == null ? '-' : item.BRAND}}</div>
+									<div class="product-info">동물 : {{item.A_SUB_TYPE}}</div>
+									<div class="product-info">상품 : {{item.I_SUB_TYPE}}</div>
+									<div class="product-price">{{fnFormatPrice(item.PRODUCT_PRICE)}}원</div>
+								</div>
+							</div>
+						</div>
 					</div>
-
-					<div id="animalPanel" class="category-panel active">
-						<div class="category-title">동물 카테고리</div>
-						<div id="animalCategoryArea"></div>
-					</div>
-
-					<div id="itemPanel" class="category-panel">
-						<div class="category-title">상품 카테고리</div>
-						<div id="itemCategoryArea"></div>
-					</div>
-				</div>
-
-				<div class="content">
-					<div class="selected-filter-box">
-						<span class="filter-label">선택 필터</span>
-						<span id="selectedAnimalTag"></span>
-						<span id="selectedItemTag"></span>
-						<button type="button" class="filter-reset-btn" onclick="fnResetFilter()">전체 초기화</button>
-					</div>
-
-					<div class="search-box">
-						<input type="text" id="keyword" placeholder="상품명 검색">
-						<select id="sort">
-							<option value="">최신순</option>
-							<option value="priceAsc">가격 낮은순</option>
-							<option value="priceDesc">가격 높은순</option>
-						</select>
-						<button type="button" onclick="fnGetProductList()">검색</button>
-					</div>
-
-					<div id="listArea" class="product-list"></div>
-					<div id="detailArea" class="detail-box"></div>
 				</div>
 			</div>
-		</div>
-
-		<script>
-			let selectedAMainNo = "";
-			let selectedASubNo = "";
-			let selectedIMainNo = "";
-			let selectedISubNo = "";
-
-			let selectedAnimalText = "동물 전체";
-			let selectedItemText = "상품 전체";
-
-			$(document).ready(function () {
-				fnGetCategoryList();
-				fnGetProductList();
-				fnRenderSelectedFilter();
-			});
-
-			function fnShowCategoryTab(type) {
-				$(".category-tab").removeClass("active");
-				$(".category-panel").removeClass("active");
-
-				if (type == "animal") {
-					$("#animalTabBtn").addClass("active");
-					$("#animalPanel").addClass("active");
-				} else {
-					$("#itemTabBtn").addClass("active");
-					$("#itemPanel").addClass("active");
-				}
-			}
-
-			function fnGetCategoryList() {
-				$.ajax({
-					url: "http://localhost:8080/productCategory.dox",
-					type: "POST",
-					dataType: "json",
-					data: {},
-					success: function (data) {
-						if (data.result == "success") {
-							fnDrawAnimalCategory(data.animalMainList, data.animalSubList);
-							fnDrawItemCategory(data.itemMainList, data.itemSubList);
-						} else {
-							alert("카테고리 조회 실패");
-						}
-					},
-					error: function () {
-						alert("카테고리 조회 중 오류가 발생했습니다.");
-					}
-				});
-			}
-
-			function fnDrawAnimalCategory(mainList, subList) {
-				let html = "";
-				html += "<div class='category-all " + (selectedAMainNo == '' && selectedASubNo == '' ? "active" : "") + "' onclick='fnSelectAnimalAll()'>동물 전체보기</div>";
-
-				$.each(mainList, function (index, main) {
-					let mainActive = (selectedAMainNo == String(main.A_MAIN_NO));
-					let mainBtnActive = (selectedAMainNo == String(main.A_MAIN_NO) && selectedASubNo == "");
-
-					html += "<div class='main-category " + (mainActive ? "active" : "") + "' onclick=\"fnToggleSub('animalSub_" + main.A_MAIN_NO + "')\">";
-					html += "<span>" + main.A_MAIN_TYPE + "</span><span>+</span>";
-					html += "</div>";
-
-					html += "<div class='main-btns'>";
-					html += "<span class='main-view-btn " + (mainBtnActive ? "active" : "") + "' onclick='fnSelectAnimalMain(" + main.A_MAIN_NO + ",\"" + main.A_MAIN_TYPE + "\")'>" + main.A_MAIN_TYPE + " 전체보기</span>";
-					html += "</div>";
-
-					html += "<div class='sub-list' id='animalSub_" + main.A_MAIN_NO + "' style='" + (mainActive ? "display:block;" : "") + "'>";
-					$.each(subList, function (i, sub) {
-						if (main.A_MAIN_NO == sub.A_MAIN_NO) {
-							let subActive = (selectedASubNo == String(sub.A_SUB_NO));
-							html += "<div class='sub-item " + (subActive ? "active" : "") + "' onclick='fnSelectAnimalSub(" + sub.A_MAIN_NO + "," + sub.A_SUB_NO + ",\"" + sub.A_SUB_TYPE + "\")'>" + sub.A_SUB_TYPE + "</div>";
-						}
-					});
-					html += "</div>";
-				});
-
-				$("#animalCategoryArea").html(html);
-			}
-
-			function fnDrawItemCategory(mainList, subList) {
-				let html = "";
-				html += "<div class='category-all " + (selectedIMainNo == '' && selectedISubNo == '' ? "active" : "") + "' onclick='fnSelectItemAll()'>상품 전체보기</div>";
-
-				$.each(mainList, function (index, main) {
-					let mainActive = (selectedIMainNo == String(main.I_MAIN_NO));
-					let mainBtnActive = (selectedIMainNo == String(main.I_MAIN_NO) && selectedISubNo == "");
-
-					html += "<div class='main-category " + (mainActive ? "active" : "") + "' onclick=\"fnToggleSub('itemSub_" + main.I_MAIN_NO + "')\">";
-					html += "<span>" + main.I_MAIN_TYPE + "</span><span>+</span>";
-					html += "</div>";
-
-					html += "<div class='main-btns'>";
-					html += "<span class='main-view-btn " + (mainBtnActive ? "active" : "") + "' onclick='fnSelectItemMain(" + main.I_MAIN_NO + ",\"" + main.I_MAIN_TYPE + "\")'>" + main.I_MAIN_TYPE + " 전체보기</span>";
-					html += "</div>";
-
-					html += "<div class='sub-list' id='itemSub_" + main.I_MAIN_NO + "' style='" + (mainActive ? "display:block;" : "") + "'>";
-					$.each(subList, function (i, sub) {
-						if (main.I_MAIN_NO == sub.I_MAIN_NO) {
-							let subActive = (selectedISubNo == String(sub.I_SUB_NO));
-							html += "<div class='sub-item " + (subActive ? "active" : "") + "' onclick='fnSelectItemSub(" + sub.I_MAIN_NO + "," + sub.I_SUB_NO + ",\"" + sub.I_SUB_TYPE + "\")'>" + sub.I_SUB_TYPE + "</div>";
-						}
-					});
-					html += "</div>";
-				});
-
-				$("#itemCategoryArea").html(html);
-			}
-
-			function fnToggleSub(id) {
-				$("#" + id).slideToggle(150);
-			}
-
-			function fnSelectAnimalAll() {
-				selectedAMainNo = "";
-				selectedASubNo = "";
-				selectedAnimalText = "동물 전체";
-				fnRenderSelectedFilter();
-				fnGetCategoryList();
-				fnGetProductList();
-			}
-
-			function fnSelectAnimalMain(aMainNo, aMainType) {
-				selectedAMainNo = String(aMainNo);
-				selectedASubNo = "";
-				selectedAnimalText = aMainType + " 전체";
-				fnRenderSelectedFilter();
-				fnGetCategoryList();
-				fnGetProductList();
-			}
-
-			function fnSelectAnimalSub(aMainNo, aSubNo, aSubType) {
-				selectedAMainNo = String(aMainNo);
-				selectedASubNo = String(aSubNo);
-				selectedAnimalText = aSubType;
-				fnRenderSelectedFilter();
-				fnGetCategoryList();
-				fnGetProductList();
-			}
-
-			function fnSelectItemAll() {
-				selectedIMainNo = "";
-				selectedISubNo = "";
-				selectedItemText = "상품 전체";
-				fnRenderSelectedFilter();
-				fnGetCategoryList();
-				fnGetProductList();
-			}
-
-			function fnSelectItemMain(iMainNo, iMainType) {
-				selectedIMainNo = String(iMainNo);
-				selectedISubNo = "";
-				selectedItemText = iMainType + " 전체";
-				fnRenderSelectedFilter();
-				fnGetCategoryList();
-				fnGetProductList();
-			}
-
-			function fnSelectItemSub(iMainNo, iSubNo, iSubType) {
-				selectedIMainNo = String(iMainNo);
-				selectedISubNo = String(iSubNo);
-				selectedItemText = iSubType;
-				fnRenderSelectedFilter();
-				fnGetCategoryList();
-				fnGetProductList();
-			}
-
-			function fnResetFilter() {
-				selectedAMainNo = "";
-				selectedASubNo = "";
-				selectedIMainNo = "";
-				selectedISubNo = "";
-				selectedAnimalText = "동물 전체";
-				selectedItemText = "상품 전체";
-				$("#keyword").val("");
-				$("#sort").val("");
-				fnRenderSelectedFilter();
-				fnGetCategoryList();
-				fnGetProductList();
-			}
-
-			function fnRenderSelectedFilter() {
-				$("#selectedAnimalTag").html("<span class='filter-tag'>" + selectedAnimalText + "</span>");
-				$("#selectedItemTag").html("<span class='filter-tag'>" + selectedItemText + "</span>");
-			}
-
-			function fnGetProductList() {
-				let nparmap = {};
-				nparmap.keyword = $("#keyword").val();
-				nparmap.aMainNo = selectedAMainNo;
-				nparmap.aSubNo = selectedASubNo;
-				nparmap.iMainNo = selectedIMainNo;
-				nparmap.iSubNo = selectedISubNo;
-				nparmap.sort = $("#sort").val();
-
-				$.ajax({
-					url: "http://localhost:8080/productList.dox",
-					type: "POST",
-					dataType: "json",
-					data: nparmap,
-					success: function (data) {
-						let html = "";
-
-						if (data.result == "success") {
-							if (data.list.length == 0) {
-								$("#listArea").removeClass("product-list");
-								html = "<div class='empty-box'>조회된 상품이 없습니다.</div>";
-							} else {
-								$("#listArea").addClass("product-list");
-								$.each(data.list, function (index, item) {
-									html += "<div class='product-card' onclick='fnGetProductView(" + item.PRODUCT_NO + ")'>";
-
-									if (item.MAIN_IMG != null && item.MAIN_IMG != "") {
-										html += "<img src='" + item.MAIN_IMG + "'>";
-									} else {
-										html += "<img src='http://localhost:8080/img/no-image.png'>";
-									}
-
-									html += "<div class='product-name'>" + item.PRODUCT_NAME + "</div>";
-									html += "<div class='product-info'>브랜드 : " + (item.BRAND == null ? "-" : item.BRAND) + "</div>";
-									html += "<div class='product-info'>동물 : " + item.A_SUB_TYPE + "</div>";
-									html += "<div class='product-info'>상품 : " + item.I_SUB_TYPE + "</div>";
-									html += "<div class='product-price'>" + item.PRODUCT_PRICE + "원</div>";
-									html += "</div>";
-								});
-							}
-						} else {
-							$("#listArea").removeClass("product-list");
-							html = "<div class='empty-box'>상품 목록 조회 실패</div>";
-						}
-
-						$("#listArea").html(html);
-					},
-					error: function (xhr) {
-						console.log(xhr.responseText);
-						alert("상품 목록 조회 중 오류가 발생했습니다.");
-					}
-				});
-			}
-
-			function fnGetProductView(productNo) {
-				$.ajax({
-					url: "http://localhost:8080/productView.dox",
-					type: "POST",
-					dataType: "json",
-					data: {productNo: productNo},
-					success: function (data) {
-						let html = "";
-						let p = data.product;
-
-						if (data.result == "success" && p != null) {
-							html += "<div class='detail-wrap'>";
-
-							html += "<div class='detail-left'>";
-							if (data.fileList != null && data.fileList.length > 0) {
-								html += "<img class='main' src='" + data.fileList[0].FILE_PATH + data.fileList[0].FILE_NAME + "'>";
-							} else {
-								html += "<img class='main' src='http://localhost:8080/img/no-image.png'>";
-							}
-
-							html += "<div class='thumb-list'>";
-							if (data.fileList != null && data.fileList.length > 0) {
-								$.each(data.fileList, function (i, file) {
-									html += "<img src='" + file.FILE_PATH + file.FILE_NAME + "'>";
-								});
-							}
-							html += "</div>";
-							html += "</div>";
-
-							html += "<div class='detail-right'>";
-							html += "<h3>" + p.PRODUCT_NAME + "</h3>";
-							html += "<div class='detail-info'>";
-							html += "브랜드 : " + (p.BRAND == null ? "-" : p.BRAND) + "<br>";
-							html += "동물분류 : " + p.A_SUB_TYPE + "<br>";
-							html += "상품분류 : " + p.I_SUB_TYPE + "<br>";
-							html += "재고 : " + p.STOCK_QTY + "<br>";
-							html += "</div>";
-							html += "<div class='price'>" + p.PRODUCT_PRICE + "원</div>";
-							html += "<div class='btn-area'>";
-							html += "<button type='button' class='btn-cart'>장바구니</button>";
-							html += "<button type='button' class='btn-buy'>구매하기</button>";
-							html += "</div>";
-							html += "</div>";
-
-							html += "</div>";
-						} else {
-							html = "<div class='empty-box'>상품 상세 조회 실패</div>";
-						}
-
-						$("#detailArea").html(html).show();
-						$("html, body").animate({
-							scrollTop: $("#detailArea").offset().top - 20
-						}, 300);
-					},
-					error: function (xhr) {
-						console.log(xhr.responseText);
-						alert("상품 상세 조회 중 오류가 발생했습니다.");
-					}
-				});
-			}
-		</script>
-
 	</body>
 
 	</html>
+
+	<script>
+		const app = Vue.createApp({
+			data() {
+				return {
+					categoryTab: "animal",
+					animalMainList: [],
+					animalSubList: [],
+					itemMainList: [],
+					itemSubList: [],
+					productList: [],
+					openAnimalMainNo: "",
+					openItemMainNo: "",
+					selectedAMainNo: "",
+					selectedASubNo: "",
+					selectedIMainNo: "",
+					selectedISubNo: "",
+					selectedAnimalText: "동물 전체",
+					selectedItemText: "상품 전체",
+					keyword: "",
+					sort: "",
+					cartCount: 0
+				};
+			},
+			methods: {
+				fnShowCategoryTab(type) {
+					this.categoryTab = type;
+				},
+
+				fnGetCategoryList() {
+					let self = this;
+					$.ajax({
+						url: "/productCategory.dox",
+						dataType: "json",
+						type: "POST",
+						data: {},
+						success: function (data) {
+							if (data.result == "success") {
+								self.animalMainList = data.animalMainList;
+								self.animalSubList = data.animalSubList;
+								self.itemMainList = data.itemMainList;
+								self.itemSubList = data.itemSubList;
+							} else {
+								alert("카테고리 조회 실패");
+							}
+						}
+					});
+				},
+
+				fnGetCartCount() {
+					let self = this;
+					$.ajax({
+						url: "/cart/count.dox",
+						dataType: "json",
+						type: "POST",
+						data: {},
+						success: function (data) {
+							if (data.result == "success") {
+								self.cartCount = data.cartCount;
+							}
+						}
+					});
+				},
+
+				fnToggleAnimalSub(aMainNo) {
+					this.openAnimalMainNo = this.openAnimalMainNo == aMainNo ? "" : aMainNo;
+				},
+
+				fnToggleItemSub(iMainNo) {
+					this.openItemMainNo = this.openItemMainNo == iMainNo ? "" : iMainNo;
+				},
+
+				fnSelectAnimalAll() {
+					this.selectedAMainNo = "";
+					this.selectedASubNo = "";
+					this.selectedAnimalText = "동물 전체";
+					this.fnGetProductList();
+				},
+
+				fnSelectAnimalMain(aMainNo, aMainType) {
+					this.selectedAMainNo = String(aMainNo);
+					this.selectedASubNo = "";
+					this.selectedAnimalText = aMainType + " 전체";
+					this.fnGetProductList();
+				},
+
+				fnSelectAnimalSub(aMainNo, aSubNo, aSubType) {
+					this.selectedAMainNo = String(aMainNo);
+					this.selectedASubNo = String(aSubNo);
+					this.selectedAnimalText = aSubType;
+					this.fnGetProductList();
+				},
+
+				fnSelectItemAll() {
+					this.selectedIMainNo = "";
+					this.selectedISubNo = "";
+					this.selectedItemText = "상품 전체";
+					this.fnGetProductList();
+				},
+
+				fnSelectItemMain(iMainNo, iMainType) {
+					this.selectedIMainNo = String(iMainNo);
+					this.selectedISubNo = "";
+					this.selectedItemText = iMainType + " 전체";
+					this.fnGetProductList();
+				},
+
+				fnSelectItemSub(iMainNo, iSubNo, iSubType) {
+					this.selectedIMainNo = String(iMainNo);
+					this.selectedISubNo = String(iSubNo);
+					this.selectedItemText = iSubType;
+					this.fnGetProductList();
+				},
+
+				fnResetFilter() {
+					this.selectedAMainNo = "";
+					this.selectedASubNo = "";
+					this.selectedIMainNo = "";
+					this.selectedISubNo = "";
+					this.selectedAnimalText = "동물 전체";
+					this.selectedItemText = "상품 전체";
+					this.keyword = "";
+					this.sort = "";
+					this.fnGetProductList();
+				},
+
+				fnGetProductList() {
+					let self = this;
+					let param = {
+						keyword: self.keyword,
+						aMainNo: self.selectedAMainNo,
+						aSubNo: self.selectedASubNo,
+						iMainNo: self.selectedIMainNo,
+						iSubNo: self.selectedISubNo,
+						sort: self.sort
+					};
+
+					$.ajax({
+						url: "/productList.dox",
+						dataType: "json",
+						type: "POST",
+						data: param,
+						success: function (data) {
+							if (data.result == "success") {
+								self.productList = data.list;
+							} else {
+								alert("상품 목록 조회 실패");
+							}
+						},
+						error: function (xhr) {
+							console.log(xhr.responseText);
+							alert("상품 목록 조회 중 오류가 발생했습니다.");
+						}
+					});
+				},
+
+				fnMoveDetail(productNo) {
+					location.href = "/product/view.do?productNo=" + productNo;
+				},
+
+				fnMoveCart() {
+					location.href = "/cart.do";
+				},
+
+				fnFormatPrice(price) {
+					return Number(price).toLocaleString();
+				}
+			},
+			mounted() {
+				this.fnGetCategoryList();
+				this.fnGetProductList();
+				this.fnGetCartCount();
+			}
+		});
+
+		app.mount('#app');
+	</script>

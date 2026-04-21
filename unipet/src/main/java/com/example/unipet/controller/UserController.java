@@ -49,7 +49,7 @@ public class UserController {
     private final Gson gson = new Gson();
     private final SecureRandom random = new SecureRandom();
 
-//    // ✅ 메인 (JSP 없이 바로 응답)
+    // ✅ 메인 (JSP 없이 바로 응답)
 //    @GetMapping("/main.do")
 //    @ResponseBody
 //    public HashMap<String, Object> main(HttpSession session) {
