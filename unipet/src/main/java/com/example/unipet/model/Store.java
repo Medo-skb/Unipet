@@ -15,6 +15,7 @@ public class Store {
 	private double lng;
 	private String sStatus;
 	private String sContents;
+	private String menuNo;
 	private String menuName;
 	private int menuPrice;
 	private String mStatus;
