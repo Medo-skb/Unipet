@@ -11,8 +11,9 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="/js/page-change.js"></script>
     <script src="/js/main/main.js"></script>
-    <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
+    <script src="https://js.tosspayments.com/v1/payment"></script>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/header.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/footer.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/payment/sub.css">
 </head>
 <body>
@@ -61,6 +62,9 @@
             </div>
         </div>
     </div>
+
+    <jsp:include page="/WEB-INF/footer/footer.jsp" />
+
 </body>
 </html>
 
@@ -72,6 +76,8 @@
                 userId : "${sessionId}",
                 info : {},
                 totalprice : 1000,
+                clientKey: "test_ck_jZ61JOxRQVEAgxoERWwVW0X9bAqw",
+
             };
         },
         methods: {
@@ -92,14 +98,26 @@
             },
             fnPaySubs: function() {
                 let self = this;
+                // SDK 초기화
+                const tossPayments = TossPayments(self.clientKey);
 
-                if (!self.info.userId) {
-                    alert("로그인이 필요한 서비스입니다.");
-                    pageChange("/login.do");
-                    return;
-                }
-
-                pageChange("/payment/pay-sub.do", { totalprice: self.totalprice });
+                // 빌링키 발급창(카드 등록창) 띄우기
+                tossPayments.requestBillingAuth('카드', {
+                    customerKey: self.info.userId, // 토스에서 유저를 식별하는 고유 키
+                    // 인증 성공/실패 시 이동할 Spring Boot 컨트롤러 주소
+                    successUrl: window.location.origin + "/payment/toss-success.do", 
+                    failUrl: window.location.origin + "/payment/toss-fail.do",
+                    // 선택 사항: 결제창에 유저 이메일과 이름을 미리 채워둘 수 있습니다.
+                    customerEmail: self.info.email, 
+                    customerName: self.info.userName 
+                }).catch(function (error) {
+                    // 유저가 결제창을 그냥 닫았거나 에러가 났을 때의 처리
+                    if (error.code === 'USER_CANCEL') {
+                        alert("카드 등록을 취소하셨습니다.");
+                    } else {
+                        alert("결제창 오류: " + error.message);
+                    }
+                });
             }
         }, // methods
         mounted() {
