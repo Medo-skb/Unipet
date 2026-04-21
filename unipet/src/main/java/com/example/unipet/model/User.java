@@ -4,8 +4,6 @@ import lombok.Data;
 
 @Data
 public class User {
-
-    // users
     private String userId;
     private String pwd;
     private String userName;
@@ -16,11 +14,5 @@ public class User {
     private String fullAddr;
     private String zipcode;
     private String socialType;
-    private String cdate;
     private String userStatus;
-
-    // store_user
-    private String sUserId;
-    private String sUserPwd;
-    private String ceoName;
 }

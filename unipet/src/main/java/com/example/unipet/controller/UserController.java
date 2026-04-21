@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.unipet.dao.UserService;
 import com.example.unipet.model.User;
@@ -57,6 +58,17 @@ public class UserController {
     private final Gson gson = new Gson();
     private final SecureRandom random = new SecureRandom();
 
+    // =========================
+    // 페이지 이동
+    // =========================
+
+    @GetMapping("/main.do")
+    public String main(HttpSession session) {
+        if (session.getAttribute("sessionId") == null) {
+            return "redirect:/user/login.do";
+        }
+        return "main/main";
+    }
 
     @GetMapping("/user/login.do")
     public String login() {
@@ -78,47 +90,263 @@ public class UserController {
         return "user/signup-biz";
     }
 
-    @PostMapping("/user/login.dox")
-    @ResponseBody
-    public HashMap<String, Object> loginProc(@RequestParam HashMap<String, Object> map,
-                                             HttpSession session) {
-        HashMap<String, Object> result = userService.login(map, session);
-
-        if (Boolean.TRUE.equals(result.get("result"))) {
-            result.put("url", "/main.do");
-        }
-
-        return result;
+    @GetMapping("/user/find-id.do")
+    public String findIdPage() {
+        return "user/find-id";
     }
 
-    @PostMapping("/user/check.dox")
-    @ResponseBody
-    public HashMap<String, Object> checkUser(@RequestParam HashMap<String, Object> map) {
-        return userService.checkUser(map);
+    @GetMapping("/user/find-pwd.do")
+    public String findPwdPage() {
+        return "user/find-pwd";
     }
 
-    @PostMapping("/user/signup-user.dox")
-    @ResponseBody
-    public HashMap<String, Object> signupUser(@RequestParam HashMap<String, Object> map) {
-        return userService.signupUser(map);
+    @GetMapping("/user/new-pwd.do")
+    public String newPwdPage() {
+        return "user/new-pwd";
     }
 
-    @GetMapping("/user/logout.do")
+    @GetMapping("/logout.do")
     public String logout(HttpSession session) {
         session.invalidate();
         return "redirect:/user/login.do";
     }
 
+    // =========================
+    // 사용자 로그인
+    // =========================
+    @PostMapping("/user/login.dox")
+    @ResponseBody
+    public String loginProc(@RequestParam HashMap<String, Object> map, HttpSession session) {
+        HashMap<String, Object> resultMap = userService.login(map);
+
+        if ((boolean) resultMap.get("result")) {
+            User user = (User) resultMap.get("user");
+
+            session.setAttribute("sessionId", user.getUserId());
+            session.setAttribute("sessionName", user.getUserName());
+            session.setAttribute("sessionRole", "USER");
+
+            resultMap.put("message", "로그인 성공");
+        } else {
+            resultMap.put("message", "아이디 또는 비밀번호 오류");
+        }
+
+        return gson.toJson(resultMap);
+    }
+
+    // =========================
+    // 사업자 로그인
+    // =========================
+    @PostMapping("/user/loginBiz.dox")
+    @ResponseBody
+    public String loginBizProc(@RequestParam HashMap<String, Object> map, HttpSession session) {
+        HashMap<String, Object> resultMap = userService.loginBiz(map);
+
+        if ((boolean) resultMap.get("result")) {
+            User user = (User) resultMap.get("user");
+
+            session.setAttribute("sessionId", user.getUserId());
+            session.setAttribute("sessionName", user.getUserName());
+            session.setAttribute("sessionRole", "BIZ");
+
+            resultMap.put("message", "사업자 로그인 성공");
+        } else {
+            resultMap.put("message", "사업자 로그인 실패");
+        }
+
+        return gson.toJson(resultMap);
+    }
+
+    // =========================
+    // 사용자 회원가입
+    // =========================
+    @PostMapping("/user/signupUser.dox")
+    @ResponseBody
+    public String signupUser(@RequestParam HashMap<String, Object> map) {
+        return gson.toJson(userService.signupUser(map));
+    }
+
+    // =========================
+    // 사업자 회원가입
+    // =========================
+    @PostMapping("/user/signupBiz.dox")
+    @ResponseBody
+    public String signupBiz(@RequestParam HashMap<String, Object> map,
+                            @RequestParam(value = "bizFile", required = false) MultipartFile bizFile) {
+        return gson.toJson(userService.signupBiz(map, bizFile));
+    }
+
+    // =========================
+    // 사용자 아이디 중복체크
+    // =========================
+    @PostMapping("/user/check.dox")
+    @ResponseBody
+    public String checkUser(@RequestParam HashMap<String, Object> map) {
+        return gson.toJson(userService.checkUser(map));
+    }
+
+    // =========================
+    // 사업자 아이디 중복체크
+    // =========================
+    @PostMapping("/user/checkBiz.dox")
+    @ResponseBody
+    public String checkBizUser(@RequestParam HashMap<String, Object> map) {
+        return gson.toJson(userService.checkStoreUser(map));
+    }
+
+    // =========================
+    // SMS 인증번호 발송
+    // =========================
+    @PostMapping("/user/sendSms.dox")
+    @ResponseBody
+    public String sendSms(@RequestParam HashMap<String, Object> map, HttpSession session) {
+        HashMap<String, Object> resultMap = userService.sendSms(map);
+
+        if ((boolean) resultMap.get("result")) {
+            session.setAttribute("smsCode", resultMap.get("code"));
+            session.setAttribute("smsPhone", map.get("phone"));
+        }
+
+        return gson.toJson(resultMap);
+    }
+
+    // =========================
+    // SMS 인증번호 확인
+    // =========================
+    @PostMapping("/user/checkSms.dox")
+    @ResponseBody
+    public String checkSms(@RequestParam HashMap<String, Object> map, HttpSession session) {
+        HashMap<String, Object> resultMap = new HashMap<>();
+
+        String inputCode = map.get("code") == null ? "" : map.get("code").toString().trim();
+        Object sessionCode = session.getAttribute("smsCode");
+        Object sessionPhone = session.getAttribute("smsPhone");
+
+        if (sessionCode != null && sessionCode.toString().trim().equals(inputCode)) {
+            resultMap.put("result", true);
+            resultMap.put("message", "인증 성공");
+            session.setAttribute("smsAuth", true);
+
+            if (sessionPhone != null) {
+                session.setAttribute("verifiedPhone", sessionPhone.toString());
+            }
+        } else {
+            resultMap.put("result", false);
+            resultMap.put("message", "인증번호가 일치하지 않습니다.");
+        }
+
+        return gson.toJson(resultMap);
+    }
+
+    // =========================
+    // 아이디 찾기
+    // =========================
+    @PostMapping("/user/findId.dox")
+    @ResponseBody
+    public String findId(@RequestParam HashMap<String, Object> map, HttpSession session) {
+        HashMap<String, Object> resultMap = new HashMap<>();
+
+        Object smsAuth = session.getAttribute("smsAuth");
+        Object verifiedPhone = session.getAttribute("verifiedPhone");
+
+        if (smsAuth == null || !(boolean) smsAuth) {
+            resultMap.put("result", false);
+            resultMap.put("message", "휴대폰 인증 후 이용해주세요.");
+            return gson.toJson(resultMap);
+        }
+
+        if (verifiedPhone == null) {
+            resultMap.put("result", false);
+            resultMap.put("message", "인증된 휴대폰 정보가 없습니다.");
+            return gson.toJson(resultMap);
+        }
+
+        map.put("phone", verifiedPhone.toString());
+        resultMap = userService.findId(map);
+
+        return gson.toJson(resultMap);
+    }
+
+    // =========================
+    // 비밀번호 재설정 대상 확인
+    // =========================
+    @PostMapping("/user/checkUserForReset.dox")
+    @ResponseBody
+    public String checkUserForReset(@RequestParam HashMap<String, Object> map, HttpSession session) {
+        HashMap<String, Object> resultMap = new HashMap<>();
+
+        Object smsAuth = session.getAttribute("smsAuth");
+        Object verifiedPhone = session.getAttribute("verifiedPhone");
+
+        if (smsAuth == null || !(boolean) smsAuth) {
+            resultMap.put("result", false);
+            resultMap.put("message", "휴대폰 인증 후 이용해주세요.");
+            return gson.toJson(resultMap);
+        }
+
+        if (verifiedPhone == null) {
+            resultMap.put("result", false);
+            resultMap.put("message", "인증된 휴대폰 정보가 없습니다.");
+            return gson.toJson(resultMap);
+        }
+
+        map.put("phone", verifiedPhone.toString());
+        resultMap = userService.checkUserForReset(map);
+
+        if ((boolean) resultMap.get("result")) {
+            session.setAttribute("resetUserId", map.get("userId"));
+        }
+
+        return gson.toJson(resultMap);
+    }
+
+    // =========================
+    // 새 비밀번호 저장
+    // =========================
+    @PostMapping("/user/resetPwd.dox")
+    @ResponseBody
+    public String resetPwd(@RequestParam HashMap<String, Object> map, HttpSession session) {
+        HashMap<String, Object> resultMap = new HashMap<>();
+
+        Object resetUserId = session.getAttribute("resetUserId");
+
+        if (resetUserId == null) {
+            resultMap.put("result", false);
+            resultMap.put("message", "비밀번호 재설정 대상이 없습니다.");
+            return gson.toJson(resultMap);
+        }
+
+        map.put("userId", resetUserId.toString());
+        resultMap = userService.resetPwd(map);
+
+        if ((boolean) resultMap.get("result")) {
+            session.removeAttribute("resetUserId");
+            session.removeAttribute("smsAuth");
+            session.removeAttribute("smsCode");
+            session.removeAttribute("smsPhone");
+            session.removeAttribute("verifiedPhone");
+        }
+
+        return gson.toJson(resultMap);
+    }
+
+    // =========================
+    // 카카오 로그인 시작
+    // =========================
     @GetMapping("/user/kakao/login")
     public void kakaoLogin(HttpServletResponse response) throws IOException {
         String url = "https://kauth.kakao.com/oauth/authorize"
                 + "?client_id=" + URLEncoder.encode(kakaoClientId, StandardCharsets.UTF_8)
                 + "&redirect_uri=" + URLEncoder.encode(kakaoRedirectUri, StandardCharsets.UTF_8)
-                + "&response_type=code";
+                + "&response_type=code"
+                + "&prompt=login";
 
         response.sendRedirect(url);
     }
 
+    // =========================
+    // 카카오 로그인 콜백
+    // =========================
     @GetMapping("/user/kakao/callback")
     public void kakaoCallback(@RequestParam(value = "code", required = false) String code,
                               @RequestParam(value = "error", required = false) String error,
@@ -226,6 +454,9 @@ public class UserController {
         response.sendRedirect("/main.do");
     }
 
+    // =========================
+    // 네이버 로그인 시작
+    // =========================
     @GetMapping("/user/naver/login")
     public void naverLogin(HttpSession session, HttpServletResponse response) throws IOException {
         String state = Long.toHexString(random.nextLong());
@@ -240,6 +471,9 @@ public class UserController {
         response.sendRedirect(url);
     }
 
+    // =========================
+    // 네이버 로그인 콜백
+    // =========================
     @GetMapping("/user/naver/callback")
     public void naverCallback(@RequestParam(value = "code", required = false) String code,
                               @RequestParam(value = "state", required = false) String state,

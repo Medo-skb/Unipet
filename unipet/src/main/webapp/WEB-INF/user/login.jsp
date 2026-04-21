@@ -178,12 +178,12 @@ const app = Vue.createApp({
             }
 
             $.ajax({
-                url: "/user/login.dox",
+                url: self.loginType === "BIZ" ? "/user/loginBiz.dox" : "/user/login.dox",
                 type: "POST",
+                dataType: "json",
                 data: {
                     userId: self.userId,
-                    pwd: self.pwd,
-                    loginType: self.loginType
+                    pwd: self.pwd
                 },
                 success: function(data) {
                     if (typeof data === "string") {

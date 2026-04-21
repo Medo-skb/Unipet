@@ -12,11 +12,21 @@ import org.springframework.security.web.firewall.StrictHttpFirewall;
 @EnableWebSecurity
 public class SecurityConfig {
 
+	
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 	    http
 	        .csrf(csrf -> csrf.disable())
-	        .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+
+	        .authorizeHttpRequests(auth -> auth
+	            .requestMatchers(
+	                "/user/mypage.do",
+	                "/user/mypage.dox",
+	                "/user/change-main-pet.dox"
+	            ).permitAll()   // ⭐ 핵심
+	            .anyRequest().authenticated()
+	        );
+
 	    return http.build();
 	}
     
@@ -26,6 +36,8 @@ public class SecurityConfig {
         firewall.setAllowUrlEncodedDoubleSlash(true); // 더블 슬래시 허용
         return firewall;
     }
-
+    
+    
+   
 
 }

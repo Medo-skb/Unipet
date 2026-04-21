@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.unipet.mapper.UserMypageMapper">
+
+    <!-- 반려동물 목록 -->
+    <select id="selectPetList" parameterType="hashmap" resultType="hashmap">
+        SELECT
+            PET_ID AS petId,
+            PET_NAME AS petName,
+            PET_TYPE AS petType,
+            PET_BREED AS petBreed,
+            PET_AGE AS petAge,
+            IS_MAIN AS isMain
+        FROM pet_profile
+        WHERE USER_ID = #{userId}
+        ORDER BY IS_MAIN DESC, PET_ID ASC
+    </select>
+
+    <!-- 최근 예약 -->
+    <select id="selectReservation" parameterType="hashmap" resultType="hashmap">
+        SELECT
+            RES_ID AS resId,
+            RES_TITLE AS resTitle,
+            RES_DATE AS resDate,
+            RES_STATUS AS resStatus
+        FROM reservation
+        WHERE USER_ID = #{userId}
+        ORDER BY RES_DATE DESC
+        LIMIT 2
+    </select>
+
+    <!-- 최근 주문 -->
+    <select id="selectOrder" parameterType="hashmap" resultType="hashmap">
+        SELECT
+            ORDER_ID AS orderId,
+            PRODUCT_NAME AS productName,
+            ORDER_DATE AS orderDate,
+            DELIVERY_STATUS AS deliveryStatus
+        FROM orders
+        WHERE USER_ID = #{userId}
+        ORDER BY ORDER_DATE DESC
+        LIMIT 2
+    </select>
+
+    <!-- 구독 -->
+    <select id="selectSubscription" parameterType="hashmap" resultType="hashmap">
+        SELECT
+            PLAN_NAME AS planName,
+            END_DATE AS endDate,
+            SUB_STATUS AS subStatus
+        FROM subscription
+        WHERE USER_ID = #{userId}
+        ORDER BY SUB_ID DESC
+        LIMIT 1
+    </select>
+
+    <!-- 즐겨찾기 -->
+    <select id="selectFavorite" parameterType="hashmap" resultType="hashmap">
+        SELECT
+            FAV_ID AS favId,
+            FAV_NAME AS favName,
+            FAV_TYPE AS favType
+        FROM favorites
+        WHERE USER_ID = #{userId}
+        ORDER BY FAV_ID DESC
+        LIMIT 4
+    </select>
+
+    <!-- 대표 반려동물 초기화 -->
+    <update id="resetMainPet" parameterType="hashmap">
+        UPDATE pet_profile
+        SET IS_MAIN = 'N'
+        WHERE USER_ID = #{userId}
+    </update>
+
+    <!-- 대표 반려동물 설정 -->
+    <update id="updateMainPet" parameterType="hashmap">
+        UPDATE pet_profile
+        SET IS_MAIN = 'Y'
+        WHERE PET_ID = #{petId}
+          AND USER_ID = #{userId}
+    </update>
+
+</mapper>
