@@ -1,47 +1,72 @@
 package com.example.unipet.dao;
 
 import java.util.HashMap;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.unipet.common.Message;
-import com.example.unipet.mapper.DefaultMapper;
+import com.example.unipet.mapper.AdminMapper;
+import com.example.unipet.model.Admin;
 
 @Service
 public class AdminService {
 
 	@Autowired 
-	DefaultMapper defaultMapper;
+	AdminMapper adminMapper;
 	
-	// 조회 -> get, 수정 -> edit, 삽입 -> add, 삭제 -> remove
-	// ex) 학생목록 : getStudentList, 학생수정 -> editStudent
+	// 사업자 승인 리스트
+	public HashMap<String, Object> getAdminBiz(HashMap<String, Object> map){
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+		try {
+			List<Admin> list = adminMapper.selectAdminBiz(map);
+			
+			resultMap.put("list", list);
+			resultMap.put("result", "success");
+			resultMap.put("message", Message.MSG_SEARCH);
+		} catch (Exception e) {
+			// TODO: handle exception
+			System.out.println(e.getMessage());
+			resultMap.put("result", "fail");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
+		}
+		return resultMap;
+	}
 	
-	// === Mapper 호출 시 === 
-	// 여러개 리턴 -> selectXXXList
-	//	List<User> list = defaultMapper.selectUserList();
-	// 한개 리턴 -> selectXXX
-	//	User info = defaultMapper.selectUser();
-	// 수정, 삭제, 삽입 -> updateXXX, deleteXXX, insertXXX
-	//	int result = defaultMapper.updateXXX();
+	// 사업자 승인
+	public HashMap<String, Object> editBizStatusApr(HashMap<String, Object> map){
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+		try {
+			int result = adminMapper.updateBizStatusApr(map);
+			
+			resultMap.put("result", "success");
+			resultMap.put("message", Message.MSG_ADD);
+		} catch (Exception e) {
+			// TODO: handle exception
+			System.out.println(e.getMessage());
+			resultMap.put("result", "fail");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
+		}
+		return resultMap;
+	}
 	
-//	public HashMap<String, Object> getItem(HashMap<String, Object> map){
-//		HashMap<String, Object> resultMap = new HashMap<String, Object>();
-//		try {
-//			List<User> list = defaultMapper.selectUserList(map);
-
-//			
-//			resultMap.put("list", list);
-//			resultMap.put("result", "success");
-//			resultMap.put("message", Message.MSG_ADD);
-//		} catch (Exception e) {
-//			// TODO: handle exception
-//			System.out.println(e.getMessage());
-//			resultMap.put("result", "fail");
-//			resultMap.put("message", Message.MSG_SERVER_ERR);
-//		}
-//		return resultMap;
-//	}
+	// 사업자 거부
+	public HashMap<String, Object> editBizStatusRej(HashMap<String, Object> map){
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+		try {
+			int result = adminMapper.updateBizStatusRej(map);
+			
+			resultMap.put("result", "success");
+			resultMap.put("message", Message.MSG_ADD);
+		} catch (Exception e) {
+			// TODO: handle exception
+			System.out.println(e.getMessage());
+			resultMap.put("result", "fail");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
+		}
+		return resultMap;
+	}
 	
 	
 	

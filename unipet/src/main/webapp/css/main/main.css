@@ -121,6 +121,21 @@
 }
 
 /* ============================= */
+/* 멤버십 배너 */
+/* ============================= */
+.membership-banner-wrap {
+    width: 100%;
+    margin-bottom: 40px;
+}
+
+.membership-banner-img {
+    width: 100%;
+    height: 210px;
+    display: block;
+    border-radius: 16px; /* 선택 */
+}
+
+/* ============================= */
 /* 공통 섹션 제목 */
 /* ============================= */
 .section-header {

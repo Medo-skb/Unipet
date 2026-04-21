@@ -2,9 +2,47 @@
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 	
 <mapper namespace="com.example.unipet.mapper.AdminMapper">
-	<!-- 여러개 검색 -->
+	<!-- 사업자 승인 리스트 -->
 	<select id="selectAdminBiz" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
-		
+		SELECT 
+		    S.STORE_NO,
+		    SU.S_USER_ID,
+            SU.U_STATUS,
+		    S.STORE_NAME,
+		    S.S_CATEGORY,
+		    S.S_ADDR,
+		    S.S_FULL_ADDR,
+		    S.S_STATUS,
+		    SF.FILE_PATH,
+		    SF.FILE_NAME,
+		    SF.ORIGIN_NAME
+		FROM STORE S
+		LEFT JOIN STORE_USER SU ON S.S_USER_ID = SU.S_USER_ID
+		LEFT JOIN STORE_FILE SF 
+		    ON S.STORE_NO = SF.STORE_NO 
+		    AND SF.IS_PROOF = 'Y'
+		WHERE S.S_STATUS = 'PND'
+        AND SU.U_STATUS = 'PND';
 	</select>
+	
+	<!-- 사업자 승인 -->
+	<update id="updateBizStatusApr" parameterType="hashmap">
+		UPDATE STORE S
+		JOIN STORE_USER SU ON S.S_USER_ID = SU.S_USER_ID
+		SET 
+		    S.S_STATUS = 'GEN',
+		    SU.U_STATUS = 'APR'
+		WHERE S.STORE_NO = #{storeNo}
+		AND SU.S_USER_ID = #{sUserId};
+	</update>
+	
+	<update id="updateBizStatusRej" parameterType="hashmap">
+		UPDATE STORE S
+		JOIN STORE_USER SU ON S.S_USER_ID = SU.S_USER_ID
+		SET 
+		    SU.U_STATUS = 'REJ'
+		WHERE S.STORE_NO = #{storeNo}
+		AND SU.S_USER_ID = #{sUserId};
+	</update>
 	
 </mapper>

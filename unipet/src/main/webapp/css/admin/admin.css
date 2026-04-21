@@ -1,112 +1,215 @@
- body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            background: #f4f4f4;
-        }
+/* 전체 */
+body {
+    margin: 0;
+    font-family: 'Malgun Gothic', sans-serif;
+    background: #ffffff;
+    color: #222;
+}
 
-        .chat-wrap {
-            width: 700px;
-            margin: 50px auto;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-            overflow: hidden;
-        }
+.container-main {
+    width: 100%;
+    max-width: 1400px;
+    min-width: 1400px;
+    margin: 0 auto;
+    padding: 24px 20px 40px; /* 헤더와 본문 간격 */
+    box-sizing: border-box;
+}
 
-        .chat-header {
-            padding: 16px;
-            background: #4a67ff;
-            color: #fff;
-            font-size: 18px;
-            font-weight: bold;
-            text-align: center;
-        }
+/* 레이아웃 */
+.admin-wrap {
+    display: flex;
+    align-items: flex-start; /* 왼쪽 메뉴가 내용만큼만 높이 잡히게 */
+    gap: 24px; /* 왼쪽 메뉴와 본문 사이 간격 */
+}
 
-        .chat-box {
-            height: 600px;
-            overflow-y: auto;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            background: #fafafa;
-        }
+/* 사이드바 */
+.admin-sidebar {
+    width: 200px;
+    background: #e1e1e1;
+    padding: 18px 16px;
+    border-radius: 14px;
+    box-sizing: border-box;
 
-        .message {
-            max-width: 75%;
-            padding: 10px 14px;
-            border-radius: 10px;
-            word-break: break-word;
-            white-space: pre-wrap;
-        }
+    /* 핵심: 내용만큼만 높이 */
+    height: fit-content;
+}
 
-        .user {
-            align-self: flex-end;
-            background: #4a67ff;
-            color: #fff;
-        }
+/* 메뉴 */
+.menu-item {
+    padding: 12px 10px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    line-height: 1.4;
+    border-radius: 10px;
+    cursor: pointer;
+    box-sizing: border-box;
+    word-break: keep-all;
+    transition: background 0.2s ease;
+}
 
-        .bot {
-            align-self: flex-start;
-            background: #e9ecef;
-            color: #333;
-        }
+.menu-item:last-child {
+    margin-bottom: 0;
+}
 
-        .chat-input {
-            display: flex;
-            gap: 10px;
-            padding: 12px;
-            background: #fff;
-        }
+.menu-item:hover {
+    background: #dfe5f7;
+}
 
-        .chat-input textarea {
-            flex: 1;
-            height: 44px;
-            resize: none;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            padding: 10px;
-            outline: none;
-            font-size: 14px;
-        }
+.menu-item.active {
+    background: #ffffff;
+    font-weight: 700;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
 
-        .chat-input button {
-            width: 80px;
-            border: none;
-            border-radius: 8px;
-            background: #4a67ff;
-            color: #fff;
-            cursor: pointer;
-            font-size: 14px;
-        }
+/* 오른쪽 */
+.admin-content {
+    flex: 1;
+    min-width: 0;
+}
 
-        .chat-input button:hover {
-            opacity: 0.9;
-        }
-        .quick-button-wrap {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            padding: 10px 12px 0 12px;
-            background: #fff;
-        }
+/* 본문 카드 */
+.content-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 28px 32px;
+    /* min-height: 700px; */
+    min-height: calc(100vh - 160px);
+    box-sizing: border-box;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
 
-        .quick-button {
-            padding: 8px 12px;
-            border: 1px solid #d0d7ff;
-            border-radius: 20px;
-            background: #f5f7ff;
-            color: #4a67ff;
-            font-size: 13px;
-            cursor: pointer;
-        }
+.admin-content h2 {
+    margin: 0 0 12px 0;
+    font-size: 30px;
+    font-weight: 700;
+    color: #111;
+}
 
-        .quick-button:hover {
-            background: #e9edff;
-        }
+.content-desc {
+    font-size: 15px;
+    color: #555;
+    line-height: 1.6;
+}
 
-        .quick-button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
+/* 나중에 카드/리스트 들어갈 영역용 예비 스타일 */
+.section-box {
+    margin-top: 24px;
+    padding: 20px;
+    border: 1px solid #ececec;
+    border-radius: 12px;
+    background: #fafafa;
+}
+
+.section-title {
+    margin-bottom: 12px;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+/* 설명 문구 */
+.content-desc {
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: #666;
+}
+
+/* 승인 카드 리스트 */
+.approve-list {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    margin-top: 20px;
+}
+
+/* 카드 1개 */
+.approve-card {
+    padding-bottom: 18px;
+    border-bottom: none;
+}
+
+/* 표 */
+.approve-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    background: #fff;
+}
+
+.approve-table th,
+.approve-table td {
+    border-top: 1px solid #666;
+    border-bottom: 1px solid #666;
+    padding: 18px 20px;
+    font-size: 15px;
+    text-align: left;
+    vertical-align: middle;
+    box-sizing: border-box;
+}
+
+.approve-table th {
+    background: #d9d9d9;
+    font-weight: 700;
+    color: #222;
+}
+
+.approve-table td {
+    background: #f8f8f8;
+    color: #222;
+}
+
+/* 파일 링크 */
+.file-link {
+    color: #333;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.file-link:hover {
+    text-decoration: underline;
+}
+
+/* 버튼 영역 */
+.approve-btn-box {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+/* 버튼 공통 */
+.btn-approve,
+.btn-reject {
+    min-width: 68px;
+    height: 36px;
+    padding: 0 16px;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* 승인 버튼 */
+.btn-approve {
+    background: #d9d9d9;
+    color: #222;
+}
+
+/* 거부 버튼 */
+.btn-reject {
+    background: #d9d9d9;
+    color: #222;
+}
+
+/* 빈 목록 */
+.empty-box {
+    margin-top: 30px;
+    padding: 40px 20px;
+    border: 1px solid #e5e5e5;
+    border-radius: 12px;
+    background: #fafafa;
+    text-align: center;
+    font-size: 15px;
+    color: #666;
+}

@@ -1,5 +1,9 @@
 package com.example.unipet.controller;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,24 +12,48 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.ui.Model;
 
-import com.example.unipet.dao.DefaultService;
+import com.example.unipet.dao.AdminService;
 import com.google.gson.Gson;
 
-import ch.qos.logback.core.model.Model;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 public class AdminController {
 	
 	@Autowired
-	DefaultService defaultService;
+	AdminService adminService;
 	
-	// 웹브라우저로 접속하는 주소, return은 jsp파일
 	@RequestMapping("/admin.do") 
-	public String copy(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception{
+	public String adminPage(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception{
 		return "/admin/adminPage";
 	}
-
-
+	
+	@RequestMapping(value = "/adminBiz.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getAdminBiz(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+		resultMap = adminService.getAdminBiz(map);
+		return new Gson().toJson(resultMap); 
+	}
+	
+	@RequestMapping(value = "/editBizStatusApr.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String editBizStatus(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+		resultMap = adminService.editBizStatusApr(map);
+ 
+		return new Gson().toJson(resultMap); 
+	}
+	
+	@RequestMapping(value = "/editBizStatusRej.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String editBizStatusRej(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+		resultMap = adminService.editBizStatusRej(map);
+ 
+		return new Gson().toJson(resultMap); 
+	}
 }
