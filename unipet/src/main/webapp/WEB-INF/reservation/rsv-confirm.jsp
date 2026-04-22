@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="/css/reservation/confirm.css" rel="stylesheet">
+    <link href="/css/reservation/rsv-confirm.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="/js/page-change.js"></script>
@@ -135,8 +135,9 @@
 
                         if (res.result === "success") {
                             alert("예약은 결제 완료 후 최종 확정이 됩니다. 결제페이지로 이동합니다.");
-                            // 결제 페이지 이동 시 생성된 예약번호(rsvNo)를 활용할 수 있습니다.
-                            // location.href = "/payment/process.do?rsvNo=" + res.rsvNo;
+                            // 결제 로직을 건너뛰고 바로 성공 페이지로 이동
+                            // 서버에서 넘겨준 rsvNo를 URL 파라미터로 붙입니다.
+                            location.href = "/reservation/rsv-success.do?rsvNo=" + res.rsvNo;
                         } else {
                             alert("예약 처리 중 오류가 발생했습니다: " + (res.message || "서버 응답 에러"));
                         }

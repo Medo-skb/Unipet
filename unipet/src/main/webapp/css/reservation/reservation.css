@@ -118,6 +118,23 @@
 /* 오늘 날짜 */
 .day-cell.today { color: #3b82f6; font-weight: bold; }
 
+/* 선택 불가능한 날짜(과거 및 Cutoff 마감) 스타일 */
+.day-cell.disabled {
+    background-color: #f5f5f5 !important; /* 옅은 회색 배경 */
+    color: #ccc !important;               /* 흐릿한 글자 색상 */
+    cursor: not-allowed !important;       /* 금지 모양 커서 */
+    pointer-events: none;                 /* 클릭 이벤트 완전 차단 (손가락 모양 안나옴) */
+}
+
+/* 활성화된 날짜에만 손가락 모양과 호버 효과 적용 */
+.day-cell:not(.disabled):not(.empty) {
+    cursor: pointer;
+}
+
+.day-cell:not(.disabled):not(.empty):hover {
+    background-color: #e3f2fd;
+}
+
 /* 5. 오른쪽 시간 슬롯 (2열 정렬) */
 #time-slot-area {
     display: grid;
@@ -173,13 +190,12 @@
     border-color: #ff9f43;
 }
 
-/* 예약 불가(disabled) 상태 */
-.time-btn:disabled {
-    background-color: #f3f4f6;
-    border-color: #d1d5db;
-    color: #9ca3af;
-    cursor: not-allowed;
-    box-shadow: none;
+.time-btn:disabled, .time-btn.booked {
+    background-color: #f2f2f2; /* 회색 배경 */
+    color: #ccc;               /* 흐린 글자색 */
+    border-color: #eee;
+    cursor: not-allowed;      /* 금지 커서 */
+    position: relative;
 }
 
 #pet-area{

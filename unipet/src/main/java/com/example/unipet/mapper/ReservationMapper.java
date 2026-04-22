@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 
-import com.example.unipet.model.Default;
+import com.example.unipet.model.Reservation;
 import com.example.unipet.model.Store;
 
 @Mapper
@@ -26,6 +26,10 @@ public interface ReservationMapper {
 	public Store selectStoreInfo(HashMap<String, Object> map);
 	// 예약 가능 여부 확인
 	public int checkSlotAvailability(Object slotNo);
+	// 업체 정책 조회
+	public Store selectStorePolicy(HashMap<String, Object> map);
+	// 예약 상세 정보 조회
+	public Reservation selectRsvInfo(HashMap<String, Object> map);
 	
 	// 삭제 
 	public int deleteDefault(HashMap<String, Object> map);
@@ -34,10 +38,17 @@ public interface ReservationMapper {
 	public int updateDefault(HashMap<String, Object> map);
 	// 예약 상태 변경 (WAI -> COM 등)
 	public int updateRsvStatus(HashMap<String, Object> map);
+	// 예약 상태 변경 (CNF -> CAN)
+	public int updateRsvStatusCancel(HashMap<String, Object> map);
 	// 슬롯 인원수 증가 및 상태 관리
-	public int updateRsvSlotCount(HashMap<String, Object> map);
-	// 슬롯 상태 업데이
+	public int updateRsvSlot(HashMap<String, Object> map);
+	// 슬롯 인원수 감소
+	public int updateRsvSlotCancel(HashMap<String, Object> map);
+	// 슬롯 상태 업데이트
 	public int updateSlotStatus(HashMap<String, Object> map);
+	// 예약 마감 시간이 지난 슬롯 일괄 'N'처리
+	public int updateExpiredSlots();
+	
 	
 	// 삽입 
 	public int insertDefault(HashMap<String, Object> map);
