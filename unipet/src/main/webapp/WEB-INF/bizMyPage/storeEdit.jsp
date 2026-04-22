@@ -28,10 +28,7 @@
                             <a href="/biz/MyPage.do">홈</a>
                         </li>
                         <li class="menu-item active">
-                            <a href="/biz/storeEdit.do">업체 정보 수정</a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="/biz/myInfo.do">내 정보 수정</a>
+                            <a href="/biz/storeEdit.do">내 정보 및 업체 정보 수정</a>
                         </li>
                         <li class="menu-item">
                             <a href="/biz/reservation.do">예약 현황</a>
@@ -48,6 +45,27 @@
                 <section class="biz-content store-edit-page">
                     <div class="content-header">
                         <h1>업체 정보 수정</h1>
+                    </div>
+
+                    <div class="content-section">
+                        <div class="section-header">
+                            <h2>기본 정보</h2>
+                        </div>
+
+                        <div class="info-list">
+                            <div class="info-row">
+                                <div class="info-label">아이디</div>
+                                <div class="info-value">{{userInfo.sUserId}}</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">대표자명</div>
+                                <div class="info-value">{{userInfo.ceoName}}</div>
+                            </div>
+                        </div>
+
+                        <div class="section-btn-area">
+                            <button type="button" class="edit-btn" @click="fnEditMyInfo">수정하기</button>
+                        </div>
                     </div>
 
                     <!-- 업체 이미지 -->
@@ -90,7 +108,7 @@
                                         <span class="plus-text">+</span>
                                         <span>이미지 등록</span>
                                     </label>
-                                    <input type="file" id="storeImageFile" class="hidden-file" @change="fnUploadImage">
+                                    <input type="file" id="storeImageFile" class="hidden-file" accept="image/*" @change="fnUploadImage">
                                 </div>
                             </div>
                         </div>
@@ -124,7 +142,9 @@
                             </div>
                             <div class="info-row">
                                 <div class="info-label">영업여부</div>
-                                <div class="info-value">{{storeInfo.isOpen}}</div>
+                                <div class="info-value">
+                                    {{ storeInfo.isOpen === 'Y' ? '영업중' : '폐업' }}
+                                </div>
                             </div>
                             <div class="info-row">
                                 <div class="info-label">은행명</div>
@@ -215,7 +235,7 @@
                                     <td>{{item.menuCategory}}</td>
                                     <td>{{item.menuInfo}}</td>
                                     <td>{{item.menuPrice}}</td>
-                                    <td>{{item.reqTime}}</td>
+                                    <td>{{item.reqTime}}분</td>
                                     <td>{{item.mStatusName ? item.mStatusName : (item.mStatus === 'Y' ? '판매중' : '판매중지')}}</td>
                                 </tr>
                             </tbody>
@@ -223,6 +243,33 @@
 
                         <div class="section-btn-area">
                             <button type="button" class="edit-btn" @click="fnEditMenu">수정하기</button>
+                        </div>
+                    </div>
+
+                    <!-- 내 정보 수정 모달 -->
+                    <div v-if="showMyInfoEditModal" class="modal-overlay">
+                        <div class="edit-modal-box">
+                            <div class="modal-header">
+                                <h2>내 정보 수정</h2>
+                                <button type="button" class="modal-close-btn" @click="fnCloseMyInfoModal">X</button>
+                            </div>
+
+                            <div class="modal-body">
+                                <div class="form-row">
+                                    <label>아이디</label>
+                                    <input type="text" v-model="editUserInfo.sUserId" readonly>
+                                </div>
+
+                                <div class="form-row">
+                                    <label>대표자명</label>
+                                    <input type="text" v-model="editUserInfo.sName">
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="cancel-btn" @click="fnCloseMyInfoModal">취소</button>
+                                <button type="button" class="save-btn" @click="fnSaveMyInfo">저장</button>
+                            </div>
                         </div>
                     </div>
 
@@ -252,7 +299,10 @@
 
                                 <div class="form-row">
                                     <label>영업여부</label>
-                                    <input type="text" v-model="editStoreInfo.isOpen">
+                                    <select v-model="editStoreInfo.isOpen">
+                                        <option value="Y">영업중</option>
+                                        <option value="N">폐업</option>
+                                    </select>
                                 </div>
 
                                 <div class="form-row">
@@ -292,7 +342,11 @@
 
                                 <div class="form-row">
                                     <label>동시 수용 가능 인원</label>
-                                    <input type="text" v-model="editStoreInfo.capacity">
+                                    <select v-model="editStoreInfo.capacity">
+                                        <option v-for="num in capacityOptions" :key="num" :value="num">
+                                            {{ num }}명
+                                        </option>
+                                    </select>
                                 </div>
 
                                 <div class="form-row">
@@ -333,7 +387,7 @@
 
                             <div class="modal-footer">
                                 <button type="button" class="cancel-btn" @click="fnCloseStoreEditModal">취소</button>
-                                <button type="button" class="save-btn">저장</button>
+                                <button type="button" class="save-btn" @click="fnSaveStoreInfo">저장</button>
                             </div>
                         </div>
                     </div>
@@ -364,7 +418,13 @@
                                             <td><input type="text" v-model="item.menuCategory"></td>
                                             <td><input type="text" v-model="item.menuInfo"></td>
                                             <td><input type="text" v-model="item.menuPrice"></td>
-                                            <td><input type="text" v-model="item.reqTime"></td>
+                                            <td>
+                                                <select v-model="item.reqTime">
+                                                    <option :value="30">30분</option>
+                                                    <option :value="60">60분</option>
+                                                    <option :value="90">90분</option>
+                                                </select>
+                                            </td>
                                             <td>
                                                 <select v-model="item.mStatus">
                                                     <option value="Y">판매중</option>
@@ -378,7 +438,7 @@
 
                             <div class="modal-footer">
                                 <button type="button" class="cancel-btn" @click="fnCloseMenuEditModal">취소</button>
-                                <button type="button" class="save-btn">저장</button>
+                                <button type="button" class="save-btn" @click="fnSaveMenuList">저장</button>
                             </div>
                         </div>
                     </div>
@@ -396,6 +456,10 @@
     const app = Vue.createApp({
         data() {
             return {
+                userInfo: {
+                    sUserId: "",
+                    ceoName: ""
+                },
                 storeInfo: {
                     storeNo: "",
                     storeName: "",
@@ -447,8 +511,16 @@
                     refundPolicy: ""
                 },
 
-                editMenuList: []
+                editMenuList: [],
+                capacityOptions: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
 
+                showMyInfoEditModal: false,
+
+                editUserInfo: {
+                    sUserId: "",
+                    sName: ""
+                },
+                
             };
         },
         methods: {
@@ -464,10 +536,43 @@
                 }
             },
 
+            fnGetMyInfo: function () {
+                let self = this;
+                let param = {
+                    sUserId: "${sessionScope.sessionId}"
+                };
+
+                $.ajax({
+                    url: "/getBizUserInfo.dox",
+                    dataType: "json",
+                    type: "POST",
+                    data: param,
+                    success: function (data) {
+                        if (data.info) {
+                            self.userInfo = data.info;
+                        } else {
+                            self.userInfo = {
+                                sUserId: "",
+                                sName: "",
+                                email: "",
+                                phone: ""
+                            };
+                        }
+                    },
+                    error: function () {
+                        alert("내 정보 조회에 실패했습니다.");
+                    }
+                });
+            },
+
+            fnEditMyInfo: function() {
+                alert("내 정보 수정 기능 연결 예정");
+            },
+
             fnGetStoreInfo: function() {
                 let self = this;
                 let param = {
-                    sUserId: "test1234"
+                    sUserId: "${sessionScope.sessionId}"
                 };
 
                 $.ajax({
@@ -510,7 +615,7 @@
             fnGetFileList: function() {
                 let self = this;
                 let param = {
-                    sUserId: "test1234"
+                    sUserId: "${sessionScope.sessionId}"
                 };
 
                 $.ajax({
@@ -534,7 +639,7 @@
             fnGetMenuList: function() {
                 let self = this;
                 let param = {
-                    sUserId: "test1234"
+                    sUserId: "${sessionScope.sessionId}"
                 };
 
                 $.ajax({
@@ -599,7 +704,7 @@
                         menuCategory: item.menuCategory,
                         menuInfo: item.menuInfo,
                         menuPrice: item.menuPrice,
-                        reqTime: item.reqTime,
+                        reqTime: Number(item.reqTime),
                         mStatus: item.mStatus
                     };
                 });
@@ -613,34 +718,223 @@
             },
 
             fnSetMainImage: function(fileNo) {
-                alert("대표 이미지 설정 기능 연결 예정");
+                let self = this;
+
+                $.ajax({
+                    url: "/biz/store/image/main.dox",
+                    type: "POST",
+                    dataType: "json",
+                    data: { fileNo: fileNo },
+                    success: function(data) {
+                        if (data.result === "success") {
+                            alert("대표 이미지가 설정되었습니다.");
+                            self.fnGetFileList();
+                        } else {
+                            alert(data.message || "대표 이미지 설정에 실패했습니다.");
+                        }
+                    },
+                    error: function() {
+                        alert("서버 오류가 발생했습니다.");
+                    }
+                });
             },
 
             fnDeleteImage: function(fileNo) {
-                alert("이미지 삭제 기능 연결 예정");
+                let self = this;
+
+                if (!confirm("이미지를 삭제하시겠습니까?")) {
+                    return;
+                }
+
+                $.ajax({
+                    url: "/biz/store/image/delete.dox",
+                    type: "POST",
+                    dataType: "json",
+                    data: { fileNo: fileNo },
+                    success: function(data) {
+                        if (data.result === "success") {
+                            alert("삭제되었습니다.");
+                            self.fnGetFileList(); // 리스트 다시 불러오기
+                        } else {
+                            alert(data.message || "삭제 실패");
+                        }
+                    },
+                    error: function() {
+                        alert("서버 오류");
+                    }
+                });
             },
 
-            fnUploadImage: function(event) {
+            fnUploadImage: function (event) {
                 let self = this;
-                let files = event.target.files;
+                const file = event.target.files[0];
 
-                if (!files || files.length === 0) {
+                if (!file) {
+                    return;
+                }
+
+                if (!self.storeInfo.storeNo) {
+                    alert("업체 정보가 아직 없습니다. 새로고침 후 다시 시도해주세요.");
+                    event.target.value = "";
                     return;
                 }
 
                 if (self.fileList.length >= 4) {
                     alert("이미지는 최대 4개까지 등록할 수 있습니다.");
+                    event.target.value = "";
                     return;
                 }
 
-                alert("이미지 업로드 기능 연결 예정");
-            }
+                if (!file.type.startsWith("image/")) {
+                    alert("이미지 파일만 업로드할 수 있습니다.");
+                    event.target.value = "";
+                    return;
+                }
 
+                let formData = new FormData();
+                formData.append("file", file);
+                formData.append("storeNo", self.storeInfo.storeNo);
+                formData.append("sUserId", "${sessionScope.sessionId}");
+
+                $.ajax({
+                    url: "/biz/store/image/upload.dox",
+                    type: "POST",
+                    dataType: "json",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    enctype: "multipart/form-data",
+                    success: function (data) {
+                        if (data.result === "success") {
+                            alert("이미지가 등록되었습니다.");
+                            event.target.value = "";
+                            self.fnGetFileList();   // 이미지 목록 다시 조회
+                        } else {
+                            alert(data.message || "이미지 등록에 실패했습니다.");
+                            event.target.value = "";
+                        }
+                    },
+                    error: function () {
+                        alert("업로드 중 오류가 발생했습니다.");
+                        event.target.value = "";
+                    }
+                });
+            },
+
+            fnSaveStoreInfo: function() {
+                let self = this;
+
+                let param = {
+                    storeNo: self.editStoreInfo.storeNo,
+                    isOpen: self.editStoreInfo.isOpen,
+                    accName: self.editStoreInfo.accName,
+                    accNo: self.editStoreInfo.accNo,
+                    accHolder: self.editStoreInfo.accHolder,
+                    subTitle: self.editStoreInfo.subTitle,
+                    sContents: self.editStoreInfo.sContents,
+                    capacity: self.editStoreInfo.capacity,
+                    openTime: self.editStoreInfo.openTime,
+                    closeTime: self.editStoreInfo.closeTime,
+                    breakStart: self.editStoreInfo.breakStart,
+                    breakEnd: self.editStoreInfo.breakEnd,
+                    offDay: self.editStoreInfo.offDay,
+                    refundPolicy: self.editStoreInfo.refundPolicy
+                };
+
+                $.ajax({
+                    url: "/biz/store/update.dox",
+                    type: "POST",
+                    dataType: "json",
+                    data: param,
+                    success: function(data) {
+                        if (data.result === "success") {
+                            alert("업체 정보가 수정되었습니다.");
+                            self.fnCloseStoreEditModal();
+                            self.fnGetStoreInfo();
+                        } else {
+                            alert(data.message || "업체 정보 수정에 실패했습니다.");
+                        }
+                    },
+                    error: function() {
+                        alert("업체 정보 수정 중 오류가 발생했습니다.");
+                    }
+                });
+            },
+
+            fnSaveMenuList: function() {
+                let self = this;
+
+                $.ajax({
+                    url: "/biz/store/menu/update.dox",
+                    type: "POST",
+                    dataType: "json",
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        menuList: self.editMenuList
+                    }),
+                    success: function(data) {
+                        if (data.result === "success") {
+                            alert("업체 메뉴가 수정되었습니다.");
+                            self.fnCloseMenuEditModal();
+                            self.fnGetMenuList();
+                        } else {
+                            alert(data.message || "업체 메뉴 수정에 실패했습니다.");
+                        }
+                    },
+                    error: function() {
+                        alert("업체 메뉴 수정 중 오류가 발생했습니다.");
+                    }
+                });
+            },
+
+            fnEditMyInfo: function() {
+                let self = this;
+
+                self.editUserInfo = {
+                    sUserId: self.userInfo.sUserId,
+                    sName: self.userInfo.sName
+                };
+
+                self.showMyInfoEditModal = true;
+            },
+
+            fnCloseMyInfoModal: function() {
+                this.showMyInfoEditModal = false;
+            },
+
+            fnSaveMyInfo: function() {
+                let self = this;
+
+                let param = {
+                    sUserId: self.editUserInfo.sUserId,
+                    sName: self.editUserInfo.sName
+                };
+
+                $.ajax({
+                    url: "/biz/user/update.dox",
+                    type: "POST",
+                    dataType: "json",
+                    data: param,
+                    success: function(data) {
+                        if (data.result === "success") {
+                            alert("내 정보가 수정되었습니다.");
+                            self.fnCloseMyInfoModal();
+                            self.fnGetMyInfo(); // 다시 조회
+                        } else {
+                            alert(data.message || "수정 실패");
+                        }
+                    },
+                    error: function() {
+                        alert("서버 오류");
+                    }
+                });
+            },
 
         }, // methods
         mounted() {
             // 처음 시작할 때 실행되는 부분
             let self = this;
+            self.fnGetMyInfo();
             self.fnGetFileList()
             self.fnGetStoreInfo();
             self.fnGetMenuList();

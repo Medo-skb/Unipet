@@ -28,10 +28,7 @@
                             <a href="/biz/MyPage.do">홈</a>
                         </li>
                         <li class="menu-item">
-                            <a href="/biz/storeEdit.do">업체 소개 수정</a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="/biz/myInfo.do">내 정보 수정</a>
+                            <a href="/biz/storeEdit.do">내 정보 및 업체 수정</a>
                         </li>
                         <li class="menu-item active">
                             <a href="/biz/reservation.do">예약 현황</a>

@@ -25,6 +25,9 @@
     </style>
 </head>
 <body>
+
+    <jsp:include page="/WEB-INF/header/header.jsp" />
+
 <div class="wrap">
     <h2 class="title">로그인</h2>
 
@@ -56,6 +59,8 @@
         <button type="button" class="naver" onclick="location.href='/user/naver/login'">네이버 로그인</button>
     </div>
 </div>
+
+<jsp:include page="/WEB-INF/footer/footer.jsp" />
 
 <script>
     let loginType = "USER";

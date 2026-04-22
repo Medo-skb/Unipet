@@ -38,6 +38,8 @@ public class BizMyPage {
 	String fileName;
 	String originName;
 	String isMain;
+	Long fileSize;
+	String fileExt;
 
 	// STORE_MENU
 	int menuNo;
@@ -48,4 +50,8 @@ public class BizMyPage {
 	String mStatus;
 	String mStatusName;
 	String menuCategory;
+	
+	// STORE_USER
+	String sUserId;
+	String ceoName;
 }

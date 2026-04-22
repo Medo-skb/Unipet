@@ -158,3 +158,20 @@
     height: 34px;
     display: block;
 }
+
+.user-menu-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logout-btn {
+    font-size: 14px;
+    color: #333;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.logout-btn:hover {
+    text-decoration: underline;
+}
