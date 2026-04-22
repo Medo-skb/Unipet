@@ -42,13 +42,6 @@
                         @click="fnChangeMenu('storeApprove')">
                         사업자 입점 승인 관리
                     </div>
-
-                    <div 
-                        class="menu-item"
-                        :class="{ active : currentMenu === 'banner' }"
-                        @click="fnChangeMenu('banner')">
-                        배너 관리
-                    </div>
                 </aside>
 
                 <!-- 오른쪽 내용 -->
@@ -60,8 +53,240 @@
                         </template>
 
                         <template v-if="currentMenu === 'report'">
-                            <h2>커뮤니티 및 리뷰 신고리스트</h2>
-                            <div class="content-desc">여기에 신고리스트 내용 들어감</div>
+                            <h2>커뮤니티 및 리뷰 신고 관리</h2>
+                            <div class="content-desc">신고 유형별로 접수된 신고를 확인하고 처리할 수 있습니다.</div>
+
+                            <!-- 신고 서브 탭 -->
+                            <div class="report-tab-wrap">
+                                <button 
+                                    type="button"
+                                    class="report-tab-btn"
+                                    :class="{ active : reportTab === 'bookingReview' }"
+                                    @click="reportTab = 'bookingReview'">
+                                    예약 리뷰 신고
+                                </button>
+
+                                <button 
+                                    type="button"
+                                    class="report-tab-btn"
+                                    :class="{ active : reportTab === 'productReview' }"
+                                    @click="reportTab = 'productReview'">
+                                    상품 리뷰 신고
+                                </button>
+
+                                <button 
+                                    type="button"
+                                    class="report-tab-btn"
+                                    :class="{ active : reportTab === 'communityPost' }"
+                                    @click="reportTab = 'communityPost'">
+                                    커뮤니티 글 신고
+                                </button>
+
+                                <button 
+                                    type="button"
+                                    class="report-tab-btn"
+                                    :class="{ active : reportTab === 'communityComment' }"
+                                    @click="reportTab = 'communityComment'">
+                                    커뮤니티 댓글 신고
+                                </button>
+                            </div>
+
+                            <!-- 예약 리뷰 신고 -->
+                            <div v-if="reportTab === 'bookingReview'">
+                                <div class="report-section-title">예약 리뷰 신고 목록</div>
+
+                                <div class="report-list" v-if="bookingReviewReportList.length > 0">
+                                    <div class="report-card" v-for="item in bookingReviewReportList" :key="item.reportNo">
+                                        <table class="report-table">
+                                            <tbody>
+                                                <tr>
+                                                    <th>신고번호</th>
+                                                    <td>{{ item.reportNo }}</td>
+                                                    <th>리뷰번호</th>
+                                                    <td>{{ item.reviewNo }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>신고자</th>
+                                                    <td>{{ item.reporterId }}</td>
+                                                    <th>작성자</th>
+                                                    <td>{{ item.userId }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>리뷰 내용</th>
+                                                    <td colspan="3">{{ item.rContents }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>업체명</th>
+                                                    <td>{{ item.storeName }}</td>
+                                                    <th>예약번호</th>
+                                                    <td>{{ item.rsvNo }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>리뷰 이미지</th>
+                                                    <td colspan="3">
+                                                        <img v-if="item.filePath" :src="item.filePath" class="report-preview-img">
+                                                        <span v-else>첨부 이미지 없음</span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <th>처리상태</th>
+                                                    <td colspan="3">{{ item.repStatus }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>리뷰 이미지</th>
+                                                    <td colspan="3">
+                                                        <img v-if="item.filePath" :src="item.filePath" class="report-preview-img">
+                                                        <span v-else>첨부 이미지 없음</span>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+
+                                        <div class="report-btn-box">
+                                            <button type="button" class="btn-approve">승인</button>
+                                            <button type="button" class="btn-reject">반려</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="empty-box" v-else>
+                                    예약 리뷰 신고가 없습니다.
+                                </div>
+                            </div>
+
+                            <!-- 상품 리뷰 신고 -->
+                            <div v-if="reportTab === 'productReview'">
+                                <div class="report-section-title">상품 리뷰 신고 목록</div>
+
+                                <div class="report-list" v-if="productReviewReportList.length > 0">
+                                    <div class="report-card" v-for="item in productReviewReportList" :key="item.reportNo">
+                                        <table class="report-table">
+                                            <tbody>
+                                                <tr>
+                                                    <th>신고번호</th>
+                                                    <td>{{ item.reportNo }}</td>
+                                                    <th>리뷰번호</th>
+                                                    <td>{{ item.reviewNo }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>신고자</th>
+                                                    <td>{{ item.reporterId }}</td>
+                                                    <th>작성자</th>
+                                                    <td>{{ item.userId }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>리뷰 내용</th>
+                                                    <td colspan="3">{{ item.rContents }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>상품명</th>
+                                                    <td>{{ item.productName }}</td>
+                                                    <th>주문번호</th>
+                                                    <td>{{ item.ordNo }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>리뷰 이미지</th>
+                                                    <td colspan="3">
+                                                        <img v-if="item.filePath" :src="item.filePath" class="report-preview-img">
+                                                        <span v-else>첨부 이미지 없음</span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <th>처리상태</th>
+                                                    <td colspan="3">{{ fnReportStatusText(item.repStatus) }}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+
+                                        <div class="report-btn-box">
+                                            <button type="button" class="btn-approve">승인</button>
+                                            <button type="button" class="btn-reject">반려</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="empty-box" v-else>
+                                    상품 리뷰 신고가 없습니다.
+                                </div>
+                            </div>
+
+                            <!-- 커뮤니티 글 신고 -->
+                            <div v-if="reportTab === 'communityPost'">
+                                <div class="report-section-title">커뮤니티 글 신고 목록</div>
+
+                                <div class="report-list" v-if="communityPostReportList.length > 0">
+                                    <div class="report-card" v-for="item in communityPostReportList" :key="item.reportNo">
+                                        <table class="report-table">
+                                            <tbody>
+                                                <tr>
+                                                    <th>신고번호</th>
+                                                    <td>{{ item.reportNo }}</td>
+                                                    <th>글번호</th>
+                                                    <td>{{ item.targetNo }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>신고자</th>
+                                                    <td>{{ item.reporterId }}</td>
+                                                    <th>작성자</th>
+                                                    <td>{{ item.reportedUserId }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>신고사유</th>
+                                                    <td colspan="3">{{ fnReportStatusText(item.repStatus) }}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+
+                                        <div class="report-btn-box">
+                                            <button type="button" class="btn-approve">승인</button>
+                                            <button type="button" class="btn-reject">반려</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="empty-box" v-else>
+                                    커뮤니티 글 신고가 없습니다.
+                                </div>
+                            </div>
+
+                            <!-- 커뮤니티 댓글 신고 -->
+                            <div v-if="reportTab === 'communityComment'">
+                                <div class="report-section-title">커뮤니티 댓글 신고 목록</div>
+
+                                <div class="report-list" v-if="communityCommentReportList.length > 0">
+                                    <div class="report-card" v-for="item in communityCommentReportList" :key="item.reportNo">
+                                        <table class="report-table">
+                                            <tbody>
+                                                <tr>
+                                                    <th>신고번호</th>
+                                                    <td>{{ item.reportNo }}</td>
+                                                    <th>댓글번호</th>
+                                                    <td>{{ item.targetNo }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>신고자</th>
+                                                    <td>{{ item.reporterId }}</td>
+                                                    <th>작성자</th>
+                                                    <td>{{ item.reportedUserId }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>신고사유</th>
+                                                    <td colspan="3">{{ item.reportReason }}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+
+                                        <div class="report-btn-box">
+                                            <button type="button" class="btn-approve">승인</button>
+                                            <button type="button" class="btn-reject">반려</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="empty-box" v-else>
+                                    커뮤니티 댓글 신고가 없습니다.
+                                </div>
+                            </div>
                         </template>
 
                         <template v-if="currentMenu === 'storeApprove'">
@@ -121,7 +346,7 @@
 
                                         <div class="approve-btn-box">
                                             <button type="button" class="btn-approve" @click="fnApprove(item)">승인</button>
-                                            <button type="button" class="btn-reject" @click="fnReject(item)">거부</button>
+                                            <button type="button" class="btn-reject" @click="fnReject(item)">반려</button>
                                         </div>
                                     </div>
                                 </template>
@@ -129,27 +354,6 @@
 
                             <div class="empty-box" v-if="fnPendingCount() === 0">
                                 승인 대기 중인 사업자가 없습니다.
-                            </div>
-                        </template>
-
-                        <template v-if="currentMenu === 'banner'">
-                            <h2>배너 관리</h2>
-
-                            <!-- 업로드 영역 -->
-                            <div class="banner-upload-box">
-                                <input type="file" @change="fnFileChange">
-                                <button @click="fnUploadBanner">배너 업로드</button>
-                            </div>
-
-                            <!-- 배너 리스트 -->
-                            <div class="banner-list">
-                                <div class="banner-item" v-for="item in bannerList" :key="item.fileName">
-                                    <img :src="item.filePath + item.fileName" class="banner-img">
-
-                                    <button class="btn-delete" @click="fnDeleteBanner(item)">
-                                        삭제
-                                    </button>
-                                </div>
                             </div>
                         </template>
                     </div>
@@ -170,10 +374,16 @@
             return {
                 // 변수 - (key : value)
                 currentMenu: "dashboard",
+                reportTab: "bookingReview",
 
                 approveList: [],
                 bannerList: [],
-                selectedFile: null
+                selectedFile: null,
+
+                bookingReviewReportList: [],
+                productReviewReportList: [],
+                communityPostReportList: [],
+                communityCommentReportList: []
                 
             };
         },
@@ -183,77 +393,77 @@
                 let self = this;
                 self.currentMenu = menuName;
 
-                // 사업자 승인 관리 메뉴 눌렀을 때 목록 조회
+                if (menuName === "report") {
+                    self.reportTab = "bookingReview";
+                    self.fnProductReviewReportList();
+                    self.fnBookingReviewReportList();
+                }
+
                 if (menuName === "storeApprove") {
                     self.fnBizList();
                 }
-            },
 
-            // 배너 파일 업로드
-            fnFileChange: function (event) {
-                let self = this;
-                self.selectedFile = event.target.files[0];
-            },
-
-            fnUploadBanner: function () {
-                let self = this;
-
-                if (!self.selectedFile) {
-                    alert("파일을 선택하세요.");
-                    return;
+                if (menuName === "banner") {
+                    self.fnBannerList();
                 }
+            },
 
-                let formData = new FormData();
-                formData.append("file", self.selectedFile);
+            fnReportStatusText: function (status) {
+                if (status === "WAI") {
+                    return "접수";
+                } // else if (status === "ACC") {
+                //     return "처리완료";
+                // } else if (status === "REJ") {
+                //     return "반려";
+                // } else {
+                //     return status;
+                // }
+            },
+
+            fnProductReviewReportList: function () {
+                let self = this;
+                let param = {};
 
                 $.ajax({
-                    url: "/banner/upload.dox",
+                    url: "/getProductReviewReportList.dox",
                     type: "POST",
-                    data: formData,
-                    processData: false,
-                    contentType: false,
+                    dataType: "json",
+                    data: param,
                     success: function (data) {
+                        console.log("상품 리뷰 신고 목록 응답 :", data);
+
                         if (data.result === "success") {
-                            alert("업로드 완료");
-                            self.fnBannerList();
+                            self.productReviewReportList = data.list || [];
                         } else {
                             alert(data.message);
                         }
+                    },
+                    error: function () {
+                        alert("상품 리뷰 신고 목록 조회 중 오류가 발생했습니다.");
                     }
                 });
             },
 
-            fnBannerList: function () {
+            fnBookingReviewReportList: function () {
                 let self = this;
+                let param = {};
 
                 $.ajax({
-                    url: "/banner/list.dox",
+                    url: "/getReservationReviewReportList.dox",
                     type: "POST",
                     dataType: "json",
+                    data: param,
                     success: function (data) {
+                        console.log("예약 리뷰 신고 목록 응답 :", data);
+
                         if (data.result === "success") {
-                            self.bannerList = data.list;
+                            self.bookingReviewReportList = data.list || [];
+                        } else {
+                            alert(data.message);
                         }
-                    }
-                });
-            },
-
-            fnDeleteBanner: function (item) {
-                let self = this;
-
-                if (!confirm("삭제하시겠습니까?")) return;
-
-                $.ajax({
-                    url: "/banner/delete.dox",
-                    type: "POST",
-                    data: {
-                        fileName: item.fileName
                     },
-                    success: function (data) {
-                        if (data.result === "success") {
-                            alert("삭제 완료");
-                            self.fnBannerList();
-                        }
+                    error: function () {
+                        alert("예약 리뷰 신고 목록 조회 중 오류가 발생했습니다.");
                     }
                 });
             },
@@ -360,8 +570,11 @@
             if (self.currentMenu === "storeApprove") {
                 self.fnBizList();
             }
-            if (menuName === "banner") {
-                self.fnBannerList();
+
+            if (self.currentMenu === "report") {
+                self.reportTab = "bookingReview";
+                self.fnProductReviewReportList();
+                self.fnBookingReviewReportList();
             }
         }
     });

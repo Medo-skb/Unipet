@@ -62,13 +62,13 @@ public class UserController {
     // 페이지 이동
     // =========================
 
-    @GetMapping("/main.do")
-    public String main(HttpSession session) {
-        if (session.getAttribute("sessionId") == null) {
-            return "redirect:/user/login.do";
-        }
-        return "main/main";
-    }
+//    @GetMapping("/main.do")
+//    public String main(HttpSession session) {
+//        if (session.getAttribute("sessionId") == null) {
+//            return "redirect:/user/login.do";
+//        }
+//        return "main/main";
+//    }
 
     @GetMapping("/user/login.do")
     public String login() {

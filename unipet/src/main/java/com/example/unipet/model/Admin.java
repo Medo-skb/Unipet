@@ -17,9 +17,26 @@ public class Admin {
     String sUserId;
     String uStatus;
 
-    // STORE_FILE
+    // STORE_FILE / 공통 파일
     String filePath;
     String fileName;
     String originName;
+
+    // 리뷰 신고 관련
+    int reportNo; 
+    int reviewNo;         
+    String userId;      
+    String reporterId;   
+    String repStatus;   
+    String rContents;
+
+    String reviewType;
+
+    // 상품 리뷰용
+    String productName; 
+    Integer ordNo; 
+
+    // 예약 리뷰용
+    Integer rsvNo;
 
 }

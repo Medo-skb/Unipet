@@ -36,6 +36,7 @@
 		AND SU.S_USER_ID = #{sUserId};
 	</update>
 	
+	<!-- 사업자 비승인 -->
 	<update id="updateBizStatusRej" parameterType="hashmap">
 		UPDATE STORE S
 		JOIN STORE_USER SU ON S.S_USER_ID = SU.S_USER_ID
@@ -44,5 +45,61 @@
 		WHERE S.STORE_NO = #{storeNo}
 		AND SU.S_USER_ID = #{sUserId};
 	</update>
+	
+	<!-- 상품 리뷰 신고 -->
+	<select id="selectProductReviewReportList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+		SELECT
+		    RR.REPORT_NO AS reportNo,
+		    RR.REVIEW_NO AS reviewNo,
+		    R.USER_ID AS userId,
+		    RR.REPORTER_ID AS reporterId,
+		    RR.REP_STATUS AS repStatus,
+		    R.R_CONTENTS AS rContents,
+		    (
+		        SELECT RF.FILE_PATH
+		        FROM REVIEW_FILE RF
+		        WHERE RF.REVIEW_NO = R.REVIEW_NO
+		        LIMIT 1
+		    ) AS filePath,
+		    P.PRODUCT_NAME AS productName,
+		    R.ORD_NO AS ordNo
+		FROM REVIEW_REPORT RR
+		INNER JOIN REVIEW R
+		    ON RR.REVIEW_NO = R.REVIEW_NO
+		LEFT JOIN PRODUCT P
+		    ON R.PRODUCT_NO = P.PRODUCT_NO
+		WHERE R.STORE_NO IS NULL
+		  AND R.RSV_NO IS NULL
+		  AND RR.REP_STATUS = 'WAI'
+		ORDER BY RR.REPORT_NO DESC;
+	</select>
+	
+	<!-- 예약 리뷰 신고 -->
+	<select id="selectReservationReviewReportList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+		SELECT
+		    RR.REPORT_NO AS reportNo,
+		    RR.REVIEW_NO AS reviewNo,
+		    R.USER_ID AS userId,
+		    RR.REPORTER_ID AS reporterId,
+		    RR.REP_STATUS AS repStatus,
+		    R.R_CONTENTS AS rContents,
+		    (
+		        SELECT RF.FILE_PATH
+		        FROM REVIEW_FILE RF
+		        WHERE RF.REVIEW_NO = R.REVIEW_NO
+		        LIMIT 1
+		    ) AS filePath,
+		    S.STORE_NAME AS storeName,
+		    R.RSV_NO AS rsvNo
+		FROM REVIEW_REPORT RR
+		INNER JOIN REVIEW R
+		    ON RR.REVIEW_NO = R.REVIEW_NO
+		LEFT JOIN STORE S
+		    ON R.STORE_NO = S.STORE_NO
+		WHERE R.PRODUCT_NO IS NULL
+		  AND R.ORD_NO IS NULL
+		  AND RR.REP_STATUS = 'WAI'
+		ORDER BY RR.REPORT_NO DESC;
+	</select>
 	
 </mapper>

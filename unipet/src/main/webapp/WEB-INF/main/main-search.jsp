@@ -13,205 +13,198 @@ pageEncoding="UTF-8"%>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/main-search.css">
 </head>
 <body>
-    <!-- ============================= -->
+
     <!-- 헤더 -->
-    <!-- ============================= -->
     <jsp:include page="/WEB-INF/header/header.jsp" />
 
     <div id="app" class="search-page">
 
-        <div v-if="keyword && keyword.trim() !== ''" class="search-container">
+        <div class="search-container">
 
-            <div class="search-page-title-box">
-                <h2 class="search-page-title">검색 결과</h2>
-                <p class="search-page-keyword">
-                    '<span>{{ keyword }}</span>' 검색 결과입니다.
-                </p>
+            <div v-if="!keyword || keyword.trim() === ''" class="search-empty">
+                검색어를 입력해주세요.
             </div>
 
-            <!-- 업체 -->
-            <section class="search-section">
-                <h3 class="search-section-title">업체</h3>
+            <div v-else>
+                <div class="search-page-title-box">
+                    <h2 class="search-page-title">검색 결과</h2>
+                    <p class="search-page-keyword">
+                        '<span>{{ keyword }}</span>' 검색 결과입니다.
+                    </p>
+                </div>
 
-                <div class="search-subsection">
-                    <h4 class="search-subsection-title">병원</h4>
+                <!-- 업체 -->
+                <section class="search-section">
+                    <h3 class="search-section-title">업체</h3>
 
-                    <div v-if="hospitalList.length > 0" class="search-list">
-                        <div v-for="item in hospitalList.slice(0, 4)" :key="item.storeNo" class="search-card search-card-row">
+                    <div class="search-subsection">
+                        <h4 class="search-subsection-title">병원</h4>
+
+                        <div v-if="hospitalList.length > 0" class="search-list">
+                            <div v-for="item in hospitalList.slice(0, 4)" :key="item.storeNo" class="search-card search-card-row">
+                                <div class="search-thumb-wrap">
+                                    <div class="search-thumb"></div>
+                                </div>
+
+                                <div class="search-info">
+                                    <div class="search-card-title">{{ item.storeName }}</div>
+
+                                    <div v-if="item.menuName1" class="search-card-menu">
+                                        {{ item.menuName1 }} - {{ item.menuPrice1 }}원
+                                    </div>
+
+                                    <div class="search-card-desc">{{ item.sAddr }}</div>
+                                </div>
+                            </div>
+                            <div v-if="hospitalCount > 4" class="search-more-wrap">
+                                <div class="search-more-btn" @click="fnGoStorePage('HOS')">병원 더보기 ></div>
+                            </div>
+                        </div>
+
+                        <div v-else class="search-empty">
+                            검색된 병원이 없습니다.
+                        </div>
+                    </div>
+
+                    <div class="search-subsection">
+                        <h4 class="search-subsection-title">미용실</h4>
+
+                        <div v-if="salonList.length > 0" class="search-list">
+                            <div v-for="item in salonList.slice(0, 4)" :key="item.storeNo" class="search-card search-card-row">
+                                <div class="search-thumb-wrap">
+                                    <div class="search-thumb"></div>
+                                </div>
+
+                                <div class="search-info">
+                                    <div class="search-card-title">{{ item.storeName }}</div>
+
+                                    <div v-if="item.menuName1" class="search-card-menu">
+                                        {{ item.menuName1 }} - {{ item.menuPrice1 }}원
+                                    </div>
+
+                                    <div class="search-card-desc">{{ item.sAddr }}</div>
+                                </div>
+                            </div>
+                            <div v-if="salonCount > 4" class="search-more-wrap">
+                                <div class="search-more-btn" @click="fnGoStorePage('SAL')">미용실 더보기 ></div>
+                            </div>
+                        </div>
+
+                        <div v-else class="search-empty">
+                            검색된 미용실이 없습니다.
+                        </div>
+                    </div>
+
+                    <div class="search-subsection">
+                        <h4 class="search-subsection-title">위탁시설</h4>
+
+                        <div v-if="boardingList.length > 0" class="search-list">
+                            <div v-for="item in boardingList.slice(0, 4)" :key="item.storeNo" class="search-card search-card-row">
+                                <div class="search-thumb-wrap">
+                                    <div class="search-thumb"></div>
+                                </div>
+
+                                <div class="search-info">
+                                    <div class="search-card-title">{{ item.storeName }}</div>
+
+                                    <div v-if="item.menuName1" class="search-card-menu">
+                                        {{ item.menuName1 }} - {{ item.menuPrice1 }}원
+                                    </div>
+
+                                    <div class="search-card-desc">{{ item.sAddr }}</div>
+                                </div>
+                            </div>
+                            <div v-if="boardingCount > 4" class="search-more-wrap">
+                                <div class="search-more-btn" @click="fnGoStorePage('BRD')">위탁시설 더보기 ></div>
+                            </div>
+                        </div>
+
+                        <div v-else class="search-empty">
+                            검색된 위탁시설이 없습니다.
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 상품 -->
+                <section class="search-section">
+                    <h3 class="search-section-title">상품</h3>
+
+                    <div v-if="productList.length > 0" class="search-list">
+                        <div v-for="item in productList.slice(0, 4)" :key="item.productNo" class="search-card search-card-row">
                             <div class="search-thumb-wrap">
                                 <div class="search-thumb"></div>
                             </div>
 
                             <div class="search-info">
-                                <div class="search-card-title">{{ item.storeName }}</div>
-
-                                <div v-if="item.menuName1" class="search-card-menu">
-                                    {{ item.menuName1 }} - {{ item.menuPrice1 }}원
+                                <div class="search-card-title">{{ item.productName }}</div>
+                                <div class="search-card-price">{{ item.productPrice }}원</div>
+                                <div class="search-card-rating">★ {{ item.rating }} ({{ item.reviewCount }})</div>
+                                <div class="search-card-brand">{{ item.brand }}</div>
+                                <div class="search-card-meta">
+                                    {{ item.aMainType }}
+                                    <span v-if="item.aSubType"> / {{ item.aSubType }}</span>
+                                    <span v-if="item.iSubType"> / {{ item.iSubType }}</span>
                                 </div>
-
-                                <div class="search-card-desc">{{ item.sAddr }}</div>
                             </div>
                         </div>
-                        <div v-if="hospitalCount > 4" class="search-more-wrap">
-                            <div class="search-more-btn" @click="fnGoStorePage('HOS')">병원 더보기 ></div>
+
+                        <div v-if="productCount > 4" class="search-more-wrap">
+                            <div class="search-more-btn" @click="fnGoProductPage">
+                                상품 더보기 >
+                            </div>
                         </div>
                     </div>
 
                     <div v-else class="search-empty">
-                        검색된 병원이 없습니다.
+                        검색된 상품이 없습니다.
                     </div>
-                </div>
+                </section>
 
-                <div class="search-subsection">
-                    <h4 class="search-subsection-title">미용실</h4>
+                <!-- 커뮤니티 -->
+                <section class="search-section">
+                    <h3 class="search-section-title">커뮤니티</h3>
 
-                <div v-if="salonList.length > 0" class="search-list">
-                    <div v-for="item in salonList.slice(0, 4)" :key="item.storeNo" class="search-card search-card-row">
-                        <div class="search-thumb-wrap">
-                            <div class="search-thumb"></div>
-                        </div>
+                    <div class="search-subsection">
+                        <h4 class="search-subsection-title">통합 게시판</h4>
 
-                        <div class="search-info">
-                            <div class="search-card-title">{{ item.storeName }}</div>
-
-                            <div v-if="item.menuName1" class="search-card-menu">
-                                {{ item.menuName1 }} - {{ item.menuPrice1 }}원
+                        <div v-if="totalBoardList.length > 0" class="search-list">
+                            <div v-for="item in totalBoardList.slice(0, 4)" :key="item.boardNo" class="search-card">
+                                <div class="search-card-title">{{ item.title }}</div>
+                                <div class="search-card-desc board-content">{{ item.bContent }}</div>
                             </div>
-
-                            <div class="search-card-desc">{{ item.sAddr }}</div>
-                        </div>
-                    </div>
-                    <div v-if="salonCount > 4" class="search-more-wrap">
-                        <div class="search-more-btn" @click="fnGoStorePage('SAL')">미용실 더보기 ></div>
-                    </div>
-                </div>
-
-                    <div v-else class="search-empty">
-                        검색된 미용실이 없습니다.
-                    </div>
-                </div>
-
-                <div class="search-subsection">
-                    <h4 class="search-subsection-title">위탁시설</h4>
-
-                <div v-if="boardingList.length > 0" class="search-list">
-                    <div v-for="item in boardingList.slice(0, 4)" :key="item.storeNo" class="search-card search-card-row">
-                        <div class="search-thumb-wrap">
-                            <div class="search-thumb"></div>
-                        </div>
-
-                        <div class="search-info">
-                            <div class="search-card-title">{{ item.storeName }}</div>
-
-                            <div v-if="item.menuName1" class="search-card-menu">
-                                {{ item.menuName1 }} - {{ item.menuPrice1 }}원
-                            </div>
-
-                            <div class="search-card-desc">{{ item.sAddr }}</div>
-                        </div>
-                    </div>
-                    <div v-if="boardingCount > 4" class="search-more-wrap">
-                        <div class="search-more-btn" @click="fnGoStorePage('BRD')">위탁시설 더보기 ></div>
-                    </div>
-                </div>
-
-                    <div v-else class="search-empty">
-                        검색된 위탁시설이 없습니다.
-                    </div>
-                </div>
-            </section>
-
-            <!-- 상품 -->
-            <section class="search-section">
-                <h3 class="search-section-title">상품</h3>
-
-                <div v-if="productList.length > 0" class="search-list">
-                    <div v-for="item in productList.slice(0, 4)" :key="item.productNo" class="search-card search-card-row">
-                        <div class="search-thumb-wrap">
-                            <div class="search-thumb"></div>
-                        </div>
-
-                        <div class="search-info">
-                            <div class="search-card-title">{{ item.productName }}</div>
-
-                            <div class="search-card-price">
-                                {{ item.productPrice }}원
-                            </div>
-
-                            <div class="search-card-rating">
-                                ★ {{ item.rating }} ({{ item.reviewCount }})
-                            </div>
-
-                            <div class="search-card-brand">{{ item.brand }}</div>
-
-                            <div class="search-card-meta">
-                                {{ item.aMainType }}
-                                <span v-if="item.aSubType"> / {{ item.aSubType }}</span>
-                                <span v-if="item.iSubType"> / {{ item.iSubType }}</span>
+                            <div v-if="totalBoardCount > 4" class="search-more-wrap">
+                                <div class="search-more-btn" @click="fnGoBoardPage(1)">
+                                    통합 게시판 더보기 >
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div v-if="productCount > 4" class="search-more-wrap">
-                        <div class="search-more-btn"
-                            @click="fnGoProductPage">
-                            상품 더보기 >
-                        </div>
-                    </div>
-                </div>
-
-                <div v-else class="search-empty">
-                    검색된 상품이 없습니다.
-                </div>
-            </section>
-
-            <!-- 커뮤니티 -->
-            <section class="search-section">
-                <h3 class="search-section-title">커뮤니티</h3>
-
-                <div class="search-subsection">
-                    <h4 class="search-subsection-title">통합 게시판</h4>
-
-                    <div v-if="totalBoardList.length > 0" class="search-list">
-                        <div v-for="item in totalBoardList.slice(0, 4)" :key="item.boardNo" class="search-card">
-                            <div class="search-card-title">{{ item.title }}</div>
-                            <div class="search-card-desc board-content">{{ item.bContent }}</div>
-                        </div>
-                        <div v-if="totalBoardCount > 4" class="search-more-wrap">
-                        <div class="search-more-btn"
-                            @click="fnGoBoardPage(1)">
-                            통합 게시판 더보기 >
-                        </div>
+                        <div v-else class="search-empty">
+                            검색된 통합 게시글이 없습니다.
                         </div>
                     </div>
 
-                    <div v-else class="search-empty">
-                        검색된 통합 게시글이 없습니다.
-                    </div>
-                </div>
+                    <div class="search-subsection">
+                        <h4 class="search-subsection-title">지역 게시판</h4>
 
-                <div class="search-subsection">
-                    <h4 class="search-subsection-title">지역 게시판</h4>
-
-                    <div v-if="localBoardList.length > 0" class="search-list">
-                        <div v-for="item in localBoardList.slice(0, 4)" :key="item.boardNo" class="search-card">
-                            <div class="search-card-title">{{ item.title }}</div>
-                            <div class="search-card-desc board-content">{{ item.bContent }}</div>
+                        <div v-if="localBoardList.length > 0" class="search-list">
+                            <div v-for="item in localBoardList.slice(0, 4)" :key="item.boardNo" class="search-card">
+                                <div class="search-card-title">{{ item.title }}</div>
+                                <div class="search-card-desc board-content">{{ item.bContent }}</div>
+                            </div>
+                            <div v-if="localBoardCount > 4" class="search-more-wrap">
+                                <div class="search-more-btn" @click="fnGoBoardPage(2)">
+                                    지역 게시판 더보기 >
+                                </div>
+                            </div>
                         </div>
-                        <div v-if="localBoardCount > 4" class="search-more-wrap">
-                        <div class="search-more-btn"
-                            @click="fnGoBoardPage(2)">
-                            지역 게시판 더보기 >
-                        </div>
+
+                        <div v-else class="search-empty">
+                            검색된 지역 게시글이 없습니다.
                         </div>
                     </div>
-
-                    <div v-else class="search-empty">
-                        검색된 지역 게시글이 없습니다.
-                    </div>
-                </div>
-            </section>
-
+                </section>
+            </div>
         </div>
     </div>
 
