@@ -202,7 +202,7 @@
                                     <div class="recommend-name">{{ item.productName }}</div>
 
                                     <div class="recommend-reason">
-                                        선택한 동물 카테고리의 추천 상품
+                                        선택한 카테고리의 추천 상품
                                     </div>
 
                                     <div class="recommend-price">

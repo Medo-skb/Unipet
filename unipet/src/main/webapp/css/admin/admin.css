@@ -213,3 +213,77 @@ body {
     font-size: 15px;
     color: #666;
 }
+
+.report-tab-wrap {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0 25px;
+    flex-wrap: wrap;
+}
+
+.report-tab-btn {
+    border: 1px solid #dcdfe6;
+    background: #fff;
+    color: #333;
+    padding: 10px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.report-tab-btn.active {
+    background: #222;
+    color: #fff;
+    border: 1px solid #222;
+}
+
+.report-section-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: #222;
+}
+
+.report-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.report-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 20px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.report-table th {
+    width: 120px;
+    background: #f8f9fb;
+    color: #333;
+    text-align: left;
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    font-size: 14px;
+}
+
+.report-table td {
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    font-size: 14px;
+    color: #555;
+}
+
+.report-btn-box {
+    margin-top: 16px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}

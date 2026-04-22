@@ -1,0 +1,88 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.example.unipet.mapper.BizMyPageMapper">
+	<!-- 업체 이미지 리스트 -->
+	<select id="selectBizImgList" parameterType="hashmap" resultType="com.example.unipet.model.BizMyPage">
+		SELECT
+		    SF.FILE_NO,
+		    SF.STORE_NO,
+		    SF.FILE_PATH,
+		    SF.FILE_NAME,
+		    SF.ORIGIN_NAME,
+		    SF.IS_MAIN
+		FROM STORE_FILE SF
+		INNER JOIN STORE S
+		    ON SF.STORE_NO = S.STORE_NO
+		INNER JOIN STORE_USER SU
+		    ON S.S_USER_ID = SU.S_USER_ID
+		WHERE S.S_USER_ID = #{sUserId}
+		  AND S.S_STATUS IN ('GEN', 'AFF')
+		  AND SU.U_STATUS = 'APR'
+		ORDER BY SF.IS_MAIN DESC, SF.FILE_NO DESC
+	</select>
+
+	<!-- 업체 소개 리스트 -->
+	<select id="selectBizStoreList" parameterType="hashmap" resultType="com.example.unipet.model.BizMyPage">
+		SELECT
+		    S.STORE_NO,
+		    S.STORE_NAME,
+		    S.S_CATEGORY,
+		    S.BIZNUM,
+		    S.IS_OPEN,
+		    S.ACC_NAME,
+		    S.ACC_NO,
+		    S.ACC_HOLDER,
+		    S.S_ADDR,
+		    S.S_FULL_ADDR,
+		    SD.SUB_TITLE,
+		    SD.S_CONTENTS,
+		    SP.SLOT,
+		    SP.CAPACITY,
+		    SP.CUTOFF,
+		    SP.OPEN_TIME,
+		    SP.CLOSE_TIME,
+		    SP.BREAK_START,
+		    SP.BREAK_END,
+		    SP.OFF_DAY,
+		    SP.REFUND_POLICY
+		FROM STORE S
+		INNER JOIN STORE_USER SU
+		    ON S.S_USER_ID = SU.S_USER_ID
+		LEFT JOIN STORE_DETAIL SD
+		    ON S.STORE_NO = SD.STORE_NO
+		LEFT JOIN STORE_POLICY SP
+		    ON S.STORE_NO = SP.STORE_NO
+		WHERE S.S_USER_ID = #{sUserId}
+		  AND S.S_STATUS IN ('GEN', 'AFF')
+		  AND SU.U_STATUS = 'APR'
+	</select>
+	
+	<!-- 업체 메뉴 리스트 -->
+	<select id="selectBizStoreMenuList" parameterType="hashmap" resultType="com.example.unipet.model.BizMyPage">
+		SELECT
+		    SM.MENU_NO,
+		    SM.STORE_NO,
+		    SM.MENU_NAME,
+		    SM.MENU_INFO,
+		    SM.MENU_PRICE,
+		    SM.REQ_TIME,
+		    SM.M_STATUS,
+		    SM.MENU_CATEGORY,
+		    CASE
+		        WHEN SM.M_STATUS = 'Y' THEN '판매중'
+		        WHEN SM.M_STATUS = 'N' THEN '판매중지'
+		        ELSE '미정'
+		    END AS M_STATUS_NAME
+		FROM STORE S
+		INNER JOIN STORE_USER SU
+		    ON S.S_USER_ID = SU.S_USER_ID
+		INNER JOIN STORE_MENU SM
+		    ON S.STORE_NO = SM.STORE_NO
+		WHERE S.S_USER_ID = #{sUserId}
+		  AND S.S_STATUS IN ('GEN', 'AFF')
+		  AND SU.U_STATUS = 'APR'
+		ORDER BY SM.MENU_NO DESC
+	</select>
+	
+</mapper>

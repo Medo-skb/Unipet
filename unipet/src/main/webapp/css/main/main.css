@@ -1,6 +1,25 @@
 /* ============================= */
+/* 🎨 컬러 변수 */
+/* ============================= */
+:root {
+    --main: #3A7DFF;
+    --sub: #E8F0FF;
+    --bg: #F8FAFF;
+    --point: #FF8A3D;
+
+    --text-main: #222;
+    --text-sub: #777;
+    --line-soft: #e6ecfa;
+    --image-soft: #f3f6ff;
+}
+
+/* ============================= */
 /* 공통 레이아웃 */
 /* ============================= */
+body {
+    background-color: var(--bg);
+}
+
 @media (max-width: 1400px) {
     .page-layout {
         min-width: 1400px;
@@ -169,26 +188,26 @@
 .store-card {
     width: calc((100% - 60px) / 4);
     background: #ffffff;
-    border: 1px solid #ececec;
+    border: 1px solid var(--line-soft);
     border-radius: 18px;
     box-sizing: border-box;
     overflow: hidden;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 6px 18px rgba(58, 125, 255, 0.08);
     transition: transform 0.25s ease, box-shadow 0.25s ease;
     cursor: pointer;
 }
 
 .store-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 14px 28px rgba(58, 125, 255, 0.15);
 }
 
 .store-image-box {
     position: relative;
     width: 100%;
     height: 220px;
-    background-color: #f4f4f4;
-    border-bottom: 1px solid #ececec;
+    background-color: var(--image-soft);
+    border-bottom: 1px solid var(--line-soft);
 }
 
 .store-image-placeholder {
@@ -210,14 +229,14 @@
     width: 34px;
     height: 34px;
     border-radius: 50%;
-    background-color: #ff6b6b;
+    background-color: var(--point);
     color: #fff;
     font-size: 17px;
     font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 10px rgba(255, 107, 107, 0.35);
+    box-shadow: 0 4px 10px rgba(255, 138, 61, 0.35);
 }
 
 .store-card-body {
@@ -238,7 +257,7 @@
     flex: 1;
     font-size: 18px;
     font-weight: 700;
-    color: #222;
+    color: var(--text-main);
     line-height: 1.4;
     word-break: keep-all;
 }
@@ -248,8 +267,8 @@
     display: inline-block;
     padding: 6px 12px;
     border-radius: 999px;
-    background-color: #fff4ef;
-    color: #ff6b6b;
+    background-color: var(--sub);
+    color: var(--main);
     font-size: 13px;
     font-weight: 600;
     line-height: 1;
@@ -265,7 +284,7 @@
 
 .store-address {
     font-size: 14px;
-    color: #777;
+    color: var(--text-sub);
     line-height: 1.5;
     word-break: keep-all;
 }
@@ -288,26 +307,26 @@
 .product-card {
     width: calc((100% - 60px) / 4);
     background: #ffffff;
-    border: 1px solid #ececec;
+    border: 1px solid var(--line-soft);
     border-radius: 18px;
     box-sizing: border-box;
     overflow: hidden;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 6px 18px rgba(58, 125, 255, 0.08);
     transition: transform 0.25s ease, box-shadow 0.25s ease;
     cursor: pointer;
 }
 
 .product-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 14px 28px rgba(58, 125, 255, 0.15);
 }
 
 .product-image-box {
     position: relative;
     width: 100%;
     height: 220px;
-    background-color: #f6f6f6;
-    border-bottom: 1px solid #ececec;
+    background-color: var(--image-soft);
+    border-bottom: 1px solid var(--line-soft);
 }
 
 .product-image-placeholder {
@@ -329,14 +348,14 @@
     width: 34px;
     height: 34px;
     border-radius: 50%;
-    background-color: #ff6b6b;
+    background-color: var(--point);
     color: #ffffff;
     font-size: 17px;
     font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 10px rgba(255, 107, 107, 0.35);
+    box-shadow: 0 4px 10px rgba(255, 138, 61, 0.35);
     z-index: 2;
 }
 
@@ -350,7 +369,7 @@
 .product-name {
     font-size: 17px;
     font-weight: 600;
-    color: #222;
+    color: var(--text-main);
     line-height: 1.5;
     word-break: keep-all;
     min-height: 52px;
@@ -359,7 +378,7 @@
 .product-price {
     font-size: 22px;
     font-weight: 700;
-    color: #ff6b6b;
+    color: var(--point);
 }
 
 /* ============================= */
@@ -387,25 +406,25 @@
 .recommend-card {
     width: calc((100% - 60px) / 4);
     background: #ffffff;
-    border: 1px solid #ececec;
+    border: 1px solid var(--line-soft);
     border-radius: 18px;
     box-sizing: border-box;
     overflow: hidden;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 6px 18px rgba(58, 125, 255, 0.08);
     transition: transform 0.25s ease, box-shadow 0.25s ease;
     cursor: pointer;
 }
 
 .recommend-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 14px 28px rgba(58, 125, 255, 0.15);
 }
 
 .recommend-image-box {
     width: 100%;
     height: 220px;
-    background-color: #f4f4f4;
-    border-bottom: 1px solid #ececec;
+    background-color: var(--image-soft);
+    border-bottom: 1px solid var(--line-soft);
 }
 
 .recommend-image-placeholder {
@@ -434,7 +453,7 @@
     flex: 1;
     font-size: 18px;
     font-weight: 700;
-    color: #222;
+    color: var(--text-main);
     line-height: 1.4;
     word-break: keep-all;
 }
@@ -450,7 +469,7 @@
 .recommend-price {
     font-size: 22px;
     font-weight: 700;
-    color: #ff6b6b;
+    color: var(--point);
 }
 
 /* ============================= */
@@ -468,8 +487,8 @@
     display: inline-block;
     padding: 6px 12px;
     border-radius: 999px;
-    background-color: #fff4ef;
-    color: #ff6b6b;
+    background-color: var(--sub);
+    color: var(--main);
     font-size: 13px;
     font-weight: 600;
     line-height: 1;
@@ -477,7 +496,7 @@
 
 .recommend-address {
     font-size: 14px;
-    color: #777;
+    color: var(--text-sub);
     line-height: 1.5;
     word-break: keep-all;
 }
@@ -513,13 +532,13 @@
 }
 
 .category-tab-btn:hover {
-    border-color: #ff6b6b;
-    color: #ff6b6b;
+    border-color: var(--main);
+    color: var(--main);
 }
 
 .category-tab-btn.active {
-    background-color: #ff6b6b;
-    border-color: #ff6b6b;
+    background-color: var(--main);
+    border-color: var(--main);
     color: #ffffff;
 }
 

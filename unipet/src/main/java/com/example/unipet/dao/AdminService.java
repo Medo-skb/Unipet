@@ -68,6 +68,41 @@ public class AdminService {
 		return resultMap;
 	}
 	
+	// 예약 리뷰 신고 리스트
+	public HashMap<String, Object> getReservationReviewReportList(HashMap<String, Object> map){
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+		try {
+			List<Admin> list = adminMapper.selectReservationReviewReportList(map);
+			
+			resultMap.put("list", list);
+			resultMap.put("result", "success");
+			resultMap.put("message", Message.MSG_SEARCH);
+		} catch (Exception e) {
+			// TODO: handle exception
+			System.out.println(e.getMessage());
+			resultMap.put("result", "fail");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
+		}
+		return resultMap;
+	}
+	
+	// 상품 리뷰 신고 리스트
+	public HashMap<String, Object> getProductReviewReportList(HashMap<String, Object> map){
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+		try {
+			List<Admin> list = adminMapper.selectProductReviewReportList(map);
+			
+			resultMap.put("list", list);
+			resultMap.put("result", "success");
+			resultMap.put("message", Message.MSG_SEARCH);
+		} catch (Exception e) {
+			// TODO: handle exception
+			System.out.println(e.getMessage());
+			resultMap.put("result", "fail");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
+		}
+		return resultMap;
+	}
 	
 	
 	

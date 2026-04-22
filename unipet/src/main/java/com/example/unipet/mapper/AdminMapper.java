@@ -18,5 +18,10 @@ public interface AdminMapper {
 	
 	// 사업자 거부
 	public int updateBizStatusRej(HashMap<String, Object> map);
-
+	
+	// 예약 리뷰 신고 리스트
+	public List<Admin> selectReservationReviewReportList(HashMap<String, Object> map);
+	
+	// 상품 리뷰 신고 리스트
+	public List<Admin> selectProductReviewReportList(HashMap<String, Object> map);
 }
