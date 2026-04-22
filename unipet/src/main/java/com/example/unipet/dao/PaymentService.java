@@ -18,6 +18,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.example.unipet.common.Message;
 import com.example.unipet.mapper.PaymentMapper;
+import com.example.unipet.model.Coupon;
 import com.example.unipet.model.Payment;
 
 import lombok.extern.slf4j.Slf4j;
@@ -78,6 +79,7 @@ public class PaymentService {
 	
 	@Transactional(rollbackFor = Exception.class)
     public HashMap<String, Object> addPayment(HashMap<String, Object> map) {
+		
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 	    try {
 	        String payStatus = (String) map.get("payStatus");
@@ -92,7 +94,45 @@ public class PaymentService {
 	            } else if ("RSV".equals(payFlg)) {
 	                paymentMapper.updateRsvStatus(map);
 	            } else if ("SHOP".equals(payFlg)) {	
-//	                paymentMapper.updateShopOrderStatus(map)'';
+	            	
+	            	// --- [Step 1] 포인트 처리 ---
+	                Object val = map.get("usedPoint");
+	                int usedPoint = (val != null) ? Integer.parseInt(val.toString()) : 0;
+	                
+	                if (usedPoint > 0) {
+	                    paymentMapper.insertPoint(map); // insertPoint에서 pointNo 자동 생성/주입
+	                } 
+
+	                // --- [Step 2] 쿠폰 처리 ---
+	                Object ucpNoObj = map.get("ucpNo");
+	                if (ucpNoObj != null && !"".equals(ucpNoObj.toString())) {
+	                    paymentMapper.updateCouponStatus(map);
+	                    // orders 테이블의 COUPON_NO 컬럼에 넣기 위해 ucpNo를 대입
+	                    map.put("couponNo", ucpNoObj); 
+	                }
+
+	                // --- [Step 3] 주문 마스터(orders) 생성 ---
+	                // 주소 합치기
+	                String fullAddr = map.get("userAddr") + " " + map.get("fullAddr");
+	                map.put("ordAddr", fullAddr);
+	                
+	                // 주문서 INSERT (map에 ordNo 자동 주입)
+	                paymentMapper.insertOrder(map);
+	                
+	                if (usedPoint > 0) {
+	                    paymentMapper.updatePoint(map);
+	                }
+
+	                // --- [Step 4] 주문 상세(order_detail) 생성 ---
+	                int generatedOrdNo = Integer.parseInt(String.valueOf(map.get("ordNo")));
+
+	                List<HashMap<String, Object>> orderList = (List<HashMap<String, Object>>) map.get("orderList");
+
+	                for (HashMap<String, Object> item : orderList) {
+	                    item.put("ordNo", generatedOrdNo); // 확보한 주문번호 연결
+	                    paymentMapper.insertOrderDetail(item);
+	                }
+	            	
 	            }
 	            
 	            // 2. 최종 결제 내역 저장
@@ -138,30 +178,39 @@ public class PaymentService {
         return resultMap;
     }
 	
+	public HashMap<String, Object> getBenefit(HashMap<String, Object> map){
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+	    
+	    try {
+	        // 1. DB에서 쿠폰 리스트 조회
+	        List<Coupon> couponList = paymentMapper.selectCoupon(map);
+	        int userPoint = paymentMapper.selectUserPoint(map);
+	        
+	        String userId = (String) map.get("userId");
+	        int subCount = paymentMapper.selectSubStatus(userId);
+	        
+	        // 2. 화면에 던져줄 데이터 세팅
+	        resultMap.put("couponList", couponList);
+	        resultMap.put("point", userPoint);
+	        resultMap.put("isPremium", subCount > 0);
+	        
+	        resultMap.put("result", "success");
+	         resultMap.put("message", Message.MSG_ADD); 
+	        
+	    } catch (Exception e) {
+	        // 4. 에러 처리 (디폴트 템플릿 스타일 그대로 적용)
+	        System.out.println(e.getMessage());
+	        
+	        resultMap.put("result", "fail");
+	        resultMap.put("message", Message.MSG_SERVER_ERR); // 상수 클래스 사용!
+	    }
+	    
+	    return resultMap;
+	}
 	
 	
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
 	
 	public int getSubStatus(String userId) {
         return paymentMapper.selectSubStatus(userId);

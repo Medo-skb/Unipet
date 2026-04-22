@@ -6,9 +6,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -126,6 +129,14 @@ public class PaymentController {
         return new Gson().toJson(resultMap); 
     }
 	
+	@PostMapping(value = "/payment/add.dox", consumes = MediaType.APPLICATION_JSON_VALUE, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public HashMap<String, Object> savePaymentJson(@RequestBody HashMap<String, Object> map) throws Exception {
+	    // @RequestBody가 붙으면 JSON 안의 배열(orderList)이 자바 List로 완벽하게 변환됩니다.
+	    // Spring Boot 3에서는 HashMap을 리턴하면 알아서 JSON으로 변환해주므로 Gson이 필요 없습니다.
+	    return paymentService.addPayment(map); 
+	}
+	
 	@RequestMapping(value = "/payment/info.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
     @ResponseBody
     public String userInfo(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
@@ -157,4 +168,18 @@ public class PaymentController {
 	    return new Gson().toJson(resultMap);
 	}
 	
+	@RequestMapping(value = "/payment/getBenefit.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getBenefit(Model model, HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
+//	    String userId = (String) session.getAttribute("userId");
+		// 테스트용
+		String userId = "test_user01";
+	    map.put("userId", userId);
+	    
+	    // 2. 디폴트 템플릿 방식대로 서비스 객체 함수 호출
+	    HashMap<String, Object> resultMap = paymentService.getBenefit(map);
+
+	    // 3. 결과를 JSON으로 변환하여 프론트(Vue)로 반환
+	    return new Gson().toJson(resultMap); 
+	}
 }

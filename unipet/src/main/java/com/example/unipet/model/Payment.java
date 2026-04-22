@@ -33,7 +33,9 @@ public class Payment {
     // 5. 계산 데이터
     int deposit;    // 예약금
     int balance;    // 잔액
+    
 
+    
     
     
 }

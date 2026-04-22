@@ -124,7 +124,8 @@
                     name: self.info.storeName + " 예약금", 
                     amount: self.deposit, 
                     buyer_name: self.info.userName,  
-                    buyer_tel: self.info.phone 
+                    buyer_tel: self.info.phone,
+                    buyer_email: self.info.email
                 }, function (response) {
                     // 성공하든 실패하든 일단 서버로 기록을 보냄
                     self.fnAddPayment(response); 
