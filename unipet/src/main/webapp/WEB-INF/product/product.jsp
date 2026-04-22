@@ -351,12 +351,68 @@
 				padding: 50px;
 				text-align: center;
 			}
+			
+			.header {
+				width: 100%;
+				height: 70px;
+				background: #fff;
+				border-bottom: 1px solid #eee;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 0 40px;
+				position: sticky;
+				top: 0;
+				z-index: 999;
+				box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+			}
+
+			.logo {
+				font-size: 24px;
+				font-weight: bold;
+				color: #ff7a00;
+				cursor: pointer;
+				display: flex;
+				align-items: baseline;
+				gap: 6px;
+			}
+
+			.logo-sub {
+				font-size: 12px;
+				color: #999;
+			}
+
+			.cart-box {
+				position: relative;
+				cursor: pointer;
+				font-size: 22px;
+			}
+
+			.cart-badge {
+				position: absolute;
+				top: -6px;
+				right: -10px;
+				background: red;
+				color: white;
+				font-size: 12px;
+				border-radius: 50%;
+				padding: 2px 6px;
+			}
 		</style>
 	</head>
 
 	<body>
 		<div id="app">
 			<div class="header">
+				<div class="logo" @click="fnMoveMain()">
+							UniPet <span class="logo-sub">shop</span>
+						</div>
+
+						<div class="cart-box" @click="fnMoveCart()">
+							🛒
+							<span class="cart-badge" v-if="cartCount > 0">{{cartCount}}</span>
+						</div>
+					</div>
 				<div class="wrap">
 					<div class="container">
 						<div class="sidebar">
@@ -649,7 +705,11 @@
 
 				fnFormatPrice(price) {
 					return Number(price).toLocaleString();
-				}
+				},
+				
+				fnMoveMain() {
+					location.href = "/product.do";
+				},
 			},
 			mounted() {
 				this.fnGetCategoryList();

@@ -29,14 +29,9 @@
 				padding: 30px 0;
 			}
 
-			.title {
-				font-size: 30px;
-				font-weight: bold;
-				margin-bottom: 20px;
-			}
-
 			.detail-box,
-			.review-box {
+			.review-box,
+			.tab-box {
 				background: #fff;
 				border: 1px solid #ddd;
 				border-radius: 12px;
@@ -122,7 +117,6 @@
 			}
 
 			.btn-area button,
-			.review-top button,
 			.qna-write-btn {
 				min-width: 130px;
 				height: 44px;
@@ -140,7 +134,6 @@
 			}
 
 			.btn-buy,
-			.btn-review,
 			.qna-write-btn {
 				background: #ff7a00;
 				color: #fff;
@@ -152,6 +145,7 @@
 				border-radius: 12px;
 				padding: 50px;
 				text-align: center;
+				margin-bottom: 20px;
 			}
 
 			.review-top {
@@ -229,6 +223,16 @@
 				font-size: 24px;
 				font-weight: bold;
 				color: #ff7a00;
+				cursor: pointer;
+				display: flex;
+				align-items: baseline;
+				gap: 6px;
+			}
+
+			.logo-sub {
+				font-size: 12px;
+				color: #999;
+				font-weight: normal;
 			}
 
 			.header-right {
@@ -276,7 +280,6 @@
 				justify-content: center;
 			}
 
-			/* 탭 */
 			.tab-menu {
 				display: flex;
 				justify-content: center;
@@ -302,24 +305,128 @@
 				background: #d8d2c8;
 			}
 
-			.tab-box {
-				background: #fff;
-				border: 1px solid #ddd;
-				border-radius: 12px;
-				padding: 25px;
-				margin-bottom: 20px;
+			.detail-desc-top {
+				background: linear-gradient(135deg, #fff8f2 0%, #ffffff 100%);
+				border: 1px solid #ffe0c2;
+				border-radius: 16px;
+				padding: 28px;
+				margin-bottom: 24px;
+			}
+
+			.detail-desc-badge {
+				display: inline-block;
+				padding: 6px 12px;
+				border-radius: 999px;
+				background: #ffefe2;
+				color: #ff7a00;
+				font-size: 12px;
+				font-weight: bold;
+				margin-bottom: 14px;
 			}
 
 			.detail-desc-title {
-				font-size: 20px;
+				font-size: 28px;
 				font-weight: bold;
-				margin-bottom: 20px;
+				margin-bottom: 10px;
+				color: #222;
 			}
 
-			.detail-img-list img {
-				max-width: 100%;
-				display: block;
-				margin: 0 auto 15px;
+			.detail-desc-sub {
+				font-size: 14px;
+				color: #777;
+				margin-bottom: 14px;
+			}
+
+			.detail-desc-price {
+				font-size: 30px;
+				font-weight: bold;
+				color: #ff7a00;
+			}
+
+			.detail-point-wrap {
+				display: grid;
+				grid-template-columns: repeat(3, 1fr);
+				gap: 16px;
+				margin-bottom: 24px;
+			}
+
+			.detail-point-box {
+				background: #fff;
+				border: 1px solid #eee;
+				border-radius: 14px;
+				padding: 20px;
+				box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+			}
+
+			.detail-point-title {
+				font-size: 16px;
+				font-weight: bold;
+				margin-bottom: 10px;
+				color: #333;
+			}
+
+			.detail-point-text {
+				font-size: 14px;
+				line-height: 1.7;
+				color: #666;
+			}
+
+			.detail-section-title {
+				font-size: 20px;
+				font-weight: bold;
+				margin-bottom: 18px;
+				color: #333;
+			}
+
+			.detail-empty-desc {
+				background: #fafafa;
+				border: 1px dashed #ddd;
+				border-radius: 14px;
+				padding: 40px 20px;
+				text-align: center;
+				color: #999;
+				font-size: 14px;
+			}
+
+			.detail-rating {
+				font-size: 14px;
+				color: #ff7a00;
+				font-weight: bold;
+				margin-bottom: 10px;
+			}
+
+			.delivery-box {
+				background: #fafafa;
+				border: 1px solid #eee;
+				border-radius: 10px;
+				padding: 12px;
+				font-size: 13px;
+				color: #555;
+				margin-top: 10px;
+			}
+
+			.tag-box span {
+				display: inline-block;
+				background: #fff1e6;
+				color: #ff7a00;
+				padding: 4px 10px;
+				border-radius: 999px;
+				font-size: 12px;
+				margin-right: 6px;
+			}
+
+			.stock-status {
+				color: red;
+				font-size: 13px;
+				font-weight: bold;
+				margin-top: 6px;
+			}
+
+			.simple-desc {
+				font-size: 14px;
+				color: #666;
+				line-height: 1.6;
+				margin-top: 10px;
 			}
 
 			.qna-write-box {
@@ -331,8 +438,7 @@
 			}
 
 			.qna-write-box input,
-			.qna-write-box textarea,
-			.qna-write-box select {
+			.qna-write-box textarea {
 				width: 100%;
 				border: 1px solid #ccc;
 				border-radius: 8px;
@@ -347,13 +453,149 @@
 				resize: none;
 			}
 
+			.qna-write-header {
+				margin-bottom: 16px;
+			}
+
+			.qna-title {
+				font-size: 20px;
+				font-weight: bold;
+				color: #222;
+				margin-bottom: 4px;
+			}
+
+			.qna-desc {
+				font-size: 13px;
+				color: #888;
+			}
+
+			.qna-secret-row {
+				display: flex;
+				align-items: center;
+				gap: 16px;
+				margin-bottom: 14px;
+				flex-wrap: wrap;
+			}
+
+			.qna-secret-label {
+				font-size: 14px;
+				font-weight: bold;
+				color: #444;
+				min-width: 70px;
+			}
+
+			.qna-secret-option-wrap {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				flex-wrap: wrap;
+			}
+
+			.qna-secret-option {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				gap: 6px;
+				min-width: 110px;
+				height: 42px;
+				padding: 0 16px;
+				border: 1px solid #ddd;
+				border-radius: 999px;
+				background: #fff;
+				cursor: pointer;
+				font-size: 14px;
+				color: #555;
+				white-space: nowrap;
+				transition: all 0.2s ease;
+			}
+
+			.qna-secret-option:hover {
+				border-color: #ffb36b;
+				background: #fffaf5;
+			}
+
+			.qna-secret-option.active {
+				border-color: #ff7a00;
+				background: #fff1e6;
+				color: #ff7a00;
+				font-weight: bold;
+			}
+
+			.qna-secret-option input[type="radio"] {
+				margin: 0;
+				width: 16px;
+				height: 16px;
+				flex-shrink: 0;
+			}
+
+			.qna-list-box {
+				margin-top: 10px;
+			}
+
+			.qna-top-row {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				margin-bottom: 10px;
+			}
+
+			.qna-head-left {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+			}
+
+			.qna-head-right {
+				color: #888;
+				font-size: 13px;
+			}
+
+			.qna-type-badge {
+				display: inline-block;
+				padding: 4px 10px;
+				border-radius: 999px;
+				font-size: 12px;
+				font-weight: bold;
+			}
+
+			.qna-type-badge.secret {
+				background: #fff1c9;
+				color: #7b5a00;
+			}
+
+			.qna-type-badge.open {
+				background: #eaf7ea;
+				color: #2c7a2c;
+			}
+
+			.qna-title-row {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				cursor: pointer;
+				padding: 14px 16px;
+				background: #fafafa;
+				border: 1px solid #eee;
+				border-radius: 10px;
+			}
+
+			.qna-title-text {
+				font-weight: bold;
+				font-size: 15px;
+			}
+
+			.qna-title-right {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+			}
+
 			.qna-status {
 				display: inline-block;
 				padding: 4px 10px;
 				border-radius: 20px;
 				font-size: 12px;
 				font-weight: bold;
-				margin-bottom: 8px;
 			}
 
 			.qna-status.waiting {
@@ -364,6 +606,85 @@
 			.qna-status.done {
 				background: #dff4df;
 				color: #1f6b1f;
+			}
+
+			.qna-arrow {
+				font-size: 12px;
+				color: #888;
+			}
+
+			.qna-body-box {
+				padding: 16px;
+				background: #fff;
+				border: 1px solid #f0f0f0;
+				border-top: none;
+				border-radius: 0 0 10px 10px;
+			}
+
+			.qna-secret-lock {
+				padding: 16px;
+				background: #fafafa;
+				border-radius: 8px;
+				color: #888;
+				font-size: 14px;
+			}
+
+			.qna-btn-row {
+				margin-top: 14px;
+				display: flex;
+				gap: 8px;
+			}
+
+			.qna-small-btn {
+				height: 34px;
+				padding: 0 14px;
+				border: none;
+				border-radius: 8px;
+				cursor: pointer;
+				font-size: 13px;
+				font-weight: bold;
+			}
+
+			.qna-small-btn.edit {
+				background: #e9ecef;
+				color: #333;
+			}
+
+			.qna-small-btn.delete {
+				background: #ffe3e3;
+				color: #d6336c;
+			}
+
+			.qna-small-btn.save {
+				background: #ff7a00;
+				color: #fff;
+			}
+
+			.qna-small-btn.cancel {
+				background: #adb5bd;
+				color: #fff;
+			}
+
+			.qna-edit-input,
+			.qna-edit-textarea {
+				width: 100%;
+				border: 1px solid #ddd;
+				border-radius: 8px;
+				padding: 10px;
+				font-size: 14px;
+				font-family: 'Malgun Gothic', sans-serif;
+				margin-bottom: 10px;
+			}
+
+			.qna-edit-textarea {
+				height: 120px;
+				resize: none;
+			}
+
+			.answer-title {
+				font-weight: bold;
+				margin-bottom: 8px;
+				color: #444;
 			}
 
 			.answer-box {
@@ -378,7 +699,9 @@
 	<body>
 		<div id="app">
 			<div class="header">
-				<div class="logo">UniPet</div>
+				<div class="logo" @click="fnMoveMain()">
+					UniPet <span class="logo-sub">shop</span>
+				</div>
 
 				<div class="header-right">
 					<div class="cart-box" @click="fnMoveCart()">
@@ -389,7 +712,6 @@
 			</div>
 
 			<div class="wrap">
-
 				<div v-if="product" class="detail-box">
 					<div class="detail-wrap">
 						<div class="detail-left">
@@ -405,6 +727,20 @@
 						<div class="detail-right">
 							<h3>{{product.PRODUCT_NAME}}</h3>
 
+							<div class="detail-rating">
+								⭐ {{reviewAvg}} / 5.0 ({{reviewCount}}개 리뷰)
+							</div>
+
+							<div class="tag-box">
+								<span>#인기상품</span>
+								<span>#추천</span>
+								<span>{{'#' + product.A_SUB_TYPE}}</span>
+							</div>
+
+							<div class="simple-desc">
+								이 상품은 {{product.A_SUB_TYPE}}를 위한 {{product.I_SUB_TYPE}} 상품으로 일상에서 편하게 사용할 수 있습니다.
+							</div>
+
 							<div class="detail-info">
 								브랜드 : {{product.BRAND == null ? '-' : product.BRAND}}<br>
 								동물분류 : {{product.A_SUB_TYPE}}<br>
@@ -412,7 +748,13 @@
 								재고 : {{product.STOCK_QTY}}개<br>
 							</div>
 
-							<div class="price">{{formatPrice(product.PRODUCT_PRICE)}}원</div>
+							<div class="price">{{formatPrice(product && product.PRODUCT_PRICE)}}원</div>
+
+							<div class="delivery-box">
+								<div>🚚 무료배송 (3만원 이상)</div>
+								<div>📦 평균 배송 1~2일</div>
+								<div>💳 카드/간편결제 가능</div>
+							</div>
 
 							<div class="qty-box">
 								수량 :
@@ -421,9 +763,13 @@
 								<button @click="fnQty(1)">+</button>
 							</div>
 
+							<div class="stock-status" v-if="product.STOCK_QTY < 10">
+								🔥 재고 얼마 안 남음!
+							</div>
+
 							<div class="btn-area">
 								<button type="button" class="btn-cart" @click="fnAddCart()">장바구니</button>
-								<button type="button" class="btn-buy">구매하기</button>
+								<button type="button" class="btn-buy" @click="fnDirectOrder()">구매하기</button>
 							</div>
 						</div>
 					</div>
@@ -437,10 +783,48 @@
 
 				<!-- 상세설명 -->
 				<div v-if="product && tab == 'detail'" class="tab-box">
-					<div class="detail-desc-title">{{product.PRODUCT_NAME}}</div>
+					<div class="detail-desc-top">
+						<div class="detail-desc-badge">PRODUCT DETAIL</div>
+						<div class="detail-desc-title">{{product.PRODUCT_NAME}}</div>
+						<div class="detail-desc-sub">
+							{{product.BRAND == null ? '브랜드 미등록' : product.BRAND}} ·
+							{{product.A_SUB_TYPE}} ·
+							{{product.I_SUB_TYPE}}
+						</div>
+						<div class="detail-desc-price">{{formatPrice(product && product.PRODUCT_PRICE)}}원</div>
+					</div>
 
-					<div class="detail-img-list">
+					<div class="detail-point-wrap">
+						<div class="detail-point-box">
+							<div class="detail-point-title">추천 대상</div>
+							<div class="detail-point-text">
+								{{product.A_SUB_TYPE}} (반려동물)을 위한 상품입니다.
+							</div>
+						</div>
+
+						<div class="detail-point-box">
+							<div class="detail-point-title">상품 특징</div>
+							<div class="detail-point-text">
+								실사용에 편리하도록 구성된 {{product.I_SUB_TYPE}} 상품입니다.
+							</div>
+						</div>
+
+						<div class="detail-point-box">
+							<div class="detail-point-title">구매 전 확인</div>
+							<div class="detail-point-text">
+								현재 재고는 {{product.STOCK_QTY}}개이며, 상품 옵션 및 수량을 확인해주세요.
+							</div>
+						</div>
+					</div>
+
+					<div class="detail-section-title">상세 이미지</div>
+
+					<div v-if="detailImageList.length > 0" class="detail-img-list">
 						<img v-for="img in detailImageList" :key="img.FILE_NO" :src="img.IMG">
+					</div>
+
+					<div v-else class="detail-empty-desc">
+						등록된 상세 이미지가 없습니다.
 					</div>
 				</div>
 
@@ -448,9 +832,8 @@
 				<div v-if="product && tab == 'review'" class="review-box">
 					<div class="review-top">
 						<div class="review-summary">
-							리뷰 {{reviewCount}}개 / 평균 별점 {{reviewAvg}}
+							리뷰 {{reviewCount}}개 / 평균 ⭐ {{reviewAvg}}
 						</div>
-						<button type="button" class="btn-review" @click="fnMoveReviewWrite()">리뷰 작성</button>
 					</div>
 
 					<div v-if="reviewList.length == 0" class="empty-box">
@@ -472,41 +855,92 @@
 				<!-- 상품문의 -->
 				<div v-if="product && tab == 'qna'" class="tab-box">
 					<div class="qna-write-box">
-						<select v-model="qnaForm.secretYn">
-							<option value="N">공개문의</option>
-							<option value="Y">비밀문의</option>
-						</select>
+						<div class="qna-write-header">
+							<div class="qna-title">상품 문의</div>
+							<div class="qna-desc">상품에 대해 궁금한 점을 남겨주세요.</div>
+						</div>
+
+						<div class="qna-secret-row">
+							<div class="qna-secret-label">문의 유형</div>
+
+							<div class="qna-secret-option-wrap">
+								<label class="qna-secret-option" :class="{active : qnaForm.secretYn == 'N'}">
+									<input type="radio" value="N" v-model="qnaForm.secretYn">
+									<span>공개문의</span>
+								</label>
+
+								<label class="qna-secret-option" :class="{active : qnaForm.secretYn == 'Y'}">
+									<input type="radio" value="Y" v-model="qnaForm.secretYn">
+									<span>비밀문의</span>
+								</label>
+							</div>
+						</div>
 
 						<input type="text" v-model="qnaForm.title" placeholder="문의 제목을 입력하세요">
 						<textarea v-model="qnaForm.contents" placeholder="문의 내용을 입력하세요"></textarea>
 						<button type="button" class="qna-write-btn" @click="fnAddQna()">문의 등록</button>
 					</div>
 
-					<div v-if="qnaList.length == 0" class="empty-box">
-						아직 등록된 문의가 없습니다.
-					</div>
+					<div class="qna-list-box">
+						<div v-if="qnaList.length == 0" class="empty-box">
+							아직 등록된 문의가 없습니다.
+						</div>
 
-					<div v-else>
-						<div class="qna-item" v-for="qna in qnaList" :key="qna.QNA_NO">
-							<div class="qna-head">
-								<span class="qna-user">{{qna.USER_ID}}</span>
-								<span class="qna-date">{{qna.CDATE}}</span>
-							</div>
+						<div v-else>
+							<div class="qna-item" v-for="qna in qnaList" :key="qna.QNA_NO">
+								<div class="qna-top-row">
+									<div class="qna-head-left">
+										<span class="qna-user">{{qna.USER_ID}}</span>
+										<span class="qna-type-badge secret" v-if="qna.IS_SECRET == 'Y'">비밀문의</span>
+										<span class="qna-type-badge open" v-else>공개문의</span>
+									</div>
+									<div class="qna-head-right">{{qna.CDATE}}</div>
+								</div>
 
-							<div class="qna-status" :class="qna.ANS_STATUS == 'Y' ? 'done' : 'waiting'">
-								{{qna.ANS_STATUS == 'Y' ? '답변완료' : '답변대기'}}
-							</div>
+								<div class="qna-title-row" @click="fnToggleQna(qna)">
+									<div class="qna-title-text">{{qna.QNA_TITLE}}</div>
+									<div class="qna-title-right">
+										<span class="qna-status" :class="qna.ANS_STATUS == 'Y' ? 'done' : 'waiting'">
+											{{qna.ANS_STATUS == 'Y' ? '답변완료' : '답변대기'}}
+										</span>
+										<span class="qna-arrow">{{qna.open ? '▲' : '▼'}}</span>
+									</div>
+								</div>
 
-							<div style="font-weight:bold; margin-bottom:8px;">{{qna.QNA_TITLE}}</div>
+								<div v-if="qna.open" class="qna-body-box">
+									<div v-if="qna.editMode">
+										<input type="text" class="qna-edit-input" v-model="qna.editTitle">
+										<textarea class="qna-edit-textarea" v-model="qna.editContents"></textarea>
 
-							<div class="qna-contents">
-								{{qna.IS_SECRET == 'Y' ? '비밀문의입니다.' : qna.Q_CONTENTS}}
-							</div>
+										<div class="qna-btn-row">
+											<button class="qna-small-btn save" @click="fnSaveQna(qna)">저장</button>
+											<button class="qna-small-btn cancel"
+												@click="fnCancelEditQna(qna)">취소</button>
+										</div>
+									</div>
 
-							<div class="answer-box"
-								v-if="qna.ANS_STATUS == 'Y' && qna.A_CONTENTS != null && qna.A_CONTENTS != ''">
-								판매자 답변<br>
-								{{qna.A_CONTENTS}}
+									<div v-else>
+										<div v-if="fnCanReadQna(qna)" class="qna-contents">
+											{{qna.Q_CONTENTS}}
+										</div>
+
+										<div v-else class="qna-secret-lock">
+											🔒 비밀문의입니다. 작성자와 관리자만 확인할 수 있습니다.
+										</div>
+
+										<div v-if="fnCanReadQna(qna) && qna.ANS_STATUS == 'Y' && qna.A_CONTENTS"
+											class="answer-box">
+											<div class="answer-title">💬 판매자 답변</div>
+											<div>{{qna.A_CONTENTS}}</div>
+										</div>
+
+										<div class="qna-btn-row" v-if="fnCanManageQna(qna)">
+											<button class="qna-small-btn edit" @click="fnEditQna(qna)">수정</button>
+											<button class="qna-small-btn delete"
+												@click="fnDeleteQna(qna.QNA_NO)">삭제</button>
+										</div>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -525,7 +959,9 @@
 		const app = Vue.createApp({
 			data() {
 				return {
-					productNo: "<%=request.getAttribute("productNo")%>",
+					productNo: '<%=request.getAttribute("productNo")%>',
+					currentUserId: '<%=(String)session.getAttribute("sessionId") == null ? "" : (String)session.getAttribute("sessionId")%>',
+					currentUserRole: '<%=(String)session.getAttribute("sessionRole") == null ? "" : (String)session.getAttribute("sessionRole")%>',
 					product: null,
 					fileList: [],
 					detailImageList: [],
@@ -557,8 +993,6 @@
 						type: "POST",
 						data: param,
 						success: function (data) {
-							console.log(data);
-
 							if (data.result == "success" && data.product != null) {
 								self.product = data.product;
 								self.fileList = data.imageList || [];
@@ -592,7 +1026,7 @@
 						data: param,
 						success: function (data) {
 							if (data.result == "success") {
-								self.reviewList = data.list;
+								self.reviewList = data.list || [];
 								self.reviewCount = data.summary != null ? data.summary.REVIEW_COUNT : 0;
 								self.reviewAvg = data.summary != null ? data.summary.REVIEW_AVG : 0;
 							} else {
@@ -620,7 +1054,14 @@
 						data: param,
 						success: function (data) {
 							if (data.result == "success") {
-								self.qnaList = data.list;
+								self.qnaList = data.list || [];
+
+								for (let i = 0; i < self.qnaList.length; i++) {
+									self.qnaList[i].open = false;
+									self.qnaList[i].editMode = false;
+									self.qnaList[i].editTitle = self.qnaList[i].QNA_TITLE;
+									self.qnaList[i].editContents = self.qnaList[i].Q_CONTENTS;
+								}
 							} else {
 								self.qnaList = [];
 							}
@@ -631,8 +1072,128 @@
 					});
 				},
 
+				fnCanReadQna: function (qna) {
+					if (qna.IS_SECRET != "Y") {
+						return true;
+					}
+
+					if (this.currentUserRole == "A") {
+						return true;
+					}
+
+					if (this.currentUserId != "" && this.currentUserId == qna.USER_ID) {
+						return true;
+					}
+
+					return false;
+				},
+
+				fnCanManageQna: function (qna) {
+					if (this.currentUserRole == "A") {
+						return true;
+					}
+
+					if (this.currentUserId != "" && this.currentUserId == qna.USER_ID) {
+						return true;
+					}
+
+					return false;
+				},
+
+				fnToggleQna: function (qna) {
+					qna.open = !qna.open;
+				},
+
+				fnEditQna: function (qna) {
+					qna.editMode = true;
+					qna.editTitle = qna.QNA_TITLE;
+					qna.editContents = qna.Q_CONTENTS;
+				},
+
+				fnCancelEditQna: function (qna) {
+					qna.editMode = false;
+					qna.editTitle = qna.QNA_TITLE;
+					qna.editContents = qna.Q_CONTENTS;
+				},
+
+				fnSaveQna: function (qna) {
+					let self = this;
+
+					if (qna.editTitle == "") {
+						alert("문의 제목을 입력해주세요.");
+						return;
+					}
+
+					if (qna.editContents == "") {
+						alert("문의 내용을 입력해주세요.");
+						return;
+					}
+
+					$.ajax({
+						url: "/qna/update.dox",
+						dataType: "json",
+						type: "POST",
+						data: {
+							qnaNo: qna.QNA_NO,
+							title: qna.editTitle,
+							contents: qna.editContents
+						},
+						success: function (data) {
+							if (data.result == "success") {
+								alert("문의가 수정되었습니다.");
+								self.fnGetQnaList();
+							} else if (data.result == "login") {
+								alert("로그인이 필요합니다.");
+								location.href = "/user/login.do";
+							} else {
+								alert("문의 수정 실패");
+							}
+						},
+						error: function () {
+							alert("문의 수정 중 오류가 발생했습니다.");
+						}
+					});
+				},
+
+				fnDeleteQna: function (qnaNo) {
+					let self = this;
+
+					if (!confirm("문의글을 삭제하시겠습니까?")) {
+						return;
+					}
+
+					$.ajax({
+						url: "/qna/delete.dox",
+						dataType: "json",
+						type: "POST",
+						data: {
+							qnaNo: qnaNo
+						},
+						success: function (data) {
+							if (data.result == "success") {
+								alert("문의가 삭제되었습니다.");
+								self.fnGetQnaList();
+							} else if (data.result == "login") {
+								alert("로그인이 필요합니다.");
+								location.href = "/user/login.do";
+							} else {
+								alert("문의 삭제 실패");
+							}
+						},
+						error: function () {
+							alert("문의 삭제 중 오류가 발생했습니다.");
+						}
+					});
+				},
+
 				fnAddQna: function () {
 					let self = this;
+
+					if (self.currentUserId == "") {
+						alert("로그인이 필요합니다.");
+						location.href = "/user/login.do";
+						return;
+					}
 
 					if (self.qnaForm.title == "") {
 						alert("문의 제목을 입력해주세요.");
@@ -664,6 +1225,9 @@
 								self.qnaForm.secretYn = "N";
 								self.fnGetQnaList();
 								self.tab = "qna";
+							} else if (data.result == "login") {
+								alert("로그인이 필요합니다.");
+								location.href = "/user/login.do";
 							} else {
 								alert("문의 등록 실패");
 							}
@@ -705,6 +1269,9 @@
 							if (data.result == "success") {
 								alert("장바구니에 담았습니다.");
 								self.fnGetCartCount();
+							} else if (data.result == "login") {
+								alert("로그인이 필요합니다.");
+								location.href = "/user/login.do";
 							} else {
 								alert("장바구니 담기 실패");
 							}
@@ -715,12 +1282,34 @@
 					});
 				},
 
-				fnMoveReviewWrite: function () {
-					location.href = "/review/write.do?productNo=" + this.productNo;
-				},
+				fnDirectOrder: function () {
+					let self = this;
+					let param = {
+						productNo: self.productNo,
+						qty: self.qty
+					};
 
-				formatPrice: function (price) {
-					return Number(price).toLocaleString();
+					$.ajax({
+						url: "/cart/add.dox",
+						dataType: "json",
+						type: "POST",
+						data: param,
+						success: function (data) {
+							if (data.result == "success") {
+								let cartNoList = [data.cartNo];
+								sessionStorage.setItem("cartNoList", JSON.stringify(cartNoList));
+								location.href = "/payment/pay-shop.do";
+							} else if (data.result == "login") {
+								alert("로그인이 필요합니다.");
+								location.href = "/user/login.do";
+							} else {
+								alert("바로구매 처리 실패");
+							}
+						},
+						error: function () {
+							alert("바로구매 처리 중 오류가 발생했습니다.");
+						}
+					});
 				},
 
 				fnGetCartCount: function () {
@@ -738,9 +1327,20 @@
 					});
 				},
 
+				formatPrice: function (price) {
+					if (price == null || price == undefined || price == "") {
+						return "0";
+					}
+					return Number(price).toLocaleString();
+				},
+
 				fnMoveCart: function () {
 					location.href = "/cart.do";
 				},
+
+				fnMoveMain: function () {
+					location.href = "/product.do";
+				}
 			},
 			mounted() {
 				this.fnGetProductView();

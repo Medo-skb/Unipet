@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.example.unipet.mapper.ProductMapper">
 
@@ -31,60 +30,88 @@
 
 	<!-- ===== 상품 리스트 ===== -->
 	<select id="selectProductList" parameterType="hashmap" resultType="hashmap">
-		SELECT 
-			P.PRODUCT_NO,
-			P.PRODUCT_NAME,
-			P.BRAND,
-			P.PRODUCT_PRICE,
-			P.STOCK_QTY,
-			P.PRODUCT_STATUS,
-			DATE_FORMAT(P.CDATE, '%Y-%m-%d %H:%i:%s') AS CDATE,
-			CONCAT(F.FILE_PATH, F.FILE_NAME) AS MAIN_IMG
-		FROM PRODUCT P
-		LEFT JOIN PRODUCT_FILE F 
-			ON P.PRODUCT_NO = F.PRODUCT_NO AND F.IS_MAIN = 'Y'
-		WHERE 1 = 1
-
-		<if test="keyword != null and keyword != ''">
+		SELECT P.PRODUCT_NO, P.PRODUCT_NAME, P.BRAND, P.PRODUCT_PRICE,
+		P.STOCK_QTY, P.PRODUCT_STATUS, DATE_FORMAT(P.CDATE, '%Y-%m-%d %H:%i:%s')
+		AS CDATE, AM.A_MAIN_NO, AM.A_MAIN_TYPE, ASUB.A_SUB_NO, ASUB.A_SUB_TYPE,
+		IM.I_MAIN_NO, IM.I_MAIN_TYPE, ISUB.I_SUB_NO, ISUB.I_SUB_TYPE,
+		CONCAT(F.FILE_PATH, F.FILE_NAME) AS MAIN_IMG FROM PRODUCT P LEFT JOIN
+		PC_ANIMAL_SUB ASUB ON P.A_SUB_NO = ASUB.A_SUB_NO LEFT JOIN
+		PC_ANIMAL_MAIN AM ON ASUB.A_MAIN_NO = AM.A_MAIN_NO LEFT JOIN PC_ITEM_SUB
+		ISUB ON P.I_SUB_NO = ISUB.I_SUB_NO LEFT JOIN PC_ITEM_MAIN IM ON
+		ISUB.I_MAIN_NO = IM.I_MAIN_NO LEFT JOIN PRODUCT_FILE F ON P.PRODUCT_NO =
+		F.PRODUCT_NO AND F.IS_MAIN = 'Y' WHERE 1 = 1 <if
+			test="keyword != null and keyword != ''">
 			AND P.PRODUCT_NAME LIKE CONCAT('%', #{keyword}, '%')
 		</if>
 
-		ORDER BY P.PRODUCT_NO DESC
+	<if
+			test="aMainNo != null and aMainNo != ''">
+			AND AM.A_MAIN_NO = #{aMainNo}
+		</if>
+
+	<if
+			test="aSubNo != null and aSubNo != ''">
+			AND ASUB.A_SUB_NO = #{aSubNo}
+		</if>
+
+	<if
+			test="iMainNo != null and iMainNo != ''">
+			AND IM.I_MAIN_NO = #{iMainNo}
+		</if>
+
+	<if
+			test="iSubNo != null and iSubNo != ''">
+			AND ISUB.I_SUB_NO = #{iSubNo}
+		</if>
+
+	<choose>
+			<when test="sort == 'priceAsc'">
+				ORDER BY P.PRODUCT_PRICE ASC
+			</when>
+			<when test="sort == 'priceDesc'">
+				ORDER BY P.PRODUCT_PRICE DESC
+			</when>
+			<otherwise>
+				ORDER BY P.PRODUCT_NO DESC
+			</otherwise>
+		</choose>
 	</select>
 
 	<!-- ===== 상품 상세 ===== -->
-	<select id="selectProductDetail" parameterType="hashmap" resultType="hashmap">
+	<select id="selectProductDetail" parameterType="hashmap"
+		resultType="hashmap">
 		SELECT
-			P.PRODUCT_NO,
-			P.PRODUCT_NAME,
-			P.BRAND,
-			P.PRODUCT_PRICE,
-			P.STOCK_QTY,
-			P.PRODUCT_STATUS,
-			DATE_FORMAT(P.CDATE, '%Y-%m-%d %H:%i:%s') AS CDATE,
-			AM.A_MAIN_TYPE,
-			ASUB.A_SUB_TYPE,
-			IM.I_MAIN_TYPE,
-			ISUB.I_SUB_TYPE,
-			CONCAT(F.FILE_PATH, F.FILE_NAME) AS MAIN_IMG
+		P.PRODUCT_NO,
+		P.PRODUCT_NAME,
+		P.BRAND,
+		P.PRODUCT_PRICE,
+		P.STOCK_QTY,
+		P.PRODUCT_STATUS,
+		DATE_FORMAT(P.CDATE, '%Y-%m-%d %H:%i:%s') AS CDATE,
+		AM.A_MAIN_TYPE,
+		ASUB.A_SUB_TYPE,
+		IM.I_MAIN_TYPE,
+		ISUB.I_SUB_TYPE,
+		CONCAT(F.FILE_PATH, F.FILE_NAME) AS MAIN_IMG
 		FROM PRODUCT P
 		LEFT JOIN PC_ANIMAL_SUB ASUB ON P.A_SUB_NO = ASUB.A_SUB_NO
 		LEFT JOIN PC_ANIMAL_MAIN AM ON ASUB.A_MAIN_NO = AM.A_MAIN_NO
 		LEFT JOIN PC_ITEM_SUB ISUB ON P.I_SUB_NO = ISUB.I_SUB_NO
 		LEFT JOIN PC_ITEM_MAIN IM ON ISUB.I_MAIN_NO = IM.I_MAIN_NO
-		LEFT JOIN PRODUCT_FILE F 
-			ON P.PRODUCT_NO = F.PRODUCT_NO AND F.IS_MAIN = 'Y'
+		LEFT JOIN PRODUCT_FILE F
+		ON P.PRODUCT_NO = F.PRODUCT_NO AND F.IS_MAIN = 'Y'
 		WHERE P.PRODUCT_NO = #{productNo}
 	</select>
 
 	<!-- 대표 이미지 -->
-	<select id="selectProductImageList" parameterType="hashmap" resultType="hashmap">
+	<select id="selectProductImageList" parameterType="hashmap"
+		resultType="hashmap">
 		SELECT
-			FILE_NO,
-			PRODUCT_NO,
-			FILE_PATH,
-			FILE_NAME,
-			CONCAT(FILE_PATH, FILE_NAME) AS IMG
+		FILE_NO,
+		PRODUCT_NO,
+		FILE_PATH,
+		FILE_NAME,
+		CONCAT(FILE_PATH, FILE_NAME) AS IMG
 		FROM PRODUCT_FILE
 		WHERE PRODUCT_NO = #{productNo}
 		AND IS_MAIN = 'Y'
@@ -92,13 +119,14 @@
 	</select>
 
 	<!-- 상세 이미지 -->
-	<select id="selectProductDetailImageList" parameterType="hashmap" resultType="hashmap">
+	<select id="selectProductDetailImageList" parameterType="hashmap"
+		resultType="hashmap">
 		SELECT
-			FILE_NO,
-			PRODUCT_NO,
-			FILE_PATH,
-			FILE_NAME,
-			CONCAT(FILE_PATH, FILE_NAME) AS IMG
+		FILE_NO,
+		PRODUCT_NO,
+		FILE_PATH,
+		FILE_NAME,
+		CONCAT(FILE_PATH, FILE_NAME) AS IMG
 		FROM PRODUCT_FILE
 		WHERE PRODUCT_NO = #{productNo}
 		AND IS_DETAIL = 'Y'
@@ -108,21 +136,22 @@
 	<!-- ===== 리뷰 ===== -->
 	<select id="selectReviewList" parameterType="hashmap" resultType="hashmap">
 		SELECT
-			REVIEW_NO,
-			PRODUCT_NO,
-			USER_ID,
-			RATING,
-			CONTENTS,
-			DATE_FORMAT(CDATE, '%Y-%m-%d %H:%i:%s') AS CDATE
+		REVIEW_NO,
+		PRODUCT_NO,
+		USER_ID,
+		RATING,
+		CONTENTS,
+		DATE_FORMAT(CDATE, '%Y-%m-%d %H:%i:%s') AS CDATE
 		FROM REVIEW
 		WHERE PRODUCT_NO = #{productNo}
 		ORDER BY REVIEW_NO DESC
 	</select>
 
-	<select id="selectReviewSummary" parameterType="hashmap" resultType="hashmap">
+	<select id="selectReviewSummary" parameterType="hashmap"
+		resultType="hashmap">
 		SELECT
-			COUNT(*) AS REVIEW_COUNT,
-			IFNULL(ROUND(AVG(RATING), 1), 0) AS REVIEW_AVG
+		COUNT(*) AS REVIEW_COUNT,
+		IFNULL(ROUND(AVG(RATING), 1), 0) AS REVIEW_AVG
 		FROM REVIEW
 		WHERE PRODUCT_NO = #{productNo}
 	</select>
@@ -130,19 +159,19 @@
 	<!-- ===== QNA ===== -->
 	<select id="selectQnaList" parameterType="hashmap" resultType="hashmap">
 		SELECT
-			QNA_NO,
-			PRODUCT_NO,
-			USER_ID,
-			QNA_TITLE,
-			Q_CONTENTS,
-			A_CONTENTS,
-			ANS_STATUS,
-			IS_SECRET,
-			DATE_FORMAT(CDATE, '%Y-%m-%d %H:%i:%s') AS CDATE,
-			CASE 
-				WHEN ADATE IS NULL THEN ''
-				ELSE DATE_FORMAT(ADATE, '%Y-%m-%d %H:%i:%s')
-			END AS ADATE
+		QNA_NO,
+		PRODUCT_NO,
+		USER_ID,
+		QNA_TITLE,
+		Q_CONTENTS,
+		A_CONTENTS,
+		ANS_STATUS,
+		IS_SECRET,
+		DATE_FORMAT(CDATE, '%Y-%m-%d %H:%i:%s') AS CDATE,
+		CASE
+		WHEN ADATE IS NULL THEN ''
+		ELSE DATE_FORMAT(ADATE, '%Y-%m-%d %H:%i:%s')
+		END AS ADATE
 		FROM QNA
 		WHERE PRODUCT_NO = #{productNo}
 		ORDER BY QNA_NO DESC
@@ -150,53 +179,53 @@
 
 	<insert id="insertQna" parameterType="hashmap">
 		INSERT INTO QNA (
-			PRODUCT_NO,
-			USER_ID,
-			QNA_TITLE,
-			Q_CONTENTS,
-			ANS_STATUS,
-			IS_SECRET,
-			CDATE
+		PRODUCT_NO,
+		USER_ID,
+		QNA_TITLE,
+		Q_CONTENTS,
+		ANS_STATUS,
+		IS_SECRET,
+		CDATE
 		) VALUES (
-			#{productNo},
-			#{userId},
-			#{title},
-			#{contents},
-			'N',
-			#{secretYn},
-			NOW()
+		#{productNo},
+		#{userId},
+		#{title},
+		#{contents},
+		'N',
+		#{secretYn},
+		NOW()
 		)
 	</insert>
 
 	<!-- ===== 장바구니 ===== -->
 	<insert id="insertCart" parameterType="hashmap">
 		INSERT INTO CART (
-			USER_ID,
-			PRODUCT_NO,
-			QTY,
-			CDATE
+		USER_ID,
+		PRODUCT_NO,
+		QTY,
+		CDATE
 		) VALUES (
-			'test1234',
-			#{productNo},
-			#{qty},
-			NOW()
+		#{userId},
+		#{productNo},
+		#{qty},
+		NOW()
 		)
 	</insert>
 
 	<select id="selectCartList" parameterType="hashmap" resultType="hashmap">
 		SELECT
-			C.CART_NO,
-			C.PRODUCT_NO,
-			C.QTY,
-			DATE_FORMAT(C.CDATE, '%Y-%m-%d %H:%i:%s') AS CDATE,
-			P.PRODUCT_NAME,
-			P.PRODUCT_PRICE,
-			CONCAT(F.FILE_PATH, F.FILE_NAME) AS MAIN_IMG
+		C.CART_NO,
+		C.PRODUCT_NO,
+		C.QTY,
+		DATE_FORMAT(C.CDATE, '%Y-%m-%d %H:%i:%s') AS CDATE,
+		P.PRODUCT_NAME,
+		P.PRODUCT_PRICE,
+		CONCAT(F.FILE_PATH, F.FILE_NAME) AS MAIN_IMG
 		FROM CART C
 		JOIN PRODUCT P ON C.PRODUCT_NO = P.PRODUCT_NO
-		LEFT JOIN PRODUCT_FILE F 
-			ON C.PRODUCT_NO = F.PRODUCT_NO AND F.IS_MAIN = 'Y'
-		WHERE C.USER_ID = 'test1234'
+		LEFT JOIN PRODUCT_FILE F
+		ON C.PRODUCT_NO = F.PRODUCT_NO AND F.IS_MAIN = 'Y'
+		WHERE C.USER_ID = #{userId}
 		ORDER BY C.CART_NO DESC
 	</select>
 
@@ -204,36 +233,66 @@
 		UPDATE CART
 		SET QTY = #{qty}
 		WHERE CART_NO = #{cartNo}
+		AND USER_ID = #{userId}
 	</update>
 
 	<delete id="deleteCart" parameterType="hashmap">
 		DELETE FROM CART
 		WHERE CART_NO = #{cartNo}
+		AND USER_ID = #{userId}
 	</delete>
 
 	<select id="selectCartOne" parameterType="hashmap" resultType="hashmap">
 		SELECT
-			CART_NO,
-			USER_ID,
-			PRODUCT_NO,
-			QTY,
-			DATE_FORMAT(CDATE, '%Y-%m-%d %H:%i:%s') AS CDATE
+		CART_NO,
+		USER_ID,
+		PRODUCT_NO,
+		QTY,
+		DATE_FORMAT(CDATE, '%Y-%m-%d %H:%i:%s') AS CDATE
 		FROM CART
-		WHERE USER_ID = 'test1234'
+		WHERE USER_ID = #{userId}
 		AND PRODUCT_NO = #{productNo}
 	</select>
 
 	<update id="updateCartPlusQty" parameterType="hashmap">
 		UPDATE CART
 		SET QTY = QTY + #{qty}
-		WHERE USER_ID = 'test1234'
+		WHERE USER_ID = #{userId}
 		AND PRODUCT_NO = #{productNo}
 	</update>
 
 	<select id="selectCartCount" parameterType="hashmap" resultType="int">
 		SELECT COUNT(*)
 		FROM CART
-		WHERE USER_ID = 'test1234'
+		WHERE USER_ID = #{userId}
 	</select>
+
+	<select id="selectQnaOne" parameterType="hashmap" resultType="hashmap">
+		SELECT
+		QNA_NO,
+		PRODUCT_NO,
+		USER_ID,
+		QNA_TITLE,
+		Q_CONTENTS,
+		A_CONTENTS,
+		ANS_STATUS,
+		IS_SECRET,
+		DATE_FORMAT(CDATE, '%Y-%m-%d %H:%i:%s') AS CDATE
+		FROM QNA
+		WHERE QNA_NO = #{qnaNo}
+	</select>
+
+	<update id="updateQna" parameterType="hashmap">
+		UPDATE QNA
+		SET
+		QNA_TITLE = #{title},
+		Q_CONTENTS = #{contents}
+		WHERE QNA_NO = #{qnaNo}
+	</update>
+
+	<delete id="deleteQna" parameterType="hashmap">
+		DELETE FROM QNA
+		WHERE QNA_NO = #{qnaNo}
+	</delete>
 
 </mapper>

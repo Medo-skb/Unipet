@@ -1,7 +1,478 @@
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-	
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
 <mapper namespace="com.example.unipet.mapper.BoardMapper">
 
-	
+	<select id="selectBoardMainTypeList" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT
+			B_MAIN_NO,
+			CASE
+			WHEN B_MAIN_TYPE = 'ALL' THEN '통합'
+			WHEN B_MAIN_TYPE = 'LOC' THEN '지역'
+			ELSE B_MAIN_TYPE
+			END AS B_MAIN_TYPE
+		FROM BOARD_TYPE_MAIN
+			ORDER BY B_MAIN_NO
+	</select>
+
+	<select id="selectBoardSubTypeList" parameterType="hashmap" resultType="hashmap">
+	SELECT 
+		B_SUB_NO,
+		B_MAIN_NO,
+		CASE
+			WHEN B_SUB_TYPE = 'NTC' THEN '공지사항'
+			WHEN B_SUB_TYPE = 'GEN' THEN '일반'
+			WHEN B_SUB_TYPE = 'INF' THEN '정보/팁'
+			WHEN B_SUB_TYPE = 'GIF' THEN '움짤'
+			WHEN B_SUB_TYPE = 'VID' THEN '동영상'
+			WHEN B_SUB_TYPE = 'QNA' THEN '질문'
+			WHEN B_SUB_TYPE = 'MAR' THEN '나눔/장터'
+			ELSE B_SUB_TYPE
+		END AS B_SUB_TYPE
+	FROM BOARD_TYPE_SUB
+	ORDER BY B_MAIN_NO, B_SUB_NO
+</select>
+
+	<select id="selectBoardLocalList" parameterType="hashmap" resultType="hashmap">
+	SELECT 
+		LOCAL_NO,
+		CASE
+			WHEN LOCAL_NAME = 'SEO' THEN '서울'
+			WHEN LOCAL_NAME = 'INC' THEN '인천'
+			WHEN LOCAL_NAME = 'PUS' THEN '부산'
+			WHEN LOCAL_NAME = 'DAE' THEN '대구'
+			WHEN LOCAL_NAME = 'GWA' THEN '광주'
+			WHEN LOCAL_NAME = 'DAJ' THEN '대전'
+			WHEN LOCAL_NAME = 'ULS' THEN '울산'
+			WHEN LOCAL_NAME = 'SEJ' THEN '세종'
+			WHEN LOCAL_NAME = 'GYE' THEN '경기'
+			WHEN LOCAL_NAME = 'GAN' THEN '강원'
+			WHEN LOCAL_NAME = 'CHU' THEN '충청'
+			WHEN LOCAL_NAME = 'JEO' THEN '전라'
+			WHEN LOCAL_NAME = 'GYS' THEN '경상'
+			WHEN LOCAL_NAME = 'JEJ' THEN '제주'
+			ELSE LOCAL_NAME
+		END AS LOCAL_NAME
+	FROM BOARD_TYPE_LOCAL
+	ORDER BY LOCAL_NO
+</select>
+
+	<select id="selectBoardList" parameterType="hashmap" resultType="hashmap">
+	SELECT 
+		B.BOARD_NO,
+		B.B_SUB_NO,
+		B.LOCAL_NO,
+		B.TITLE,
+		B.B_CONTENT,
+		B.USER_ID,
+		B.VIEW_COUNT,
+		B.B_STATUS,
+		B.PRIVATE,
+		DATE_FORMAT(B.CREATE_TIME, '%Y-%m-%d %H:%i:%s') AS CREATE_TIME,
+		DATE_FORMAT(B.UPDATE_TIME, '%Y-%m-%d %H:%i:%s') AS UPDATE_TIME,
+		CASE
+			WHEN BTS.B_SUB_TYPE = 'NTC' THEN '공지사항'
+			WHEN BTS.B_SUB_TYPE = 'GEN' THEN '일반'
+			WHEN BTS.B_SUB_TYPE = 'INF' THEN '정보/팁'
+			WHEN BTS.B_SUB_TYPE = 'GIF' THEN '움짤'
+			WHEN BTS.B_SUB_TYPE = 'VID' THEN '동영상'
+			WHEN BTS.B_SUB_TYPE = 'QNA' THEN '질문'
+			WHEN BTS.B_SUB_TYPE = 'MAR' THEN '나눔/장터'
+			ELSE BTS.B_SUB_TYPE
+		END AS B_SUB_TYPE,
+		CASE
+			WHEN BTM.B_MAIN_TYPE = 'ALL' THEN '통합'
+			WHEN BTM.B_MAIN_TYPE = 'LOC' THEN '지역'
+			ELSE BTM.B_MAIN_TYPE
+		END AS B_MAIN_TYPE,
+		CASE
+			WHEN BTL.LOCAL_NAME = 'SEO' THEN '서울'
+			WHEN BTL.LOCAL_NAME = 'INC' THEN '인천'
+			WHEN BTL.LOCAL_NAME = 'PUS' THEN '부산'
+			WHEN BTL.LOCAL_NAME = 'DAE' THEN '대구'
+			WHEN BTL.LOCAL_NAME = 'GWA' THEN '광주'
+			WHEN BTL.LOCAL_NAME = 'DAJ' THEN '대전'
+			WHEN BTL.LOCAL_NAME = 'ULS' THEN '울산'
+			WHEN BTL.LOCAL_NAME = 'SEJ' THEN '세종'
+			WHEN BTL.LOCAL_NAME = 'GYE' THEN '경기'
+			WHEN BTL.LOCAL_NAME = 'GAN' THEN '강원'
+			WHEN BTL.LOCAL_NAME = 'CHU' THEN '충청'
+			WHEN BTL.LOCAL_NAME = 'JEO' THEN '전라'
+			WHEN BTL.LOCAL_NAME = 'GYS' THEN '경상'
+			WHEN BTL.LOCAL_NAME = 'JEJ' THEN '제주'
+			ELSE BTL.LOCAL_NAME
+		END AS LOCAL_NAME,
+		IFNULL(LK.LIKE_CNT, 0) AS LIKE_CNT,
+		IFNULL(CM.COMMENT_CNT, 0) AS COMMENT_CNT,
+		BF.FILE_PATH,
+		BF.FILE_NAME,
+		CONCAT(BF.FILE_PATH, BF.FILE_NAME) AS THUMBNAIL
+	FROM BOARD B
+	INNER JOIN BOARD_TYPE_SUB BTS ON B.B_SUB_NO = BTS.B_SUB_NO
+	INNER JOIN BOARD_TYPE_MAIN BTM ON BTS.B_MAIN_NO = BTM.B_MAIN_NO
+	LEFT JOIN BOARD_TYPE_LOCAL BTL ON B.LOCAL_NO = BTL.LOCAL_NO
+	LEFT JOIN (
+		SELECT BOARD_NO, COUNT(*) AS LIKE_CNT
+		FROM BOARD_LIKE
+		GROUP BY BOARD_NO
+	) LK ON B.BOARD_NO = LK.BOARD_NO
+	LEFT JOIN (
+		SELECT BOARD_NO, COUNT(*) AS COMMENT_CNT
+		FROM COMMENT
+		GROUP BY BOARD_NO
+	) CM ON B.BOARD_NO = CM.BOARD_NO
+	LEFT JOIN (
+		SELECT BOARD_NO, MIN(FILE_NO) AS FILE_NO
+		FROM BOARD_FILE
+		GROUP BY BOARD_NO
+	) BFM ON B.BOARD_NO = BFM.BOARD_NO
+	LEFT JOIN BOARD_FILE BF ON BFM.FILE_NO = BF.FILE_NO
+	WHERE B.B_STATUS = 'Y'
+	<if test="bMainNo != null and bMainNo != ''">
+		AND BTM.B_MAIN_NO = #{bMainNo}
+	</if>
+	<if test="bSubNo != null and bSubNo != ''">
+		AND B.B_SUB_NO = #{bSubNo}
+	</if>
+	<if test="localNo != null and localNo != ''">
+		AND B.LOCAL_NO = #{localNo}
+	</if>
+	<if test="keyword != null and keyword != ''">
+		AND (
+			<choose>
+				<when test="searchType == 'title'">
+					B.TITLE LIKE CONCAT('%', #{keyword}, '%')
+				</when>
+				<when test="searchType == 'contents'">
+					B.B_CONTENT LIKE CONCAT('%', #{keyword}, '%')
+				</when>
+				<when test="searchType == 'user'">
+					B.USER_ID LIKE CONCAT('%', #{keyword}, '%')
+				</when>
+				<otherwise>
+					(
+						B.TITLE LIKE CONCAT('%', #{keyword}, '%')
+						OR B.B_CONTENT LIKE CONCAT('%', #{keyword}, '%')
+						OR B.USER_ID LIKE CONCAT('%', #{keyword}, '%')
+					)
+				</otherwise>
+			</choose>
+		)
+	</if>
+	ORDER BY
+	<choose>
+		<when test="sortType == 'like'">
+			LIKE_CNT DESC, B.BOARD_NO DESC
+		</when>
+		<when test="sortType == 'view'">
+			B.VIEW_COUNT DESC, B.BOARD_NO DESC
+		</when>
+		<otherwise>
+			B.BOARD_NO DESC
+		</otherwise>
+	</choose>
+	LIMIT #{startIndex}, #{pageSize}
+</select>
+
+	<select id="selectBoardCnt" parameterType="hashmap" resultType="int"> SELECT
+		COUNT(*) FROM BOARD B INNER JOIN BOARD_TYPE_SUB BTS ON B.B_SUB_NO =
+		BTS.B_SUB_NO INNER JOIN BOARD_TYPE_MAIN BTM ON BTS.B_MAIN_NO =
+		BTM.B_MAIN_NO WHERE B.B_STATUS = 'Y' <if
+			test="bMainNo != null and bMainNo != ''">
+			AND BTM.B_MAIN_NO = #{bMainNo}
+		</if>
+		<if
+			test="bSubNo != null and bSubNo != ''">
+			AND B.B_SUB_NO = #{bSubNo}
+		</if>
+		<if
+			test="localNo != null and localNo != ''">
+			AND B.LOCAL_NO = #{localNo}
+		</if>
+		<if
+			test="keyword != null and keyword != ''"> AND ( <choose>
+				<when test="searchType == 'title'">
+					B.TITLE LIKE CONCAT('%', #{keyword}, '%')
+				</when>
+				<when test="searchType == 'contents'">
+					B.B_CONTENT LIKE CONCAT('%', #{keyword}, '%')
+				</when>
+				<when test="searchType == 'user'">
+					B.USER_ID LIKE CONCAT('%', #{keyword}, '%')
+				</when>
+				<otherwise>
+					(
+					B.TITLE LIKE CONCAT('%', #{keyword}, '%')
+					OR B.B_CONTENT LIKE CONCAT('%', #{keyword}, '%')
+					OR B.USER_ID LIKE CONCAT('%', #{keyword}, '%')
+					)
+				</otherwise>
+			</choose>
+		) </if>
+	</select>
+
+	<update id="updateViewCount" parameterType="hashmap">
+		UPDATE BOARD
+		SET VIEW_COUNT = VIEW_COUNT + 1
+		WHERE BOARD_NO = #{boardNo}
+	</update>
+
+	<select id="selectBoardInfo" parameterType="hashmap" resultType="hashmap">
+	SELECT 
+		B.BOARD_NO,
+		B.B_SUB_NO,
+		B.LOCAL_NO,
+		B.TITLE,
+		B.B_CONTENT,
+		B.USER_ID,
+		B.VIEW_COUNT,
+		B.B_STATUS,
+		B.PRIVATE,
+		DATE_FORMAT(B.CREATE_TIME, '%Y-%m-%d %H:%i:%s') AS CREATE_TIME,
+		DATE_FORMAT(B.UPDATE_TIME, '%Y-%m-%d %H:%i:%s') AS UPDATE_TIME,
+		CASE
+			WHEN BTS.B_SUB_TYPE = 'NTC' THEN '공지사항'
+			WHEN BTS.B_SUB_TYPE = 'GEN' THEN '일반'
+			WHEN BTS.B_SUB_TYPE = 'INF' THEN '정보/팁'
+			WHEN BTS.B_SUB_TYPE = 'GIF' THEN '움짤'
+			WHEN BTS.B_SUB_TYPE = 'VID' THEN '동영상'
+			WHEN BTS.B_SUB_TYPE = 'QNA' THEN '질문'
+			WHEN BTS.B_SUB_TYPE = 'MAR' THEN '나눔/장터'
+			ELSE BTS.B_SUB_TYPE
+		END AS B_SUB_TYPE,
+		CASE
+			WHEN BTM.B_MAIN_TYPE = 'ALL' THEN '통합'
+			WHEN BTM.B_MAIN_TYPE = 'LOC' THEN '지역'
+			ELSE BTM.B_MAIN_TYPE
+		END AS B_MAIN_TYPE,
+		CASE
+			WHEN BTL.LOCAL_NAME = 'SEO' THEN '서울'
+			WHEN BTL.LOCAL_NAME = 'INC' THEN '인천'
+			WHEN BTL.LOCAL_NAME = 'PUS' THEN '부산'
+			WHEN BTL.LOCAL_NAME = 'DAE' THEN '대구'
+			WHEN BTL.LOCAL_NAME = 'GWA' THEN '광주'
+			WHEN BTL.LOCAL_NAME = 'DAJ' THEN '대전'
+			WHEN BTL.LOCAL_NAME = 'ULS' THEN '울산'
+			WHEN BTL.LOCAL_NAME = 'SEJ' THEN '세종'
+			WHEN BTL.LOCAL_NAME = 'GYE' THEN '경기'
+			WHEN BTL.LOCAL_NAME = 'GAN' THEN '강원'
+			WHEN BTL.LOCAL_NAME = 'CHU' THEN '충청'
+			WHEN BTL.LOCAL_NAME = 'JEO' THEN '전라'
+			WHEN BTL.LOCAL_NAME = 'GYS' THEN '경상'
+			WHEN BTL.LOCAL_NAME = 'JEJ' THEN '제주'
+			ELSE BTL.LOCAL_NAME
+		END AS LOCAL_NAME
+	FROM BOARD B
+	INNER JOIN BOARD_TYPE_SUB BTS ON B.B_SUB_NO = BTS.B_SUB_NO
+	INNER JOIN BOARD_TYPE_MAIN BTM ON BTS.B_MAIN_NO = BTM.B_MAIN_NO
+	LEFT JOIN BOARD_TYPE_LOCAL BTL ON B.LOCAL_NO = BTL.LOCAL_NO
+	WHERE B.BOARD_NO = #{boardNo}
+	AND B.B_STATUS = 'Y'
+</select>
+
+	<select id="selectBoardFileList" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT
+		FILE_NO,
+		BOARD_NO,
+		FILE_PATH,
+		FILE_NAME,
+		ORIGIN_NAME,
+		FILE_SIZE,
+		FILE_EXT,
+		CONCAT(FILE_PATH, FILE_NAME) AS FILE_URL
+		FROM BOARD_FILE
+		WHERE BOARD_NO = #{boardNo}
+		ORDER BY FILE_NO
+	</select>
+
+	<select id="selectBoardLikeInfo" parameterType="hashmap"
+		resultType="hashmap"> SELECT IFNULL(A.LIKE_CNT, 0) AS LIKE_CNT, CASE
+		WHEN B.BOARD_NO IS NULL THEN 'N' ELSE 'Y' END AS MY_LIKE FROM ( SELECT
+		BOARD_NO, COUNT(*) AS LIKE_CNT FROM BOARD_LIKE WHERE BOARD_NO =
+		#{boardNo} GROUP BY BOARD_NO ) A LEFT JOIN ( SELECT BOARD_NO FROM
+		BOARD_LIKE WHERE BOARD_NO = #{boardNo} <if
+			test="sessionId != null and sessionId != ''">
+			AND USER_ID = #{sessionId}
+		</if> ) B ON A.BOARD_NO = B.BOARD_NO
+		UNION SELECT 0 AS LIKE_CNT, 'N' AS MY_LIKE FROM DUAL WHERE NOT EXISTS (
+		SELECT 1 FROM BOARD_LIKE WHERE BOARD_NO = #{boardNo} ) LIMIT 1 </select>
+
+	<select id="selectCommentList" parameterType="hashmap" resultType="hashmap">
+		SELECT
+		C.COMMENT_NO,
+		C.C_CONTENT,
+		C.USER_ID,
+		C.BOARD_NO,
+		C.PARENT_NO,
+		DATE_FORMAT(C.CREATE_TIME, '%Y-%m-%d %H:%i:%s') AS CREATE_TIME,
+		DATE_FORMAT(C.UPDATE_TIME, '%Y-%m-%d %H:%i:%s') AS UPDATE_TIME
+		FROM COMMENT C
+		WHERE C.BOARD_NO = #{boardNo}
+		ORDER BY
+		CASE WHEN C.PARENT_NO IS NULL THEN C.COMMENT_NO ELSE C.PARENT_NO END
+		ASC,
+		C.PARENT_NO ASC,
+		C.COMMENT_NO ASC
+	</select>
+
+	<insert id="insertComment" parameterType="hashmap">
+		INSERT INTO COMMENT (
+		C_CONTENT,
+		USER_ID,
+		BOARD_NO,
+		PARENT_NO,
+		CREATE_TIME,
+		UPDATE_TIME
+		) VALUES (
+		#{contents},
+		#{userId},
+		#{boardNo},
+		#{parentNo},
+		NOW(),
+		NOW()
+		)
+	</insert>
+
+	<select id="selectBoardLikeCheck" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT BOARD_NO, USER_ID
+		FROM BOARD_LIKE
+		WHERE BOARD_NO = #{boardNo}
+		AND USER_ID = #{userId}
+	</select>
+
+	<insert id="insertBoardLike" parameterType="hashmap">
+		INSERT INTO BOARD_LIKE (
+		BOARD_NO,
+		USER_ID,
+		CDATE
+		) VALUES (
+		#{boardNo},
+		#{userId},
+		NOW()
+		)
+	</insert>
+
+	<delete id="deleteBoardLike" parameterType="hashmap">
+		DELETE FROM BOARD_LIKE
+		WHERE BOARD_NO = #{boardNo}
+		AND USER_ID = #{userId}
+	</delete>
+
+	<insert id="insertBoardReport" parameterType="hashmap">
+		INSERT INTO BOARD_REPORT (
+		REPORTER_ID,
+		BOARD_NO,
+		COMMENT_NO,
+		REPORT_REASON,
+		REP_STATUS,
+		CDATE
+		) VALUES (
+		#{reporterId},
+		#{boardNo},
+		#{commentNo},
+		#{reportReason},
+		'WAI',
+		NOW()
+		)
+	</insert>
+
+	<select id="selectBoardInfoForEdit" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT
+		BOARD_NO,
+		B_SUB_NO,
+		LOCAL_NO,
+		TITLE,
+		B_CONTENT,
+		USER_ID,
+		VIEW_COUNT,
+		B_STATUS,
+		PRIVATE,
+		DATE_FORMAT(CREATE_TIME, '%Y-%m-%d %H:%i:%s') AS CREATE_TIME,
+		DATE_FORMAT(UPDATE_TIME, '%Y-%m-%d %H:%i:%s') AS UPDATE_TIME
+		FROM BOARD
+		WHERE BOARD_NO = #{boardNo}
+		AND B_STATUS = 'Y'
+	</select>
+
+	<insert id="insertBoard" parameterType="hashmap" useGeneratedKeys="true"
+		keyProperty="boardNo"> INSERT INTO BOARD ( B_SUB_NO, LOCAL_NO, TITLE,
+		B_CONTENT, USER_ID, VIEW_COUNT, B_STATUS, PRIVATE, CREATE_TIME,
+		UPDATE_TIME ) VALUES ( #{bSubNo}, <choose>
+			<when test="localNo != null and localNo != ''">
+				#{localNo}
+			</when>
+			<otherwise>
+				NULL
+			</otherwise>
+		</choose>, #{title}, #{bContent},
+		#{userId}, 0, 'Y', #{privateYn}, NOW(), NOW() ) </insert>
+		
+		<insert id="insertBoardFile" parameterType="hashmap">
+	INSERT INTO BOARD_FILE (
+		BOARD_NO,
+		FILE_PATH,
+		FILE_NAME,
+		ORIGIN_NAME,
+		FILE_SIZE,
+		FILE_EXT
+	) VALUES (
+		#{boardNo},
+		#{filePath},
+		#{fileName},
+		#{originName},
+		#{fileSize},
+		#{fileExt}
+	)
+</insert>
+
+	<update id="updateBoard" parameterType="hashmap"> UPDATE BOARD SET B_SUB_NO
+		= #{bSubNo}, LOCAL_NO = <choose>
+			<when test="localNo != null and localNo != ''">
+				#{localNo}
+			</when>
+			<otherwise>
+				NULL
+			</otherwise>
+		</choose>, TITLE = #{title},
+		B_CONTENT = #{bContent}, PRIVATE = #{privateYn}, UPDATE_TIME = NOW()
+		WHERE BOARD_NO = #{boardNo} </update>
+
+	<update id="deleteBoard" parameterType="hashmap">
+		UPDATE BOARD
+		SET
+		B_STATUS = 'N',
+		UPDATE_TIME = NOW()
+		WHERE BOARD_NO = #{boardNo}
+	</update>
+
+	<select id="selectCommentInfo" parameterType="hashmap" resultType="hashmap">
+		SELECT
+		COMMENT_NO,
+		C_CONTENT,
+		USER_ID,
+		BOARD_NO,
+		PARENT_NO,
+		DATE_FORMAT(CREATE_TIME, '%Y-%m-%d %H:%i:%s') AS CREATE_TIME,
+		DATE_FORMAT(UPDATE_TIME, '%Y-%m-%d %H:%i:%s') AS UPDATE_TIME
+		FROM COMMENT
+		WHERE COMMENT_NO = #{commentNo}
+	</select>
+
+	<update id="updateComment" parameterType="hashmap">
+		UPDATE COMMENT
+		SET
+		C_CONTENT = #{contents},
+		UPDATE_TIME = NOW()
+		WHERE COMMENT_NO = #{commentNo}
+	</update>
+
+	<delete id="deleteComment" parameterType="hashmap">
+		DELETE FROM COMMENT
+		WHERE COMMENT_NO = #{commentNo}
+	</delete>
+
 </mapper>

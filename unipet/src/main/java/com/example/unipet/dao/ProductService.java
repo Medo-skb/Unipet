@@ -83,8 +83,10 @@ public class ProductService {
 
 		try {
 			resultMap.put("list", productMapper.selectReviewList(map));
+			resultMap.put("summary", productMapper.selectReviewSummary(map));
 			resultMap.put("result", "success");
 		} catch (Exception e) {
+			e.printStackTrace();
 			resultMap.put("result", "fail");
 		}
 
@@ -130,16 +132,28 @@ public class ProductService {
 			HashMap<String, Object> cartInfo = productMapper.selectCartOne(map);
 
 			int result = 0;
+			HashMap<String, Object> cartResult = null;
 
 			if (cartInfo == null) {
 				result = productMapper.insertCart(map);
+				cartResult = productMapper.selectCartOne(map);
 			} else {
 				result = productMapper.updateCartPlusQty(map);
+				cartResult = productMapper.selectCartOne(map);
 			}
 
-			resultMap.put("result", result > 0 ? "success" : "fail");
+			if (result > 0) {
+				resultMap.put("result", "success");
+
+				if (cartResult != null) {
+					resultMap.put("cartNo", cartResult.get("CART_NO"));
+				}
+			} else {
+				resultMap.put("result", "fail");
+			}
 
 		} catch (Exception e) {
+			e.printStackTrace();
 			resultMap.put("result", "fail");
 		}
 
@@ -202,6 +216,66 @@ public class ProductService {
 			resultMap.put("cartCount", count);
 			resultMap.put("result", "success");
 		} catch (Exception e) {
+			resultMap.put("result", "fail");
+		}
+
+		return resultMap;
+	}
+
+	public HashMap<String, Object> updateQna(HashMap<String, Object> map) {
+		HashMap<String, Object> resultMap = new HashMap<>();
+
+		try {
+			HashMap<String, Object> qnaInfo = productMapper.selectQnaOne(map);
+
+			if (qnaInfo == null) {
+				resultMap.put("result", "fail");
+				return resultMap;
+			}
+
+			String loginUserId = String.valueOf(map.get("userId"));
+			String loginUserRole = map.get("userRole") == null ? "" : String.valueOf(map.get("userRole"));
+			String writerId = String.valueOf(qnaInfo.get("USER_ID"));
+
+			if (!loginUserId.equals(writerId) && !"A".equals(loginUserRole)) {
+				resultMap.put("result", "fail");
+				return resultMap;
+			}
+
+			int cnt = productMapper.updateQna(map);
+			resultMap.put("result", cnt > 0 ? "success" : "fail");
+		} catch (Exception e) {
+			e.printStackTrace();
+			resultMap.put("result", "fail");
+		}
+
+		return resultMap;
+	}
+
+	public HashMap<String, Object> deleteQna(HashMap<String, Object> map) {
+		HashMap<String, Object> resultMap = new HashMap<>();
+
+		try {
+			HashMap<String, Object> qnaInfo = productMapper.selectQnaOne(map);
+
+			if (qnaInfo == null) {
+				resultMap.put("result", "fail");
+				return resultMap;
+			}
+
+			String loginUserId = String.valueOf(map.get("userId"));
+			String loginUserRole = map.get("userRole") == null ? "" : String.valueOf(map.get("userRole"));
+			String writerId = String.valueOf(qnaInfo.get("USER_ID"));
+
+			if (!loginUserId.equals(writerId) && !"A".equals(loginUserRole)) {
+				resultMap.put("result", "fail");
+				return resultMap;
+			}
+
+			int cnt = productMapper.deleteQna(map);
+			resultMap.put("result", cnt > 0 ? "success" : "fail");
+		} catch (Exception e) {
+			e.printStackTrace();
 			resultMap.put("result", "fail");
 		}
 

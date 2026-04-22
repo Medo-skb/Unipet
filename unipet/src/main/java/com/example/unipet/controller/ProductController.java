@@ -10,6 +10,7 @@ import com.example.unipet.dao.ProductService;
 import com.google.gson.Gson;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class ProductController {
@@ -17,26 +18,22 @@ public class ProductController {
 	@Autowired
 	ProductService productService;
 
-	// 상품 리스트 페이지
 	@RequestMapping("/product.do")
 	public String product() {
 		return "/product/product";
 	}
 
-	// 상품 상세 페이지
 	@RequestMapping("/product/view.do")
 	public String productView(HttpServletRequest request, @RequestParam HashMap<String, Object> map) {
 		request.setAttribute("productNo", map.get("productNo"));
 		return "/product/productView";
 	}
 
-	// 장바구니 페이지
 	@RequestMapping("/cart.do")
 	public String cart() {
 		return "/product/cart";
 	}
 
-	// 카테고리
 	@RequestMapping(value = "/productCategory.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
 	public String productCategory(@RequestParam HashMap<String, Object> map) throws Exception {
@@ -44,7 +41,6 @@ public class ProductController {
 		return new Gson().toJson(resultMap);
 	}
 
-	// 상품 리스트
 	@RequestMapping(value = "/productList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
 	public String productList(@RequestParam HashMap<String, Object> map) throws Exception {
@@ -52,7 +48,6 @@ public class ProductController {
 		return new Gson().toJson(resultMap);
 	}
 
-	// 🔥 상세 + 이미지 + 기타
 	@RequestMapping(value = "/product/detail.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
 	public String detail(@RequestParam HashMap<String, Object> map) throws Exception {
@@ -60,7 +55,6 @@ public class ProductController {
 		return new Gson().toJson(resultMap);
 	}
 
-	// 리뷰 목록
 	@RequestMapping(value = "/review/list.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
 	public String reviewList(@RequestParam HashMap<String, Object> map) throws Exception {
@@ -68,7 +62,6 @@ public class ProductController {
 		return new Gson().toJson(resultMap);
 	}
 
-	// QNA 목록
 	@RequestMapping(value = "/qna/list.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
 	public String qnaList(@RequestParam HashMap<String, Object> map) throws Exception {
@@ -76,63 +69,151 @@ public class ProductController {
 		return new Gson().toJson(resultMap);
 	}
 
-	// QNA 등록
 	@RequestMapping(value = "/qna/add.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
-	public String addQna(@RequestParam HashMap<String, Object> map) throws Exception {
+	public String addQna(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
+		String userId = (String) session.getAttribute("sessionId");
 
-		map.put("userId", "test1234"); // 테스트용
+		if (userId == null) {
+			HashMap<String, Object> resultMap = new HashMap<>();
+			resultMap.put("result", "login");
+			resultMap.put("message", "로그인이 필요합니다.");
+			return new Gson().toJson(resultMap);
+		}
+
+		map.put("userId", userId);
 
 		HashMap<String, Object> resultMap = productService.addQna(map);
 		return new Gson().toJson(resultMap);
 	}
 
-	// 장바구니 담기
 	@RequestMapping(value = "/cart/add.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
-	public String addCart(@RequestParam HashMap<String, Object> map) throws Exception {
+	public String addCart(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
+		String userId = (String) session.getAttribute("sessionId");
 
-		map.put("userId", "test1234");
+		if (userId == null) {
+			HashMap<String, Object> resultMap = new HashMap<>();
+			resultMap.put("result", "login");
+			resultMap.put("message", "로그인이 필요합니다.");
+			return new Gson().toJson(resultMap);
+		}
+
+		map.put("userId", userId);
 
 		HashMap<String, Object> resultMap = productService.addCart(map);
 		return new Gson().toJson(resultMap);
 	}
 
-	// 장바구니 리스트 🔥 (아까 빠진거)
 	@RequestMapping(value = "/cart/list.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
-	public String cartList(@RequestParam HashMap<String, Object> map) throws Exception {
+	public String cartList(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
+		String userId = (String) session.getAttribute("sessionId");
 
-		map.put("userId", "test1234");
+		if (userId == null) {
+			HashMap<String, Object> resultMap = new HashMap<>();
+			resultMap.put("result", "login");
+			resultMap.put("message", "로그인이 필요합니다.");
+			return new Gson().toJson(resultMap);
+		}
+
+		map.put("userId", userId);
 
 		HashMap<String, Object> resultMap = productService.getCartList(map);
 		return new Gson().toJson(resultMap);
 	}
 
-	// 수량 변경
 	@RequestMapping(value = "/cart/update.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
-	public String cartUpdate(@RequestParam HashMap<String, Object> map) throws Exception {
+	public String cartUpdate(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
+		String userId = (String) session.getAttribute("sessionId");
+
+		if (userId == null) {
+			HashMap<String, Object> resultMap = new HashMap<>();
+			resultMap.put("result", "login");
+			resultMap.put("message", "로그인이 필요합니다.");
+			return new Gson().toJson(resultMap);
+		}
+
+		map.put("userId", userId);
+
 		HashMap<String, Object> resultMap = productService.updateCartQty(map);
 		return new Gson().toJson(resultMap);
 	}
 
-	// 삭제
 	@RequestMapping(value = "/cart/remove.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
-	public String cartRemove(@RequestParam HashMap<String, Object> map) throws Exception {
+	public String cartRemove(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
+		String userId = (String) session.getAttribute("sessionId");
+
+		if (userId == null) {
+			HashMap<String, Object> resultMap = new HashMap<>();
+			resultMap.put("result", "login");
+			resultMap.put("message", "로그인이 필요합니다.");
+			return new Gson().toJson(resultMap);
+		}
+
+		map.put("userId", userId);
+
 		HashMap<String, Object> resultMap = productService.removeCart(map);
 		return new Gson().toJson(resultMap);
 	}
 
-	// 개수
 	@RequestMapping(value = "/cart/count.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
-	public String cartCount(@RequestParam HashMap<String, Object> map) throws Exception {
+	public String cartCount(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
+		String userId = (String) session.getAttribute("sessionId");
 
-		map.put("userId", "test1234");
+		if (userId == null) {
+			HashMap<String, Object> resultMap = new HashMap<>();
+			resultMap.put("result", "success");
+			resultMap.put("cartCount", 0);
+			return new Gson().toJson(resultMap);
+		}
+
+		map.put("userId", userId);
 
 		HashMap<String, Object> resultMap = productService.getCartCount(map);
+		return new Gson().toJson(resultMap);
+	}
+	
+	@RequestMapping(value = "/qna/update.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String updateQna(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
+		String userId = (String) session.getAttribute("sessionId");
+		String userRole = (String) session.getAttribute("sessionRole");
+
+		if (userId == null) {
+			HashMap<String, Object> resultMap = new HashMap<>();
+			resultMap.put("result", "login");
+			resultMap.put("message", "로그인이 필요합니다.");
+			return new Gson().toJson(resultMap);
+		}
+
+		map.put("userId", userId);
+		map.put("userRole", userRole);
+
+		HashMap<String, Object> resultMap = productService.updateQna(map);
+		return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/qna/delete.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String deleteQna(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
+		String userId = (String) session.getAttribute("sessionId");
+		String userRole = (String) session.getAttribute("sessionRole");
+
+		if (userId == null) {
+			HashMap<String, Object> resultMap = new HashMap<>();
+			resultMap.put("result", "login");
+			resultMap.put("message", "로그인이 필요합니다.");
+			return new Gson().toJson(resultMap);
+		}
+
+		map.put("userId", userId);
+		map.put("userRole", userRole);
+
+		HashMap<String, Object> resultMap = productService.deleteQna(map);
 		return new Gson().toJson(resultMap);
 	}
 }

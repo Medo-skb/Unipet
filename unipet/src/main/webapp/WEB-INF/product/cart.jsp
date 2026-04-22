@@ -297,12 +297,47 @@
 				height: 18px;
 				cursor: pointer;
 			}
+			
+			.header {
+				width: 100%;
+				height: 70px;
+				background: #ffffff;
+				border-bottom: 1px solid #eee;
+				display: flex;
+				align-items: center;
+				padding: 0 40px;
+				position: sticky;
+				top: 0;
+				z-index: 999;
+				box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+			}
+
+			.logo {
+				font-size: 24px;
+				font-weight: bold;
+				color: #ff7a00;
+				cursor: pointer;
+				display: flex;
+				align-items: baseline;
+				gap: 6px;
+			}
+
+			.logo-sub {
+				font-size: 12px;
+				color: #999;
+				font-weight: normal;
+			}
 		</style>
 	</head>
 
 	<body>
 
 		<div id="app">
+			<div class="header">
+				<div class="logo" @click="fnMoveProduct()">
+					UniPet <span class="logo-sub">shop</span>
+				</div>
+			</div>
 			<div class="wrap">
 				<div class="page-title">장바구니</div>
 				<div class="page-sub">담아둔 상품을 확인하고 주문할 수 있어요.</div>
@@ -311,7 +346,7 @@
 				<div v-if="cartList.length == 0" class="empty-box">
 					<div class="empty-title">장바구니가 비어 있습니다</div>
 					<div class="empty-text">원하는 상품을 담아보세요.</div>
-					<button @click="location.href='/product/list.do'">쇼핑하러 가기</button>
+					<button @click="fnMoveProduct()">쇼핑하러 가기</button>
 				</div>
 
 				<!-- 장바구니 있을 때 -->
@@ -615,25 +650,32 @@
 					});
 				},
 
+				fnMoveProduct() {
+					location.href = "/product.do";
+				},
+
 				// 결제
 				fnOrder() {
 					let self = this;
-					let orderList = [];
+					let cartNoList = [];
 
 					for (let i = 0; i < self.cartList.length; i++) {
 						if (self.cartList[i].checked) {
-							orderList.push(self.cartList[i]);
+							cartNoList.push(self.cartList[i].CART_NO);
 						}
 					}
 
-					if (orderList.length == 0) {
+					if (cartNoList.length == 0) {
 						alert("주문할 상품을 선택해주세요.");
 						return;
 					}
+					console.log("저장할 cartNoList :", cartNoList);
+					
+					sessionStorage.setItem("cartNoList", JSON.stringify(cartNoList));
 
-					alert("결제는 다음 단계");
+					location.href = "/payment/pay-shop.do";
 				},
-
+				
 				formatPrice(price) {
 					return Number(price).toLocaleString();
 				}
