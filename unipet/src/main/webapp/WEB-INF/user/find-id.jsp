@@ -10,44 +10,18 @@
     <h2>아이디 찾기</h2>
 
     이름 : <input type="text" id="userName"><br>
-    휴대폰 번호 : <input type="text" id="phone"><br>
-    인증번호 : <input type="text" id="code"><br>
+    비밀번호 : <input type="password" id="pwd"><br>
 
-    <button type="button" onclick="sendSms()">인증번호 발송</button>
-    <button type="button" onclick="checkSms()">인증번호 확인</button>
     <button type="button" onclick="findId()">아이디 찾기</button>
 
 <script>
-function sendSms() {
-    $.ajax({
-        url: "/user/sendSms.dox",
-        type: "POST",
-        data: { phone: $("#phone").val() },
-        success: function(res) {
-            const data = JSON.parse(res);
-            alert(data.message);
-        }
-    });
-}
-
-function checkSms() {
-    $.ajax({
-        url: "/user/checkSms.dox",
-        type: "POST",
-        data: { code: $("#code").val() },
-        success: function(res) {
-            const data = JSON.parse(res);
-            alert(data.message);
-        }
-    });
-}
-
 function findId() {
     $.ajax({
         url: "/user/findId.dox",
         type: "POST",
         data: {
-            userName: $("#userName").val()
+            userName: $("#userName").val(),
+            pwd: $("#pwd").val()
         },
         success: function(res) {
             const data = JSON.parse(res);
@@ -56,6 +30,9 @@ function findId() {
             } else {
                 alert(data.message);
             }
+        },
+        error: function() {
+            alert("아이디 찾기 중 오류가 발생했습니다.");
         }
     });
 }

@@ -5,83 +5,251 @@
 
 <mapper namespace="com.example.unipet.mapper.UserMypageMapper">
 
-    <!-- 반려동물 목록 -->
-    <select id="selectPetList" parameterType="hashmap" resultType="hashmap">
+    <!-- =========================
+         회원정보 조회
+    ========================== -->
+    <select id="getUserInfo" parameterType="hashmap" resultType="hashmap">
         SELECT
-            PET_ID AS petId,
-            PET_NAME AS petName,
-            PET_TYPE AS petType,
-            PET_BREED AS petBreed,
-            PET_AGE AS petAge,
-            IS_MAIN AS isMain
-        FROM pet_profile
+            USER_ID      AS userId,
+            USER_NAME    AS userName,
+            NICKNAME     AS nickname,
+            EMAIL        AS email,
+            PHONE        AS phone,
+            ZIPCODE      AS zipcode,
+            USER_ADDR    AS userAddr,
+            FULL_ADDR    AS fullAddr,
+            CDATE        AS cdate
+        FROM users
         WHERE USER_ID = #{userId}
-        ORDER BY IS_MAIN DESC, PET_ID ASC
     </select>
 
-    <!-- 최근 예약 -->
-    <select id="selectReservation" parameterType="hashmap" resultType="hashmap">
-        SELECT
-            RES_ID AS resId,
-            RES_TITLE AS resTitle,
-            RES_DATE AS resDate,
-            RES_STATUS AS resStatus
-        FROM reservation
+    <!-- =========================
+         회원정보 수정
+    ========================== -->
+    <update id="updateUser" parameterType="hashmap">
+        UPDATE users
+        SET
+            USER_NAME = #{userName},
+            NICKNAME = #{nickname},
+            EMAIL = #{email},
+            PHONE = #{phone},
+            ZIPCODE = #{zipcode},
+            USER_ADDR = #{userAddr},
+            FULL_ADDR = #{fullAddr}
         WHERE USER_ID = #{userId}
-        ORDER BY RES_DATE DESC
-        LIMIT 2
+    </update>
+
+    <!-- =========================
+         비밀번호 확인
+    ========================== -->
+    <select id="checkPassword" parameterType="hashmap" resultType="hashmap">
+        SELECT
+            USER_ID AS userId
+        FROM users
+        WHERE USER_ID = #{userId}
+          AND USER_PWD = #{pwd}
     </select>
 
-    <!-- 최근 주문 -->
-    <select id="selectOrder" parameterType="hashmap" resultType="hashmap">
-        SELECT
-            ORDER_ID AS orderId,
-            PRODUCT_NAME AS productName,
-            ORDER_DATE AS orderDate,
-            DELIVERY_STATUS AS deliveryStatus
-        FROM orders
+    <!-- =========================
+         비밀번호 변경
+    ========================== -->
+    <update id="changePwd" parameterType="hashmap">
+        UPDATE users
+        SET USER_PWD = #{newPwd}
         WHERE USER_ID = #{userId}
-        ORDER BY ORDER_DATE DESC
-        LIMIT 2
+    </update>
+
+    <!-- =========================
+         회원 탈퇴
+         실제 삭제가 부담되면 USER_STATUS='N' 으로 바꿔도 됨
+    ========================== -->
+    <delete id="deleteUser" parameterType="hashmap">
+        DELETE FROM users
+        WHERE USER_ID = #{userId}
+    </delete>
+
+    <!-- =========================
+         반려동물 수
+    ========================== -->
+    <select id="countPet" parameterType="hashmap" resultType="int">
+        SELECT COUNT(*)
+        FROM pet
+        WHERE USER_ID = #{userId}
     </select>
 
-    <!-- 구독 -->
-    <select id="selectSubscription" parameterType="hashmap" resultType="hashmap">
+    <!-- =========================
+         반려동물 목록
+    ========================== -->
+    <select id="getPetList" parameterType="hashmap" resultType="hashmap">
         SELECT
-            PLAN_NAME AS planName,
-            END_DATE AS endDate,
-            SUB_STATUS AS subStatus
-        FROM subscription
+            PET_NO      AS petNo,
+            USER_ID     AS userId,
+            PET_NAME    AS petName,
+            SPECIES     AS species,
+            BREED       AS breed,
+            BIRTHDATE   AS birthdate,
+            GENDER      AS gender,
+            IS_MAIN     AS isMain
+        FROM pet
         WHERE USER_ID = #{userId}
-        ORDER BY SUB_ID DESC
+        ORDER BY
+            CASE WHEN IS_MAIN = 'Y' THEN 0 ELSE 1 END,
+            PET_NO DESC
+    </select>
+
+    <!-- =========================
+         특정 반려동물 조회
+    ========================== -->
+    <select id="getPetByPetNo" parameterType="hashmap" resultType="hashmap">
+        SELECT
+            PET_NO      AS petNo,
+            USER_ID     AS userId,
+            PET_NAME    AS petName,
+            SPECIES     AS species,
+            BREED       AS breed,
+            BIRTHDATE   AS birthdate,
+            GENDER      AS gender,
+            IS_MAIN     AS isMain
+        FROM pet
+        WHERE USER_ID = #{userId}
+          AND PET_NO = #{petNo}
+    </select>
+
+    <!-- =========================
+         첫 반려동물 조회
+    ========================== -->
+    <select id="getFirstPet" parameterType="hashmap" resultType="hashmap">
+        SELECT
+            PET_NO    AS petNo,
+            USER_ID   AS userId,
+            PET_NAME  AS petName
+        FROM pet
+        WHERE USER_ID = #{userId}
+        ORDER BY PET_NO ASC
         LIMIT 1
     </select>
 
-    <!-- 즐겨찾기 -->
-    <select id="selectFavorite" parameterType="hashmap" resultType="hashmap">
-        SELECT
-            FAV_ID AS favId,
-            FAV_NAME AS favName,
-            FAV_TYPE AS favType
-        FROM favorites
-        WHERE USER_ID = #{userId}
-        ORDER BY FAV_ID DESC
-        LIMIT 4
-    </select>
+    <!-- =========================
+         반려동물 등록
+    ========================== -->
+    <insert id="addPet" parameterType="hashmap">
+        INSERT INTO pet (
+            USER_ID,
+            PET_NAME,
+            SPECIES,
+            BREED,
+            BIRTHDATE,
+            GENDER,
+            IS_MAIN
+        ) VALUES (
+            #{userId},
+            #{petName},
+            #{species},
+            #{breed},
+            #{birthdate},
+            #{gender},
+            #{isMain}
+        )
+    </insert>
 
-    <!-- 대표 반려동물 초기화 -->
+    <!-- =========================
+         반려동물 수정
+    ========================== -->
+    <update id="updatePet" parameterType="hashmap">
+        UPDATE pet
+        SET
+            PET_NAME = #{petName},
+            SPECIES = #{species},
+            BREED = #{breed},
+            BIRTHDATE = #{birthdate},
+            GENDER = #{gender}
+        WHERE USER_ID = #{userId}
+          AND PET_NO = #{petNo}
+    </update>
+
+    <!-- =========================
+         반려동물 삭제
+    ========================== -->
+    <delete id="deletePet" parameterType="hashmap">
+        DELETE FROM pet
+        WHERE USER_ID = #{userId}
+          AND PET_NO = #{petNo}
+    </delete>
+
+    <!-- =========================
+         대표펫 초기화
+    ========================== -->
     <update id="resetMainPet" parameterType="hashmap">
-        UPDATE pet_profile
+        UPDATE pet
         SET IS_MAIN = 'N'
         WHERE USER_ID = #{userId}
     </update>
 
-    <!-- 대표 반려동물 설정 -->
-    <update id="updateMainPet" parameterType="hashmap">
-        UPDATE pet_profile
+    <!-- =========================
+         대표펫 설정
+    ========================== -->
+    <update id="changeMainPet" parameterType="hashmap">
+        UPDATE pet
         SET IS_MAIN = 'Y'
-        WHERE PET_ID = #{petId}
-          AND USER_ID = #{userId}
+        WHERE USER_ID = #{userId}
+          AND PET_NO = #{petNo}
     </update>
+
+    <!-- =========================
+         최근 예약 3개
+         reservation 테이블명/컬럼명 다르면 수정
+    ========================== -->
+    <select id="getReservationList" parameterType="hashmap" resultType="hashmap">
+        SELECT
+            RSV_NO          AS rsvNo,
+            RSV_DATE        AS rsvDate,
+            RSV_START_TIME  AS rsvStartTime,
+            RSV_END_TIME    AS rsvEndTime,
+            STORE_NO        AS storeNo,
+            PET_NO          AS petNo,
+            MENU_NO         AS menuNo,
+            REQUEST         AS request,
+            RSV_STATUS      AS rsvStatus
+        FROM reservation
+        WHERE USER_ID = #{userId}
+        ORDER BY RSV_DATE DESC, RSV_NO DESC
+        LIMIT 3
+    </select>
+
+    <!-- =========================
+         전체 예약 목록
+    ========================== -->
+    <select id="getReservationAllList" parameterType="hashmap" resultType="hashmap">
+        SELECT
+            RSV_NO          AS rsvNo,
+            RSV_DATE        AS rsvDate,
+            RSV_START_TIME  AS rsvStartTime,
+            RSV_END_TIME    AS rsvEndTime,
+            STORE_NO        AS storeNo,
+            PET_NO          AS petNo,
+            MENU_NO         AS menuNo,
+            REQUEST         AS request,
+            RSV_STATUS      AS rsvStatus
+        FROM reservation
+        WHERE USER_ID = #{userId}
+        ORDER BY RSV_DATE DESC, RSV_NO DESC
+    </select>
+
+    <!-- =========================
+         주문 목록
+         orders / order_item / product 테이블명 다르면 수정
+    ========================== -->
+ <select id="getOrderList" parameterType="hashmap" resultType="hashmap">
+    SELECT
+        o.ORD_NO        AS orderNo,
+        o.ORD_DATE      AS orderDate,
+        o.ORD_STATUS    AS orderStatus,
+        o.TOTAL_PRICE   AS totalPrice,
+        o.DELI_STATUS   AS deliStatus,
+        o.ORD_ADDR      AS address
+    FROM orders o
+    WHERE o.USER_ID = #{userId}
+    ORDER BY o.ORD_DATE DESC, o.ORD_NO DESC
+</select>
 
 </mapper>
