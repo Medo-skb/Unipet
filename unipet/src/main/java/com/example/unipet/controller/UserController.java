@@ -117,18 +117,17 @@ public class UserController {
     @PostMapping("/user/login.dox")
     @ResponseBody
     public String loginProc(@RequestParam HashMap<String, Object> map, HttpSession session) {
-        HashMap<String, Object> resultMap = userService.login(map);
+        HashMap<String, Object> resultMap = userService.selectUser(map);
 
-        if ((boolean) resultMap.get("result")) {
+        if (Boolean.TRUE.equals(resultMap.get("result"))) {
             User user = (User) resultMap.get("user");
 
+            // 기존 기능 유지 + userId 세션 저장
             session.setAttribute("sessionId", user.getUserId());
             session.setAttribute("sessionName", user.getUserName());
             session.setAttribute("sessionRole", "USER");
 
-            resultMap.put("message", "로그인 성공");
-        } else {
-            resultMap.put("message", "아이디 또는 비밀번호 오류");
+            resultMap.put("message", user.getUserName() + "님 환영합니다 👋");
         }
 
         return gson.toJson(resultMap);
@@ -140,18 +139,17 @@ public class UserController {
     @PostMapping("/user/loginBiz.dox")
     @ResponseBody
     public String loginBizProc(@RequestParam HashMap<String, Object> map, HttpSession session) {
-        HashMap<String, Object> resultMap = userService.loginBiz(map);
+        HashMap<String, Object> resultMap = userService.selectStoreUser(map);
 
-        if ((boolean) resultMap.get("result")) {
+        if (Boolean.TRUE.equals(resultMap.get("result"))) {
             User user = (User) resultMap.get("user");
 
+            // 기존 기능 유지 + userId 세션 저장
             session.setAttribute("sessionId", user.getUserId());
             session.setAttribute("sessionName", user.getUserName());
             session.setAttribute("sessionRole", "BIZ");
 
-            resultMap.put("message", "사업자 로그인 성공");
-        } else {
-            resultMap.put("message", "사업자 로그인 실패");
+            resultMap.put("message", user.getUserName() + "님 환영합니다 👋");
         }
 
         return gson.toJson(resultMap);
@@ -163,7 +161,8 @@ public class UserController {
     @PostMapping("/user/signupUser.dox")
     @ResponseBody
     public String signupUser(@RequestParam HashMap<String, Object> map) {
-        return gson.toJson(userService.signupUser(map));
+        HashMap<String, Object> resultMap = userService.insertUser(map);
+        return gson.toJson(resultMap);
     }
 
     // =========================
@@ -173,7 +172,9 @@ public class UserController {
     @ResponseBody
     public String signupBiz(@RequestParam HashMap<String, Object> map,
                             @RequestParam(value = "bizFile", required = false) MultipartFile bizFile) {
-        return gson.toJson(userService.signupBiz(map, bizFile));
+        // 현재 서비스는 MultipartFile 안 받음
+        HashMap<String, Object> resultMap = userService.insertBizUser(map);
+        return gson.toJson(resultMap);
     }
 
     // =========================
@@ -200,12 +201,15 @@ public class UserController {
     @PostMapping("/user/sendSms.dox")
     @ResponseBody
     public String sendSms(@RequestParam HashMap<String, Object> map, HttpSession session) {
-        HashMap<String, Object> resultMap = userService.sendSms(map);
+        HashMap<String, Object> resultMap = new HashMap<>();
 
-        if ((boolean) resultMap.get("result")) {
-            session.setAttribute("smsCode", resultMap.get("code"));
-            session.setAttribute("smsPhone", map.get("phone"));
-        }
+        String code = String.format("%06d", random.nextInt(1000000));
+        session.setAttribute("smsCode", code);
+        session.setAttribute("smsPhone", map.get("phone"));
+
+        resultMap.put("result", true);
+        resultMap.put("message", "인증번호가 발송되었습니다.");
+        resultMap.put("code", code); // 테스트용. 실제 배포 시 제거
 
         return gson.toJson(resultMap);
     }
@@ -243,27 +247,8 @@ public class UserController {
     // =========================
     @PostMapping("/user/findId.dox")
     @ResponseBody
-    public String findId(@RequestParam HashMap<String, Object> map, HttpSession session) {
-        HashMap<String, Object> resultMap = new HashMap<>();
-
-        Object smsAuth = session.getAttribute("smsAuth");
-        Object verifiedPhone = session.getAttribute("verifiedPhone");
-
-        if (smsAuth == null || !(boolean) smsAuth) {
-            resultMap.put("result", false);
-            resultMap.put("message", "휴대폰 인증 후 이용해주세요.");
-            return gson.toJson(resultMap);
-        }
-
-        if (verifiedPhone == null) {
-            resultMap.put("result", false);
-            resultMap.put("message", "인증된 휴대폰 정보가 없습니다.");
-            return gson.toJson(resultMap);
-        }
-
-        map.put("phone", verifiedPhone.toString());
-        resultMap = userService.findId(map);
-
+    public String findId(@RequestParam HashMap<String, Object> map) {
+        HashMap<String, Object> resultMap = userService.findId(map);
         return gson.toJson(resultMap);
     }
 
@@ -293,7 +278,7 @@ public class UserController {
         map.put("phone", verifiedPhone.toString());
         resultMap = userService.checkUserForReset(map);
 
-        if ((boolean) resultMap.get("result")) {
+        if (Boolean.TRUE.equals(resultMap.get("result"))) {
             session.setAttribute("resetUserId", map.get("userId"));
         }
 
@@ -319,7 +304,7 @@ public class UserController {
         map.put("userId", resetUserId.toString());
         resultMap = userService.resetPwd(map);
 
-        if ((boolean) resultMap.get("result")) {
+        if (Boolean.TRUE.equals(resultMap.get("result"))) {
             session.removeAttribute("resetUserId");
             session.removeAttribute("smsAuth");
             session.removeAttribute("smsCode");
@@ -440,13 +425,21 @@ public class UserController {
         socialMap.put("email", email);
         socialMap.put("socialType", "KAKAO");
 
-        User user = userService.socialLogin(socialMap);
+        HashMap<String, Object> selectResult = userService.selectSocialUser(socialMap);
 
-        if (user == null) {
+        if (!Boolean.TRUE.equals(selectResult.get("result"))) {
+            userService.insertSocialUser(socialMap);
+            selectResult = userService.selectSocialUser(socialMap);
+        }
+
+        if (!Boolean.TRUE.equals(selectResult.get("result"))) {
             response.sendRedirect("/user/login.do");
             return;
         }
 
+        User user = (User) selectResult.get("user");
+
+        // 기존 기능 유지 + userId 세션 저장
         session.setAttribute("sessionId", user.getUserId());
         session.setAttribute("sessionName", user.getUserName());
         session.setAttribute("sessionRole", "USER");
@@ -575,13 +568,21 @@ public class UserController {
         socialMap.put("email", email);
         socialMap.put("socialType", "NAVER");
 
-        User user = userService.socialLogin(socialMap);
+        HashMap<String, Object> selectResult = userService.selectSocialUser(socialMap);
 
-        if (user == null) {
+        if (!Boolean.TRUE.equals(selectResult.get("result"))) {
+            userService.insertSocialUser(socialMap);
+            selectResult = userService.selectSocialUser(socialMap);
+        }
+
+        if (!Boolean.TRUE.equals(selectResult.get("result"))) {
             response.sendRedirect("/user/login.do");
             return;
         }
 
+        User user = (User) selectResult.get("user");
+
+        // 기존 기능 유지 + userId 세션 저장
         session.setAttribute("sessionId", user.getUserId());
         session.setAttribute("sessionName", user.getUserName());
         session.setAttribute("sessionRole", "USER");
