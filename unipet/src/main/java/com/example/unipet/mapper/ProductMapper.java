@@ -39,7 +39,13 @@ public interface ProductMapper {
 	// ===== QNA =====
 	public List<HashMap<String, Object>> selectQnaList(HashMap<String, Object> map);
 
+	public HashMap<String, Object> selectQnaOne(HashMap<String, Object> map);
+
 	public int insertQna(HashMap<String, Object> map);
+
+	public int updateQna(HashMap<String, Object> map);
+
+	public int deleteQna(HashMap<String, Object> map);
 
 	// ===== 장바구니 =====
 	public int insertCart(HashMap<String, Object> map);
@@ -55,4 +61,5 @@ public interface ProductMapper {
 	public int deleteCart(HashMap<String, Object> map);
 
 	public int selectCartCount(HashMap<String, Object> map);
+
 }
