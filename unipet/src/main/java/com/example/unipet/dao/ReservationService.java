@@ -11,6 +11,7 @@ import com.example.unipet.common.Message;
 import com.example.unipet.mapper.PetMapper;
 import com.example.unipet.mapper.ReservationMapper;
 import com.example.unipet.model.Pet;
+import com.example.unipet.model.Reservation;
 import com.example.unipet.model.Store;
 
 @Service
@@ -135,19 +136,45 @@ public class ReservationService {
 		return resultMap;
 	}
 	
-	@Transactional
+	public HashMap<String, Object> getStorePolicy(HashMap<String, Object> map){
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+		try {
+			Store info = reservationMapper.selectStorePolicy(map);
+			
+			resultMap.put("info", info);
+			resultMap.put("result", "success");
+			resultMap.put("message", Message.MSG_ADD);
+		} catch (Exception e) {
+			// TODO: handle exception
+			System.out.println(e.getMessage());
+			resultMap.put("result", "fail");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
+		}
+		return resultMap;
+	}
+	
+	@Transactional(rollbackFor = Exception.class)
 	public HashMap<String, Object> addReservation(HashMap<String, Object> map) throws Exception {
 	    HashMap<String, Object> resultMap = new HashMap<>();
 
-	    // 예약 테이블 및 로그만 기록 (상태는 기본값 WAI 등으로 입력됨)
+	    // 1. 예약 메인 정보 저장
 	    int res1 = reservationMapper.insertReservation(map);
+
+	    // 2. 로그 기록을 위한 필수 파라미터 추가
+	    // MyBatis XML의 #{action}, #{newStatus}, #{remark}와 매칭됩니다.
+	    map.put("action", "CREATE");
+	    map.put("newStatus", "WAI");
+	    map.put("remark", "신규 예약 신청 완료 (결제 대기)");
+
+	    // 3. 로그 저장
 	    int res2 = reservationMapper.insertRsvLog(map);
 
 	    if (res1 > 0 && res2 > 0) {
 	        resultMap.put("result", "success");
-	        resultMap.put("rsvNo", map.get("rsvNo"));
+	        resultMap.put("rsvNo", map.get("rsvNo")); // selectKey 등으로 채워진 rsvNo 반환
 	    } else {
-	        throw new Exception("예약 신청 실패");
+	        // 트랜잭션 처리를 위해 RuntimeException이나 명시적 Exception 발생
+	        throw new Exception("예약 신청 중 오류가 발생했습니다.");
 	    }
 	    return resultMap;
 	}
@@ -160,25 +187,59 @@ public class ReservationService {
 	public HashMap<String, Object> completeReservation(HashMap<String, Object> map) throws Exception {
 	    HashMap<String, Object> resultMap = new HashMap<>();
 
-	    // [STEP 1] 슬롯 업데이트 실행 
-	    // 매퍼 내부의 EXISTS 조건에 의해 rsv_status가 'COM'이 아니면 업데이트가 되지 않음
-	    int resSlot = reservationMapper.updateRsvSlotCount(map);
+	    // 1. 슬롯 업데이트 실행 (XML에서 CNF 상태를 확인하므로 로직은 동일)
+	    int resSlot = reservationMapper.updateRsvSlot(map);
 	    
 	    if (resSlot <= 0) {
-	        // 업데이트된 행이 0개라면: 상태가 'COM'이 아니거나, 이미 자리가 찼거나, slotNo가 틀린 경우
 	        resultMap.put("result", "fail");
-	        resultMap.put("message", "예약 확정 조건(결제 완료 상태)이 아니거나 슬롯이 마감되었습니다.");
+	        resultMap.put("message", "예약 확정 조건을 만족하지 않거나 마감된 슬롯입니다.");
 	        return resultMap;
 	    }
 
-	    // [STEP 2] 결제 완료 및 슬롯 반영 로그 추가
+	    // 2. 로그 파라미터 세팅 (WAI -> CNF)
 	    map.put("action", "UPDATE_SLOT");
-	    map.put("newStatus", "COM");
-	    map.put("actorType", "SYSTEM");
+	    map.put("oldStatus", "WAI");
+	    map.put("newStatus", "CNF"); // [수정] COM에서 CNF로 변경
+	    map.put("remark", "결제 승인 확인: 슬롯 카운트 증가 및 상태 업데이트");
+	    
+	    // 3. 로그 기록
 	    reservationMapper.insertRsvLog(map);
 
 	    resultMap.put("result", "success");
 	    return resultMap;
+	}
+	
+	public HashMap<String, Object> getRsvInfo(HashMap<String, Object> map){
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+		try {
+			Reservation info = reservationMapper.selectRsvInfo(map);
+			
+			resultMap.put("info", info);
+			resultMap.put("result", "success");
+			resultMap.put("message", Message.MSG_ADD);
+		} catch (Exception e) {
+			// TODO: handle exception
+			System.out.println(e.getMessage());
+			resultMap.put("result", "fail");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
+		}
+		return resultMap;
+	}
+	
+	@Transactional(rollbackFor = Exception.class)
+	public void removeRsv(HashMap<String, Object> map) throws Exception {
+	    // 1. RESERVATION 테이블 상태 변경 (CNF -> CAN)
+	    reservationMapper.updateRsvStatusCancel(map);
+	    
+	    // 2. RSV_SLOT 테이블 카운트 감소 및 가용성 복구
+	    reservationMapper.updateRsvSlotCancel(map);
+	    
+	    // 3. RSV_LOG 테이블 이력 기록
+	    map.put("action", "CANCEL");
+	    map.put("oldStatus", "CNF");
+	    map.put("newStatus", "CAN");
+	    map.put("remark", "결제 승인 후 취소");
+	    reservationMapper.insertRsvLog(map);
 	}
 	
 }

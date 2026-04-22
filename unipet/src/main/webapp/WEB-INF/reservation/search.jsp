@@ -42,6 +42,12 @@
                             <input type="text" id="end-time" placeholder="종료" style="width: 60px; text-align: center;">
                         </div>
                     </div>
+                    <div id="search-area">
+                        <div class="button-group">
+                            <button type="button" @click="fnStoreList" class="search-btn">검색</button>
+                            <button type="button" @click="fnReset" class="reset-btn">초기화</button>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div id="bottom">
@@ -106,6 +112,9 @@
                 infowindow: null,
                 selectedType: '',
                 myMarker: null,
+                // 검색 조건 추가
+                searchDate: { start: '', end: '' },
+                searchTime: { start: '', end: '' }
             };
         },
         methods: {
@@ -163,7 +172,7 @@
                 const ne = bounds.getNorthEast();
 
                 $.ajax({
-                    url: "http://localhost:8080/reservation/search.dox", 
+                    url: "/reservation/search.dox", 
                     dataType: "json",
                     type: "POST",
                     data: {
@@ -171,46 +180,55 @@
                         swLng: sw.getLng(),
                         neLat: ne.getLat(),
                         neLng: ne.getLng(),
-                        storeType: vm.selectedType
+                        storeType: vm.selectedType,
+                        // 검색 조건 추가 (값이 없으면 빈 문자열로 전송되어 XML의 <if>문을 통과함)
+                        startDate: vm.searchDate.start,
+                        endDate: vm.searchDate.end,
+                        // 시간이 '12:00' 형태일 때 정확한 비교를 위해 초 단위까지 고려하거나 포맷 확인
+                        startTime: vm.searchTime.start ? vm.searchTime.start : '00:00',
+                        endTime: vm.searchTime.end ? vm.searchTime.end : '23:59'
                     },
                     success: (res) => {
-                        console.log("1. 서버 응답:", res);
-                        const rawData = res.list || []; 
+                        console.log("검색 결과:", res.list);
+                        console.log(vm.searchDate, vm.searchTime)
+                        const rawData = res.list || [];
+                        
+                        // 기존의 중복 제거 및 정렬 로직
+                        const uniqueData = rawData.filter((item, index, arr) =>
+                            index === arr.findIndex((t) => (
+                                t.storeName === item.storeName && t.lat === item.lat && t.lng === item.lng
+                            ))
+                        );
+                        
+                        this.list = uniqueData.sort((a, b) => {
+                            const aS = a.sStatus ? a.sStatus.toLowerCase() : '';
+                            const bS = b.sStatus ? b.sStatus.toLowerCase() : '';
+                            if (aS === 'gen' && bS !== 'gen') return -1;
+                            if (aS !== 'gen' && bS === 'gen') return 1;
+                            return 0;
+                        });
 
-                        if (rawData.length > 0) {
-                            // [1] 중복 제거
-                            const uniqueData = rawData.filter((item, index, arr) =>
-                                index === arr.findIndex((t) => (
-                                    (t.storeName === item.storeName && t.lat === item.lat && t.lng === item.lng)
-                                ))
-                            );
-                            
-                            // [2] 회원사(GEN) 상단 정렬
-                            const sortedData = uniqueData.sort((a, b) => {
-                                // sStatus가 'GEN'인 항목을 위로(-1), 아니면 뒤로(1)
-                                const aStatus = a.sStatus ? a.sStatus.toUpperCase() : '';
-                                const bStatus = b.sStatus ? b.sStatus.toUpperCase() : '';
-
-                                if (aStatus === 'GEN' && bStatus !== 'GEN') return -1;
-                                if (aStatus !== 'GEN' && bStatus === 'GEN') return 1;
-                                return 0;
-                            });
-                            
-                            // [3] 결과 반영
-                            this.list = sortedData;
-                            console.log("2. 정렬 및 중복제거 완료:", this.list.length);
-
-                            this.$nextTick(() => {
-                                this.createMarkers();
-                            });
-                        } else {
-                            this.list = [];
+                        this.$nextTick(() => {
                             this.createMarkers();
-                        }
+                        });
                     }
                 });
             },
 
+            fnReset() {
+                // 1. Vue 데이터 초기화
+                this.searchDate = { start: '', end: '' };
+                this.searchTime = { start: '', end: '' };
+                this.selectedType = '';
+
+                // 2. 입력 필드(Flatpickr) 강제 초기화
+                document.getElementById('date-range')._flatpickr.clear();
+                document.getElementById('start-time')._flatpickr.clear();
+                document.getElementById('end-time')._flatpickr.clear();
+
+                // 3. 전체 목록 다시 불러오기 (날짜/시간이 빈 상태로 전송됨)
+                this.fnStoreList();
+            },
 
             createMarkers() {
                 // [1] self 선언: 이벤트 리스너(function) 내부에서 Vue 인스턴스에 접근하기 위해 반드시 필요합니다.
@@ -340,11 +358,49 @@
                     
                     window.open(naverMapUrl, '_blank');
                 }
+            },
+            formatDate(date) {
+                if (!date) return ''; // 날짜가 없으면 빈 문자열 반환
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
             }
         }, 
         
         mounted() {
+            const vm = this;
             this.initMap();
+
+            // 날짜 선택 설정
+            flatpickr("#date-range", {
+                mode: "range",
+                locale: "ko",
+                dateFormat: "Y-m-d",
+                onChange: function(selectedDates, dateStr, instance) {
+                    // 날짜가 2개 다 선택되었을 때만 실행
+                    if (selectedDates.length === 2) {
+                        // instance.formatDate를 사용하면 시차/오류 걱정 없이 설정된 dateFormat대로 출력됩니다.
+                        vm.searchDate.start = instance.formatDate(selectedDates[0], "Y-m-d");
+                        vm.searchDate.end = instance.formatDate(selectedDates[1], "Y-m-d");
+                    } else if (selectedDates.length === 0) {
+                        vm.searchDate.start = '';
+                        vm.searchDate.end = '';
+                    }
+                }
+            });
+
+            // 시간 선택 설정
+            const timeConfig = {
+                enableTime: true,
+                noCalendar: true,
+                dateFormat: "H:i",
+                time_24hr: true,
+                locale: "ko"
+            };
+
+            flatpickr("#start-time", { ...timeConfig, onChange: (d, str) => vm.searchTime.start = str });
+            flatpickr("#end-time", { ...timeConfig, onChange: (d, str) => vm.searchTime.end = str });
         }
     });
     app.mount('#app');

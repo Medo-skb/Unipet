@@ -32,9 +32,9 @@
                                 :class="{ 
                                     'empty': !d.day, 
                                     'today': d.fullDate === today,
-                                    /* d.day가 있을 때만 selected 클래스가 적용되도록 조건 추가 */
                                     'selected': d.day && d.fullDate === selectedDate,
-                                    'disabled': d.fullDate && d.fullDate < today
+                                    /* d.isFullDisabled가 true일 때 disabled 클래스 적용 */
+                                    'disabled': d.day && d.isFullDisabled 
                                 }"
                                 @click="selectDate(d)">
                                 <span v-text="d.day"></span>
@@ -46,12 +46,14 @@
                                 :key="slot.slotNo" 
                                 class="time-btn"
                                 :class="{ 
-                                    'booked': slot.isAvailable === 'N' || slot.curCount >= slot.capacity,
+                                    /* 계산된 isClosed 값이 true면 booked 클래스 적용 */
+                                    'booked': slot.isClosed, 
                                     'selected': selectedTime === slot 
                                 }"
-                                :disabled="slot.isAvailable === 'N' || slot.curCount >= slot.capacity"
+                                /* 클릭 비활성화 */
+                                :disabled="slot.isClosed"
                                 @click="selectTime(slot)">
-                            <span v-text="slot.slotTime" class="timetxt"></span>
+                            <span v-text="slot.slotTime.substring(0, 5)" class="timetxt"></span>
                         </button>
                     </div>
                 </div>
@@ -128,7 +130,8 @@
                 selectedPet: null,
                 menuList: [],
                 selectedMenu: null, // 이제 단일 객체
-                selectedTime: null
+                selectedTime: null,
+                cutoff: 0 // store_policy에서 가져올 예약 마감 시간 (단위: 시간)
             };
         },
         computed: {
@@ -141,16 +144,66 @@
             }
         },
         methods: {
+            fnGetStorePolicy() {
+                const self = this;
+                $.ajax({
+                    url: "/reservation/store-policy.dox",
+                    type: "POST",
+                    data: { storeNo: self.storeNo },
+                    success: function(data) {
+                        self.cutoff = data.info.cutoff;
+                        
+                        // 정책을 가져온 후 달력을 그립니다.
+                        self.buildCalendar();
+
+                        // [추가] 만약 오늘이 예약 불가능(isFullDisabled)하다면 다음날을 기본값으로 설정
+                        const todayObj = self.calendarDays.find(d => d.fullDate === self.today);
+                        if (todayObj && todayObj.isFullDisabled) {
+                            const tomorrow = new Date();
+                            tomorrow.setDate(tomorrow.getDate() + 1);
+                            self.selectedDate = tomorrow.toISOString().split('T')[0];
+                        }
+
+                        self.fnGetTimeList();
+                    }
+                });
+            },
+            
             buildCalendar() {
                 this.calendarDays = [];
                 const firstDay = new Date(this.currentYear, this.currentMonth, 1).getDay();
                 const lastDate = new Date(this.currentYear, this.currentMonth + 1, 0).getDate();
+                
+                // 마감 기준 시점 (현재 + cutoff 시간)
+                const now = new Date();
+                const limitTime = new Date(now.getTime() + (Number(this.cutoff) * 60 * 60 * 1000));
+
                 for (let i = 0; i < firstDay; i++) {
                     this.calendarDays.push({ day: '', fullDate: '' });
                 }
+
                 for (let i = 1; i <= lastDate; i++) {
                     const dateStr = this.currentYear + '-' + String(this.currentMonth + 1).padStart(2, '0') + '-' + String(i).padStart(2, '0');
-                    this.calendarDays.push({ day: i, fullDate: dateStr });
+                    
+                    // 해당 날짜의 영업 종료 시간 (예: 20:00). 필요시 store_policy에서 가져온 값을 넣으세요.
+                    const endOfBusiness = new Date(dateStr + 'T20:00:00'); 
+                    
+                    let isFullDisabled = false;
+
+                    if (dateStr < this.today) {
+                        isFullDisabled = true; // 과거 날짜
+                    } else if (dateStr === this.today) {
+                        // 오늘인데, 영업 종료 시간이 이미 마감 기준 시점(limitTime)보다 전이라면 예약 불가
+                        if (endOfBusiness <= limitTime) {
+                            isFullDisabled = true;
+                        }
+                    }
+
+                    this.calendarDays.push({ 
+                        day: i, 
+                        fullDate: dateStr,
+                        isFullDisabled: isFullDisabled
+                    });
                 }
             },
             changeMonth(diff) {
@@ -160,7 +213,10 @@
                 this.buildCalendar();
             },
             selectDate(date) {
-                if (!date.day || date.fullDate < this.today) return;
+                // 1. 빈 칸이거나 2. 비활성화된 날짜(과거/마감)라면 아무 동작 안함
+                if (!date.day || date.isFullDisabled) {
+                    return; 
+                }
                 this.selectedDate = date.fullDate;
                 this.fnGetTimeList();
             },
@@ -170,7 +226,26 @@
                     url: "/reservation/store-reservation.dox",
                     type: "POST",
                     data: { storeNo: self.storeNo, targetDate: self.selectedDate },
-                    success: function(data) { self.timeSlots = data.timelist; }
+                    success: function(data) {
+                        const now = new Date();
+                        // 현재 시간에 cutoff(시간)를 더한 시점
+                        const limitTime = new Date(now.getTime() + (Number(self.cutoff) * 60 * 60 * 1000));
+
+                        self.timeSlots = data.timelist.map(slot => {
+                            // [수정] slotDate와 slotTime을 합칠 때 포맷 확인
+                            // 만약 slotTime이 '10:00'이라면 '10:00:00'으로 맞춰주는 게 안전합니다.
+                            const timeStr = slot.slotTime.length === 5 ? slot.slotTime + ":00" : slot.slotTime;
+                            const slotDateTime = new Date(slot.slotDate + 'T' + timeStr); // T를 넣는 것이 표준 포맷
+                            
+                            return {
+                                ...slot,
+                                // 마감 조건 판별
+                                isClosed: slot.isAvailable === 'N' || 
+                                        slot.curCount >= slot.capacity || 
+                                        slotDateTime < limitTime
+                            };
+                        });
+                    }
                 });
             },
             selectTime(slot) {
@@ -233,12 +308,12 @@
 
                 console.log("넘기기 전 최종 확인:", reserveData); // 여기서 No값들이 숫자로 나오면 성공!
                 localStorage.setItem("reserveTemp", JSON.stringify(reserveData));
-                location.href = "/reservation/confirm.do";
+                location.href = "/reservation/rsv-confirm.do";
             }
         },
         mounted() {
+            this.fnGetStorePolicy();
             this.buildCalendar();
-            this.fnGetTimeList();
             this.fnGetPetList();
             this.fnGetMenuList();
         }   

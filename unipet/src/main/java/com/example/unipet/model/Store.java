@@ -30,6 +30,14 @@ public class Store {
 	private String capacity;
 	private String curCount;
 	private String isAvailable;
+	private String slot;
+	private String cutoff;
+	private String openTime;
+	private String closeTime;
+	private String breakStart;
+	private String breakEnd;
+	private String offDay;
+	private String refundPolicy;
 	
 	
 }
