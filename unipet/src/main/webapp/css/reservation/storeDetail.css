@@ -79,12 +79,73 @@
     display: grid;
     gap: 20px;
     grid-template-columns: 300px auto;
-    grid-template-rows: 200px;
+    grid-template-rows: 250px;
     /* border: 1px solid black; */
 }
 
+.sub-text{
+    font-size: 15px;
+    color: gray;
+}
+
 .rev-cont{
-    margin: 15px 0px;
+}
+
+/* 리뷰 컨테이너 전체 */
+.review-list-container {
+   
+}
+
+/* 개별 리뷰 항목 */
+.rev-cont {
+    border-bottom: 1px solid #eee;
+    padding: 15px 0;
+}
+
+.rev-cont:last-child {
+    border-bottom: none; /* 마지막 리뷰는 선 제거 */
+}
+
+/* 닉네임과 날짜 헤더 영역 */
+.rev-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.rev-header .nickname {
+    font-weight: bold;
+    color: #333;
+    font-size: 15px;
+}
+
+.rev-header .date {
+    font-size: 12px;
+    color: #999;
+}
+
+/* 별점 영역 */
+.rev-star {
+    margin: 5px 0;
+    color: #f1c40f; /* 별 색상 (노란색) */
+    font-size: 14px;
+}
+
+/* 리뷰 본문 */
+.rev-text {
+    font-size: 14px;
+    color: #444;
+    line-height: 1.6;
+    word-break: break-all; /* 긴 문장 자동 줄바꿈 */
+}
+
+/* 리뷰가 없을 때 */
+.no-review {
+    padding: 30px;
+    text-align: center;
+    color: #bbb;
+    font-size: 14px;
 }
 
 #map{
@@ -92,6 +153,7 @@
     width: 100%;
     height: 100%;
 }
+
 
 
 

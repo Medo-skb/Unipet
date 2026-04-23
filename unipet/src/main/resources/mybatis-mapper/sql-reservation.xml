@@ -59,6 +59,24 @@
     ORDER BY 
         IS_MAIN DESC, FILE_NO ASC
    </select>
+   
+   <select id="selectStoreReviewList" parameterType="hashmap" resultType="com.example.unipet.model.Review">
+	    SELECT 
+	        R.USER_ID,
+	        NICKNAME,
+	        RATING,
+	        R_CONTENTS,
+	        DATE_FORMAT(R.CDATE, '%Y-%m-%d %H:%i') AS cdate,
+	        RSV_NO
+	    FROM REVIEW R
+	    JOIN USERS U ON R.USER_ID = U.USER_ID
+	    WHERE STORE_NO = #{storeNo}
+	    <if test="rsvNo != null and rsvNo != ''">
+	        AND RSV_NO = #{rsvNo}
+	    </if>
+	    ORDER BY R.CDATE DESC
+	    LIMIT 2
+	</select>
 	
 	<select id="selectStoreSlotList" parameterType="hashmap" resultType="com.example.unipet.model.Store">
 	    SELECT 
@@ -117,12 +135,25 @@
 	        P.BREED,
 	        M.MENU_NAME,
 	        M.MENU_PRICE,
-	        R.REQUEST
+	        R.REQUEST,
+	        S.STORE_NO,
+	        S.STORE_NAME
 	    FROM RESERVATION R
 	    JOIN RSV_SLOT SL ON R.SLOT_NO = SL.SLOT_NO
 	    JOIN PET P ON R.PET_NO = P.PET_NO
 	    JOIN STORE_MENU M ON R.MENU_NO = M.MENU_NO
+	    JOIN STORE S ON R.STORE_NO = S.STORE_NO
 	    WHERE R.RSV_NO = #{rsvNo}
+	</select>
+	
+	<select id="selectExpiredReservations" parameterType="hashmap" resultType="com.example.unipet.model.Reservation">
+	    SELECT 
+	        RSV_NO AS rsvNo,
+	        USER_ID AS userId,
+	        RSV_STATUS AS rsvStatus
+	    FROM reservation
+	    WHERE RSV_STATUS = 'CNF' 
+	      AND STR_TO_DATE(CONCAT(RSV_DATE, ' ', RSV_END_TIME), '%Y-%m-%d %H:%i') <![CDATA[ <= ]]> DATE_SUB(NOW(), INTERVAL 30 MINUTE)
 	</select>
 	
 	<!-- 삽입 -->
@@ -154,20 +185,32 @@
 	    INSERT INTO rsv_log (
 	        RSV_NO, 
 	        ACTION, 
-	        OLD_STATUS,   NEW_STATUS, 
-	        ACTOR_TYPE, 
+	        OLD_STATUS, 
+	        NEW_STATUS, 
+	        ACTOR_TYPE,
 	        ACTOR_ID, 
 	        LOG_DATE, 
 	        REMARK
 	    ) VALUES (
 	        #{rsvNo}, 
 	        #{action}, 
-	        #{oldStatus}, #{newStatus}, 
-	        'USER', 
+	        #{oldStatus}, 
+	        #{newStatus}, 
+	        IFNULL(#{actorType}, 'USER'),
 	        #{userId}, 
 	        NOW(), 
 	        #{remark}
 	    )
+	</insert>
+	
+	<insert id="insertReviewRsv" parameterType="hashmap" useGeneratedKeys="true" keyProperty="reviewNo" keyColumn="REVIEW_NO">
+	    INSERT INTO review (USER_ID, STORE_NO, RSV_NO, RATING, R_CONTENTS, CDATE)
+	    VALUES (#{userId}, #{storeNo}, #{rsvNo}, #{rating}, #{rContents}, NOW())
+	</insert>
+	
+	<insert id="insertReviewRsvFile" parameterType="hashmap">
+	    INSERT INTO review_file (REVIEW_NO, FILE_PATH, FILE_NAME, ORIGIN_NAME, FILE_SIZE, FILE_EXT)
+	    VALUES (#{reviewNo}, #{file_path}, #{file_name}, #{origin_name}, #{file_size}, #{file_ext})
 	</insert>
 	
 	<!-- 삭제 -->
@@ -227,6 +270,12 @@
 	        IS_AVAILABLE = 'Y'
 	    WHERE SLOT_NO = #{slotNo}
 	      AND CUR_COUNT > 0 /* 0 이하로 내려가는 것 방지 */
+	</update>
+	
+	<update id="updateRsvStatusToFin" parameterType="hashmap">
+	    UPDATE RESERVATION 
+	    SET RSV_STATUS = 'FIN'
+	    WHERE RSV_NO = #{rsvNo}
 	</update>
 	
 </mapper>

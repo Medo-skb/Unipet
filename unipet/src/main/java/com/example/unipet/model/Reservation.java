@@ -15,5 +15,9 @@ public class Reservation {
 	private String menuName;
 	private String menuPrice;
 	private String request;
+	private String storeNo;
+	private String storeName;
+	private String rsvStatus;
+
 	
 }
