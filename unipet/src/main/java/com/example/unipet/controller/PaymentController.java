@@ -109,6 +109,14 @@ public class PaymentController {
 	    }
 	}
 	
+	@RequestMapping("/payment/pay-success.do")
+	public String paymentSuccessPage(HttpServletRequest request, @RequestParam HashMap<String, Object> map) {
+	    // 2. 파라미터로 받은 orderNo(또는 rsvNo)를 request에 담기 (Attribute 세팅)
+	    request.setAttribute("ordNo", map.get("ordNo"));
+	    request.setAttribute("rsvNo", map.get("rsvNo"));
+	    
+	    return "payment/pay-success";
+	}
 	// ajax가 호출하는 주소
 	@RequestMapping(value = "/payment/rsv.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
@@ -132,8 +140,7 @@ public class PaymentController {
 	@PostMapping(value = "/payment/add.dox", consumes = MediaType.APPLICATION_JSON_VALUE, produces = "application/json;charset=UTF-8")
 	@ResponseBody
 	public HashMap<String, Object> savePaymentJson(@RequestBody HashMap<String, Object> map) throws Exception {
-	    // @RequestBody가 붙으면 JSON 안의 배열(orderList)이 자바 List로 완벽하게 변환됩니다.
-	    // Spring Boot 3에서는 HashMap을 리턴하면 알아서 JSON으로 변환해주므로 Gson이 필요 없습니다.
+
 	    return paymentService.addPayment(map); 
 	}
 	
@@ -149,21 +156,7 @@ public class PaymentController {
 	@ResponseBody
 	public String getOrderList(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
 	    HashMap<String, Object> resultMap = new HashMap<>();
-
-//	    String userId = (String) session.getAttribute("userId");
-//	    List<Integer> cartIds = (List<Integer>) session.getAttribute("checkedCartIds");
-	    String userId = "test_user01";
-	    List<Integer> cartIds = List.of(2, 15, 17);
-
-	    if (userId == null || cartIds == null) {
-	        resultMap.put("result", "fail");
-	        resultMap.put("message", "결제 정보가 만료되었습니다. 다시 시도해주세요.");
-	    } else {
-	    	map.put("userId", userId);
-	        map.put("list", cartIds);
-	        
-	        resultMap = paymentService.getCartList(map);
-	    }
+	    resultMap = paymentService.getCartList(map);
 
 	    return new Gson().toJson(resultMap);
 	}
@@ -176,10 +169,24 @@ public class PaymentController {
 		String userId = "test_user01";
 	    map.put("userId", userId);
 	    
-	    // 2. 디폴트 템플릿 방식대로 서비스 객체 함수 호출
 	    HashMap<String, Object> resultMap = paymentService.getBenefit(map);
-
-	    // 3. 결과를 JSON으로 변환하여 프론트(Vue)로 반환
 	    return new Gson().toJson(resultMap); 
+	}
+	
+	@RequestMapping(value = "/payment/getOrder.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+    @ResponseBody
+    public String getOrder(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+        HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+        resultMap = paymentService.getOrder(map); 
+        return new Gson().toJson(resultMap); 
+    }
+	@RequestMapping(value = "/payment/getRsv.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getRsv(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+		
+		resultMap = paymentService.getRsv(map); 
+		return new Gson().toJson(resultMap); 
 	}
 }
