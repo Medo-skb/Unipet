@@ -188,8 +188,29 @@
 							@click="fnSelectMain('1')">통합</button>
 						<button class="tab-btn" :class="{active : selectedMainNo == '2'}"
 							@click="fnSelectMain('2')">지역</button>
-						<button class="tab-btn" :class="{active : selectedMainNo == '3'}" @click="fnSelectMain('3')">전문가
-							Q&A</button>
+					</div>
+					<div class="tab-row" v-if="selectedMainNo == '1'">
+						<button class="tab-btn" :class="{active : integratedCategory == ''}" @click="fnSelectIntegratedCategory('')">전체</button>
+						<button class="tab-btn" :class="{active : integratedCategory == 'NTC'}" @click="fnSelectIntegratedCategory('NTC')">공지사항</button>
+						<button class="tab-btn" :class="{active : integratedCategory == 'GEN'}" @click="fnSelectIntegratedCategory('GEN')">일반</button>
+						<button class="tab-btn" :class="{active : integratedCategory == 'INF'}" @click="fnSelectIntegratedCategory('INF')">정보/팁</button>
+						<button class="tab-btn" :class="{active : integratedCategory == 'GIF'}" @click="fnSelectIntegratedCategory('GIF')">움짤</button>
+						<button class="tab-btn" :class="{active : integratedCategory == 'VID'}" @click="fnSelectIntegratedCategory('VID')">동영상</button>
+						<button class="tab-btn" :class="{active : integratedCategory == 'QNA'}" @click="fnSelectIntegratedCategory('QNA')">질문</button>
+						<button class="tab-btn" :class="{active : integratedCategory == 'MAR'}" @click="fnSelectIntegratedCategory('MAR')">나눔/장터</button>
+					</div>
+					
+					
+					<!-- 지역 카테고리 필터 -->
+					<div class="tab-row" v-if="selectedMainNo == '2'">
+						<button class="tab-btn" :class="{active : localCategory == ''}" @click="fnSelectLocalCategory('')">전체</button>
+						<button class="tab-btn" :class="{active : localCategory == 'walk'}" @click="fnSelectLocalCategory('walk')">산책</button>
+						<button class="tab-btn" :class="{active : localCategory == 'meet'}" @click="fnSelectLocalCategory('meet')">소모임</button>
+						<button class="tab-btn" :class="{active : localCategory == 'travel'}" @click="fnSelectLocalCategory('travel')">여행</button>
+						<button class="tab-btn" :class="{active : localCategory == 'info'}" @click="fnSelectLocalCategory('info')">지역정보</button>
+						<button class="tab-btn" :class="{active : localCategory == 'hospital'}" @click="fnSelectLocalCategory('hospital')">병원추천</button>
+						<button class="tab-btn" :class="{active : localCategory == 'care'}" @click="fnSelectLocalCategory('care')">돌봄</button>
+						<button class="tab-btn" :class="{active : localCategory == 'market'}" @click="fnSelectLocalCategory('market')">중고거래</button>
 					</div>
 
 					<!-- 검색 -->
@@ -217,7 +238,11 @@
 								@click="fnChangeSort('view')">조회순</button>
 						</div>
 
-						<button class="write-btn" @click="fnMoveAdd()">글쓰기</button>
+						<div style="display:flex; gap:10px;">
+							<button class="write-btn" @click="fnMoveTempList()">임시저장 글 보기</button>
+							<button class="write-btn" @click="fnMoveNormalList()">전체 글</button>
+							<button class="write-btn" @click="fnMoveAdd()">글쓰기</button>
+						</div>
 					</div>
 
 					<!-- 목록 -->
@@ -287,8 +312,11 @@
 						keyword: '<%=request.getAttribute("keyword") == null ? "" : request.getAttribute("keyword")%>',
 						sortType: '<%=request.getAttribute("sortType") == null || request.getAttribute("sortType").equals("") ? "new" : request.getAttribute("sortType")%>',
 						currentPage: Number('<%=request.getAttribute("page") == null || request.getAttribute("page").equals("") ? "1" : request.getAttribute("page")%>'),
+						tempYn: '<%=request.getAttribute("tempYn") == null ? "" : request.getAttribute("tempYn")%>',
 						pageSize: 10,
-						totalCount: 0
+						totalCount: 0,
+						integratedCategory: '',
+						localCategory: ''
 					};
 				},
 				computed: {
@@ -309,7 +337,8 @@
 								keyword: self.keyword,
 								sortType: self.sortType,
 								page: self.currentPage,
-								pageSize: self.pageSize
+								pageSize: self.pageSize,
+								tempYn: self.tempYn
 							},
 							success: function (data) {
 								if (data.result == "success") {
@@ -340,9 +369,15 @@
 						this.currentPage = page;
 						this.fnGetBoardList();
 					},
+					
 					fnMoveView(boardNo) {
-						location.href = "/board/view.do?boardNo=" + boardNo;
+						if (this.tempYn == "Y") {
+							location.href = "/board/edit.do?boardNo=" + boardNo;
+						} else {
+							location.href = "/board/view.do?boardNo=" + boardNo;
+						}
 					},
+					
 					fnMoveAdd() {
 						if (this.selectedMainNo == "") {
 							alert("글을 작성할 게시판 탭을 먼저 선택해주세요.");
@@ -350,6 +385,32 @@
 						}
 
 						location.href = "/board/add.do?bMainNo=" + this.selectedMainNo;
+					},
+					
+					fnMoveTempList() {
+						location.href = "/board/list.do?tempYn=Y";
+					},
+
+					fnMoveNormalList() {
+						location.href = "/board/list.do";
+					},
+					
+					fnTempList() {
+						this.tempYn = "Y";
+						this.currentPage = 1;
+						this.fnGetBoardList();
+					},
+
+					fnNormalList() {
+						this.tempYn = "";
+						this.currentPage = 1;
+						this.fnGetBoardList();
+					},
+					
+					fnSelectLocalCategory(category) {
+						this.localCategory = category;
+						this.currentPage = 1;
+						this.fnGetBoardList();
 					}
 				},
 				mounted() {
