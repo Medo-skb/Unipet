@@ -36,9 +36,6 @@
                         <li class="menu-item">
                             <a href="/biz/review.do">리뷰 관리</a>
                         </li>
-                        <li class="menu-item">
-                            <a href="/biz/sales.do">매출 현황</a>
-                        </li>
                     </ul>
                 </aside>
 
@@ -76,7 +73,8 @@
 
                         <div class="image-section-wrap">
                             <div class="image-guide-text">
-                                이미지는 최대 4개까지 등록할 수 있습니다. 대표 이미지는 1개만 설정할 수 있습니다.
+                                <div>이미지는 최대 4개까지 등록할 수 있습니다. 대표 이미지는 1개만 설정할 수 있습니다.</div>
+                               <div>이미지 사이즈는 250px * 250px 사이즈를 권장합니다. 그 외 사이즈는 이미지가 잘릴 수 있습니다.</div>
                             </div>
 
                             <div class="store-image-grid">
@@ -194,10 +192,10 @@
                                 <div class="info-label">브레이크 종료</div>
                                 <div class="info-value">{{storeInfo.breakEnd}}</div>
                             </div>
-                            <div class="info-row">
+                            <!-- <div class="info-row">
                                 <div class="info-label">휴무일</div>
                                 <div class="info-value">{{storeInfo.offDay}}</div>
-                            </div>
+                            </div> -->
                             <div class="info-row">
                                 <div class="info-label">환불정책</div>
                                 <div class="info-value full-text">{{storeInfo.refundPolicy}}</div>
@@ -257,12 +255,34 @@
                             <div class="modal-body">
                                 <div class="form-row">
                                     <label>아이디</label>
-                                    <input type="text" v-model="editUserInfo.sUserId" readonly>
+                                    <div class="inline-input-area">
+                                        <input type="text"
+                                            v-model="editUserInfo.sUserId"
+                                            @input="fnResetIdCheck"
+                                            :readonly="isIdChecked">
+
+                                        <button type="button"
+                                                class="line-btn"
+                                                @click="fnCheckBizUserId"
+                                                :disabled="isIdChecked">
+                                            {{ isIdChecked ? '확인완료' : '중복확인' }}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <label>새 비밀번호</label>
+                                    <input type="password" v-model="editUserInfo.sUserPwd" placeholder="새 비밀번호를 입력하세요">
+                                </div>
+
+                                <div class="form-row">
+                                    <label>비밀번호 확인</label>
+                                    <input type="password" v-model="editUserInfo.sUserPwdConfirm" placeholder="비밀번호를 다시 입력하세요">
                                 </div>
 
                                 <div class="form-row">
                                     <label>대표자명</label>
-                                    <input type="text" v-model="editUserInfo.sName">
+                                    <input type="text" v-model="editUserInfo.ceoName" readonly>
                                 </div>
                             </div>
 
@@ -374,10 +394,10 @@
                                     <input type="time" v-model="editStoreInfo.breakEnd" ref="breakEndInput" @click="fnOpenTimePicker('breakEndInput')">
                                 </div>
 
-                                <div class="form-row">
+                                <!-- <div class="form-row">
                                     <label>휴무일</label>
                                     <input type="text" v-model="editStoreInfo.offDay">
-                                </div>
+                                </div> -->
 
                                 <div class="form-row">
                                     <label>환불정책</label>
@@ -515,11 +535,14 @@
                 capacityOptions: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
 
                 showMyInfoEditModal: false,
-
+                isIdChecked: false,
+                
                 editUserInfo: {
                     sUserId: "",
-                    sName: ""
+                    ceoName: ""
                 },
+
+                isIdChecked: false,
                 
             };
         },
@@ -553,7 +576,7 @@
                         } else {
                             self.userInfo = {
                                 sUserId: "",
-                                sName: "",
+                                ceoName: "",
                                 email: "",
                                 phone: ""
                             };
@@ -563,10 +586,6 @@
                         alert("내 정보 조회에 실패했습니다.");
                     }
                 });
-            },
-
-            fnEditMyInfo: function() {
-                alert("내 정보 수정 기능 연결 예정");
             },
 
             fnGetStoreInfo: function() {
@@ -892,22 +911,85 @@
 
                 self.editUserInfo = {
                     sUserId: self.userInfo.sUserId,
-                    sName: self.userInfo.sName
+                    ceoName: self.userInfo.ceoName,
+                    sUserPwd: "",
+                    sUserPwdConfirm: ""
                 };
 
+                self.isIdChecked = false;
                 self.showMyInfoEditModal = true;
             },
 
-            fnCloseMyInfoModal: function() {
-                this.showMyInfoEditModal = false;
+            fnResetIdCheck: function() {
+                this.isIdChecked = false;
+            },
+
+            fnCheckBizUserId: function() {
+                let self = this;
+                let param = {
+                    sUserId: self.editUserInfo.sUserId,
+                };
+
+                if (!self.editUserInfo.sUserId) {
+                    alert("아이디를 입력해주세요.");
+                    return;
+                }
+
+                $.ajax({
+                    url: "/checkBizUserId.dox",
+                    type: "POST",
+                    dataType: "json",
+                    data: param,
+                    success: function(data) {
+                        if (data.result === "success") {
+                            if (data.exists) {
+                                alert("이미 사용 중인 아이디입니다.");
+                                self.isIdChecked = false;
+                            } else {
+                                alert("사용 가능한 아이디입니다.");
+                                self.isIdChecked = true;
+                            }
+                        } else {
+                            alert(data.message || "중복 확인에 실패했습니다.");
+                        }
+                    },
+                    error: function() {
+                        alert("중복 확인 중 오류가 발생했습니다.");
+                    }
+                });
             },
 
             fnSaveMyInfo: function() {
                 let self = this;
 
+                if (!self.editUserInfo.sUserId) {
+                    alert("아이디를 입력해주세요.");
+                    return;
+                }
+
+                if (self.editUserInfo.sUserId !== self.userInfo.sUserId && !self.isIdChecked) {
+                    alert("아이디 중복 확인을 해주세요.");
+                    return;
+                }
+
+                if (!self.editUserInfo.sUserPwd) {
+                    alert("새 비밀번호를 입력해주세요.");
+                    return;
+                }
+
+                if (!self.editUserInfo.sUserPwdConfirm) {
+                    alert("비밀번호 확인을 입력해주세요.");
+                    return;
+                }
+
+                if (self.editUserInfo.sUserPwd !== self.editUserInfo.sUserPwdConfirm) {
+                    alert("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
+                    return;
+                }
+
                 let param = {
                     sUserId: self.editUserInfo.sUserId,
-                    sName: self.editUserInfo.sName
+                    sUserPwd: self.editUserInfo.sUserPwd
                 };
 
                 $.ajax({
@@ -919,15 +1001,29 @@
                         if (data.result === "success") {
                             alert("내 정보가 수정되었습니다.");
                             self.fnCloseMyInfoModal();
-                            self.fnGetMyInfo(); // 다시 조회
+                            self.fnGetMyInfo();
                         } else {
-                            alert(data.message || "수정 실패");
+                            alert(data.message || "내 정보 수정에 실패했습니다.");
                         }
                     },
                     error: function() {
-                        alert("서버 오류");
+                        alert("내 정보 수정 중 오류가 발생했습니다.");
                     }
                 });
+            },
+
+            fnCloseMyInfoModal: function() {
+                let self = this;
+
+                self.showMyInfoEditModal = false;
+                self.isIdChecked = false;
+
+                self.editUserInfo = {
+                    sUserId: "",
+                    ceoName: "",
+                    sUserPwd: "",
+                    sUserPwdConfirm: ""
+                };
             },
 
         }, // methods

@@ -109,7 +109,7 @@
 		FROM store_user
 		WHERE S_USER_ID = #{userId}
 		  AND S_USER_PWD = #{pwd}
-		  AND U_STATUS != 'BAN'
+		  AND U_STATUS NOT IN ('BAN', 'EXT')
     </select>
 
     <!-- 아이디 찾기 : 이름 + 비밀번호 -->
