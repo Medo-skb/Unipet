@@ -21,6 +21,65 @@ public class BizMyPageService {
 	@Autowired 
 	BizMyPageMapper bizMyPageMapper;
 	
+	// 오늘의 일정
+	public HashMap<String, Object> getTodayScheduleList(HashMap<String, Object> map){
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+		try {
+			List<BizMyPage> list = bizMyPageMapper.selectTodayScheduleList(map);
+
+			resultMap.put("list", list);
+			resultMap.put("result", "success");
+			resultMap.put("message", Message.MSG_SEARCH);
+		} catch (Exception e) {
+			e.printStackTrace();
+			resultMap.put("result", "fail");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
+		}
+
+		return resultMap;
+	}
+	
+	// 메뉴 예약 분포
+	public HashMap<String, Object> getMenuChartList(HashMap<String, Object> map){
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+		try {
+			List<BizMyPage> list = bizMyPageMapper.selectMenuChartList(map);
+
+			resultMap.put("list", list);
+			resultMap.put("result", "success");
+			resultMap.put("message", Message.MSG_SEARCH);
+		} catch (Exception e) {
+			e.printStackTrace();
+			resultMap.put("result", "fail");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
+		}
+
+		return resultMap;
+	}
+	
+	// 하루 예약 건수 차트
+	public HashMap<String, Object> getDailyReservationChartList(HashMap<String, Object> map){
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+		try {
+			List<BizMyPage> list = bizMyPageMapper.selectDailyReservationChartList(map);
+
+			resultMap.put("list", list);
+			resultMap.put("result", "success");
+			resultMap.put("message", Message.MSG_SEARCH);
+		} catch (Exception e) {
+			e.printStackTrace();
+			resultMap.put("result", "fail");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
+		}
+
+		return resultMap;
+	}
+	
+	
+	
 	// 업체 이미지 리스트
 	public HashMap<String, Object> getBizImgList(HashMap<String, Object> map){
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
@@ -257,15 +316,15 @@ public class BizMyPageService {
 		return resultMap;
 	}
 	
-	// 사업자 내 정보 수정
-	public HashMap<String, Object> editBizUser(HashMap<String, Object> map){
+	// 아이디 중복 확인
+	public HashMap<String, Object> getBizUserId(HashMap<String, Object> map){
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
 		try {
-			bizMyPageMapper.updateBizUser(map);
+			int count = bizMyPageMapper.checkBizUserId(map);
 
 			resultMap.put("result", "success");
-			resultMap.put("message", "수정 완료");
+			resultMap.put("exists", count > 0);
 		} catch (Exception e) {
 			e.printStackTrace();
 			resultMap.put("result", "fail");
@@ -274,6 +333,136 @@ public class BizMyPageService {
 
 		return resultMap;
 	}
+	
+	// 내 정보 수정
+	public HashMap<String, Object> editBizUser(HashMap<String, Object> map){
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
+		try {
+			bizMyPageMapper.updateBizUser(map);
+
+			resultMap.put("result", "success");
+			resultMap.put("message", Message.MSG_EDIT);
+		} catch (Exception e) {
+			e.printStackTrace();
+			resultMap.put("result", "fail");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
+		}
+
+		return resultMap;
+	}
+	
+	// 예약 요약
+	public HashMap<String, Object> getReservationSummary(HashMap<String, Object> map){
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+		try {
+			BizMyPage info = bizMyPageMapper.selectReservationSummary(map);
+
+			resultMap.put("info", info);
+			resultMap.put("result", "success");
+			resultMap.put("message", Message.MSG_SEARCH);
+		} catch (Exception e) {
+			e.printStackTrace();
+			resultMap.put("result", "fail");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
+		}
+
+		return resultMap;
+	}
+	
+	// 예약 목록
+	public HashMap<String, Object> getReservationList(HashMap<String, Object> map){
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+		try {
+			List<BizMyPage> list = bizMyPageMapper.selectReservationList(map);
+
+			resultMap.put("list", list);
+			resultMap.put("result", "success");
+			resultMap.put("message", Message.MSG_SEARCH);
+		} catch (Exception e) {
+			e.printStackTrace();
+			resultMap.put("result", "fail");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
+		}
+
+		return resultMap;
+	}
+	
+	// 리뷰 요약
+	public HashMap<String, Object> getReviewSummary(HashMap<String, Object> map){
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+		try {
+			BizMyPage info = bizMyPageMapper.selectReviewSummary(map);
+
+			resultMap.put("info", info);
+			resultMap.put("result", "success");
+			resultMap.put("message", Message.MSG_SEARCH);
+		} catch (Exception e) {
+			e.printStackTrace();
+			resultMap.put("result", "fail");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
+		}
+
+		return resultMap;
+	}
+	
+	// 리뷰 목록
+	public HashMap<String, Object> getReviewList(HashMap<String, Object> map){
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+		try {
+			List<BizMyPage> list = bizMyPageMapper.selectReviewList(map);
+
+			resultMap.put("list", list);
+			resultMap.put("result", "success");
+			resultMap.put("message", Message.MSG_SEARCH);
+		} catch (Exception e) {
+			e.printStackTrace();
+			resultMap.put("result", "fail");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
+		}
+
+		return resultMap;
+	}
+	
+	// 리뷰 메뉴 목록
+	public HashMap<String, Object> getReviewMenuList(HashMap<String, Object> map){
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+	    try {
+	        List<BizMyPage> list = bizMyPageMapper.selectReviewMenuList(map);
+
+	        resultMap.put("list", list);
+	        resultMap.put("result", "success");
+	        resultMap.put("message", Message.MSG_SEARCH);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        resultMap.put("result", "fail");
+	        resultMap.put("message", Message.MSG_SERVER_ERR);
+	    }
+
+	    return resultMap;
+	}
+	
+	// 리뷰 신고 등록
+	public HashMap<String, Object> addReviewReport(HashMap<String, Object> map){
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+	    try {
+	        bizMyPageMapper.insertReviewReport(map);
+
+	        resultMap.put("result", "success");
+	        resultMap.put("message", "리뷰가 신고되었습니다.");
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        resultMap.put("result", "fail");
+	        resultMap.put("message", Message.MSG_SERVER_ERR);
+	    }
+
+	    return resultMap;
+	}
 	
 }

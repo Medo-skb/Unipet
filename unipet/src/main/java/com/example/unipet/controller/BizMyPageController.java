@@ -95,6 +95,72 @@ public class BizMyPageController {
 		return "/bizMyPage/sales";
 	}
 	
+	// 오늘의 일정
+	@RequestMapping(value = "/getTodayScheduleList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getTodayScheduleList(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+		String sessionId = (String) session.getAttribute("sessionId");
+		String sessionRole = (String) session.getAttribute("sessionRole");
+
+		if (sessionId == null || !"BIZ".equals(sessionRole)) {
+			resultMap.put("result", "fail");
+			resultMap.put("message", "로그인이 필요합니다.");
+			return new Gson().toJson(resultMap);
+		}
+
+		map.put("sUserId", sessionId);
+
+		resultMap = bizMyPageService.getTodayScheduleList(map);
+
+		return new Gson().toJson(resultMap);
+	}
+	
+	// 메뉴 예약 분포
+	@RequestMapping(value = "/getMenuChartList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getMenuChartList(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+		String sessionId = (String) session.getAttribute("sessionId");
+		String sessionRole = (String) session.getAttribute("sessionRole");
+
+		if (sessionId == null || !"BIZ".equals(sessionRole)) {
+			resultMap.put("result", "fail");
+			resultMap.put("message", "로그인이 필요합니다.");
+			return new Gson().toJson(resultMap);
+		}
+
+		map.put("sUserId", sessionId);
+
+		resultMap = bizMyPageService.getMenuChartList(map);
+
+		return new Gson().toJson(resultMap);
+	}
+	
+	// 하루 예약 건수 차트
+	@RequestMapping(value = "/getDailyReservationChartList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getDailyReservationChartList(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+		String sessionId = (String) session.getAttribute("sessionId");
+		String sessionRole = (String) session.getAttribute("sessionRole");
+
+		if (sessionId == null || !"BIZ".equals(sessionRole)) {
+			resultMap.put("result", "fail");
+			resultMap.put("message", "로그인이 필요합니다.");
+			return new Gson().toJson(resultMap);
+		}
+
+		map.put("sUserId", sessionId);
+
+		resultMap = bizMyPageService.getDailyReservationChartList(map);
+
+		return new Gson().toJson(resultMap);
+	}
+	
 	// 업체 이미지 리스트
 	@RequestMapping(value = "/getBizImgList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
@@ -204,15 +270,176 @@ public class BizMyPageController {
 		return new Gson().toJson(resultMap);
 	}
 	
-	// 사업자 내정보 수정
-	@RequestMapping(value = "/biz/user/update.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	// 아이디 중복 확인
+	@RequestMapping(value = "/checkBizUserId.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
-	public String updateBizUser(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
-
+	public String checkBizUserId(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
-		resultMap = bizMyPageService.editBizUser(map);
+		resultMap = bizMyPageService.getBizUserId(map);
 
 		return new Gson().toJson(resultMap);
+	}
+	
+	// 내 정보 수정
+	@RequestMapping(value = "/biz/user/update.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String updateBizUser(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+	    String sessionId = (String) session.getAttribute("sessionId");
+	    String sessionRole = (String) session.getAttribute("sessionRole");
+
+	    // 로그인 체크
+	    if (sessionId == null || !"BIZ".equals(sessionRole)) {
+	        resultMap.put("result", "fail");
+	        resultMap.put("message", "로그인이 필요합니다.");
+	        return new Gson().toJson(resultMap);
+	    }
+
+	    // 기존 아이디는 세션값으로 고정
+	    map.put("originUserId", sessionId);
+
+	    resultMap = bizMyPageService.editBizUser(map);
+
+	    // 아이디 변경 성공 시 세션도 같이 변경
+	    if ("success".equals(resultMap.get("result"))) {
+	        String newUserId = String.valueOf(map.get("sUserId"));
+	        session.setAttribute("sessionId", newUserId);
+	    }
+
+	    return new Gson().toJson(resultMap);
+	}
+	
+	// 예약 요약
+	@RequestMapping(value = "/getReservationSummary.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getReservationSummary(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+		String sessionId = (String) session.getAttribute("sessionId");
+		String sessionRole = (String) session.getAttribute("sessionRole");
+
+		if (sessionId == null || !"BIZ".equals(sessionRole)) {
+			resultMap.put("result", "fail");
+			resultMap.put("message", "로그인이 필요합니다.");
+			return new Gson().toJson(resultMap);
+		}
+
+		map.put("sUserId", sessionId);
+
+		resultMap = bizMyPageService.getReservationSummary(map);
+
+		return new Gson().toJson(resultMap);
+	}
+	
+	// 예약 목록
+	@RequestMapping(value = "/getReservationList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getReservationList(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+		String sessionId = (String) session.getAttribute("sessionId");
+		String sessionRole = (String) session.getAttribute("sessionRole");
+
+		if (sessionId == null || !"BIZ".equals(sessionRole)) {
+			resultMap.put("result", "fail");
+			resultMap.put("message", "로그인이 필요합니다.");
+			return new Gson().toJson(resultMap);
+		}
+
+		map.put("sUserId", sessionId);
+
+		resultMap = bizMyPageService.getReservationList(map);
+
+		return new Gson().toJson(resultMap);
+	}
+	
+	// 리뷰 요약
+	@RequestMapping(value = "/getReviewSummary.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getReviewSummary(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+		String sessionId = (String) session.getAttribute("sessionId");
+		String sessionRole = (String) session.getAttribute("sessionRole");
+
+		if (sessionId == null || !"BIZ".equals(sessionRole)) {
+			resultMap.put("result", "fail");
+			resultMap.put("message", "로그인이 필요합니다.");
+			return new Gson().toJson(resultMap);
+		}
+
+		map.put("sUserId", sessionId);
+
+		resultMap = bizMyPageService.getReviewSummary(map);
+
+		return new Gson().toJson(resultMap);
+	}
+	
+	// 리뷰 목록
+	@RequestMapping(value = "/getReviewList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getReviewList(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+		String sessionId = (String) session.getAttribute("sessionId");
+		String sessionRole = (String) session.getAttribute("sessionRole");
+
+		if (sessionId == null || !"BIZ".equals(sessionRole)) {
+			resultMap.put("result", "fail");
+			resultMap.put("message", "로그인이 필요합니다.");
+			return new Gson().toJson(resultMap);
+		}
+
+		map.put("sUserId", sessionId);
+
+		resultMap = bizMyPageService.getReviewList(map);
+
+		return new Gson().toJson(resultMap);
+	}
+	
+	// 리뷰 메뉴 목록
+	@RequestMapping(value = "/getReviewMenuList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getReviewMenuList(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+	    String sessionId = (String) session.getAttribute("sessionId");
+	    String sessionRole = (String) session.getAttribute("sessionRole");
+
+	    if (sessionId == null || !"BIZ".equals(sessionRole)) {
+	        resultMap.put("result", "fail");
+	        resultMap.put("message", "로그인이 필요합니다.");
+	        return new Gson().toJson(resultMap);
+	    }
+
+	    map.put("sUserId", sessionId);
+
+	    resultMap = bizMyPageService.getReviewMenuList(map);
+
+	    return new Gson().toJson(resultMap);
+	}
+	
+	// 리뷰 신고
+	@RequestMapping(value = "/reportReview.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String reportReview(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+	    String sessionId = (String) session.getAttribute("sessionId");
+	    String sessionRole = (String) session.getAttribute("sessionRole");
+
+	    if (sessionId == null || !"BIZ".equals(sessionRole)) {
+	        resultMap.put("result", "fail");
+	        resultMap.put("message", "로그인이 필요합니다.");
+	        return new Gson().toJson(resultMap);
+	    }
+
+	    map.put("reporterId", sessionId);
+
+	    resultMap = bizMyPageService.addReviewReport(map);
+
+	    return new Gson().toJson(resultMap);
 	}
 
 }

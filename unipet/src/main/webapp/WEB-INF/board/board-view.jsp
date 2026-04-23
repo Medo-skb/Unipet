@@ -173,6 +173,7 @@
 				display: flex;
 				justify-content: center;
 				align-items: center;
+				z-index: 9999;
 			}
 
 			.report-modal {
@@ -194,13 +195,25 @@
 				padding: 0 10px;
 				margin-bottom: 12px;
 			}
+			
+	
 		</style>
 	</head>
 
 	<body>
+		<%
+			String msg = request.getParameter("msg");
+			if ("update".equals(msg)) {
+		%>
+		<script>
+			alert("수정되었습니다.");
+		</script>
+		<%
+			}
+		%>
 		<div id="app">
 			<div style="padding:20px 0; text-align:center;">
-				<img src="../../img/board/unipet_logo.png" style="height:60px; cursor:pointer;" onclick="fnGoHome()">
+				<img src="../../img/board/unipet_logo.png" style="height:100px; cursor:pointer;" onclick="fnGoHome()">
 			</div>
 			<div class="wrap">
 				<div v-if="resultType == 'private'" class="private-box">
@@ -240,13 +253,11 @@
 							{{myLike == 'Y' ? '추천취소' : '추천'}} ({{likeCnt}})
 						</button>
 
-						<button class="report-btn" @click="showReportModal = true">신고</button>
+						<button type="button" class="report-btn" @click="fnOpenReportModal()">신고</button>
 
-						<button class="report-btn" v-if="board.USER_ID == currentUserId || currentUserRole == 'A'"
-							@click="fnMoveEdit()">수정</button>
+						<button type="button" class="report-btn" v-if="fnCanManageBoard()" @click="fnMoveEdit()">수정</button>
 
-						<button class="report-btn" v-if="board.USER_ID == currentUserId || currentUserRole == 'A'"
-							@click="fnRemoveBoard()">삭제</button>
+						<button type="button" class="report-btn" v-if="fnCanManageBoard()" @click="fnRemoveBoard()">삭제</button>
 
 						<button class="list-btn" @click="fnMoveList()">목록</button>
 					</div>
@@ -258,7 +269,7 @@
 					<div class="comment-write">
 						<textarea v-model="commentContents" placeholder="댓글을 입력하세요"></textarea>
 						<div class="btn-wrap">
-							<button class="like-btn" @click="fnAddComment()">댓글 등록</button>
+							<button type="button" class="like-btn" @click="fnAddComment()">댓글 등록</button>
 						</div>
 					</div>
 
@@ -277,8 +288,8 @@
 								style="width:100%; height:80px; border:1px solid #ccc; border-radius:8px; padding:10px; resize:none; font-family:'Malgun Gothic';"></textarea>
 
 							<div class="btn-row" style="margin-top:10px;">
-								<button class="like-btn" @click="fnUpdateComment(comment)">저장</button>
-								<button class="report-btn" @click="fnCancelEditComment(comment)">취소</button>
+								<button type="button" class="like-btn" @click="fnUpdateComment(comment)">저장</button>
+								<button type="button" class="report-btn" @click="fnCancelEditComment(comment)">취소</button>
 							</div>
 						</div>
 
@@ -286,13 +297,11 @@
 							<div class="comment-content">{{comment.C_CONTENT}}</div>
 
 							<div class="btn-row" style="margin-top:10px;">
-								<button class="report-btn" @click="fnShowReply(comment.COMMENT_NO)">답글</button>
+								<button type="button" class="report-btn" @click="fnShowReply(comment.COMMENT_NO)">답글</button>
 
-								<button class="report-btn" v-if="fnCanManageComment(comment)"
-									@click="fnEditComment(comment)">수정</button>
+								<button type="button" class="report-btn" v-if="fnCanManageComment(comment)" @click="fnEditComment(comment)">수정</button>
 
-								<button class="report-btn" v-if="fnCanManageComment(comment)"
-									@click="fnRemoveComment(comment.COMMENT_NO)">삭제</button>
+								<button type="button" class="report-btn" v-if="fnCanManageComment(comment)" @click="fnRemoveComment(comment.COMMENT_NO)">삭제</button>
 							</div>
 
 							<div v-if="replyTargetNo == comment.COMMENT_NO" style="margin-top:10px;">
@@ -300,8 +309,8 @@
 									style="width:100%; height:70px; border:1px solid #ccc; border-radius:8px; padding:10px; resize:none;"></textarea>
 
 								<div class="btn-row" style="margin-top:5px;">
-									<button class="like-btn" @click="fnAddReply(comment.COMMENT_NO)">등록</button>
-									<button class="report-btn" @click="replyTargetNo = null">취소</button>
+									<button type="button" class="like-btn" @click="fnAddReply(comment.COMMENT_NO)">등록</button>
+									<button type="button" class="report-btn" @click="replyTargetNo = null">취소</button>
 								</div>
 							</div>
 						</div>
@@ -321,9 +330,17 @@
 						</select>
 
 						<div class="btn-row">
-							<button class="like-btn" @click="fnReportBoard()">접수</button>
-							<button class="report-btn" @click="showReportModal = false">취소</button>
+							<button type="button" class="like-btn" @click="fnReportBoard()">접수</button>
+							<button type="button" class="report-btn" @click="showReportModal = false">취소</button>
 						</div>
+						
+						<div>
+							sessionId = <%=session.getAttribute("sessionId")%>
+						</div>
+						<div>
+							sessionRole = <%=session.getAttribute("sessionRole")%>
+						</div>
+						
 					</div>
 				</div>
 			</div>
@@ -334,9 +351,8 @@
 				data() {
 					return {
 						boardNo: '<%=request.getAttribute("boardNo")%>',
-						currentUserId: '<%=(String)session.getAttribute("sessionId") == null ? "" : (String)session.getAttribute("sessionId")%>',
-						currentUserRole: '<%=(String)session.getAttribute("sessionRole") == null ? "" : (String)session.getAttribute("sessionRole")%>',
-						board: null,
+						currentUserId: '<%=session.getAttribute("sessionId") == null ? "" : session.getAttribute("sessionId")%>',
+						currentUserRole: '<%=session.getAttribute("sessionRole") == null ? "" : session.getAttribute("sessionRole")%>',
 						fileList: [],
 						commentList: [],
 						commentContents: "",
@@ -361,9 +377,10 @@
 							},
 							success: function (data) {
 								self.resultType = data.result;
-
+								
 								if (data.result == "success") {
 									self.board = data.board;
+									console.log("board.USER_ID =", data.board.USER_ID);
 									self.fileList = data.fileList || [];
 									self.likeCnt = data.likeCnt || 0;
 									self.myLike = data.myLike || "N";
@@ -400,6 +417,7 @@
 					},
 					fnAddComment() {
 						let self = this;
+						console.log("댓글등록 클릭");
 
 						if (self.commentContents == "") {
 							alert("댓글 내용을 입력해주세요.");
@@ -480,6 +498,17 @@
 							}
 						});
 					},
+					
+					fnCanManageBoard() {
+						if (this.currentUserRole == "A") {
+							return true;
+						}
+						if (this.board != null && this.currentUserId != "" && String(this.board.USER_ID) == String(this.currentUserId)) {
+							return true;
+						}
+						return false;
+					},
+					
 					fnReportBoard() {
 						let self = this;
 
@@ -494,7 +523,7 @@
 							dataType: "json",
 							data: {
 								boardNo: self.boardNo,
-								commentNo: "",
+								commentNo: null,
 								reportReason: self.reportReason
 							},
 							success: function (data) {
@@ -511,9 +540,11 @@
 							}
 						});
 					},
+					
 					fnMoveMypage(userId) {
 						location.href = "/mypage.do?userId=" + userId;
 					},
+					
 					fnMoveList() {
 						if (this.board != null && this.board.B_MAIN_TYPE == '통합') {
 							location.href = "/board/list.do?bMainNo=1";
@@ -525,11 +556,13 @@
 							location.href = "/board/list.do";
 						}
 					},
+					
 					fnIsImage(ext) {
 						if (!ext) return false;
 						ext = ext.toLowerCase();
 						return ext == 'jpg' || ext == 'jpeg' || ext == 'png' || ext == 'gif' || ext == 'webp';
 					},
+					
 					fnIsVideo(ext) {
 						if (!ext) return false;
 						ext = ext.toLowerCase();
@@ -613,6 +646,7 @@
 							}
 						});
 					},
+					
 					fnShowReply(commentNo) {
 						if (this.replyTargetNo == commentNo) {
 							this.replyTargetNo = null;
@@ -655,9 +689,16 @@
 							}
 						});
 					},
+					
+					fnOpenReportModal() {
+						console.log("신고버튼 클릭");
+						this.showReportModal = true;
+					}
 
 				},
 				mounted() {
+					console.log("currentUserId =", this.currentUserId);
+					console.log("currentUserRole =", this.currentUserRole);
 					this.fnGetBoardDetail();
 				}
 			});

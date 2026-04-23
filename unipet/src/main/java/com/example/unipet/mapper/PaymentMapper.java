@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 
 import com.example.unipet.model.Coupon;
 import com.example.unipet.model.Default;
+import com.example.unipet.model.Order;
 import com.example.unipet.model.Payment;
 
 @Mapper
@@ -26,6 +27,15 @@ public interface PaymentMapper {
 	
 	// 쿠폰 내역 검색
 	public List<Coupon> selectCoupon(HashMap<String, Object> map);
+	
+	// 오더 마스터 검색
+    public Order selectOrderMaster(HashMap<String, Object> map);
+    
+    // 오더 디테일 검색
+    public List<Order> selectOrderDetail(HashMap<String, Object> map);
+    
+    // 예약 내역 검색
+    public Order selectReservation(HashMap<String, Object> map);
 	
 	// 포인트 내역 검색
 	public int selectUserPoint(HashMap<String, Object> map);
@@ -62,5 +72,11 @@ public interface PaymentMapper {
 
 	// 포인트 업데이트
 	public int updatePoint(HashMap<String, Object> map);
+	
+	// 장바구니에서 삭제
+	public int deleteCart(HashMap<String, Object> map);
+	
+	// 재고 수량 업데이트
+	public int updateStock(HashMap<String, Object> map);
 	
 }

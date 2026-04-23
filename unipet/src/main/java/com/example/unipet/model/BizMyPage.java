@@ -53,5 +53,43 @@ public class BizMyPage {
 	
 	// STORE_USER
 	String sUserId;
+	String sUserPwd;
 	String ceoName;
+	
+	// 예약 건수 조회
+	Integer todayReservationCount;
+	Integer weekReservationCount;
+	Integer completeReservationCount;
+	Integer reserveCount;
+	String rsvDate;
+	
+	// 예약 목록
+	String rsvNo;
+	String userName;
+	String phone;
+	String rsvTime;
+	String rsvDateTime;
+	String rsvStatus;
+	String rsvStatusName;
+	String request;
+
+	// PET
+	String petName;
+	String species;
+	String breed;
+	String birthdate;
+	String gender;
+	
+	// 리뷰 요약
+	Integer totalReviewCount;
+	Double avgRating;
+	Double recentReviewRating;
+	
+	// 리뷰 목록
+	Integer reviewNo;
+	String nickname;
+	Integer rating;
+	String rContents;
+	String reviewDate;
+	String isReported;
 }

@@ -1,0 +1,125 @@
+        body { background-color: #f8f9fa; margin: 0; padding: 0; font-family: 'Pretendard', sans-serif; color: #333; }
+        
+        /* [2] 보내주신 .pay-container 스타일 적용 */
+        .pay-container { max-width: 800px; margin: 80px auto; padding: 0 20px; animation: fadeIn 0.6s ease-out; }
+        
+        /* [3] 보내주신 .pay-header 스타일 적용 */
+        .pay-header { font-size: 28px; font-weight: 800; text-align: center; margin-bottom: 50px; color: #333; }
+
+        /* [4] 보내주신 .pay-section (흰색 카드) 스타일 적용 */
+        .pay-section { 
+            background: #fff; border-radius: 20px; padding: 40px; margin-bottom: 25px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); /* 소포트한 그림자 그대로 */
+            text-align: center;
+        }
+        
+        /* 성공 아이콘 스타일 (UNIPET 라운드 스타일 재해석) */
+        .success-icon-wrap { margin-bottom: 30px; animation: scaleUp 0.5s ease-out 0.3s both; }
+        .success-icon {
+            width: 90px; height: 90px; background-color: #3BB1E5; color: white; 
+            font-size: 50px; line-height: 90px; border-radius: 50%; /* 완전 둥글게 */
+            display: inline-block; box-shadow: 0 8px 20px rgba(59, 177, 229, 0.3); /* 버튼 그림자 가져옴 */
+        }
+        
+        .success-title { font-size: 30px; font-weight: 800; color: #333; margin-bottom: 12px; }
+        .success-subtitle { font-size: 17px; color: #888; margin-bottom: 0; line-height: 1.5; }
+
+        /* [5] 보내주신 .section-title 스타일 적용 (파란색 세로 바) */
+        .section-title { font-size: 19px; font-weight: 700; margin-bottom: 25px; display: flex; align-items: center; justify-content: center; color: #444; text-align: left; }
+        .section-title::before { content: ""; width: 5px; height: 20px; background-color: #3BB1E5; margin-right: 12px; border-radius: 10px; }
+
+        /* 상세 정보 테이블 스타일 (UNIPET 스타일로 재작성) */
+        .info-table { width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid #f1f1f1; border-radius: 15px; overflow: hidden; margin-top: 10px; }
+        .info-table th, .info-table td { padding: 18px 20px; border-bottom: 1px solid #f1f1f1; font-size: 15px; }
+        .info-table tr:last-child th, .info-table tr:last-child td { border-bottom: none; }
+        
+        /* 보내주신 테이블 스타일의 th 배경색 적용 */
+        .info-table th { background-color: #f9fbfd; color: #666; font-weight: 600; width: 35%; text-align: left; }
+        
+        /* 보내주신 .item-total 스타일을 td에 적용 */
+        .info-table td { color: #333; font-weight: 500; text-align: left; }
+        .info-table td.highlight { color: #3BB1E5; font-weight: 700; font-size: 17px; }
+
+        /* [6] 하단 버튼 그룹 및 .btn-submit, .btn-sub 스타일 적용 */
+        .btn-group { display: flex; gap: 15px; margin-top: 40px; }
+        
+        /* 메인으로 버튼 (.btn-sub 스타일 적용: gray, rounded 30px) */
+        .btn-secondary { 
+            flex: 1; padding: 18px; background: #666; color: white; border: none; 
+            border-radius: 30px; font-size: 16px; font-weight: 600; cursor: pointer; 
+            text-align: center; text-decoration: none; transition: background 0.3s; 
+        }
+        .btn-secondary:hover { background: #555; }
+        
+        /* 내역 확인 버튼 (.btn-submit 스타일 적용: blue, rounded 40px) */
+        .btn-primary { 
+            flex: 1; padding: 18px; background: #3BB1E5; color: white; border: none; 
+            border-radius: 40px; font-size: 17px; font-weight: 700; cursor: pointer; 
+            transition: transform 0.2s, background 0.3s;
+            box-shadow: 0 8px 20px rgba(59, 177, 229, 0.3);
+        }
+        .btn-primary:hover { background: #2a9cd1; transform: translateY(-2px); }
+        .btn-primary:active { transform: translateY(0); }
+
+        /* 상품 카드 컨테이너 */
+        .item-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #f1f1f1;
+        }
+
+        .item-card:last-child {
+            border-bottom: none; /* 마지막 아이템은 선 제거 */
+        }
+
+        /* 이미지와 텍스트를 감싸는 왼쪽 영역 */
+        .item-content {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        /* 상품 이미지 (UNIPET 라운드 스타일) */
+        .item-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 15px;
+            object-fit: cover;
+            border: 1px solid #f1f1f1;
+            background-color: #f9fbfd;
+        }
+
+        /* 텍스트 정보 영역 */
+        .item-info {
+            text-align: left;
+        }
+
+        .item-name {
+            font-weight: 700;
+            font-size: 17px;
+            color: #333;
+            margin-bottom: 6px;
+        }
+
+        .item-detail {
+            color: #888;
+            font-size: 14px;
+        }
+
+        .item-detail b {
+            color: #555;
+            font-weight: 600;
+        }
+
+        /* 우측 합계 금액 강조 */
+        .item-total-price {
+            font-weight: 800;
+            font-size: 18px;
+            color: #3BB1E5; /* UNIPET 포인트 컬러 */
+        }
+
+        /* 애니메이션 정의 */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes scaleUp { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
