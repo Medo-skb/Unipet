@@ -19,6 +19,7 @@ import org.springframework.web.client.RestTemplate;
 import com.example.unipet.common.Message;
 import com.example.unipet.mapper.PaymentMapper;
 import com.example.unipet.model.Coupon;
+import com.example.unipet.model.Order;
 import com.example.unipet.model.Payment;
 
 import lombok.extern.slf4j.Slf4j;
@@ -106,7 +107,7 @@ public class PaymentService {
 	                // --- [Step 2] 쿠폰 처리 ---
 	                Object ucpNoObj = map.get("ucpNo");
 	                if (ucpNoObj != null && !"".equals(ucpNoObj.toString())) {
-	                    paymentMapper.updateCouponStatus(map);
+
 	                    // orders 테이블의 COUPON_NO 컬럼에 넣기 위해 ucpNo를 대입
 	                    map.put("couponNo", ucpNoObj); 
 	                }
@@ -116,25 +117,39 @@ public class PaymentService {
 	                String fullAddr = map.get("userAddr") + " " + map.get("fullAddr");
 	                map.put("ordAddr", fullAddr);
 	                
-	                // 주문서 INSERT (map에 ordNo 자동 주입)
+	                // ORDERS에 INSERT (map에 ordNo 자동 주입)
 	                paymentMapper.insertOrder(map);
+	                resultMap.put("ordNo", map.get("ordNo"));
 	                
+	                // 포인트 업데이트
 	                if (usedPoint > 0) {
 	                    paymentMapper.updatePoint(map);
+	                }
+	                
+	                // 쿠폰 업데이트
+	                if (ucpNoObj != null && !"".equals(ucpNoObj.toString())) {
+	                    paymentMapper.updateCouponStatus(map);
 	                }
 
 	                // --- [Step 4] 주문 상세(order_detail) 생성 ---
 	                int generatedOrdNo = Integer.parseInt(String.valueOf(map.get("ordNo")));
+	                String userId = (String) map.get("userId");
 
 	                List<HashMap<String, Object>> orderList = (List<HashMap<String, Object>>) map.get("orderList");
 
 	                for (HashMap<String, Object> item : orderList) {
 	                    item.put("ordNo", generatedOrdNo); // 확보한 주문번호 연결
+	                    item.put("userId", userId);
 	                    paymentMapper.insertOrderDetail(item);
+	                    int stockResult = paymentMapper.updateStock(item);
+	                    if (stockResult == 0) {
+	                        // 재고가 부족하여 업데이트가 안 된 경우, 강제로 예외를 발생시켜 전체 롤백
+	                        throw new RuntimeException("상품번호 [" + item.get("productNo") + "]의 재고가 부족하여 결제를 진행할 수 없습니다.");
+	                    }
+	                    paymentMapper.deleteCart(item);
 	                }
-	            	
+	                
 	            }
-	            
 	            // 2. 최종 결제 내역 저장
 	            paymentMapper.insertPayment(map);
 	            resultMap.put("result", "success");
@@ -207,9 +222,6 @@ public class PaymentService {
 	    
 	    return resultMap;
 	}
-	
-	
-	
 
 	
 	public int getSubStatus(String userId) {
@@ -357,5 +369,44 @@ public class PaymentService {
 	    return paymentMapper.selectTodaySub();
 	}
 	
+	public HashMap<String, Object> getOrder(HashMap<String, Object> map) {
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+	    try {
+
+	        Order info = paymentMapper.selectOrderMaster(map);
+	        List<Order> list = paymentMapper.selectOrderDetail(map);
+	        
+	        // 3. 결과 맵에 담기 (Vue에서는 이전과 동일하게 사용 가능)
+	        resultMap.put("info", info);
+	        resultMap.put("list", list);
+	        
+	        resultMap.put("result", "success");
+	        resultMap.put("message", "주문 내역 로드 성공");
+	    } catch (Exception e) {
+	        System.out.println(e.getMessage());
+	        resultMap.put("result", "fail");
+	        resultMap.put("message", "서버 오류 발생");
+	    }
+	    return resultMap;
+	}
+	
+	public HashMap<String, Object> getRsv(HashMap<String, Object> map) {
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+	    try {
+
+	        Order info = paymentMapper.selectReservation(map);
+	        
+	        // 3. 결과 맵에 담기 (Vue에서는 이전과 동일하게 사용 가능)
+	        resultMap.put("info", info);
+	        
+	        resultMap.put("result", "success");
+	        resultMap.put("message", "주문 내역 로드 성공");
+	    } catch (Exception e) {
+	        System.out.println(e.getMessage());
+	        resultMap.put("result", "fail");
+	        resultMap.put("message", "서버 오류 발생");
+	    }
+	    return resultMap;
+	}
 }	
 	

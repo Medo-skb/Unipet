@@ -26,7 +26,7 @@
         INNER JOIN store s ON r.STORE_NO = s.STORE_NO
         INNER JOIN store_menu m ON r.MENU_NO = m.MENU_NO
         INNER JOIN users u ON r.USER_ID = u.USER_ID
-        WHERE r.RSV_NO = 1 <!-- 테스트용 하드코딩 -->
+        WHERE r.RSV_NO = #{rsvNo}
     </select>
     
     <select id="selectUser" parameterType="hashmap" resultType="com.example.unipet.model.Payment">
@@ -97,6 +97,51 @@
 	    SELECT 
 	        COALESCE(SUM(POINT_AMOUNT), 0) FROM user_point
 	    WHERE USER_ID = #{userId}
+	</select>
+	
+	<select id="selectOrderDetail" parameterType="hashmap" resultType="com.example.unipet.model.Order">
+	    SELECT 
+	        d.PRODUCT_NO, 
+	        p.PRODUCT_NAME,
+	        f.FILE_PATH, 
+	        f.FILE_NAME,  
+	        d.UNIT_PRICE, 
+	        d.ORD_QTY
+	    FROM order_detail d
+	    JOIN product p ON d.PRODUCT_NO = p.PRODUCT_NO
+	    LEFT JOIN product_file f ON p.PRODUCT_NO = f.PRODUCT_NO 
+	                                AND f.IS_MAIN = 'Y'
+	    WHERE 
+	        d.ORD_NO = #{id}  
+	</select>
+	
+	<select id="selectOrderMaster" parameterType="hashmap" resultType="com.example.unipet.model.Order">
+	    SELECT 
+	        ORD_NO, 
+	        ORD_ADDR, 
+	        ORD_MEMO, 
+	        TOTAL_PRICE, 
+	        ORD_DATE,
+	        DIS_PRICE
+	    FROM orders
+	    WHERE 
+	        ORD_NO = #{id}
+	</select>
+	
+	<select id="selectReservation" parameterType="hashmap" resultType="com.example.unipet.model.Order">
+	    SELECT 
+	        r.RSV_NO,          
+	        r.RSV_DATE,        
+	        r.RSV_START_TIME,
+	        r.RSV_END_TIME,
+	        s.STORE_NAME,      
+	        m.MENU_NAME,       
+	        m.MENU_PRICE,                      
+	        r.REQUEST     
+	    FROM reservation r
+	    JOIN store s      ON r.STORE_NO = s.STORE_NO
+	    JOIN store_menu m ON r.MENU_NO = m.MENU_NO
+	    WHERE r.RSV_NO = #{id}
 	</select>
     
 	<insert id="insertPayment" parameterType="hashmap">
@@ -243,6 +288,22 @@
 	    WHERE 
 	        UCP_NO = #{ucpNo}       
 	        AND USER_ID = #{userId} 
-    </update>   
+    </update> 
+    
+    <update id="updateStock" parameterType="hashmap">
+	    UPDATE product
+	    SET 
+	        STOCK_QTY = STOCK_QTY - #{QTY}
+	    WHERE 
+	        PRODUCT_NO = #{PRODUCT_NO}
+	        AND STOCK_QTY >= #{QTY}
+	</update>
+    
+    <delete id="deleteCart" parameterType="hashmap">
+    	DELETE FROM cart 
+    	WHERE 
+    		CART_NO = #{CART_NO}      
+        	AND USER_ID = #{userId}   
+    </delete>
     
 </mapper>

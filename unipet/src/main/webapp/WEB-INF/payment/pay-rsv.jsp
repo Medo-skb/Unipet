@@ -83,6 +83,8 @@
         data() {
             return {
                 // 변수 - (key : value)
+                rsvNo : "${rsvNo}" || 1,
+                userId : "${sessionId}",
                 info : {},
                 deposit : "",
                 balance : ""
@@ -93,15 +95,21 @@
             fnGetInfo: function () {
                 let self = this;
 
+                const param = {
+                    rsvNo : self.rsvNo,
+                    userId : self.userId
+                }
+ 
                 $.ajax({
                     url: "/payment/rsv.dox",
                     dataType: "json",
                     type: "POST",
+                    data : param,
                     success: function (data) {
                         self.info = data.info;
                         self.deposit = data.deposit;
                         self.balance = data.info.menuPrice - data.deposit;
-                        console.log(data);
+                        console.log(param);
                     }
                 });
             },
@@ -159,7 +167,7 @@
                         if(data.result === "success") {
                             if(status === "PAY") {
                                 alert("예약 및 결제가 완료되었습니다!");
-                                // location.href = "/my-reservation.do"; 
+                                pageChange("/payment/pay-success.do", {rsvNo : rsvNo});
                             } else {
                                 // 결제 실패인데 DB 기록은 성공한 경우
                                 alert("결제 실패: " + rsp.error_msg + "\n(실패 내역이 기록되었습니다.)");
@@ -174,6 +182,11 @@
         mounted() {
             // 처음 시작할 때 실행되는 부분
             let self = this;
+            if (!self.rsvNo || self.rsvNo === "null") {
+                alert("잘못된 접근입니다.");
+                location.href = "/main.do";
+                return; 
+            }
             self.fnGetInfo();
         }
     });

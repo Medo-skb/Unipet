@@ -108,10 +108,8 @@
 
 	<body>
 		<div id="app">
-			<div style="padding:20px 0; text-align:center;">
-			    <img src="/img/board/unipet_logo.png"
-			         style="height:60px; cursor:pointer;"
-			         onclick="fnGoHome()">
+			<div style="padding:40px 0; text-align:center;">
+				<img src="/img/board/unipet_logo.png" style="height:100px; cursor:pointer;" onclick="fnGoHome()">
 			</div>
 			<div class="wrap">
 				<div class="box">
@@ -157,14 +155,13 @@
 
 					<div class="form-row">
 						<div class="label">첨부파일</div>
-						<div class="info-box">
-							파일 업로드 기능은 다음 단계에서 연결 예정<br>
-							현재는 게시글 기본 등록 구조부터 먼저 맞춘 상태
-						</div>
+						<input type="file" id="fileInput" multiple>
 					</div>
 
 					<div class="btn-row">
-						<button class="save-btn" @click="fnAddBoard()">등록</button>
+						<button class="save-btn" @click="fnAddBoard('Y')">등록</button>
+						<button class="list-btn" @click="fnAddBoard('T')">임시저장</button>
+						<button class="list-btn" @click="fnLoadTempBoard()">최근 임시저장 불러오기</button>
 						<button class="list-btn" @click="fnMoveList()">목록</button>
 					</div>
 				</div>
@@ -239,24 +236,48 @@
 							}
 						});
 					},
-					fnAddBoard: function () {
+					fnAddBoard: function (status) {
 						let self = this;
+						if (self.bSubNo == "") {
+							alert("카테고리를 선택해주세요.");
+							return;
+						}
+						
+						if (self.selectedMainNo == "2" && self.localNo == "") {
+							alert("지역을 선택해주세요.");
+							return;
+						}
+
+						let formData = new FormData();
+
+						formData.append("bSubNo", self.bSubNo);
+						formData.append("localNo", self.localNo);
+						formData.append("privateYn", self.privateYn);
+						formData.append("title", self.title);
+						formData.append("bContent", self.bContent);
+						formData.append("bStatus", status);
+
+						let files = $("#fileInput")[0].files;
+						for (let i = 0; i < files.length; i++) {
+							formData.append("files", files[i]);
+						}
 
 						$.ajax({
 							url: "/board/add.dox",
 							type: "POST",
 							dataType: "json",
-							data: {
-								bSubNo: self.bSubNo,
-								localNo: self.localNo,
-								privateYn: self.privateYn,
-								title: self.title,
-								bContent: self.bContent
-							},
+							data: formData,
+							processData: false,
+							contentType: false,
 							success: function (data) {
 								if (data.result == "success") {
 									alert(data.message);
-									location.href = "/board/view.do?boardNo=" + data.boardNo;
+
+									if (status == "T") {
+										location.href = "/board/edit.do?boardNo=" + data.boardNo;
+									} else {
+										location.href = "/board/view.do?boardNo=" + data.boardNo;
+									}
 								} else if (data.result == "login") {
 									alert("로그인이 필요합니다.");
 									location.href = "/user/login.do";
@@ -272,6 +293,37 @@
 					},
 					fnMoveList: function () {
 						location.href = "/board/list.do?bMainNo=" + this.selectedMainNo;
+					},
+
+					fnLoadTempBoard: function () {
+						let self = this;
+
+						$.ajax({
+							url: "/board/temp-recent.dox",
+							type: "POST",
+							dataType: "json",
+							data: {},
+							success: function (data) {
+								if (data.result == "success") {
+									self.bSubNo = data.info.B_SUB_NO == null ? "" : data.info.B_SUB_NO;
+									self.localNo = data.info.LOCAL_NO == null ? "" : data.info.LOCAL_NO;
+									self.privateYn = data.info.PRIVATE == null ? "N" : data.info.PRIVATE;
+									self.title = data.info.TITLE == null ? "" : data.info.TITLE;
+									self.bContent = data.info.B_CONTENT == null ? "" : data.info.B_CONTENT;
+
+									alert("최근 임시저장 글을 불러왔습니다.");
+								} else if (data.result == "login") {
+									alert("로그인이 필요합니다.");
+									location.href = "/user/login.do";
+								} else {
+									alert(data.message);
+								}
+							},
+							error: function (xhr, status, error) {
+								console.log("임시저장 불러오기 오류:", xhr.responseText);
+								alert("임시저장 글 불러오기 중 오류가 발생했습니다.");
+							}
+						});
 					}
 				},
 				mounted() {
@@ -287,9 +339,9 @@
 			app.mount("#app");
 		</script>
 		<script>
-		function fnGoHome() {
-			location.href = "/board/list.do";
-		}
+			function fnGoHome() {
+				location.href = "/board/list.do";
+			}
 		</script>
 	</body>
 

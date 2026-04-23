@@ -8,6 +8,7 @@
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
+    <script src="/js/page-change.js"></script>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/header.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/footer.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/payment/pay-shop.css">
@@ -127,7 +128,9 @@
     const app = Vue.createApp({
         data() {
             return {
-                // 1. 주문 상품 데이터 (나중에 서버에서 받아오게 수정 가능)
+                userId : "${sessionId}",
+                cartIds : JSON.parse('${cartNoList}' || '[2, 15, 17]'),
+                // 1.
                 orderList: [],
                 // 2. 입력 폼 데이터 바인딩
                 info: {
@@ -221,17 +224,29 @@
 
             fnGetOrderList: function () {
                 let self = this;
+
+                const param = {
+                    userId : self.userId,
+                    cartIds : self.cartIds
+                }
+
                 $.ajax({
                     url: "/payment/orderList.dox",
                     type: "POST",
                     dataType: "json",
-                    // 보낼 데이터는 딱히 없음 (서버가 세션에서 꺼내 쓸 거니까)
+                    data : param,
                     success: function (data) {
                         if (data.result === "success") {
+                            console.log(param);
                             self.orderList = data.list; // 서버가 준 리스트를 Vue 변수에 꽂기
                             console.log(self.orderList);
+                            if (!self.orderList || self.orderList.length == 0) {
+                                alert("결제할 상품 정보가 없습니다. 메인 페이지로 이동합니다.");
+                                location.href = "/main.do"; // 메인으로 튕겨내기
+                            } 
                         } else {
-                            alert(data.message);
+                            alert(data.message || "주문 정보를 불러올 수 없습니다.");
+                            location.href = "/main.do";
                         }
                     }
                 });
@@ -356,24 +371,18 @@
                     ordName: orderName,              // 주문명 (ex: 사료 외 2건)
 
                     // 5. 주문 상품 상세 리스트 (order_detail 반복문용)
-                    // [ {PRODUCT_NO: 1, QTY: 2, PRODUCT_PRICE: 15000}, ... ]
                     orderList: self.orderList 
                 };
-
-                console.log("============== [Gate 1] Vue 전송 데이터 ==============");
-                console.log("userId 확인:", param.userId);
-                console.log("전체 데이터:", param);
-                console.log("====================================================");
-
                 $.ajax({
                     url: "/payment/add.dox",
                     type: "POST",
                     contentType: "application/json; charset=utf-8", 
                     data: JSON.stringify(param), 
                     success: function(data) {
-                        // 서버에서 HashMap으로 주면 jQuery가 알아서 객체로 인식합니다.
                         if (data.result === "success") {
                             alert(data.message);
+                            console.log(data);
+                            pageChange("/payment/pay-success.do", {ordNo : data.ordNo});
                         }
                     }
                 });

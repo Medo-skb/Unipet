@@ -5,8 +5,12 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.unipet.mapper.BoardMapper;
+
+import java.io.File;
+import java.util.UUID;
 
 @Service
 public class BoardService {
@@ -180,6 +184,9 @@ public class BoardService {
 		}
 
 		map.put("reporterId", sessionId);
+		if (map.get("commentNo") == null || "".equals(map.get("commentNo"))) {
+			map.put("commentNo", null);
+		}
 		int cnt = boardMapper.insertBoardReport(map);
 
 		if (cnt > 0) {
@@ -208,7 +215,7 @@ public class BoardService {
 		return result;
 	}
 
-	public HashMap<String, Object> addBoard(HashMap<String, Object> map) {
+	public HashMap<String, Object> addBoard(HashMap<String, Object> map, MultipartFile[] files) {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
 		String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
@@ -216,6 +223,7 @@ public class BoardService {
 		String bContent = map.get("bContent") == null ? "" : map.get("bContent").toString();
 		String bSubNo = map.get("bSubNo") == null ? "" : map.get("bSubNo").toString();
 		String privateYn = map.get("privateYn") == null ? "N" : map.get("privateYn").toString();
+		String bStatus = map.get("bStatus") == null ? "Y" : map.get("bStatus").toString();
 
 		if (sessionId.equals("")) {
 			resultMap.put("result", "login");
@@ -243,13 +251,69 @@ public class BoardService {
 
 		map.put("userId", sessionId);
 		map.put("privateYn", privateYn);
+		map.put("bStatus", bStatus);
 
 		int cnt = boardMapper.insertBoard(map);
 
 		if (cnt > 0) {
-			resultMap.put("result", "success");
-			resultMap.put("message", "게시글이 등록되었습니다.");
-			resultMap.put("boardNo", map.get("boardNo"));
+			try {
+				int boardNo = Integer.parseInt(String.valueOf(map.get("boardNo")));
+
+				String uploadPath = "C:/upload/board/";
+				File folder = new File(uploadPath);
+
+				if (!folder.exists()) {
+					folder.mkdirs();
+				}
+
+				if (files != null) {
+					for (int i = 0; i < files.length; i++) {
+						MultipartFile file = files[i];
+
+						if (file != null && !file.isEmpty()) {
+							String originName = file.getOriginalFilename();
+							String fileExt = "";
+
+							if (originName != null && originName.lastIndexOf(".") > -1) {
+								fileExt = originName.substring(originName.lastIndexOf(".") + 1);
+							}
+
+							String fileName = UUID.randomUUID().toString();
+							if (!fileExt.equals("")) {
+								fileName += "." + fileExt;
+							}
+
+							File dest = new File(uploadPath + fileName);
+							file.transferTo(dest);
+
+							HashMap<String, Object> fileMap = new HashMap<String, Object>();
+							fileMap.put("boardNo", boardNo);
+							fileMap.put("filePath", "/upload/board/");
+							fileMap.put("fileName", fileName);
+							fileMap.put("originName", originName);
+							fileMap.put("fileSize", file.getSize());
+							fileMap.put("fileExt", fileExt);
+
+							boardMapper.insertBoardFile(fileMap);
+						}
+					}
+				}
+
+				resultMap.put("result", "success");
+
+				if ("T".equals(bStatus)) {
+					resultMap.put("message", "임시저장되었습니다.");
+				} else {
+					resultMap.put("message", "게시글이 등록되었습니다.");
+				}
+
+				resultMap.put("boardNo", boardNo);
+
+			} catch (Exception e) {
+				e.printStackTrace();
+				resultMap.put("result", "fail");
+				resultMap.put("message", "파일 업로드 중 오류가 발생했습니다.");
+			}
 		} else {
 			resultMap.put("result", "fail");
 			resultMap.put("message", "게시글 등록 실패");
@@ -300,7 +364,7 @@ public class BoardService {
 		return resultMap;
 	}
 
-	public HashMap<String, Object> updateBoard(HashMap<String, Object> map) {
+	public HashMap<String, Object> updateBoard(HashMap<String, Object> map, MultipartFile[] files) {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
 		String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
@@ -308,6 +372,8 @@ public class BoardService {
 		String bContent = map.get("bContent") == null ? "" : map.get("bContent").toString();
 		String bSubNo = map.get("bSubNo") == null ? "" : map.get("bSubNo").toString();
 		String privateYn = map.get("privateYn") == null ? "N" : map.get("privateYn").toString();
+		String bStatus = map.get("bStatus") == null ? "Y" : map.get("bStatus").toString();
+		map.put("bStatus", bStatus);
 
 		if (sessionId.equals("")) {
 			resultMap.put("result", "login");
@@ -354,8 +420,57 @@ public class BoardService {
 		int cnt = boardMapper.updateBoard(map);
 
 		if (cnt > 0) {
-			resultMap.put("result", "success");
-			resultMap.put("message", "게시글이 수정되었습니다.");
+			try {
+				int boardNo = Integer.parseInt(String.valueOf(map.get("boardNo")));
+
+				String uploadPath = "C:/upload/board/";
+				File folder = new File(uploadPath);
+
+				if (!folder.exists()) {
+					folder.mkdirs();
+				}
+
+				if (files != null) {
+					for (int i = 0; i < files.length; i++) {
+						MultipartFile file = files[i];
+
+						if (file != null && !file.isEmpty()) {
+							String originName = file.getOriginalFilename();
+							String fileExt = "";
+
+							if (originName != null && originName.lastIndexOf(".") > -1) {
+								fileExt = originName.substring(originName.lastIndexOf(".") + 1);
+							}
+
+							String fileName = UUID.randomUUID().toString();
+							if (!fileExt.equals("")) {
+								fileName = fileName + "." + fileExt;
+							}
+
+							File dest = new File(uploadPath + fileName);
+							file.transferTo(dest);
+
+							HashMap<String, Object> fileMap = new HashMap<String, Object>();
+							fileMap.put("boardNo", boardNo);
+							fileMap.put("filePath", "/upload/board/");
+							fileMap.put("fileName", fileName);
+							fileMap.put("originName", originName);
+							fileMap.put("fileSize", file.getSize());
+							fileMap.put("fileExt", fileExt);
+
+							boardMapper.insertBoardFile(fileMap);
+						}
+					}
+				}
+
+				resultMap.put("result", "success");
+				resultMap.put("message", "게시글이 수정되었습니다.");
+
+			} catch (Exception e) {
+				e.printStackTrace();
+				resultMap.put("result", "fail");
+				resultMap.put("message", "파일 업로드 중 오류가 발생했습니다.");
+			}
 		} else {
 			resultMap.put("result", "fail");
 			resultMap.put("message", "게시글 수정 실패");
@@ -401,6 +516,50 @@ public class BoardService {
 			resultMap.put("result", "fail");
 			resultMap.put("message", "게시글 삭제 실패");
 		}
+
+		return resultMap;
+	}
+
+	public HashMap<String, Object> removeBoardFile(HashMap<String, Object> map) {
+
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+		String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
+		String boardNo = map.get("boardNo") == null ? "" : map.get("boardNo").toString();
+
+		if (sessionId.equals("")) {
+			resultMap.put("result", "login");
+			resultMap.put("message", "로그인이 필요합니다.");
+			return resultMap;
+		}
+
+		// 파일 정보 조회
+		HashMap<String, Object> fileInfo = boardMapper.selectBoardFileInfo(map);
+
+		if (fileInfo == null) {
+			resultMap.put("result", "fail");
+			resultMap.put("message", "파일 정보가 없습니다.");
+			return resultMap;
+		}
+
+		// 실제 파일 삭제
+		try {
+			String filePath = fileInfo.get("FILE_PATH").toString();
+			String fileName = fileInfo.get("FILE_NAME").toString();
+
+			File file = new File("C:" + filePath + fileName);
+			if (file.exists()) {
+				file.delete();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		// DB 삭제
+		boardMapper.deleteBoardFile(map);
+
+		resultMap.put("result", "success");
+		resultMap.put("message", "파일이 삭제되었습니다.");
 
 		return resultMap;
 	}
@@ -496,7 +655,7 @@ public class BoardService {
 
 		return resultMap;
 	}
-	
+
 	public HashMap<String, Object> getBoardCategoryList(HashMap<String, Object> map) {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
@@ -507,6 +666,31 @@ public class BoardService {
 		resultMap.put("mainTypeList", mainTypeList);
 		resultMap.put("subTypeList", subTypeList);
 		resultMap.put("localList", localList);
+		resultMap.put("result", "success");
+
+		return resultMap;
+	}
+	
+	public HashMap<String, Object> getRecentTempBoard(HashMap<String, Object> map) {
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+		String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
+
+		if (sessionId.equals("")) {
+			resultMap.put("result", "login");
+			resultMap.put("message", "로그인이 필요합니다.");
+			return resultMap;
+		}
+
+		HashMap<String, Object> info = boardMapper.selectRecentTempBoard(map);
+
+		if (info == null) {
+			resultMap.put("result", "fail");
+			resultMap.put("message", "최근 임시저장 글이 없습니다.");
+			return resultMap;
+		}
+
+		resultMap.put("info", info);
 		resultMap.put("result", "success");
 
 		return resultMap;
