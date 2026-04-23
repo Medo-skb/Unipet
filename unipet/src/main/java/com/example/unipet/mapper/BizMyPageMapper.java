@@ -9,6 +9,17 @@ import com.example.unipet.model.BizMyPage;
 
 @Mapper
 public interface BizMyPageMapper {
+	// 오늘의 일정
+	public List<BizMyPage> selectTodayScheduleList(HashMap<String, Object> map);
+	
+	// 메뉴 예약 분포
+	public List<BizMyPage> selectMenuChartList(HashMap<String, Object> map);
+	
+	// 하루 예약 건수 차트
+	public List<BizMyPage> selectDailyReservationChartList(HashMap<String, Object> map);
+	
+	
+	
 	// 업체 이미지 리스트
 	public List<BizMyPage> selectBizImgList(HashMap<String, Object> map);
 	
@@ -54,6 +65,29 @@ public interface BizMyPageMapper {
 	// 사업자 내 정보 조회
 	public BizMyPage selectBizUserInfo(HashMap<String, Object> map);
 	
+	// 사업자 아이디 중복 확인
+	public int checkBizUserId(HashMap<String, Object> map);
+
 	// 사업자 내 정보 수정
 	public void updateBizUser(HashMap<String, Object> map);
+	
+	// 예약 요약
+	public BizMyPage selectReservationSummary(HashMap<String, Object> map);
+	
+	// 예약 목록
+	public List<BizMyPage> selectReservationList(HashMap<String, Object> map);
+	
+	// 리뷰 요약
+	public BizMyPage selectReviewSummary(HashMap<String, Object> map);
+	
+	// 리뷰 목록
+	public List<BizMyPage> selectReviewList(HashMap<String, Object> map);
+	
+	// 리뷰 메뉴 목록
+	public List<BizMyPage> selectReviewMenuList(HashMap<String, Object> map);
+	
+	// 리뷰 신고 등록
+	public void insertReviewReport(HashMap<String, Object> map);
+	
+	
 }

@@ -573,6 +573,52 @@ table {
     color: #888;
 }
 
+/* 메인페이지 */
+.chart-left {
+    width: 420px;
+    flex-shrink: 0;
+    max-width: 450px;
+}
+
+.chart-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 40px;
+    flex-wrap: nowrap;
+}
+
+.chart-right {
+    flex: 1;
+    min-width: 220px;
+    padding-top: 20px;
+}
+
+#menuPieChart {
+    width: 420px;
+    max-width: 420px;
+}
+
+.chart-summary {
+    font-size: 15px;
+}
+
+.total-count {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.menu-rank {
+    margin: 0;
+    padding-left: 18px;
+}
+
+.menu-rank li {
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+
 @media screen and (max-width: 1024px) {
     .simple-card-list {
         grid-template-columns: 1fr;
