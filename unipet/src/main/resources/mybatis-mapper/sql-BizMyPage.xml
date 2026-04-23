@@ -85,4 +85,133 @@
 		ORDER BY SM.MENU_NO DESC
 	</select>
 	
+	<!-- 업체 이미지 개수 조회 -->
+	<select id="selectStoreImageCount" parameterType="int" resultType="int">
+		SELECT COUNT(*)
+		FROM STORE_FILE
+		WHERE STORE_NO = #{storeNo}
+	</select>
+	
+	<!-- 업체 이미지 등록 -->
+	<insert id="insertStoreImage" parameterType="com.example.unipet.model.BizMyPage">
+		INSERT INTO STORE_FILE
+		(
+			STORE_NO,
+			FILE_PATH,
+			FILE_NAME,
+			ORIGIN_NAME,
+			IS_MAIN,
+			FILE_SIZE,
+			FILE_EXT
+		)
+		VALUES
+		(
+			#{storeNo},
+			#{filePath},
+			#{fileName},
+			#{originName},
+			#{isMain},
+			#{fileSize},
+			#{fileExt}
+		)
+	</insert>
+	
+	<!-- 이미지 1건 조회 -->
+	<select id="selectStoreImage" parameterType="int" resultType="com.example.unipet.model.BizMyPage">
+		SELECT FILE_NO, FILE_PATH, FILE_NAME
+		FROM STORE_FILE
+		WHERE FILE_NO = #{fileNo}
+	</select>
+	
+	<!-- 이미지 삭제 -->
+	<delete id="deleteStoreImage" parameterType="int">
+		DELETE FROM STORE_FILE
+		WHERE FILE_NO = #{fileNo}
+	</delete>
+	
+	<!-- 선택한 이미지 정보 조회 -->
+	<select id="selectStoreImageInfo" parameterType="int" resultType="com.example.unipet.model.BizMyPage">
+		SELECT FILE_NO, STORE_NO, FILE_PATH, FILE_NAME, ORIGIN_NAME, IS_MAIN
+		FROM STORE_FILE
+		WHERE FILE_NO = #{fileNo}
+	</select>
+	
+	<!-- 해당 업체 이미지 전체 대표 해제 -->
+	<update id="updateStoreImageMainReset" parameterType="int">
+		UPDATE STORE_FILE
+		SET IS_MAIN = 'N'
+		WHERE STORE_NO = #{storeNo}
+	</update>
+	
+	<!-- 선택한 이미지 대표 설정 -->
+	<update id="updateStoreImageMain" parameterType="int">
+		UPDATE STORE_FILE
+		SET IS_MAIN = 'Y'
+		WHERE FILE_NO = #{fileNo}
+	</update>
+	
+	<!-- STORE 수정 -->
+	<update id="updateBizStore" parameterType="hashmap">
+		UPDATE STORE
+		SET
+			IS_OPEN = #{isOpen},
+			ACC_NAME = #{accName},
+			ACC_NO = #{accNo},
+			ACC_HOLDER = #{accHolder}
+		WHERE STORE_NO = #{storeNo}
+	</update>
+	
+	<!-- STORE_DETAIL 수정 -->
+	<update id="updateBizStoreDetail" parameterType="hashmap">
+		UPDATE STORE_DETAIL
+		SET
+			SUB_TITLE = #{subTitle},
+			S_CONTENTS = #{sContents}
+		WHERE STORE_NO = #{storeNo}
+	</update>
+	
+	<!-- STORE_POLICY 수정 -->
+	<update id="updateBizStorePolicy" parameterType="hashmap">
+		UPDATE STORE_POLICY
+		SET
+			CAPACITY = #{capacity},
+			OPEN_TIME = #{openTime},
+			CLOSE_TIME = #{closeTime},
+			BREAK_START = #{breakStart},
+			BREAK_END = #{breakEnd},
+			OFF_DAY = #{offDay},
+			REFUND_POLICY = #{refundPolicy}
+		WHERE STORE_NO = #{storeNo}
+	</update>
+	
+	<!-- 업체 메뉴 수정 -->
+	<update id="updateBizStoreMenu" parameterType="hashmap">
+		UPDATE STORE_MENU
+		SET
+			MENU_NAME = #{menuName},
+			MENU_CATEGORY = #{menuCategory},
+			MENU_INFO = #{menuInfo},
+			MENU_PRICE = #{menuPrice},
+			REQ_TIME = #{reqTime},
+			M_STATUS = #{mStatus}
+		WHERE MENU_NO = #{menuNo}
+	</update>
+	
+	<!-- 사업자 내 정보 조회 -->
+	<select id="selectBizUserInfo" parameterType="hashmap" resultType="com.example.unipet.model.BizMyPage">
+		SELECT
+			S_USER_ID,
+			CEO_NAME
+		FROM STORE_USER
+		WHERE S_USER_ID = #{sUserId}
+	</select>
+	
+	<!-- 사업자 내 정보 수정 -->
+	<update id="updateBizUser" parameterType="hashmap">
+		UPDATE STORE_USER
+		SET
+			CEO_NAME = #{sName}
+		WHERE S_USER_ID = #{sUserId}
+	</update>
+	
 </mapper>

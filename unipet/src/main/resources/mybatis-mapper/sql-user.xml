@@ -101,18 +101,15 @@
 
     <!-- 사업자 로그인 -->
     <select id="selectStoreUser" parameterType="hashmap" resultType="com.example.unipet.model.User">
-        SELECT
-            USER_ID AS userId,
-            USER_PWD AS pwd,
-            USER_NAME AS userName,
-            BIZ_NAME AS bizName,
-            BIZ_NO AS bizNo,
-            PHONE,
-            EMAIL,
-            ROLE
-        FROM store_user
-        WHERE USER_ID = #{userId}
-          AND USER_PWD = #{pwd}
+		SELECT
+		    S_USER_ID AS userId,
+		    S_USER_PWD AS pwd,
+		    CEO_NAME AS userName,
+		    U_STATUS AS status
+		FROM store_user
+		WHERE S_USER_ID = #{userId}
+		  AND S_USER_PWD = #{pwd}
+		  AND U_STATUS != 'BAN'
     </select>
 
     <!-- 아이디 찾기 : 이름 + 비밀번호 -->

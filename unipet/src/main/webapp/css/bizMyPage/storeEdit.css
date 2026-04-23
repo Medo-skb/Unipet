@@ -19,11 +19,13 @@
     color: #666;
 }
 
-/* 🔥 그리드도 250px 기준으로 정렬 */
 .store-image-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 250px);
+    display: flex;
     gap: 18px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 8px;
+    align-items: stretch;
 }
 
 /* 카드 공통 */
@@ -34,6 +36,7 @@
     background: #fff;
     position: relative;
     box-sizing: border-box;
+    flex: 0 0 250px;
 }
 
 /* 실제 이미지 카드 */
@@ -158,6 +161,19 @@
 .store-edit-page .full-text {
     white-space: pre-line;
     word-break: break-word;
+}
+
+.store-image-grid::-webkit-scrollbar {
+    height: 10px;
+}
+
+.store-image-grid::-webkit-scrollbar-thumb {
+    background: #d9d9d9;
+    border-radius: 999px;
+}
+
+.store-image-grid::-webkit-scrollbar-track {
+    background: transparent;
 }
 
 /* 반응형 (필요하면 사용) */

@@ -18,5 +18,42 @@ public interface BizMyPageMapper {
 	// 업체 메뉴 리스트
 	public List<BizMyPage> selectBizStoreMenuList(HashMap<String, Object> map);
 
+	// 이미지 개수 조회
+	public int selectStoreImageCount(int storeNo);
+
+	// 이미지 등록
+	public void insertStoreImage(BizMyPage item);
 	
+	// 이미지 1건 조회 (파일 경로 얻기용)
+	public BizMyPage selectStoreImage(int fileNo);
+
+	// 이미지 삭제
+	public void deleteStoreImage(int fileNo);
+	
+	// 선택한 이미지의 업체번호 조회
+	public BizMyPage selectStoreImageInfo(int fileNo);
+
+	// 해당 업체 이미지 전체 대표 해제
+	public void updateStoreImageMainReset(int storeNo);
+
+	// 선택한 이미지 대표 설정
+	public void updateStoreImageMain(int fileNo);
+	
+	// 업체 기본정보 수정
+	public void updateBizStore(HashMap<String, Object> map);
+
+	// 업체 상세정보 수정
+	public void updateBizStoreDetail(HashMap<String, Object> map);
+
+	// 업체 정책 수정
+	public void updateBizStorePolicy(HashMap<String, Object> map);
+	
+	// 업체 메뉴 수정
+	public void updateBizStoreMenu(HashMap<String, Object> map);
+	
+	// 사업자 내 정보 조회
+	public BizMyPage selectBizUserInfo(HashMap<String, Object> map);
+	
+	// 사업자 내 정보 수정
+	public void updateBizUser(HashMap<String, Object> map);
 }
