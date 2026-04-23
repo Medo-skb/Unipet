@@ -53,5 +53,11 @@ public interface BoardMapper {
 	public int deleteComment(HashMap<String, Object> map);
 	
 	public int insertBoardFile(HashMap<String, Object> map);
+	
+	public int deleteBoardFile(HashMap<String, Object> map);
+	
+	public HashMap<String, Object> selectBoardFileInfo(HashMap<String, Object> map);
+	
+	public HashMap<String, Object> selectRecentTempBoard(HashMap<String, Object> map);
 
 }

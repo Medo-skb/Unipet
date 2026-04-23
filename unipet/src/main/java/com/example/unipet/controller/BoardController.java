@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.unipet.dao.BoardService;
 import com.google.gson.Gson;
@@ -28,6 +29,7 @@ public class BoardController {
 		request.setAttribute("searchType", map.get("searchType"));
 		request.setAttribute("sortType", map.get("sortType"));
 		request.setAttribute("page", map.get("page"));
+		request.setAttribute("tempYn", map.get("tempYn"));
 		return "/board/board-list";
 	}
 
@@ -47,6 +49,31 @@ public class BoardController {
 	public String edit(HttpServletRequest request, @RequestParam HashMap<String, Object> map) throws Exception {
 		request.setAttribute("boardNo", map.get("boardNo"));
 		return "/board/board-edit";
+	}
+
+	@RequestMapping("/board/update.do")
+	public String updateBoard(HttpSession session,
+			@RequestParam HashMap<String, Object> map,
+			@RequestParam(value = "files", required = false) MultipartFile[] files) throws Exception {
+
+		String sessionId = session.getAttribute("sessionId") == null ? "" : (String) session.getAttribute("sessionId");
+		map.put("sessionId", sessionId);
+
+		HashMap<String, Object> resultMap = boardService.updateBoard(map, files);
+
+		if (resultMap.get("result").equals("success")) {
+
+			if ("T".equals(map.get("bStatus"))) {
+				return "redirect:/board/edit.do?boardNo=" + map.get("boardNo") + "&msg=temp";
+			} else {
+				return "redirect:/board/view.do?boardNo=" + map.get("boardNo") + "&msg=update";
+			}
+
+		} else if (resultMap.get("result").equals("login")) {
+			return "redirect:/user/login.do";
+		} else {
+			return "redirect:/board/edit.do?boardNo=" + map.get("boardNo");
+		}
 	}
 
 	@RequestMapping("/board/list.dox")
@@ -105,11 +132,12 @@ public class BoardController {
 
 	@RequestMapping("/board/add.dox")
 	@ResponseBody
-	public String addBoard(HttpSession session, @RequestParam HashMap<String, Object> map) {
+	public String addBoard(HttpSession session, @RequestParam HashMap<String, Object> map,
+			@RequestParam(value = "files", required = false) MultipartFile[] files) {
 		String sessionId = session.getAttribute("sessionId") == null ? "" : (String) session.getAttribute("sessionId");
 		map.put("sessionId", sessionId);
 
-		HashMap<String, Object> resultMap = boardService.addBoard(map);
+		HashMap<String, Object> resultMap = boardService.addBoard(map, files);
 		return new Gson().toJson(resultMap);
 	}
 
@@ -120,16 +148,6 @@ public class BoardController {
 		map.put("sessionId", sessionId);
 
 		HashMap<String, Object> resultMap = boardService.getBoardEditInfo(map);
-		return new Gson().toJson(resultMap);
-	}
-
-	@RequestMapping("/board/update.dox")
-	@ResponseBody
-	public String updateBoard(HttpSession session, @RequestParam HashMap<String, Object> map) {
-		String sessionId = session.getAttribute("sessionId") == null ? "" : (String) session.getAttribute("sessionId");
-		map.put("sessionId", sessionId);
-
-		HashMap<String, Object> resultMap = boardService.updateBoard(map);
 		return new Gson().toJson(resultMap);
 	}
 
@@ -146,12 +164,24 @@ public class BoardController {
 		HashMap<String, Object> resultMap = boardService.removeBoard(map);
 		return new Gson().toJson(resultMap);
 	}
-	
+
+	@RequestMapping("/board/file/remove.dox")
+	@ResponseBody
+	public String removeFile(HttpSession session, @RequestParam HashMap<String, Object> map) {
+
+		String sessionId = session.getAttribute("sessionId") == null ? "" : (String) session.getAttribute("sessionId");
+		map.put("sessionId", sessionId);
+
+		HashMap<String, Object> resultMap = boardService.removeBoardFile(map);
+		return new Gson().toJson(resultMap);
+	}
+
 	@RequestMapping("/board/comment/update.dox")
 	@ResponseBody
 	public String updateComment(HttpSession session, @RequestParam HashMap<String, Object> map) {
 		String sessionId = session.getAttribute("sessionId") == null ? "" : (String) session.getAttribute("sessionId");
-		String sessionRole = session.getAttribute("sessionRole") == null ? "" : (String) session.getAttribute("sessionRole");
+		String sessionRole = session.getAttribute("sessionRole") == null ? ""
+				: (String) session.getAttribute("sessionRole");
 
 		map.put("sessionId", sessionId);
 		map.put("sessionRole", sessionRole);
@@ -164,7 +194,8 @@ public class BoardController {
 	@ResponseBody
 	public String removeComment(HttpSession session, @RequestParam HashMap<String, Object> map) {
 		String sessionId = session.getAttribute("sessionId") == null ? "" : (String) session.getAttribute("sessionId");
-		String sessionRole = session.getAttribute("sessionRole") == null ? "" : (String) session.getAttribute("sessionRole");
+		String sessionRole = session.getAttribute("sessionRole") == null ? ""
+				: (String) session.getAttribute("sessionRole");
 
 		map.put("sessionId", sessionId);
 		map.put("sessionRole", sessionRole);
@@ -172,11 +203,21 @@ public class BoardController {
 		HashMap<String, Object> resultMap = boardService.removeComment(map);
 		return new Gson().toJson(resultMap);
 	}
-	
+
 	@RequestMapping("/board/category/list.dox")
 	@ResponseBody
 	public String getBoardCategoryList(@RequestParam HashMap<String, Object> map) {
 		HashMap<String, Object> resultMap = boardService.getBoardCategoryList(map);
+		return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping("/board/temp-recent.dox")
+	@ResponseBody
+	public String getRecentTempBoard(HttpSession session, @RequestParam HashMap<String, Object> map) {
+		String sessionId = session.getAttribute("sessionId") == null ? "" : (String) session.getAttribute("sessionId");
+		map.put("sessionId", sessionId);
+
+		HashMap<String, Object> resultMap = boardService.getRecentTempBoard(map);
 		return new Gson().toJson(resultMap);
 	}
 }
