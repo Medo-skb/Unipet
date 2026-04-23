@@ -14,354 +14,378 @@ public class UserMypageService {
     @Autowired
     private UserMypageMapper userMypageMapper;
 
-    private void convertDateFields(HashMap<String, Object> map) {
-        if (map == null) {
-            return;
-        }
-
-        Object birthdate = map.get("birthdate");
-        Object cdate = map.get("cdate");
-        Object rsvDate = map.get("rsvDate");
-        Object orderDate = map.get("orderDate");
-
-        if (birthdate != null) {
-            map.put("birthdate", birthdate.toString());
-        }
-
-        if (cdate != null) {
-            map.put("cdate", cdate.toString());
-        }
-
-        if (rsvDate != null) {
-            map.put("rsvDate", rsvDate.toString());
-        }
-
-        if (orderDate != null) {
-            map.put("orderDate", orderDate.toString());
-        }
-    }
-
+    // 마이페이지 기본정보 조회
     public HashMap<String, Object> getMypageData(HashMap<String, Object> map) {
         HashMap<String, Object> result = new HashMap<>();
 
-        try {
-            HashMap<String, Object> userInfo = userMypageMapper.getUserInfo(map);
-            result.put("result", "success");
-            result.put("userInfo", userInfo);
-        } catch (Exception e) {
-            e.printStackTrace();
-            result.put("result", "fail");
-            result.put("message", "마이페이지 정보 조회 중 오류가 발생했습니다.");
-        }
+        HashMap<String, Object> userInfo = userMypageMapper.selectUserInfo(map);
+
+        result.put("result", userInfo != null ? "success" : "fail");
+        result.put("userInfo", userInfo);
+        result.put("message", userInfo != null ? "조회 성공" : "사용자 정보가 없습니다.");
 
         return result;
     }
 
+    // 회원정보 수정
     public HashMap<String, Object> updateUserInfo(HashMap<String, Object> map) {
         HashMap<String, Object> result = new HashMap<>();
 
-        try {
-            int cnt = userMypageMapper.updateUser(map);
+        int cnt = userMypageMapper.updateUserInfo(map);
 
-            if (cnt > 0) {
-                result.put("result", "success");
-                result.put("message", "회원정보가 수정되었습니다.");
-            } else {
-                result.put("result", "fail");
-                result.put("message", "회원정보 수정에 실패했습니다.");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            result.put("result", "fail");
-            result.put("message", "회원정보 수정 중 오류가 발생했습니다.");
-        }
+        result.put("result", cnt > 0 ? "success" : "fail");
+        result.put("message", cnt > 0 ? "회원정보가 저장되었습니다." : "회원정보 저장 실패");
 
         return result;
     }
 
+    // 현재 비밀번호 확인
     public HashMap<String, Object> checkPassword(HashMap<String, Object> map) {
         HashMap<String, Object> result = new HashMap<>();
 
-        try {
-            HashMap<String, Object> user = userMypageMapper.checkPassword(map);
+        HashMap<String, Object> check = userMypageMapper.checkPassword(map);
 
-            if (user != null) {
-                result.put("result", "success");
-                result.put("message", "비밀번호가 일치합니다.");
-            } else {
-                result.put("result", "fail");
-                result.put("message", "비밀번호가 일치하지 않습니다.");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            result.put("result", "fail");
-            result.put("message", "비밀번호 확인 중 오류가 발생했습니다.");
-        }
+        result.put("result", check != null ? "success" : "fail");
+        result.put("message", check != null ? "비밀번호 확인 완료" : "현재 비밀번호가 일치하지 않습니다.");
 
         return result;
     }
 
+    // 비밀번호 변경
     public HashMap<String, Object> changePassword(HashMap<String, Object> map) {
         HashMap<String, Object> result = new HashMap<>();
 
-        try {
-            int cnt = userMypageMapper.changePwd(map);
+        int cnt = userMypageMapper.changePassword(map);
 
-            if (cnt > 0) {
-                result.put("result", "success");
-                result.put("message", "비밀번호가 변경되었습니다.");
-            } else {
-                result.put("result", "fail");
-                result.put("message", "비밀번호 변경에 실패했습니다.");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            result.put("result", "fail");
-            result.put("message", "비밀번호 변경 중 오류가 발생했습니다.");
-        }
+        result.put("result", cnt > 0 ? "success" : "fail");
+        result.put("message", cnt > 0 ? "비밀번호가 변경되었습니다." : "비밀번호 변경 실패");
 
         return result;
     }
 
+    // 회원 탈퇴
     public HashMap<String, Object> deleteUser(HashMap<String, Object> map) {
         HashMap<String, Object> result = new HashMap<>();
 
-        try {
-            int cnt = userMypageMapper.deleteUser(map);
+        int cnt = userMypageMapper.deleteUser(map);
 
-            if (cnt > 0) {
-                result.put("result", "success");
-                result.put("message", "회원 탈퇴가 완료되었습니다.");
-            } else {
-                result.put("result", "fail");
-                result.put("message", "회원 탈퇴에 실패했습니다.");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            result.put("result", "fail");
-            result.put("message", "회원 탈퇴 중 오류가 발생했습니다.");
-        }
+        result.put("result", cnt > 0 ? "success" : "fail");
+        result.put("message", cnt > 0 ? "회원 탈퇴가 완료되었습니다." : "회원 탈퇴 실패");
 
         return result;
     }
 
+    // 반려동물 목록 조회
     public HashMap<String, Object> getPetList(HashMap<String, Object> map) {
         HashMap<String, Object> result = new HashMap<>();
 
-        try {
-            List<HashMap<String, Object>> petList = userMypageMapper.getPetList(map);
+        List<HashMap<String, Object>> petList = userMypageMapper.selectPetList(map);
 
-            for (HashMap<String, Object> pet : petList) {
-                convertDateFields(pet);
-            }
-
-            result.put("result", "success");
-            result.put("petList", petList);
-        } catch (Exception e) {
-            e.printStackTrace();
-            result.put("result", "fail");
-            result.put("message", "반려동물 목록 조회 중 오류가 발생했습니다.");
-        }
+        result.put("result", "success");
+        result.put("petList", petList);
+        result.put("message", "반려동물 목록 조회 완료");
 
         return result;
     }
 
+    // 반려동물 등록
     public HashMap<String, Object> addPet(HashMap<String, Object> map) {
         HashMap<String, Object> result = new HashMap<>();
 
-        try {
-            String petName = map.get("petName") == null ? "" : map.get("petName").toString().trim();
-            String species = map.get("species") == null ? "" : map.get("species").toString().trim();
+        int cnt = userMypageMapper.insertPet(map);
 
-            if (petName.isEmpty()) {
-                result.put("result", "fail");
-                result.put("message", "반려동물 이름은 필수입니다.");
-                return result;
-            }
-
-            if (species.isEmpty()) {
-                result.put("result", "fail");
-                result.put("message", "종(species)은 필수입니다.");
-                return result;
-            }
-
-            int petCount = userMypageMapper.countPet(map);
-            map.put("isMain", petCount == 0 ? "Y" : "N");
-
-            int cnt = userMypageMapper.addPet(map);
-
-            if (cnt > 0) {
-                result.put("result", "success");
-                result.put("message", "반려동물 정보가 등록되었습니다.");
-            } else {
-                result.put("result", "fail");
-                result.put("message", "반려동물 등록에 실패했습니다.");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            result.put("result", "fail");
-            result.put("message", "반려동물 등록 중 오류가 발생했습니다.");
-        }
+        result.put("result", cnt > 0 ? "success" : "fail");
+        result.put("message", cnt > 0 ? "반려동물이 등록되었습니다." : "반려동물 등록 실패");
 
         return result;
     }
 
+    // 반려동물 수정
     public HashMap<String, Object> updatePet(HashMap<String, Object> map) {
         HashMap<String, Object> result = new HashMap<>();
 
-        try {
-            String petName = map.get("petName") == null ? "" : map.get("petName").toString().trim();
-            String species = map.get("species") == null ? "" : map.get("species").toString().trim();
+        int cnt = userMypageMapper.updatePet(map);
 
-            if (petName.isEmpty()) {
-                result.put("result", "fail");
-                result.put("message", "반려동물 이름은 필수입니다.");
-                return result;
-            }
-
-            if (species.isEmpty()) {
-                result.put("result", "fail");
-                result.put("message", "종(species)은 필수입니다.");
-                return result;
-            }
-
-            int cnt = userMypageMapper.updatePet(map);
-
-            if (cnt > 0) {
-                result.put("result", "success");
-                result.put("message", "반려동물 정보가 수정되었습니다.");
-            } else {
-                result.put("result", "fail");
-                result.put("message", "반려동물 수정에 실패했습니다.");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            result.put("result", "fail");
-            result.put("message", "반려동물 수정 중 오류가 발생했습니다.");
-        }
+        result.put("result", cnt > 0 ? "success" : "fail");
+        result.put("message", cnt > 0 ? "반려동물 정보가 수정되었습니다." : "반려동물 수정 실패");
 
         return result;
     }
 
+    // 반려동물 삭제
     public HashMap<String, Object> deletePet(HashMap<String, Object> map) {
         HashMap<String, Object> result = new HashMap<>();
 
-        try {
-            HashMap<String, Object> petInfo = userMypageMapper.getPetByPetNo(map);
-            convertDateFields(petInfo);
+        int cnt = userMypageMapper.deletePet(map);
 
-            int cnt = userMypageMapper.deletePet(map);
-
-            if (cnt > 0) {
-                if (petInfo != null && "Y".equals(String.valueOf(petInfo.get("isMain")))) {
-                    HashMap<String, Object> firstPet = userMypageMapper.getFirstPet(map);
-                    if (firstPet != null && firstPet.get("petNo") != null) {
-                        HashMap<String, Object> mainMap = new HashMap<>();
-                        mainMap.put("userId", map.get("userId"));
-                        mainMap.put("petNo", firstPet.get("petNo"));
-                        userMypageMapper.changeMainPet(mainMap);
-                    }
-                }
-
-                result.put("result", "success");
-                result.put("message", "반려동물 정보가 삭제되었습니다.");
-            } else {
-                result.put("result", "fail");
-                result.put("message", "반려동물 삭제에 실패했습니다.");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            result.put("result", "fail");
-            result.put("message", "반려동물 삭제 중 오류가 발생했습니다.");
-        }
+        result.put("result", cnt > 0 ? "success" : "fail");
+        result.put("message", cnt > 0 ? "반려동물 정보가 삭제되었습니다." : "반려동물 삭제 실패");
 
         return result;
     }
 
+    // 대표 반려동물 변경
     public HashMap<String, Object> changeMainPet(HashMap<String, Object> map) {
         HashMap<String, Object> result = new HashMap<>();
 
-        try {
-            userMypageMapper.resetMainPet(map);
-            int cnt = userMypageMapper.changeMainPet(map);
+        userMypageMapper.resetMainPet(map);
+        int cnt = userMypageMapper.changeMainPet(map);
 
-            if (cnt > 0) {
-                result.put("result", "success");
-                result.put("message", "대표 프로필이 변경되었습니다.");
-            } else {
-                result.put("result", "fail");
-                result.put("message", "대표 프로필 변경에 실패했습니다.");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            result.put("result", "fail");
-            result.put("message", "대표 프로필 변경 중 오류가 발생했습니다.");
-        }
+        result.put("result", cnt > 0 ? "success" : "fail");
+        result.put("message", cnt > 0 ? "대표 프로필이 변경되었습니다." : "대표 프로필 변경 실패");
 
         return result;
     }
 
+    // 최근 예약 목록
     public HashMap<String, Object> getReservationList(HashMap<String, Object> map) {
         HashMap<String, Object> result = new HashMap<>();
 
-        try {
-            List<HashMap<String, Object>> reservationList = userMypageMapper.getReservationList(map);
+        List<HashMap<String, Object>> reservationList = userMypageMapper.selectReservationList(map);
 
-            for (HashMap<String, Object> item : reservationList) {
-                convertDateFields(item);
-            }
-
-            result.put("result", "success");
-            result.put("reservationList", reservationList);
-        } catch (Exception e) {
-            e.printStackTrace();
-            result.put("result", "fail");
-            result.put("message", "예약 내역 조회 중 오류가 발생했습니다.");
-        }
+        result.put("result", "success");
+        result.put("reservationList", reservationList);
+        result.put("message", "예약 목록 조회 완료");
 
         return result;
     }
 
+    // 전체 예약 목록
     public HashMap<String, Object> getReservationAllList(HashMap<String, Object> map) {
         HashMap<String, Object> result = new HashMap<>();
 
-        try {
-            List<HashMap<String, Object>> reservationList = userMypageMapper.getReservationAllList(map);
+        List<HashMap<String, Object>> reservationList = userMypageMapper.selectReservationAllList(map);
 
-            for (HashMap<String, Object> item : reservationList) {
-                convertDateFields(item);
-            }
-
-            result.put("result", "success");
-            result.put("reservationList", reservationList);
-        } catch (Exception e) {
-            e.printStackTrace();
-            result.put("result", "fail");
-            result.put("message", "전체 예약 내역 조회 중 오류가 발생했습니다.");
-        }
+        result.put("result", "success");
+        result.put("reservationList", reservationList);
+        result.put("message", "전체 예약 목록 조회 완료");
 
         return result;
     }
 
-    // 추가
+    // 주문내역 조회
     public HashMap<String, Object> getOrderList(HashMap<String, Object> map) {
         HashMap<String, Object> result = new HashMap<>();
 
-        try {
-            List<HashMap<String, Object>> orderList = userMypageMapper.getOrderList(map);
+        List<HashMap<String, Object>> orderList = userMypageMapper.selectOrderList(map);
 
-            for (HashMap<String, Object> item : orderList) {
-                convertDateFields(item);
-            }
-
-            result.put("result", "success");
-            result.put("orderList", orderList);
-        } catch (Exception e) {
-            e.printStackTrace();
-            result.put("result", "fail");
-            result.put("message", "주문 내역 조회 중 오류가 발생했습니다.");
-        }
+        result.put("result", "success");
+        result.put("orderList", orderList);
+        result.put("message", "주문 목록 조회 완료");
 
         return result;
     }
+    public HashMap<String, Object> getWeightList(HashMap<String, Object> map) {
+        HashMap<String, Object> result = new HashMap<>();
+
+        List<HashMap<String, Object>> weightList = userMypageMapper.selectWeightList(map);
+
+        result.put("result", "success");
+        result.put("weightList", weightList);
+        result.put("message", "몸무게 목록 조회 완료");
+
+        return result;
+    }
+
+    public HashMap<String, Object> addWeight(HashMap<String, Object> map) {
+        HashMap<String, Object> result = new HashMap<>();
+
+        int cnt = userMypageMapper.insertWeight(map);
+
+        result.put("result", cnt > 0 ? "success" : "fail");
+        result.put("message", cnt > 0 ? "몸무게가 저장되었습니다." : "몸무게 저장 실패");
+
+        return result;
+    }
+
+    public HashMap<String, Object> getHealthList(HashMap<String, Object> map) {
+        HashMap<String, Object> result = new HashMap<>();
+
+        List<HashMap<String, Object>> healthList = userMypageMapper.selectHealthList(map);
+
+        result.put("result", "success");
+        result.put("healthList", healthList);
+        result.put("message", "건강기록 목록 조회 완료");
+
+        return result;
+    }
+
+    public HashMap<String, Object> addHealth(HashMap<String, Object> map) {
+        HashMap<String, Object> result = new HashMap<>();
+
+        int cnt = userMypageMapper.insertHealth(map);
+
+        result.put("result", cnt > 0 ? "success" : "fail");
+        result.put("message", cnt > 0 ? "건강기록이 저장되었습니다." : "건강기록 저장 실패");
+
+        return result;
+    }
+    
+    public HashMap<String, Object> getVaccineList(HashMap<String, Object> map) {
+        HashMap<String, Object> result = new HashMap<>();
+
+        List<HashMap<String, Object>> vaccineList = userMypageMapper.selectVaccineList(map);
+
+        result.put("result", "success");
+        result.put("vaccineList", vaccineList);
+        result.put("message", "백신 목록 조회 완료");
+
+        return result;
+    }
+
+    public HashMap<String, Object> addVaccine(HashMap<String, Object> map) {
+        HashMap<String, Object> result = new HashMap<>();
+
+        int cnt = userMypageMapper.insertVaccine(map);
+
+        result.put("result", cnt > 0 ? "success" : "fail");
+        result.put("message", cnt > 0 ? "백신 기록이 저장되었습니다." : "백신 기록 저장 실패");
+
+        return result;
+    }
+
+    public HashMap<String, Object> deleteVaccine(HashMap<String, Object> map) {
+        HashMap<String, Object> result = new HashMap<>();
+
+        int cnt = userMypageMapper.deleteVaccine(map);
+
+        result.put("result", cnt > 0 ? "success" : "fail");
+        result.put("message", cnt > 0 ? "백신 기록이 삭제되었습니다." : "백신 기록 삭제 실패");
+
+        return result;
+    }
+    public HashMap<String, Object> getWritableReviewList(HashMap<String, Object> map) {
+        HashMap<String, Object> result = new HashMap<>();
+
+        List<HashMap<String, Object>> list = userMypageMapper.selectWritableReviewList(map);
+
+        result.put("result", "success");
+        result.put("writableReviewList", list);
+        result.put("message", "작성 가능한 리뷰 목록 조회 완료");
+
+        return result;
+    }
+
+    public HashMap<String, Object> getMyReviewList(HashMap<String, Object> map) {
+        HashMap<String, Object> result = new HashMap<>();
+
+        List<HashMap<String, Object>> list = userMypageMapper.selectMyReviewList(map);
+
+        result.put("result", "success");
+        result.put("myReviewList", list);
+        result.put("message", "내 리뷰 목록 조회 완료");
+
+        return result;
+    }
+
+    public HashMap<String, Object> addReview(HashMap<String, Object> map) {
+        HashMap<String, Object> result = new HashMap<>();
+
+        int cnt = userMypageMapper.insertReview(map);
+
+        result.put("result", cnt > 0 ? "success" : "fail");
+        result.put("message", cnt > 0 ? "리뷰가 등록되었습니다." : "리뷰 등록 실패");
+
+        return result;
+    }
+
+    public HashMap<String, Object> editReview(HashMap<String, Object> map) {
+        HashMap<String, Object> result = new HashMap<>();
+
+        int cnt = userMypageMapper.updateReview(map);
+
+        result.put("result", cnt > 0 ? "success" : "fail");
+        result.put("message", cnt > 0 ? "리뷰가 수정되었습니다." : "리뷰 수정 실패");
+
+        return result;
+    }
+
+    public HashMap<String, Object> removeReview(HashMap<String, Object> map) {
+        HashMap<String, Object> result = new HashMap<>();
+
+        int cnt = userMypageMapper.deleteReview(map);
+
+        result.put("result", cnt > 0 ? "success" : "fail");
+        result.put("message", cnt > 0 ? "리뷰가 삭제되었습니다." : "리뷰 삭제 실패");
+
+        return result;
+    }
+ // =====================
+ // 구독 정보
+ // =====================
+    public HashMap<String, Object> getSubscriptionInfo(HashMap<String, Object> map) {
+        HashMap<String, Object> result = new HashMap<>();
+
+        HashMap<String, Object> info = userMypageMapper.selectSubscriptionInfo(map);
+        if (info == null) {
+            info = new HashMap<>();
+        }
+
+        result.put("result", "success");
+        result.put("subscriptionInfo", info);
+
+        return result;
+    }
+ 
+ public HashMap<String, Object> getMyPostList(HashMap<String, Object> map) {
+	    HashMap<String, Object> result = new HashMap<>();
+
+	    List<HashMap<String, Object>> list = userMypageMapper.selectMyPostList(map);
+
+	    result.put("result", "success");
+	    result.put("postList", list);
+
+	    return result;
+	}
+
+	public HashMap<String, Object> getMyCommentList(HashMap<String, Object> map) {
+	    HashMap<String, Object> result = new HashMap<>();
+
+	    List<HashMap<String, Object>> list = userMypageMapper.selectMyCommentList(map);
+
+	    result.put("result", "success");
+	    result.put("commentList", list);
+
+	    return result;
+	}
+	public int cancelSubscription(HashMap<String, Object> map) {
+	    return userMypageMapper.cancelSubscription(map);
+	}
+	// 현재 포인트 조회
+	public HashMap<String, Object> getPointInfo(HashMap<String, Object> map) {
+
+	    HashMap<String, Object> result = new HashMap<>();
+
+	    // mapper에서 포인트 조회 (SUM 또는 USER_POINT)
+	    HashMap<String, Object> info = userMypageMapper.selectPointInfo(map);
+
+	    // 결과 세팅
+	    result.put("result", "success");
+
+	    // 데이터 없을 경우 대비
+	    result.put("pointInfo", info != null ? info : new HashMap<>());
+
+	    return result;
+	}
+
+
+	// 포인트 사용내역 조회
+	public HashMap<String, Object> getPointUseList(HashMap<String, Object> map) {
+
+	    HashMap<String, Object> result = new HashMap<>();
+
+	    // 사용내역 리스트 조회
+	    List<HashMap<String, Object>> list = userMypageMapper.selectPointUseList(map);
+
+	    result.put("result", "success");
+	    result.put("pointUseList", list);
+
+	    return result;
+	}
+
+	
+	
+    
+    
+    
 }
