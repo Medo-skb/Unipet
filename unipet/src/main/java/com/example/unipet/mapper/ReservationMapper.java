@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 
 import com.example.unipet.model.Reservation;
+import com.example.unipet.model.Review;
 import com.example.unipet.model.Store;
 
 @Mapper
@@ -18,8 +19,12 @@ public interface ReservationMapper {
 	public List<Store> selectStoreMenuList(HashMap<String, Object> map);
 	// 업체 이미지 조회
 	public List<Store> selectStoreImgList(HashMap<String, Object> map);
+	// 업체 리뷰 조회
+	public List<Review> selectStoreReviewList(HashMap<String, Object> map);
 	// 업체 예약 슬롯 조회
 	public List<Store> selectStoreSlotList(HashMap<String, Object> map);
+	// 예약 서비스 완료 시간 지남 조회
+	public List<Reservation> selectExpiredReservations(HashMap<String, Object> map);
 	
 	// 한개 리턴 -> selectXXX
 	// 업체 상세 정보 조회
@@ -30,6 +35,7 @@ public interface ReservationMapper {
 	public Store selectStorePolicy(HashMap<String, Object> map);
 	// 예약 상세 정보 조회
 	public Reservation selectRsvInfo(HashMap<String, Object> map);
+	
 	
 	// 삭제 
 	public int deleteDefault(HashMap<String, Object> map);
@@ -48,6 +54,8 @@ public interface ReservationMapper {
 	public int updateSlotStatus(HashMap<String, Object> map);
 	// 예약 마감 시간이 지난 슬롯 일괄 'N'처리
 	public int updateExpiredSlots();
+	// 예약 서비스 완료 시간 지남 FIN 처리
+	public int updateRsvStatusToFin(HashMap<String, Object> map);
 	
 	
 	// 삽입 
@@ -56,6 +64,10 @@ public interface ReservationMapper {
 	public int insertReservation(HashMap<String, Object> map);
 	// 로그 기록 삽입
 	public int insertRsvLog(HashMap<String, Object> map);
+	// 예약 서비스 리뷰 삽입
+	public int insertReviewRsv(HashMap<String, Object> map);
+	// 예약 서비스 리뷰 파일 삽입
+	public int insertReviewRsvFile(HashMap<String, Object> map);
 	
 	
 }

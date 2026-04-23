@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="/css/reservation/reservation.css" rel="stylesheet">
+    <link href="/css/reservation/book.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="/js/page-change.js"></script>
@@ -125,7 +125,7 @@
                 today: new Date().toISOString().split('T')[0],
                 calendarDays: [],
                 timeSlots: [],
-                userId: 'test_user01', // 테스트용 아이디
+                userId: 'test_user03', // 테스트용 아이디
                 petList: [],
                 selectedPet: null,
                 menuList: [],
@@ -223,7 +223,7 @@
             fnGetTimeList() {
                 const self = this;
                 $.ajax({
-                    url: "/reservation/store-reservation.dox",
+                    url: "/reservation/book.dox",
                     type: "POST",
                     data: { storeNo: self.storeNo, targetDate: self.selectedDate },
                     success: function(data) {
@@ -308,7 +308,7 @@
 
                 console.log("넘기기 전 최종 확인:", reserveData); // 여기서 No값들이 숫자로 나오면 성공!
                 localStorage.setItem("reserveTemp", JSON.stringify(reserveData));
-                location.href = "/reservation/rsv-confirm.do";
+                location.href = "/reservation/confirm.do";
             }
         },
         mounted() {

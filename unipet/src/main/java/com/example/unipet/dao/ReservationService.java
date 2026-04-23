@@ -1,17 +1,23 @@
 package com.example.unipet.dao;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.unipet.common.Message;
 import com.example.unipet.mapper.PetMapper;
 import com.example.unipet.mapper.ReservationMapper;
 import com.example.unipet.model.Pet;
 import com.example.unipet.model.Reservation;
+import com.example.unipet.model.Review;
 import com.example.unipet.model.Store;
 
 @Service
@@ -89,6 +95,23 @@ public class ReservationService {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 		try {
 			List<Store> list = reservationMapper.selectStoreImgList(map);
+			
+			resultMap.put("list", list);
+			resultMap.put("result", "success");
+			resultMap.put("message", Message.MSG_ADD);
+		} catch (Exception e) {
+			// TODO: handle exception
+			System.out.println(e.getMessage());
+			resultMap.put("result", "fail");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
+		}
+		return resultMap;
+	}
+	
+	public HashMap<String, Object> getStoreReviewList(HashMap<String, Object> map){
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+		try {
+			List<Review> list = reservationMapper.selectStoreReviewList(map);
 			
 			resultMap.put("list", list);
 			resultMap.put("result", "success");
@@ -240,6 +263,79 @@ public class ReservationService {
 	    map.put("newStatus", "CAN");
 	    map.put("remark", "결제 승인 후 취소");
 	    reservationMapper.insertRsvLog(map);
+	}
+	
+	@Value("${file.review-path}")
+    private String uploadPath; // 설정 파일의 경로가 이 변수로 쏙 들어옵니다.
+	
+	@Transactional
+	public HashMap<String, Object> addReviewRsv(HashMap<String, Object> map, List<MultipartFile> files) {
+	    HashMap<String, Object> resultMap = new HashMap<>();
+	    try {
+	        // 1. 리뷰 본문 저장
+	        reservationMapper.insertReviewRsv(map);
+	        int reviewNo = Integer.parseInt(String.valueOf(map.get("reviewNo")));
+
+	        // 2. 파일 처리 (조건문 강화)
+	        // files가 null이 아니고, 리스트가 비어있지 않으며, 첫 번째 파일의 이름이 있을 때만 실행
+	        if (files != null && !files.isEmpty() && !files.get(0).getOriginalFilename().isEmpty()) {
+	            for (MultipartFile file : files) {
+	                String originName = file.getOriginalFilename();
+	                String ext = originName.substring(originName.lastIndexOf("."));
+	                String saveName = UUID.randomUUID().toString() + ext;
+
+	                File dest = new File(uploadPath + saveName);
+	                if (!dest.exists()) dest.mkdirs();
+	                file.transferTo(dest);
+
+	                HashMap<String, Object> fileMap = new HashMap<>();
+	                fileMap.put("reviewNo", reviewNo);
+	                fileMap.put("file_path", "/img/review/");
+	                fileMap.put("file_name", saveName);
+	                fileMap.put("origin_name", originName);
+	                
+	                reservationMapper.insertReviewRsvFile(fileMap);
+	            }
+	        }
+	        resultMap.put("result", "success");
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+	        resultMap.put("result", "fail");
+	    }
+	    return resultMap;
+	}
+	
+	@Transactional
+	public int processAutoFinish(HashMap<String, Object> map) {
+	    // 1. 종료 시간 30분이 지난 'COM' 상태 예약들 조회
+	    // 리턴 타입을 Reservation 객체 리스트로 받음
+	    List<Reservation> expiredList = reservationMapper.selectExpiredReservations(map);
+	    
+	    if (expiredList == null || expiredList.isEmpty()) {
+	        return 0;
+	    }
+
+	    for (Reservation rsv : expiredList) {
+	        // 2. 상태를 'FIN'으로 변경 (rsvNo 필드 사용)
+	        HashMap<String, Object> updateMap = new HashMap<>();
+	        updateMap.put("rsvNo", rsv.getRsvNo()); 
+	        reservationMapper.updateRsvStatusToFin(updateMap);
+
+	        // 3. 로그 기록 (기존 insertRsvLog 재사용)
+	        HashMap<String, Object> logMap = new HashMap<>();
+	        logMap.put("rsvNo", rsv.getRsvNo());
+	        logMap.put("action", "AUTO_FINISH");
+	        logMap.put("oldStatus", "COM");
+	        logMap.put("newStatus", "FIN");
+	        logMap.put("actorType", "SYSTEM");
+	        logMap.put("userId", "SYSTEM");
+	        logMap.put("remark", "이용시간 30분 경과 자동 종료");
+	        
+	        reservationMapper.insertRsvLog(logMap);
+	    }
+	    
+	    return expiredList.size(); // 처리된 건수 반환
 	}
 	
 }

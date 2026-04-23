@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="/css/reservation/rsv-success.css" rel="stylesheet">
+    <link href="/css/reservation/success.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="/js/page-change.js"></script>
@@ -33,7 +33,7 @@
                         <span class="label">반려동물:</span>
                         <span class="value">
                              {{ info.petName }}
-                            <span class="sub-text">{{ info.species }} / {{ info.breed }}</span>
+                            <span class="sub-text">({{ info.species }} / {{ info.breed }})</span>
                         </span>
                     </div>
                     
@@ -97,7 +97,7 @@
             fnGetDetail() {
                 const self = this;
                 $.ajax({
-                    url: "/reservation/rsv-info.dox", // 상세 조회용 API
+                    url: "/reservation/info.dox", // 상세 조회용 API
                     type: "POST",
                     data: { rsvNo: self.rsvNo },
                     success: function(data) {
@@ -123,7 +123,7 @@
                 if (!confirm("예약을 취소하시겠습니까?")) return;
 
                 $.ajax({
-                    url: "/reservation/rsv-cancel.dox",
+                    url: "/reservation/cancel.dox",
                     type: "POST",
                     data: { 
                         rsvNo: self.rsvNo,
