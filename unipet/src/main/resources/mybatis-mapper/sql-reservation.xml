@@ -59,8 +59,7 @@
     ORDER BY 
         IS_MAIN DESC, FILE_NO ASC
    </select>
- 
- <!--  
+   
    <select id="selectStoreReviewList" parameterType="hashmap" resultType="com.example.unipet.model.Review">
 	    SELECT 
 	        R.USER_ID,
@@ -78,7 +77,6 @@
 	    ORDER BY R.CDATE DESC
 	    LIMIT 2
 	</select>
--->
 	
 	<select id="selectStoreSlotList" parameterType="hashmap" resultType="com.example.unipet.model.Store">
 	    SELECT 
@@ -125,30 +123,13 @@
 	    ]]>
 	</select>
 
-<!--	
-	<select id="selectRsvInfo" parameterType="hashmap" resultType="com.example.unipet.model.Reservation">
+	<select id="selectStoreReviewSummary" parameterType="hashmap" resultType="hashmap">
 	    SELECT 
-	        R.RSV_NO,
-	        R.SLOT_NO,
-	        SL.SLOT_DATE,
-	        SL.SLOT_TIME,
-	        R.USER_ID,
-	        P.PET_NAME,
-	        P.SPECIES,
-	        P.BREED,
-	        M.MENU_NAME,
-	        M.MENU_PRICE,
-	        R.REQUEST,
-	        S.STORE_NO,
-	        S.STORE_NAME
-	    FROM RESERVATION R
-	    JOIN RSV_SLOT SL ON R.SLOT_NO = SL.SLOT_NO
-	    JOIN PET P ON R.PET_NO = P.PET_NO
-	    JOIN STORE_MENU M ON R.MENU_NO = M.MENU_NO
-	    JOIN STORE S ON R.STORE_NO = S.STORE_NO
-	    WHERE R.RSV_NO = #{rsvNo}
+	        COUNT(*) AS REVIEW_COUNT,
+	        IFNULL(ROUND(AVG(RATING), 1), 0) AS REVIEW_AVG
+	    FROM REVIEW
+	    WHERE STORE_NO = #{storeNo}
 	</select>
--->
 
 	<select id="selectExpiredReservations" parameterType="hashmap" resultType="com.example.unipet.model.Reservation">
 	    SELECT 

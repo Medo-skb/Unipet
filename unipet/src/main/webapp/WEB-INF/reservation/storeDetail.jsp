@@ -12,7 +12,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=2198e0ed2782e12a610e46213693750e&libraries=services"></script>
-    <title>Store Detail</title>
+    <title>업체 상세</title>
     
 </head>
 <body>
@@ -51,27 +51,32 @@
                 </div>
                 <div id="bottom">
                     <div class="review">
-                        <div class="review">
-                            <div class="review-title">방문자 리뷰 <span class="sub-text">** 최근 2건</span></div>
-                            <hr>
-                            <div class="review-list-container">
-                                <div v-if="reviewList.length === 0" class="no-review">
-                                    작성된 리뷰가 없습니다.
-                                </div>
+                        <div class="review-title">
+                            방문자 리뷰 
+                            <span v-if="reviewCount > 0" class="title-stats">
+                                <span class="total-count">[총 {{ reviewCount }}개</span>
+                                <span class="avg-score"> / 평균 ⭐ {{ reviewAvg }}]</span>
+                            </span>
+                        </div>
+                        <hr>
+                        <div class="review-list-container">
+                            <div v-if="reviewList.length === 0" class="no-review">
+                                작성된 리뷰가 없습니다.
+                            </div>
 
-                                <div v-for="rev in reviewList" :key="rev.rsvNo" class="rev-cont">
-                                    <div class="rev-header">
-                                        <span class="nickname">{{ rev.nickname }}</span>
-                                        <span class="date">{{ rev.cdate }}</span>
-                                    </div>
-                                    <div class="rev-star">
-                                        {{ fnConvertStar(rev.rating) }}
-                                    </div>
-                                    <div class="rev-text">
-                                        {{ rev.rContents }}
-                                    </div>
+                            <div v-for="rev in reviewList" :key="rev.rsvNo" class="rev-cont">
+                                <div class="rev-header">
+                                    <span class="nickname">{{ rev.nickname }}</span>
+                                    <span class="date">{{ rev.cdate }}</span>
+                                </div>
+                                <div class="rev-star">
+                                    {{ fnConvertStar(rev.rating) }}
+                                </div>
+                                <div class="rev-text">
+                                    {{ rev.rContents }}
                                 </div>
                             </div>
+                            <div class="sub-text"> ** 리뷰는 최근 2건만 보여집니다.</div>
                         </div>
                     </div>
                     <div id="map"></div>
@@ -107,8 +112,9 @@
                         self.storeMenuList = data.menuList;
                         self.storeImgList = data.imgList;
                         self.reviewList = data.reviewList;
+                        self.reviewCount = data.reviewCount; 
+                        self.reviewAvg = data.reviewAvg;
                         
-                        // Vue가 데이터를 바인딩하고 DOM을 준비할 시간을 주기 위해 setTimeout 사용
                         setTimeout(() => {
                             self.drawMap();
                         }, 100);
@@ -117,7 +123,6 @@
             },
 
             fnConvertStar(rating) {
-                // rating이 문자열로 넘어올 경우를 대비해 숫자로 변환
                 const num = Math.floor(Number(rating));
                 return "⭐️".repeat(num);
             },
@@ -138,14 +143,11 @@
                 };
                 const map = new kakao.maps.Map(container, options);
 
-                // 2. 마커 생성
                 const marker = new kakao.maps.Marker({
                     position: moveLatLon
                 });
                 marker.setMap(map);
 
-                // 3. 말풍선 내용 정리 (좌표 제외, 업체명과 주소만)
-                // 스타일을 인라인으로 넣어서 CSS 간섭을 방지합니다.
                 var content = 
                     '<div style="padding:10px; min-width:150px; background-color:white; border:1px solid #ccc; border-radius:5px; box-shadow: 2px 2px 5px rgba(0,0,0,0.1);">' +
                     '    <div style="font-weight:bold; color:#000; font-size:14px; margin-bottom:5px; text-align:center;">' + name + '</div>' +
@@ -156,7 +158,6 @@
                     content: content
                 });
                 
-                // 마커 위에 말풍선 열기
                 infowindow.open(map, marker);
             },
 
@@ -165,11 +166,7 @@
                     alert("업체 정보가 로드되지 않았습니다.");
                     return;
                 }
-                // URL 파라미터로 storeNo를 담아서 이동
-                // contextPath가 필요한 경우 앞에 붙여주세요 (예: /myProject/reservation/...)
-                // location.href = "/reservation/book.do?storeNo=" + storeNo;
                 pageChange("/reservation/book.do", { storeNo: storeNo });
-
             },
         }, 
         mounted() {

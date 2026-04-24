@@ -35,23 +35,6 @@ public class ReviewService {
 	// 수정, 삭제, 삽입 -> updateXXX, deleteXXX, insertXXX
 	//	int result = defaultMapper.updateXXX();
 	
-	public HashMap<String, Object> getStoreReviewList(HashMap<String, Object> map){
-		HashMap<String, Object> resultMap = new HashMap<String, Object>();
-		try {
-			List<Review> list = reviewMapper.selectStoreReviewList(map);
-			
-			resultMap.put("list", list);
-			resultMap.put("result", "success");
-			resultMap.put("message", Message.MSG_ADD);
-		} catch (Exception e) {
-			// TODO: handle exception
-			System.out.println(e.getMessage());
-			resultMap.put("result", "fail");
-			resultMap.put("message", Message.MSG_SERVER_ERR);
-		}
-		return resultMap;
-	}
-	
 	public HashMap<String, Object> getRsvInfo(HashMap<String, Object> map){
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 		try {
@@ -88,18 +71,15 @@ public class ReviewService {
 	
 	
 	@Value("${file.review-path}")
-    private String uploadPath; // 설정 파일의 경로가 이 변수로 쏙 들어옵니다.
+    private String uploadPath; // 설정 파일의 경로가 이 변수로 들어옴.
 	
 	@Transactional
 	public HashMap<String, Object> addReviewRsv(HashMap<String, Object> map, List<MultipartFile> files) {
 	    HashMap<String, Object> resultMap = new HashMap<>();
 	    try {
-	        // 1. 리뷰 본문 저장
 	        reviewMapper.insertReviewRsv(map);
 	        int reviewNo = Integer.parseInt(String.valueOf(map.get("reviewNo")));
 
-	        // 2. 파일 처리 (조건문 강화)
-	        // files가 null이 아니고, 리스트가 비어있지 않으며, 첫 번째 파일의 이름이 있을 때만 실행
 	        if (files != null && !files.isEmpty() && !files.get(0).getOriginalFilename().isEmpty()) {
 	            for (MultipartFile file : files) {
 	                String originName = file.getOriginalFilename();
@@ -135,12 +115,9 @@ public class ReviewService {
 	public HashMap<String, Object> addReviewPrd(HashMap<String, Object> map, List<MultipartFile> files) {
 	    HashMap<String, Object> resultMap = new HashMap<>();
 	    try {
-	        // 1. 리뷰 본문 저장
 	        reviewMapper.insertReviewPrd(map);
 	        int reviewNo = Integer.parseInt(String.valueOf(map.get("reviewNo")));
 
-	        // 2. 파일 처리 (조건문 강화)
-	        // files가 null이 아니고, 리스트가 비어있지 않으며, 첫 번째 파일의 이름이 있을 때만 실행
 	        if (files != null && !files.isEmpty() && !files.get(0).getOriginalFilename().isEmpty()) {
 	            for (MultipartFile file : files) {
 	                String originName = file.getOriginalFilename();

@@ -32,13 +32,11 @@ public class ReservationScheduler {
     }
 
     // 신규 로직: 이용 완료(30분 경과) 건 자동 FIN 처리 및 로그 기록
-    @Scheduled(cron = "0 * * * * *") // 매 분 0초마다 실행
+    @Scheduled(cron = "0 * * * * *")
     public void autoFinishReservations() {
         try {
-            // 서비스 메서드 사양에 맞춰 빈 HashMap 전달
             HashMap<String, Object> map = new HashMap<>();
             
-            // 서비스에서 트랜잭션 단위로 처리 (상태 변경 + 로그 기록)
             int finishedCount = reservationService.processAutoFinish(map);
             
             if (finishedCount > 0) {

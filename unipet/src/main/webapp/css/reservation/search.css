@@ -4,7 +4,9 @@
     margin: 0 auto;
     padding: 20px 20px 80px;
     box-sizing: border-box;
-    background: var(--bg);
+}
+
+#top{
 }
 
 #sort-area {
@@ -35,11 +37,12 @@
 #search {
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 15px;
-    margin: 18px 0 24px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--line-soft);
+}
+
+.button-group {
+    display: flex;
+    gap: 5px;
 }
 
 .search-btn {
@@ -53,9 +56,9 @@
 }
 
 .reset-btn {
-    background-color: #fff;
-    color: var(--text-sub);
-    border: 1px solid var(--line-soft);
+    background-color: #f8f9fa;
+    color: #666;
+    border: 1px solid #ddd;
     padding: 8px 16px;
     border-radius: 6px;
     cursor: pointer;
@@ -67,16 +70,17 @@
 
 #bottom {
     display: grid;
-    gap: 20px;
-    grid-template-columns: 340px auto;
-    grid-template-rows: 560px;
+    gap: 10px;
+    grid-template-columns: 300px auto;
+    grid-template-rows: 500px;
+    border-top: 1px solid black;
+    padding-top: 10px;
 }
 
-#left {
+#left{
     height: 100%;
-    overflow-y: auto;
-    background-color: #fff;
-    border-top: 1px solid var(--line-soft);
+    overflow-y: auto; 
+    background-color: #fcfcfc;
 }
 
 .list-header {
@@ -113,69 +117,51 @@
 }
 
 .store-card.is-member {
-    border-left: none;
-    background-color: transparent;
-}
-
-.store-info {
-    padding: 16px 14px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.info-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-}
-
-.category {
-    font-size: 12px;
-    color: var(--text-sub);
-    background: #f8f9fb;
-    padding: 3px 7px;
-    border-radius: 4px;
-}
-
-.member-badge {
-    display: inline-block;
-    background-color: var(--main);
-    color: #fff;
-    font-size: 10px;
-    padding: 3px 7px;
-    border-radius: 4px;
-    font-weight: 700;
-    white-space: nowrap;
+    border-left: 4px solid #4a90e2;
+    background-color: #f8fbff;
 }
 
 .name-wrap {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    margin: 0 0 8px;
+    align-items: center;           
+    margin: 5px 0;
+}
+
+.member-badge {
+    display: inline-block;
+    background-color: #4A90E2; 
+    color: white;
+    font-size: 10px;
+    padding: 3px 7px;
+    border-radius: 4px;
+    font-weight: bold;
+    white-space: nowrap;      
+    flex-shrink: 0;           
 }
 
 .store-name {
     margin: 0;
     font-size: 17px;
-    color: var(--text-main);
-    font-weight: 700;
+    color: #333;
+    flex: 1; 
+    display: flex;      
+    align-items: center; 
+    gap: 6px;           
+    overflow: hidden;    
 }
 
 .detail-btn-sm {
     margin-left: 10px;
     padding: 4px 10px;
     font-size: 11px;
-    background: none;
-    color: var(--main);
-    border: 1px solid var(--main);
+    background-color: #fff;
+    color: #4A90E2;
+    border: 1px solid #4A90E2;
     border-radius: 4px;
     cursor: pointer;
     white-space: nowrap;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    transition: all 0.2s;
 }
 
 .detail-btn-sm:hover {
@@ -278,10 +264,14 @@
     width: 150px;
 }
 
-#start-time,
-#end-time {
-    width: 70px !important;
-    text-align: center;
+.store-addr {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 3px;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .input-box span {
@@ -372,25 +362,26 @@
     text-align: center;
 }
 
-.flatpickr-calendar.hasTime.noCalendar .flatpickr-time .flatpickr-time-separator {
-    width: 12px !important;
-    min-width: 12px !important;
-    text-align: center;
+#right{
 }
 
-.flatpickr-time input {
-    font-size: 14px;
-    color: var(--text-main);
-    background: transparent !important;
+#map {
+    position: relative;
+    width: 100%;
+    height: 100%;
 }
 
-.flatpickr-time input:hover,
-.flatpickr-time input:focus {
-    background: transparent !important;
-}
-
-.flatpickr-time .flatpickr-time-separator {
-    color: var(--text-sub);
+#my-location-btn {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    z-index: 2;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 8px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
 .flatpickr-time .numInputWrapper span.arrowUp,
@@ -398,67 +389,6 @@
     display: none;
 }
 
-.flatpickr-time input:focus {
-    border-color: var(--main);
-}
-
-.flatpickr-time .numInputWrapper span.arrowUp:after {
-    border-bottom-color: var(--main);
-}
-
-.flatpickr-time .numInputWrapper span.arrowDown:after {
-    border-top-color: var(--main);
-}
-
-/* 시간 숫자 영역 전체 줄이기 */
-.flatpickr-time .numInputWrapper {
-    width: 32px !important;
-    min-width: 32px !important;
-    padding: 0 !important;
-}
-
-/* 숫자 input */
-.flatpickr-time input {
-    width: 100% !important;
-    padding: 0 !important;
-    text-align: center;
-}
-
-/* 콜론 간격 줄이기 */
-.flatpickr-time .flatpickr-time-separator {
-    margin: 0 4px;
-}
-
-/* 전체 중앙 정렬 */
-.flatpickr-time {
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    gap: 4px;
-}
-
-/* 시/분 wrapper 동일 크기 */
-.flatpickr-time .numInputWrapper {
-    width: 32px !important;
-    flex: 0 0 32px !important;
-    display: flex;
-    justify-content: center;
-}
-
-/* input */
-.flatpickr-time input {
-    width: 100% !important;
-    text-align: center;
-    padding: 0 !important;
-}
-
-/* 콜론 */
-.flatpickr-time .flatpickr-time-separator {
-    width: 10px;
-    text-align: center;
-}
-
-.button-group {
-    display: flex;
-    gap: 10px;
+#my-location-btn:hover {
+    background: #f4f4f4;
 }

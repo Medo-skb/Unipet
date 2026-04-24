@@ -5,25 +5,7 @@
 	<!-- 여러개 검색 -->
 	<select id="selectUserList" parameterType="hashmap" resultType="com.example.unipet.model.Default">
 	</select>
-	
-	<select id="selectStoreReviewList" parameterType="hashmap" resultType="com.example.unipet.model.Review">
-	    SELECT 
-	        R.USER_ID,
-	        NICKNAME,
-	        RATING,
-	        R_CONTENTS,
-	        DATE_FORMAT(R.CDATE, '%Y-%m-%d %H:%i') AS cdate,
-	        RSV_NO
-	    FROM REVIEW R
-	    JOIN USERS U ON R.USER_ID = U.USER_ID
-	    WHERE STORE_NO = #{storeNo}
-	    <if test="rsvNo != null and rsvNo != ''">
-	        AND RSV_NO = #{rsvNo}
-	    </if>
-	    ORDER BY R.CDATE DESC
-	    LIMIT 2
-	</select>
-	
+
 	<!-- 한개 검색 -->
 	<select id="selectUser" parameterType="hashmap" resultType="com.example.unipet.model.Default">
 	</select>
