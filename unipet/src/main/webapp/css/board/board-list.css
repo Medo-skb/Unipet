@@ -1,0 +1,326 @@
+* {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	font-family: 'Malgun Gothic';
+	background: #f7f8fa;
+}
+
+.wrap {
+	width: 1200px;
+	margin: 0 auto;
+	padding: 30px 0;
+}
+
+.page-title {
+	font-size: 28px;
+	font-weight: bold;
+	margin-bottom: 20px;
+}
+
+.box {
+	position: relative; 
+	background: #fff;
+	border: 1px solid #ddd;   
+	border-radius: 12px;
+	padding: 20px;
+	margin-bottom: 20px;
+}
+
+.tab-row,
+.search-row,
+.sort-row {
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
+	margin-bottom: 15px;
+}
+
+.tab-btn,
+.sort-btn {
+	border: none;
+	background: #e9ecef;
+	padding: 10px 16px;
+	border-radius: 999px;
+	cursor: pointer;
+	font-weight: bold;
+}
+
+.tab-btn.active,
+.sort-btn.active {
+	background: #ff7a00;
+	color: #fff;
+}
+
+.search-row select,
+.search-row input {
+	height: 40px;
+	border: 1px solid #ccc;
+	border-radius: 8px;
+	padding: 0 10px;
+}
+
+.search-row input {
+	width: 300px;
+}
+
+.search-row button,
+.write-btn {
+	height: 40px;
+	border: none;
+	border-radius: 8px;
+	background: #ff7a00;
+	color: #fff;
+	padding: 0 16px;
+	cursor: pointer;
+	font-weight: bold;
+}
+
+table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+th,
+td {
+	padding: 14px 10px;
+	border-bottom: 1px solid #eee;
+	text-align: center;
+}
+
+th {
+	background: #fafafa;
+}
+
+.title-cell {
+	text-align: left;
+	cursor: pointer;
+	font-weight: bold;
+}
+
+.title-wrap {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.thumb {
+	width: 60px;
+	height: 60px;
+	object-fit: cover;
+	border-radius: 8px;
+	border: 1px solid #ddd;
+	background: #f3f3f3;
+}
+
+.private-badge {
+	background: #fff3cd;
+	color: #856404;
+	font-size: 12px;
+	padding: 2px 6px;
+	border-radius: 6px;
+}
+
+.popular-badge {
+	background: #ffe3e3;
+	color: #d6336c;
+	font-size: 12px;
+	padding: 2px 6px;
+	border-radius: 6px;
+}
+
+.pagination {
+	display: flex;
+	justify-content: center;
+	gap: 8px;
+	margin-top: 20px;
+}
+
+.pagination button {
+	width: 36px;
+	height: 36px;
+	border: 1px solid #ccc;
+	background: white;
+	border-radius: 8px;
+	cursor: pointer;
+}
+
+.pagination button.active {
+	background: #ff7a00;
+	color: white;
+	border-color: #ff7a00;
+}
+
+.top-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 15px;
+	position: relative;
+}
+
+.category {
+	font-size: 12px;
+	color: #888;
+	margin-right: 4px;
+}
+
+.title-text {
+	font-size: 15px;
+	font-weight: 500;
+}
+
+.main-badge {
+	background: #f1f3f5;
+	color: #555;
+	font-size: 12px;
+	padding: 3px 7px;
+	border-radius: 999px;
+	font-weight: bold;
+}
+
+.board-btn-wrap {
+	display: flex;
+	gap: 10px;
+}
+
+/* 알림 */
+.alarm-box {
+	position: absolute;
+	right: 0;
+	top: 55px;
+	width: 330px;
+	background: #fff;
+	border: 1px solid #ddd;
+	border-radius: 10px;
+	box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+	z-index: 1001;
+}
+
+.alarm-box::before {
+	content: "";
+	position: absolute;
+	top: -8px;
+	right: 28px;
+	width: 14px;
+	height: 14px;
+	background: #fff;
+	border-left: 1px solid #ddd;
+	border-top: 1px solid #ddd;
+	transform: rotate(45deg);
+}
+
+.alarm-empty {
+	padding: 10px;
+	text-align: center;
+}
+
+.alarm-item {
+	padding: 10px;
+	border-bottom: 1px solid #eee;
+	cursor: pointer;
+}
+
+.alarm-item:hover {
+	background: #f8f8f8;
+}
+
+.alarm-icon {
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	background: #f1f3f5;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	font-size: 18px;
+	transition: all 0.2s ease;
+}
+
+.alarm-icon:hover {
+	background: #fff1e6;
+	transform: scale(1.1);
+}
+
+.alarm-top {
+	position: absolute;
+	right: 20px;
+	top: 12px;   
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	background: #f1f3f5;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	font-size: 18px;
+	z-index: 10;
+}
+
+.alarm-top:hover {
+	background: #fff1e6;
+	transform: scale(1.1);
+}
+
+.main-tab-row {
+	justify-content: space-between;
+	align-items: center;
+}
+
+.main-tab-left {
+	display: flex;
+	gap: 10px;
+}
+
+.alarm-top {
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	background: #f1f3f5;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	font-size: 18px;
+}
+
+.alarm-fixed {
+	width: 42px;
+	height: 42px;
+	border-radius: 50%;
+	background: #f1f3f5;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	font-size: 18px;
+	position: relative;
+}
+
+.alarm-area {
+	position: absolute;
+	right: 30px;
+	top: 25px;
+	z-index: 1000;
+}
+
+.alarm-badge {
+	position: absolute;
+	top: -6px;
+	right: -6px;
+	min-width: 18px;
+	height: 18px;
+	padding: 0 5px;
+	border-radius: 999px;
+	background: red;
+	color: #fff;
+	font-size: 11px;
+	font-weight: bold;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}

@@ -124,6 +124,25 @@ public class BoardService {
 		int cnt = boardMapper.insertComment(map);
 
 		if (cnt > 0) {
+			HashMap<String, Object> boardInfo = boardMapper.selectBoardInfo(map);
+
+			if (boardInfo != null) {
+				String writerId = boardInfo.get("USER_ID").toString();
+				String senderId = map.get("sessionId").toString();
+
+				if (!writerId.equals(senderId)) {
+					HashMap<String, Object> alarmMap = new HashMap<String, Object>();
+					alarmMap.put("receiverId", writerId);
+					alarmMap.put("senderId", senderId);
+					alarmMap.put("boardNo", map.get("boardNo"));
+					alarmMap.put("commentNo", "");
+					alarmMap.put("alarmType", "COMMENT");
+					alarmMap.put("alarmContent", senderId + "님이 내 게시글에 댓글을 남겼습니다.");
+
+					boardMapper.insertBoardAlarm(alarmMap);
+				}
+			}
+			
 			resultMap.put("result", "success");
 			resultMap.put("message", "댓글이 등록되었습니다.");
 		} else {
@@ -151,6 +170,25 @@ public class BoardService {
 
 		if (check == null) {
 			boardMapper.insertBoardLike(map);
+			HashMap<String, Object> boardInfo = boardMapper.selectBoardInfo(map);
+
+			if (boardInfo != null) {
+				String writerId = boardInfo.get("USER_ID").toString();
+				String senderId = map.get("sessionId").toString();
+
+				if (!writerId.equals(senderId)) {
+					HashMap<String, Object> alarmMap = new HashMap<String, Object>();
+					alarmMap.put("receiverId", writerId);
+					alarmMap.put("senderId", senderId);
+					alarmMap.put("boardNo", map.get("boardNo"));
+					alarmMap.put("commentNo", "");
+					alarmMap.put("alarmType", "LIKE");
+					alarmMap.put("alarmContent", senderId + "님이 내 게시글을 추천했습니다.");
+
+					boardMapper.insertBoardAlarm(alarmMap);
+				}
+			}
+			
 			resultMap.put("message", "추천되었습니다.");
 		} else {
 			boardMapper.deleteBoardLike(map);
@@ -187,14 +225,19 @@ public class BoardService {
 		if (map.get("commentNo") == null || "".equals(map.get("commentNo"))) {
 			map.put("commentNo", null);
 		}
-		int cnt = boardMapper.insertBoardReport(map);
+		try {
+			int cnt = boardMapper.insertBoardReport(map);
 
-		if (cnt > 0) {
-			resultMap.put("result", "success");
-			resultMap.put("message", "신고가 접수되었습니다.");
-		} else {
+			if (cnt > 0) {
+				resultMap.put("result", "success");
+				resultMap.put("message", "신고가 접수되었습니다.");
+			} else {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "신고 접수 실패");
+			}
+		} catch (Exception e) {
 			resultMap.put("result", "fail");
-			resultMap.put("message", "신고 접수 실패");
+			resultMap.put("message", "이미 신고한 대상입니다.");
 		}
 
 		return resultMap;
@@ -693,6 +736,42 @@ public class BoardService {
 		resultMap.put("info", info);
 		resultMap.put("result", "success");
 
+		return resultMap;
+	}
+	
+	public HashMap<String, Object> getBoardAlarmList(HashMap<String, Object> map) {
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+		String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
+
+		if (sessionId.equals("")) {
+			resultMap.put("result", "login");
+			resultMap.put("message", "로그인이 필요합니다.");
+			return resultMap;
+		}
+
+		List<HashMap<String, Object>> list = boardMapper.selectBoardAlarmList(map);
+
+		resultMap.put("list", list);
+		resultMap.put("result", "success");
+
+		return resultMap;
+	}
+	
+	public HashMap<String, Object> readBoardAlarm(HashMap<String, Object> map) {
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+		String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
+
+		if (sessionId.equals("")) {
+			resultMap.put("result", "login");
+			resultMap.put("message", "로그인이 필요합니다.");
+			return resultMap;
+		}
+
+		boardMapper.updateBoardAlarmRead(map);
+
+		resultMap.put("result", "success");
 		return resultMap;
 	}
 }
