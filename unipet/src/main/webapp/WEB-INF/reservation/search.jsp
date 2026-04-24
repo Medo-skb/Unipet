@@ -6,26 +6,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="/css/reservation/search.css" rel="stylesheet">
     <title>Store Search</title>
     <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="/js/page-change.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link href="/css/reservation/search.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://npmcdn.com/flatpickr/dist/l10n/ko.js"></script>
     <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=2198e0ed2782e12a610e46213693750e"></script>
 </head>
 <body>
+    <jsp:include page="/WEB-INF/header/header.jsp" />
+
     <div id="app">
         <!-- html 코드는 id가 app인 태그 안에서 작업 -->
         <div id="container">
             <div id="top">
                 <div id="sort-area">
+                    <div class="s-button" :class="{ active: selectedType === '' }" @click="filterType('')">전체보기</div>
                     <div class="s-button" :class="{ active: selectedType === '병원' }" @click="filterType('병원')">병원</div>
                     <div class="s-button" :class="{ active: selectedType === '미용실' }" @click="filterType('미용실')">미용실</div>
                     <div class="s-button" :class="{ active: selectedType === '위탁시설' }" @click="filterType('위탁시설')">위탁시설</div>
-                    <div class="s-button" @click="filterType('')">전체보기</div>
                 </div>
                 <div id="search">
                     <div class="input-group">
@@ -95,10 +97,10 @@
                     </div>
                 </div>
             </div>
-            
-           
         </div>
     </div>
+
+    <jsp:include page="/WEB-INF/footer/footer.jsp" />
 </body>
 </html>
 

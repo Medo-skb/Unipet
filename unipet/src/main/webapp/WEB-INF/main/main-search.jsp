@@ -41,16 +41,24 @@ pageEncoding="UTF-8"%>
                         <h4 class="search-subsection-title">병원</h4>
 
                         <div v-if="hospitalList.length > 0" class="search-list">
-                            <div v-for="item in hospitalList.slice(0, 4)" :key="item.storeNo" class="search-card search-card-row">
+                            <div v-for="item in hospitalList.slice(0, 4)"
+                                :key="item.storeNo"
+                                class="search-card search-card-row"
+                                @click="fnGoStoreDetail(item.storeNo)">
                                 <div class="search-thumb-wrap">
-                                    <div class="search-thumb"></div>
+                                    <img v-if="item.filePath && item.fileName"
+                                        :src="item.filePath + item.fileName"
+                                        alt="업체 이미지"
+                                        class="search-thumb-image"
+                                        @error="handleImgError">
+                                    <div v-else class="search-thumb"></div>
                                 </div>
 
                                 <div class="search-info">
                                     <div class="search-card-title">{{ item.storeName }}</div>
 
                                     <div v-if="item.menuName1" class="search-card-menu">
-                                        {{ item.menuName1 }} - {{ item.menuPrice1 }}원
+                                        {{ item.menuName1 }} - {{ item.menuPrice1 }}원 ~
                                     </div>
 
                                     <div class="search-card-desc">{{ item.sAddr }}</div>
@@ -70,16 +78,24 @@ pageEncoding="UTF-8"%>
                         <h4 class="search-subsection-title">미용실</h4>
 
                         <div v-if="salonList.length > 0" class="search-list">
-                            <div v-for="item in salonList.slice(0, 4)" :key="item.storeNo" class="search-card search-card-row">
+                            <div v-for="item in salonList.slice(0, 4)"
+                                :key="item.storeNo"
+                                class="search-card search-card-row"
+                                @click="fnGoStoreDetail(item.storeNo)">
                                 <div class="search-thumb-wrap">
-                                    <div class="search-thumb"></div>
+                                    <img v-if="item.filePath && item.fileName"
+                                        :src="item.filePath + item.fileName"
+                                        alt="업체 이미지"
+                                        class="search-thumb-image"
+                                        @error="handleImgError">
+                                    <div v-else class="search-thumb"></div>
                                 </div>
 
                                 <div class="search-info">
                                     <div class="search-card-title">{{ item.storeName }}</div>
 
                                     <div v-if="item.menuName1" class="search-card-menu">
-                                        {{ item.menuName1 }} - {{ item.menuPrice1 }}원
+                                        {{ item.menuName1 }} - {{ item.menuPrice1 }}원 ~
                                     </div>
 
                                     <div class="search-card-desc">{{ item.sAddr }}</div>
@@ -99,16 +115,24 @@ pageEncoding="UTF-8"%>
                         <h4 class="search-subsection-title">위탁시설</h4>
 
                         <div v-if="boardingList.length > 0" class="search-list">
-                            <div v-for="item in boardingList.slice(0, 4)" :key="item.storeNo" class="search-card search-card-row">
+                            <div v-for="item in boardingList.slice(0, 4)"
+                                :key="item.storeNo"
+                                class="search-card search-card-row"
+                                @click="fnGoStoreDetail(item.storeNo)">
                                 <div class="search-thumb-wrap">
-                                    <div class="search-thumb"></div>
+                                    <img v-if="item.filePath && item.fileName"
+                                        :src="item.filePath + item.fileName"
+                                        alt="업체 이미지"
+                                        class="search-thumb-image"
+                                        @error="handleImgError">
+                                    <div v-else class="search-thumb"></div>
                                 </div>
 
                                 <div class="search-info">
                                     <div class="search-card-title">{{ item.storeName }}</div>
 
                                     <div v-if="item.menuName1" class="search-card-menu">
-                                        {{ item.menuName1 }} - {{ item.menuPrice1 }}원
+                                        {{ item.menuName1 }} - {{ item.menuPrice1 }}원 ~
                                     </div>
 
                                     <div class="search-card-desc">{{ item.sAddr }}</div>
@@ -130,9 +154,17 @@ pageEncoding="UTF-8"%>
                     <h3 class="search-section-title">상품</h3>
 
                     <div v-if="productList.length > 0" class="search-list">
-                        <div v-for="item in productList.slice(0, 4)" :key="item.productNo" class="search-card search-card-row">
+                        <div v-for="item in productList.slice(0, 4)"
+                            :key="item.productNo"
+                            class="search-card search-card-row"
+                            @click="fnGoProductDetail(item.productNo)">
                             <div class="search-thumb-wrap">
-                                <div class="search-thumb"></div>
+                                <img v-if="item.filePath && item.fileName"
+                                    :src="item.filePath + item.fileName"
+                                    alt="상품 이미지"
+                                    class="search-thumb-image"
+                                    @error="handleImgError">
+                                <div v-else class="search-thumb"></div>
                             </div>
 
                             <div class="search-info">
@@ -168,7 +200,10 @@ pageEncoding="UTF-8"%>
                         <h4 class="search-subsection-title">통합 게시판</h4>
 
                         <div v-if="totalBoardList.length > 0" class="search-list">
-                            <div v-for="item in totalBoardList.slice(0, 4)" :key="item.boardNo" class="search-card">
+                            <div v-for="item in totalBoardList.slice(0, 4)"
+                                :key="item.boardNo"
+                                class="search-card"
+                                @click="fnGoBoardDetail(item.boardNo)">
                                 <div class="search-card-title">{{ item.title }}</div>
                                 <div class="search-card-desc board-content">{{ item.bContent }}</div>
                             </div>
@@ -188,7 +223,10 @@ pageEncoding="UTF-8"%>
                         <h4 class="search-subsection-title">지역 게시판</h4>
 
                         <div v-if="localBoardList.length > 0" class="search-list">
-                            <div v-for="item in localBoardList.slice(0, 4)" :key="item.boardNo" class="search-card">
+                            <div v-for="item in localBoardList.slice(0, 4)"
+                                :key="item.boardNo"
+                                class="search-card"
+                                @click="fnGoBoardDetail(item.boardNo)">
                                 <div class="search-card-title">{{ item.title }}</div>
                                 <div class="search-card-desc board-content">{{ item.bContent }}</div>
                             </div>
@@ -411,7 +449,32 @@ pageEncoding="UTF-8"%>
                 location.href = "/main/search/board.do?keyword="
                     + encodeURIComponent(self.keyword)
                     + "&bMainNo=" + bMainNo;
-            }
+            },
+
+            handleImgError: function (event) {
+                event.target.src = "${pageContext.request.contextPath}/img/no-image.png";
+            },
+
+            fnGoStoreDetail: function (storeNo) {
+                if (!storeNo) {
+                    return;
+                }
+                location.href = "/reservation/store-detail.do?storeNo=" + storeNo;
+            },
+
+            fnGoProductDetail: function (productNo) {
+                if (!productNo) {
+                    return;
+                }
+                location.href = "/product/view.do?productNo=" + productNo;
+            },
+
+            fnGoBoardDetail: function (boardNo) {
+                if (!boardNo) {
+                    return;
+                }
+                location.href = "/board/view.do?boardNo=" + boardNo;
+            },
 
         }, // methods
         mounted() {

@@ -13,7 +13,7 @@
     <script src="/js/page-change.js"></script>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/header.css">
 </head>
-<body>
+<body> 
     <header class="site-header">
         <div class="header-container">
             <div class="header-left">
@@ -25,7 +25,7 @@
             <div class="header-center">
                 <form class="search-form" action="${pageContext.request.contextPath}/main/search.do" method="get">
                     <input spellcheck="false" autocorrect="off" autocomplete="off"
-                    type="text" name="keyword" class="search-input" placeholder="검색어를 입력하세요">
+                        type="text" name="keyword" class="search-input" placeholder="검색어를 입력하세요">
                     <button type="submit" class="search-btn" aria-label="검색">
                         <svg viewBox="0 0 24 24" aria-hidden="true">
                             <circle cx="11" cy="11" r="7"></circle>
@@ -39,45 +39,66 @@
                 <nav class="main-nav">
                     <a href="${pageContext.request.contextPath}/reservation/search.do" class="nav-link">예약</a>
                     <a href="${pageContext.request.contextPath}/product.do" class="nav-link">쇼핑</a>
-                    <a href="#" class="nav-link">커뮤니티</a>
-                    <a href="#" class="nav-link">관광지</a>
+                    <a href="${pageContext.request.contextPath}/board/list.do" class="nav-link">커뮤니티</a>
                 </nav>
 
                 <div class="user-menu-wrap">
                     <c:choose>
                         <c:when test="${empty sessionScope.sessionId}">
-                            <a href="${pageContext.request.contextPath}/user/login.do" class="user-link">
-                                <img src="${pageContext.request.contextPath}/img/main/login.png"
-                                    alt="로그인"
-                                    class="user-icon">
+                            <a href="${pageContext.request.contextPath}/user/login.do" class="header-icon-link" aria-label="로그인">
+                                <svg class="header-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M10 17l5-5-5-5"></path>
+                                    <path d="M15 12H3"></path>
+                                    <path d="M21 3v18"></path>
+                                </svg>
                             </a>
                         </c:when>
 
                         <c:when test="${sessionScope.sessionRole eq 'USER'}">
-                            <a href="${pageContext.request.contextPath}/user/mypage.do" class="user-link">
-                                <img src="${pageContext.request.contextPath}/img/main/mypage.png"
-                                    alt="마이페이지"
-                                    class="user-icon">
+                            <a href="${pageContext.request.contextPath}/user/mypage.do" class="header-icon-link" aria-label="마이페이지">
+                                <svg class="header-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                    <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"></path>
+                                </svg>
                             </a>
-                            <a href="${pageContext.request.contextPath}/logout.do" class="logout-btn"
-                            onclick="return confirm('로그아웃 하시겠습니까?');">로그아웃</a>
+
+                            <a href="${pageContext.request.contextPath}/cart.do" class="header-icon-link" aria-label="장바구니">
+                                <svg class="header-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M3 4h2l2.4 11.5h10.2L20 8H7"></path>
+                                    <circle cx="9" cy="20" r="1.5"></circle>
+                                    <circle cx="17" cy="20" r="1.5"></circle>
+                                </svg>
+                            </a>
+
+                            <a href="${pageContext.request.contextPath}/logout.do" class="logout-btn">로그아웃</a>
                         </c:when>
 
                         <c:when test="${sessionScope.sessionRole eq 'BIZ'}">
-                            <a href="${pageContext.request.contextPath}/biz/MyPage.do" class="user-link">
-                                <img src="${pageContext.request.contextPath}/img/main/mypage.png"
-                                    alt="사업자 마이페이지"
-                                    class="user-icon">
+                            <a href="${pageContext.request.contextPath}/biz/MyPage.do" class="header-icon-link" aria-label="사업자 마이페이지">
+                                <svg class="header-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                    <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"></path>
+                                </svg>
                             </a>
-                            <a href="${pageContext.request.contextPath}/logout.do" class="logout-btn"
-                            onclick="return confirm('로그아웃 하시겠습니까?');">로그아웃</a>
+
+                            <a href="${pageContext.request.contextPath}/cart.do" class="header-icon-link" aria-label="장바구니">
+                                <svg class="header-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M3 4h2l2.4 11.5h10.2L20 8H7"></path>
+                                    <circle cx="9" cy="20" r="1.5"></circle>
+                                    <circle cx="17" cy="20" r="1.5"></circle>
+                                </svg>
+                            </a>
+
+                            <a href="${pageContext.request.contextPath}/logout.do" class="logout-btn">로그아웃</a>
                         </c:when>
 
                         <c:otherwise>
-                            <a href="${pageContext.request.contextPath}/user/login.do" class="user-link">
-                                <img src="${pageContext.request.contextPath}/img/main/login.png"
-                                    alt="로그인"
-                                    class="user-icon">
+                            <a href="${pageContext.request.contextPath}/user/login.do" class="header-icon-link" aria-label="로그인">
+                                <svg class="header-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M10 17l5-5-5-5"></path>
+                                    <path d="M15 12H3"></path>
+                                    <path d="M21 3v18"></path>
+                                </svg>
                             </a>
                         </c:otherwise>
                     </c:choose>

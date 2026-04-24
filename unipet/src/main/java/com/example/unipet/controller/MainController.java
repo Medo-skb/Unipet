@@ -29,6 +29,11 @@ public class MainController {
 		return "main/main";
 	}
     
+    @RequestMapping("/main/kindergarten.do")
+	public String kindergarten(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+		return "main/kindergarten";
+	}
+    
     // 메인 통합 검색
     @RequestMapping("/main/search.do")
     public String mainSearch(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception {
@@ -142,5 +147,15 @@ public class MainController {
 
     	return new Gson().toJson(resultMap);
     }
+    
+    // 유치원 보내주개
+    @RequestMapping(value = "/main/kindergarten.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getKindergartenStoreList(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+		resultMap = mainService.getKindergartenStoreList(map);
+ 
+		return new Gson().toJson(resultMap);
+	}
 
 }

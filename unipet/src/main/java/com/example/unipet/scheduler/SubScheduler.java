@@ -16,7 +16,7 @@ public class SubScheduler {
     private PaymentService paymentService;
 
     // 10초마다 오늘 결제할 사람 있는지 확인 (테스트용)
-    @Scheduled(cron = "0/10 * * * * *")
+    @Scheduled(cron = "0 0 20 * * *")
     public void scheduleSubscriptionBilling() {
         // 1. 명단 확보
         List<HashMap<String, Object>> targets = paymentService.getTodayBillingList();
