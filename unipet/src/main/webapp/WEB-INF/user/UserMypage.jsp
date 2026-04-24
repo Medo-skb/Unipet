@@ -2022,6 +2022,19 @@ const app = Vue.createApp({
         this.loadSubscriptionInfo();
         this.loadMyPostList();
         this.loadMyCommentList();
+
+        // 리뷰 작성 후 예약내역 또는 주문내역 페이지로 이동
+        const trigger = sessionStorage.getItem("triggerFunction");
+        if (trigger === "openRsvList") {
+            this.changeMenu('reserveList');
+            sessionStorage.removeItem("triggerFunction");
+        } else if (trigger === "openOrdList") {
+            this.changeMenu('orderList');
+            sessionStorage.removeItem("triggerFunction");
+        }  
+
+        
+        
     }
 });
 
