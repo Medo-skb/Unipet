@@ -117,6 +117,16 @@ public class PaymentController {
 	    
 	    return "payment/pay-success";
 	}
+	
+	@RequestMapping("/payment/refund.do")
+	public String refund(HttpServletRequest request, @RequestParam HashMap<String, Object> map) {
+	    // 2. 파라미터로 받은 orderNo(또는 rsvNo)를 request에 담기 (Attribute 세팅)
+	    request.setAttribute("ordNo", map.get("ordNo"));
+	    request.setAttribute("rsvNo", map.get("rsvNo"));
+	    
+	    return "payment/refund";
+	}
+	
 	// ajax가 호출하는 주소
 	@RequestMapping(value = "/payment/rsv.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
@@ -152,13 +162,21 @@ public class PaymentController {
         return new Gson().toJson(resultMap); 
     }
 	
-	@RequestMapping(value = "/payment/orderList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@PostMapping(value = "/payment/orderList.dox") // RequestMapping보다 명확한 PostMapping 권장
 	@ResponseBody
-	public String getOrderList(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
-	    HashMap<String, Object> resultMap = new HashMap<>();
-	    resultMap = paymentService.getCartList(map);
+	public HashMap<String, Object> getOrderList(
+	    HttpSession session, 
+	    @RequestBody HashMap<String, Object> map // ★ @RequestParam -> @RequestBody로 변경
+	) throws Exception {
+	    
+	    // 이제 map.get("list")를 하면 [33, 32, 29]가 ArrayList 형태로 들어옵니다.
+	    System.out.println("넘어온 파라미터 전체: " + map);
+	    System.out.println("넘어온 리스트: " + map.get("list"));
 
-	    return new Gson().toJson(resultMap);
+	    HashMap<String, Object> resultMap = paymentService.getCartList(map);
+
+	    // 스프링 부트에서는 그냥 Map을 리턴하면 자동으로 JSON으로 변환해주므로 Gson이 필요 없습니다.
+	    return resultMap;
 	}
 	
 	@RequestMapping(value = "/payment/getBenefit.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")

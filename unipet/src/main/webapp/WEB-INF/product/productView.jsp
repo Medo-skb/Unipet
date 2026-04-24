@@ -161,13 +161,16 @@
 
 					<div v-else>
 						<div class="review-item" v-for="review in reviewList" :key="review.REVIEW_NO">
-							<div class="review-head">
-								<span class="review-user">{{review.USER_ID}}</span>
-								<span class="review-date">{{review.CDATE}}</span>
-							</div>
-							<div class="review-rating">별점 : {{review.RATING}} / 5</div>
-							<div class="review-contents">{{review.CONTENTS}}</div>
-						</div>
+                            <div class="review-head">
+                                <span class="review-user">{{ review.USER_ID }}</span>
+                                <span class="review-date">{{ review.CDATE }}</span> 
+                            </div>
+                            <div class="review-rating">
+                                <span v-for="n in review.RATING" :key="'star-' + n" class="star-filled">★</span>
+                            </div>
+                            <!-- <div class="review-rating">별점 : {{ review.RATING }} / 5</div> -->
+                            <div class="review-contents">{{ review.R_CONTENTS }}</div>
+                        </div>
 					</div>
 				</div>
 
@@ -346,6 +349,7 @@
 						type: "POST",
 						data: param,
 						success: function (data) {
+                            console.log(data);
 							if (data.result == "success") {
 								self.reviewList = data.list || [];
 								self.reviewCount = data.summary != null ? data.summary.REVIEW_COUNT : 0;

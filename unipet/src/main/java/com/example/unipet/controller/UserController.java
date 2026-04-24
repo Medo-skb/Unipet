@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.unipet.dao.SmsService;
 import com.example.unipet.dao.UserService;
 import com.example.unipet.model.User;
 import com.google.gson.Gson;
@@ -36,6 +37,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private SmsService smsService;
 
     @Value("${kakao.client-id:}")
     private String kakaoClientId;
@@ -61,14 +65,6 @@ public class UserController {
     // =========================
     // 페이지 이동
     // =========================
-
-//    @GetMapping("/main.do")
-//    public String main(HttpSession session) {
-//        if (session.getAttribute("sessionId") == null) {
-//            return "redirect:/user/login.do";
-//        }
-//        return "main/main";
-//    }
 
     @GetMapping("/user/login.do")
     public String login() {
@@ -122,7 +118,6 @@ public class UserController {
         if (Boolean.TRUE.equals(resultMap.get("result"))) {
             User user = (User) resultMap.get("user");
 
-            // 기존 기능 유지 + userId 세션 저장
             session.setAttribute("sessionId", user.getUserId());
             session.setAttribute("sessionName", user.getUserName());
             session.setAttribute("sessionRole", "USER");
@@ -144,7 +139,6 @@ public class UserController {
         if (Boolean.TRUE.equals(resultMap.get("result"))) {
             User user = (User) resultMap.get("user");
 
-            // 기존 기능 유지 + userId 세션 저장
             session.setAttribute("sessionId", user.getUserId());
             session.setAttribute("sessionName", user.getUserName());
             session.setAttribute("sessionRole", "BIZ");
@@ -172,7 +166,11 @@ public class UserController {
     @ResponseBody
     public String signupBiz(@RequestParam HashMap<String, Object> map,
                             @RequestParam(value = "bizFile", required = false) MultipartFile bizFile) {
-        // 현재 서비스는 MultipartFile 안 받음
+
+        if (bizFile != null && !bizFile.isEmpty()) {
+            map.put("bizFileName", bizFile.getOriginalFilename());
+        }
+
         HashMap<String, Object> resultMap = userService.insertBizUser(map);
         return gson.toJson(resultMap);
     }
@@ -203,13 +201,28 @@ public class UserController {
     public String sendSms(@RequestParam HashMap<String, Object> map, HttpSession session) {
         HashMap<String, Object> resultMap = new HashMap<>();
 
-        String code = String.format("%06d", random.nextInt(1000000));
-        session.setAttribute("smsCode", code);
-        session.setAttribute("smsPhone", map.get("phone"));
+        String phone = map.get("phone") == null ? "" : map.get("phone").toString();
 
-        resultMap.put("result", true);
-        resultMap.put("message", "인증번호가 발송되었습니다.");
-        resultMap.put("code", code); // 테스트용. 실제 배포 시 제거
+        if (phone.isBlank()) {
+            resultMap.put("result", false);
+            resultMap.put("message", "휴대폰 번호를 입력해주세요.");
+            return gson.toJson(resultMap);
+        }
+
+        String code = smsService.createCode();
+        boolean sendResult = smsService.sendSms(phone, code);
+
+        if (sendResult) {
+            session.setAttribute("smsCode", code);
+            session.setAttribute("smsPhone", phone);
+
+            resultMap.put("result", true);
+            resultMap.put("message", "인증번호가 발송되었습니다.");
+            resultMap.put("code", code); // 테스트 끝나면 삭제
+        } else {
+            resultMap.put("result", false);
+            resultMap.put("message", "SMS 전송 실패");
+        }
 
         return gson.toJson(resultMap);
     }
@@ -439,7 +452,6 @@ public class UserController {
 
         User user = (User) selectResult.get("user");
 
-        // 기존 기능 유지 + userId 세션 저장
         session.setAttribute("sessionId", user.getUserId());
         session.setAttribute("sessionName", user.getUserName());
         session.setAttribute("sessionRole", "USER");
@@ -582,7 +594,6 @@ public class UserController {
 
         User user = (User) selectResult.get("user");
 
-        // 기존 기능 유지 + userId 세션 저장
         session.setAttribute("sessionId", user.getUserId());
         session.setAttribute("sessionName", user.getUserName());
         session.setAttribute("sessionRole", "USER");

@@ -1,0 +1,92 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.example.unipet.mapper.ReviewMapper">
+	<!-- 여러개 검색 -->
+	<select id="selectUserList" parameterType="hashmap" resultType="com.example.unipet.model.Default">
+	</select>
+	
+	<select id="selectStoreReviewList" parameterType="hashmap" resultType="com.example.unipet.model.Review">
+	    SELECT 
+	        R.USER_ID,
+	        NICKNAME,
+	        RATING,
+	        R_CONTENTS,
+	        DATE_FORMAT(R.CDATE, '%Y-%m-%d %H:%i') AS cdate,
+	        RSV_NO
+	    FROM REVIEW R
+	    JOIN USERS U ON R.USER_ID = U.USER_ID
+	    WHERE STORE_NO = #{storeNo}
+	    <if test="rsvNo != null and rsvNo != ''">
+	        AND RSV_NO = #{rsvNo}
+	    </if>
+	    ORDER BY R.CDATE DESC
+	    LIMIT 2
+	</select>
+	
+	<!-- 한개 검색 -->
+	<select id="selectUser" parameterType="hashmap" resultType="com.example.unipet.model.Default">
+	</select>
+	
+	<select id="selectOrderInfo" parameterType="hashmap" resultType="com.example.unipet.model.Order">
+		SELECT
+			O.ORD_NO, USER_ID, DELI_STATUS, ORD_DATE, P.PRODUCT_NO, P.PRODUCT_NAME
+		FROM ORDERS O
+		JOIN ORDER_DETAIL D ON O.ORD_NO = D.ORD_NO 
+		JOIN PRODUCT P ON D.PRODUCT_NO = P.PRODUCT_NO
+		WHERE O.ORD_NO = #{ordNo}
+		AND USER_ID = #{userId}
+		AND P.PRODUCT_NO = #{productNo}
+	</select>
+	
+	<select id="selectRsvInfo" parameterType="hashmap" resultType="com.example.unipet.model.Reservation">
+	    SELECT 
+	        R.RSV_NO,
+	        R.SLOT_NO,
+	        SL.SLOT_DATE,
+	        SL.SLOT_TIME,
+	        R.USER_ID,
+	        P.PET_NAME,
+	        P.SPECIES,
+	        P.BREED,
+	        M.MENU_NAME,
+	        M.MENU_PRICE,
+	        R.REQUEST,
+	        S.STORE_NO,
+	        S.STORE_NAME
+	    FROM RESERVATION R
+	    JOIN RSV_SLOT SL ON R.SLOT_NO = SL.SLOT_NO
+	    JOIN PET P ON R.PET_NO = P.PET_NO
+	    JOIN STORE_MENU M ON R.MENU_NO = M.MENU_NO
+	    JOIN STORE S ON R.STORE_NO = S.STORE_NO
+	    WHERE R.RSV_NO = #{rsvNo}
+	</select>
+	
+	<!-- 삽입 -->
+	<insert id="insertUser" parameterType="hashmap">
+	</insert>
+	
+	<insert id="insertReviewRsv" parameterType="hashmap" useGeneratedKeys="true" keyProperty="reviewNo" keyColumn="REVIEW_NO">
+	    INSERT INTO review (USER_ID, STORE_NO, RSV_NO, RATING, R_CONTENTS, CDATE)
+	    VALUES (#{userId}, #{storeNo}, #{rsvNo}, #{rating}, #{rContents}, NOW())
+	</insert>
+	
+	<insert id="insertReviewPrd" parameterType="hashmap" useGeneratedKeys="true" keyProperty="reviewNo" keyColumn="REVIEW_NO">
+	    INSERT INTO review (USER_ID, PRODUCT_NO, ORD_NO, RATING, R_CONTENTS, CDATE)
+	    VALUES (#{userId}, #{productNo}, #{ordNo}, #{rating}, #{rContents}, NOW())
+	</insert>
+	
+	<insert id="insertReviewFile" parameterType="hashmap">
+	    INSERT INTO review_file (REVIEW_NO, FILE_PATH, FILE_NAME, ORIGIN_NAME, FILE_SIZE, FILE_EXT)
+	    VALUES (#{reviewNo}, #{filePath}, #{fileName}, #{originName}, #{fileSize}, #{fileExt})
+	</insert>
+	
+	<!-- 삭제 -->
+	<delete id="deleteUser" parameterType="hashmap">
+	</delete>
+	
+	<!-- 수정 -->
+	<update id="updateUser" parameterType="hashmap">
+	</update>
+	
+</mapper>

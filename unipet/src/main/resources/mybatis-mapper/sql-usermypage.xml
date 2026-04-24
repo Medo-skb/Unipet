@@ -372,8 +372,8 @@
 	<update id="cancelSubscription" parameterType="hashmap">
 		UPDATE subscription
 		SET
-			SUB_STATUS = 'N',
-			IS_AUTO = 'N'
+		SUB_STATUS = 'N',
+		IS_AUTO = 'N'
 		WHERE USER_ID = #{userId}
 		AND SUB_STATUS = 'Y'
 	</update>
@@ -394,7 +394,27 @@
 		#{content}
 		)
 	</insert>
-	
-	
+	<!-- 현재 포인트 조회 -->
+	<select id="selectPointInfo" parameterType="hashmap" resultType="hashmap">
+		SELECT
+		IFNULL(SUM(POINT_AMOUNT), 0) AS point
+		FROM USER_POINT
+		WHERE USER_ID = #{userId}
+	</select>
+
+	<!-- 포인트 사용내역 조회 -->
+	<select id="selectPointUseList" parameterType="hashmap" resultType="hashmap">
+		SELECT
+		POINT_NO AS pointNo,
+		USER_ID AS userId,
+		POINT_AMOUNT AS pointAmount,
+		ORD_NO AS ordNo,
+		REVIEW_NO AS reviewNo,
+		DATE_FORMAT(CDATE, '%Y-%m-%d %H:%i') AS cdate
+		FROM USER_POINT
+		WHERE USER_ID = #{userId}
+		AND POINT_AMOUNT &lt; 0
+		ORDER BY CDATE DESC
+	</select>
 
 </mapper>

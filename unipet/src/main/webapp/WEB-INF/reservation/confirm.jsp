@@ -135,9 +135,7 @@
 
                         if (res.result === "success") {
                             alert("예약은 결제 완료 후 최종 확정이 됩니다. 결제페이지로 이동합니다.");
-                            // 결제 로직을 건너뛰고 바로 성공 페이지로 이동
-                            // 서버에서 넘겨준 rsvNo를 URL 파라미터로 붙입니다.
-                            location.href = "/reservation/success.do?rsvNo=" + res.rsvNo;
+                            pageChange("/payment/pay-rsv.do", { rsvNo: res.rsvNo });
                         } else {
                             alert("예약 처리 중 오류가 발생했습니다: " + (res.message || "서버 응답 에러"));
                         }
@@ -161,10 +159,11 @@
 
                     if (sNo) {
                         // 해당 가게의 상세 페이지로 파라미터를 붙여서 이동
-                        location.href = "/reservation/store-reservation.do?storeNo=" + sNo;
+                        // location.href = "/reservation/book.do?storeNo=" + storeNo;
+                        pageChange("/reservation/book.do", { storeNo: sNo });
                     } else {
                         // 혹시라도 storeNo가 없는 경우를 대비한 예외 처리 (기본 목록으로)
-                        location.href = "/reservation/main.do";
+                        location.href = "/main.do";
                     }
                 }
             }

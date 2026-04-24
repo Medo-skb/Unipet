@@ -1,0 +1,199 @@
+/* refund.css */
+
+/* 기본 설정 */
+body { 
+    background-color: #f8f9fa; 
+    margin: 0; 
+    padding: 0; 
+    font-family: 'Pretendard', sans-serif; 
+    color: #333; 
+}
+
+/* 레이아웃 컨테이너 */
+.pay-container { 
+    max-width: 800px; 
+    margin: 60px auto; 
+    padding: 0 20px; 
+    animation: fadeIn 0.6s ease-out; 
+}
+
+/* 헤더 */
+.pay-header { 
+    font-size: 28px; 
+    font-weight: 800; 
+    text-align: center; 
+    margin-bottom: 40px; 
+    color: #333; 
+}
+
+/* 섹션 공통 (흰색 카드) */
+.pay-section { 
+    background: #fff; 
+    border-radius: 20px; 
+    padding: 30px; 
+    margin-bottom: 25px; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+}
+
+/* 섹션 타이틀 (파란색 세로 바) */
+.section-title { 
+    font-size: 19px; 
+    font-weight: 700; 
+    margin-bottom: 25px; 
+    display: flex; 
+    align-items: center; 
+    color: #444; 
+}
+.section-title::before { 
+    content: ""; 
+    width: 5px; 
+    height: 20px; 
+    background-color: #3BB1E5; 
+    margin-right: 12px; 
+    border-radius: 10px; 
+}
+
+/* 상품 카드 영역 */
+.item-card { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    padding: 10px 0; 
+}
+.item-content { 
+    display: flex; 
+    align-items: center; 
+    gap: 20px; 
+}
+.item-img { 
+    width: 80px; 
+    height: 80px; 
+    border-radius: 15px; 
+    object-fit: cover; 
+    border: 1px solid #f1f1f1; 
+    background-color: #f9fbfd; 
+}
+.item-name { 
+    font-weight: 700; 
+    font-size: 17px; 
+    color: #333; 
+    margin-bottom: 5px; 
+}
+.item-detail { 
+    color: #888; 
+    font-size: 14px; 
+}
+.item-detail b { 
+    color: #555; 
+    font-weight: 600; 
+}
+.item-total-price { 
+    font-weight: 800; 
+    font-size: 18px; 
+    color: #3BB1E5; 
+}
+
+/* 입력 폼 스타일 */
+.input-group { 
+    margin-bottom: 15px; 
+    text-align: left; 
+}
+.input-group label { 
+    display: block; 
+    font-size: 14px; 
+    font-weight: 600; 
+    margin-bottom: 10px; 
+    color: #666; 
+}
+.input-field { 
+    width: 100%; 
+    padding: 14px 20px; 
+    border: 1px solid #e1e1e1; 
+    border-radius: 30px; 
+    box-sizing: border-box; 
+    font-size: 15px; 
+    font-family: inherit;
+    transition: all 0.3s; 
+    background-color: #fff;
+}
+.input-field:focus { 
+    border-color: #3BB1E5; 
+    outline: none; 
+    box-shadow: 0 0 8px rgba(59, 177, 229, 0.2); 
+}
+
+/* 요약 박스 */
+.summary-box { 
+    background: #f9fbfd; 
+    padding: 25px; 
+    border-radius: 15px; 
+    text-align: left; 
+}
+.summary-row { 
+    display: flex; 
+    justify-content: space-between; 
+    margin-bottom: 12px; 
+    color: #666; 
+    font-size: 15px; 
+}
+.text-discount { 
+    color: #FF4D4F; 
+    font-weight: 800; 
+    font-size: 17px; 
+}
+.point-info { 
+    font-size: 13px; 
+    color: #888; 
+    margin-top: 15px; 
+    padding-top: 15px; 
+    border-top: 1px dashed #e1e1e1; 
+}
+.point-info b { 
+    color: #3BB1E5; 
+}
+
+/* 버튼 그룹 */
+.btn-group { 
+    display: flex; 
+    gap: 15px; 
+    margin-top: 20px; 
+    margin-bottom: 60px;
+}
+.btn-primary { 
+    flex: 2; 
+    padding: 18px; 
+    background: #3BB1E5; 
+    color: white; 
+    border: none; 
+    border-radius: 40px; 
+    font-size: 17px; 
+    font-weight: 700; 
+    cursor: pointer; 
+    transition: all 0.3s; 
+    box-shadow: 0 8px 20px rgba(59, 177, 229, 0.3); 
+}
+.btn-primary:hover { 
+    background: #2a9cd1; 
+    transform: translateY(-2px); 
+}
+.btn-secondary { 
+    flex: 1; 
+    padding: 18px; 
+    background: #666; 
+    color: white; 
+    border: none; 
+    border-radius: 30px; 
+    font-size: 16px; 
+    font-weight: 600; 
+    cursor: pointer; 
+    transition: background 0.3s; 
+}
+.btn-secondary:hover { 
+    background: #555; 
+}
+
+/* 애니메이션 */
+@keyframes fadeIn { 
+    from { opacity: 0; transform: translateY(20px); } 
+    to { opacity: 1; transform: translateY(0); } 
+}

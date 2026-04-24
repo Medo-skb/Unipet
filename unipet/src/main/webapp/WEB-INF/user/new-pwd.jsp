@@ -3,8 +3,11 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>새 비밀번호 설정</title>
+   <link href="/css/user/signupuser.css" rel="stylesheet">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+     <title>새 비밀번호 설정</title>
 </head>
 <body>
     <h2>새 비밀번호 설정</h2>

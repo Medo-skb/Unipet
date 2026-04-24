@@ -59,7 +59,8 @@
     ORDER BY 
         IS_MAIN DESC, FILE_NO ASC
    </select>
-   
+ 
+ <!--  
    <select id="selectStoreReviewList" parameterType="hashmap" resultType="com.example.unipet.model.Review">
 	    SELECT 
 	        R.USER_ID,
@@ -77,6 +78,7 @@
 	    ORDER BY R.CDATE DESC
 	    LIMIT 2
 	</select>
+-->
 	
 	<select id="selectStoreSlotList" parameterType="hashmap" resultType="com.example.unipet.model.Store">
 	    SELECT 
@@ -122,7 +124,8 @@
 	      AND CUR_COUNT < CAPACITY
 	    ]]>
 	</select>
-	
+
+<!--	
 	<select id="selectRsvInfo" parameterType="hashmap" resultType="com.example.unipet.model.Reservation">
 	    SELECT 
 	        R.RSV_NO,
@@ -145,7 +148,8 @@
 	    JOIN STORE S ON R.STORE_NO = S.STORE_NO
 	    WHERE R.RSV_NO = #{rsvNo}
 	</select>
-	
+-->
+
 	<select id="selectExpiredReservations" parameterType="hashmap" resultType="com.example.unipet.model.Reservation">
 	    SELECT 
 	        RSV_NO AS rsvNo,
@@ -203,7 +207,7 @@
 	    )
 	</insert>
 	
-	<insert id="insertReviewRsv" parameterType="hashmap" useGeneratedKeys="true" keyProperty="reviewNo" keyColumn="REVIEW_NO">
+<!--	<insert id="insertReviewRsv" parameterType="hashmap" useGeneratedKeys="true" keyProperty="reviewNo" keyColumn="REVIEW_NO">
 	    INSERT INTO review (USER_ID, STORE_NO, RSV_NO, RATING, R_CONTENTS, CDATE)
 	    VALUES (#{userId}, #{storeNo}, #{rsvNo}, #{rating}, #{rContents}, NOW())
 	</insert>
@@ -212,6 +216,7 @@
 	    INSERT INTO review_file (REVIEW_NO, FILE_PATH, FILE_NAME, ORIGIN_NAME, FILE_SIZE, FILE_EXT)
 	    VALUES (#{reviewNo}, #{file_path}, #{file_name}, #{origin_name}, #{file_size}, #{file_ext})
 	</insert>
+-->
 	
 	<!-- 삭제 -->
 	<delete id="deleteUser" parameterType="hashmap">
