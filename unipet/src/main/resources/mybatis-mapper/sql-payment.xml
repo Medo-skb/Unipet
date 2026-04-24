@@ -143,6 +143,7 @@
 	    JOIN store_menu m ON r.MENU_NO = m.MENU_NO
 	    WHERE r.RSV_NO = #{id}
 	</select>
+
     
 	<insert id="insertPayment" parameterType="hashmap">
 	    INSERT INTO payment_master (

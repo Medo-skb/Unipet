@@ -6,15 +6,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>환불 요청</title>
     <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="/js/page-change.js"></script>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/header.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/footer.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/payment/refund.css">
-    <style>
-    </style>
 </head>
 <body>
 
@@ -24,17 +22,20 @@
         <div class="pay-container">
             <div class="pay-header">환불 요청하기</div>
 
-            <div class="pay-section">
+            <div class="pay-section" v-if="list && list.length > 0">
                 <div class="section-title">환불 대상 상품</div>
-                <div class="item-card">
+                
+                <div v-for="item in list" :key="item.productNo" class="item-card">
                     <div class="item-content">
-                        <img :src="orderInfo.IMG_PATH" class="item-img" alt="상품 이미지">
+                        <img :src="item.filePath + item.fileName" class="item-img" alt="상품 이미지">
                         <div class="item-info">
-                            <div class="item-name">{{ orderInfo.PRODUCT_NAME }}</div>
-                            <div class="item-detail">수량: <b>{{ orderInfo.QTY }}개</b></div>
+                            <div class="item-name">{{ item.productName }}</div>
+                            <div class="item-detail">
+                                수량: <b>{{ item.ordQty }}개</b> | 가격: <b>{{ item.unitPrice?.toLocaleString() }}원</b>
+                            </div>
                         </div>
                     </div>
-                    <div class="item-total-price">{{ orderInfo.TOTAL_PRICE?.toLocaleString() }}원</div>
+                    <div class="item-total-price">{{ (item.ordQty * item.unitPrice).toLocaleString() }}원</div>
                 </div>
             </div>
 
@@ -60,12 +61,12 @@
                 </div>
             </div>
 
-            <div class="pay-section">
-                <div class="section-title">환불 방법</div>
+            <div class="pay-section" v-if="info.totalPrice">
+                <div class="section-title">환불 내용</div>
                 <div class="summary-box">
                     <div class="summary-row">
                         <span>환불 예정 금액</span>
-                        <span class="text-discount">{{ orderInfo.TOTAL_PRICE?.toLocaleString() }}원</span>
+                        <span class="text-discount">{{ info.totalPrice?.toLocaleString() }}원</span>
                     </div>
                     <div class="summary-row">
                         <span>환불 수단</span>
@@ -93,50 +94,85 @@
     const app = Vue.createApp({
         data() {
             return {
-                // 변수 - (key : value)
                 ordNo: "${ordNo}" || 6, 
-                rsvNo: "${rsvNo}",
                 
-                // 2. [테스트 데이터] 화면이 뜨는지 확인하기 위해 가짜 데이터를 넣습니다.
-                orderInfo: {
-                    PRODUCT_NAME: "유니펫 프리미엄 사료 5kg",
-                    QTY: 2,
-                    TOTAL_PRICE: 45000,
-                    // 실제 있는 이미지 경로를 넣거나, 테스트용 이미지를 쓰세요.
-                    IMG_PATH: "https://via.placeholder.com/80", 
-                    PAY_NO: 101
-                },
+                info: {},   // 전체 결제 정보 (totalPrice, payNo 등)
+                list: [],   // 환불할 상품 리스트 목록 배열
                 
-                refundReason: "",   // 사유 선택값
-                refundDetail: ""    // 상세 내용
+                refundReason: "",   
+                refundDetail: ""    
             };
         },
         watch: {
             refundReason(newVal) {
-                // 사유가 '기타'가 아닌 다른 것으로 바뀌면, 적어둔 상세 내용을 싹 비워줌
                 if (newVal !== '기타') {
                     this.refundDetail = "";
                 }
             }
         },
         methods: {
-            fnList: function () {
+            // [데이터 가져오기]
+            fnGetInfo: function () {
                 let self = this;
-                let param = {};
                 $.ajax({
-                    url: "",
+                    url: "/payment/getOrder.dox", // 만약 getOrder.dox를 같이 쓴다면 바꿔주세요!
                     dataType: "json",
                     type: "POST",
-                    data: param,
+                    data: { id: self.ordNo }, // 백엔드에서 id로 받으면 id: self.ordNo 로 수정
                     success: function (data) {
-
+                        if(data.info) {
+                            self.info = data.info;
+                            self.list = data.list || []; // 리스트 꽂아주기
+                        } else {
+                            alert("주문 정보를 찾을 수 없습니다.");
+                        }
                     }
                 });
-            }
-        }, // methods
+            },
+            // [환불 제출]
+            fnSubmitRefund: function () {
+                let self = this;
+
+                // 폼 검증
+                if(!self.refundReason || self.refundReason === '사유를 선택해주세요') {
+                    alert("환불 사유를 반드시 선택해주세요.");
+                    return; 
+                }
+                if(self.refundReason === '기타' && !self.refundDetail.trim()) {
+                    alert("기타 사유에 대한 상세 내용을 입력해주세요.");
+                    return;
+                }
+
+                // 서버로 전송할 파라미터 (info 객체에서 추출)
+                const param = {
+                    ordNo: self.ordNo,
+                    payNo: self.info.payNo,           // Order 객체의 payNo 매핑
+                    amount: self.info.totalPrice,     // Order 객체의 totalPrice 매핑
+                    reason: self.refundReason === '기타' ? self.refundReason + " - " + self.refundDetail : self.refundReason
+                };
+
+                if(confirm("상품을 환불하시겠습니까?")) {
+                    $.ajax({
+                        url: "/payment/productRefund.dox",
+                        dataType: "json",
+                        type: "POST",
+                        data: param, // JSON.stringify 없이 폼 데이터로 전송
+                        success: function (data) {
+                            if(data.result === "success") {
+                                alert("환불 완료!");
+                                location.href = "/user/UserMypage.dox";
+                            } else {
+                                alert("오류: " + data.message);
+                            }
+                        }
+                    });
+                }   
+            },
+            fnGoBack: function() { window.history.back(); }
+        },
         mounted() {
-            // 처음 시작할 때 실행되는 부분
             let self = this;
+            self.fnGetInfo();
         }
     });
 
