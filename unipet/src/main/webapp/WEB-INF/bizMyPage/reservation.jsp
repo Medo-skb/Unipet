@@ -11,7 +11,6 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="/js/page-change.js"></script>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/bizMyPage/bizCommon.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/bizMyPage/reservation.css">
 </head>
 <body>
 
@@ -29,7 +28,7 @@
                             <a href="/biz/MyPage.do">홈</a>
                         </li>
                         <li class="menu-item">
-                            <a href="/biz/storeEdit.do">내 정보 및 업체 수정</a>
+                            <a href="/biz/storeEdit.do">내 정보 및 업체 정보 수정</a>
                         </li>
                         <li class="menu-item active">
                             <a href="/biz/reservation.do">예약 현황</a>
