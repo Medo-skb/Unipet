@@ -7,8 +7,7 @@
 <meta charset="UTF-8">
 <link href="/css/user/signupuser.css" rel="stylesheet">
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+
 <title>사용자 회원가입</title>
 </head>
 
