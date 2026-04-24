@@ -59,5 +59,11 @@ public interface BoardMapper {
 	public HashMap<String, Object> selectBoardFileInfo(HashMap<String, Object> map);
 	
 	public HashMap<String, Object> selectRecentTempBoard(HashMap<String, Object> map);
+	
+	public void insertBoardAlarm(HashMap<String, Object> map);
+
+	public List<HashMap<String, Object>> selectBoardAlarmList(HashMap<String, Object> map);
+
+	public int updateBoardAlarmRead(HashMap<String, Object> map);
 
 }

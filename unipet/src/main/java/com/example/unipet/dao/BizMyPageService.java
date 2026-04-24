@@ -3,12 +3,10 @@ package com.example.unipet.dao;
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.unipet.common.Message;
@@ -80,54 +78,7 @@ public class BizMyPageService {
 		return resultMap;
 	}
 	
-	// 승인된 업체 조회
-	public HashMap<String, Object> getApprovedStore(HashMap<String, Object> map){
-	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
-
-	    try {
-	        BizMyPage info = bizMyPageMapper.selectApprovedStore(map);
-
-	        resultMap.put("info", info);
-	        resultMap.put("result", "success");
-	        resultMap.put("message", Message.MSG_SEARCH);
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        resultMap.put("result", "fail");
-	        resultMap.put("message", Message.MSG_SERVER_ERR);
-	    }
-
-	    return resultMap;
-	}
 	
-	// 사업자 회원 탈퇴
-	@Transactional
-	public Map<String, Object> withdrawRequest(Map<String, Object> map) {
-	    Map<String, Object> result = new HashMap<>();
-
-	    // 1. 본인 STORE 존재 여부 확인
-	    int storeCnt = bizMyPageMapper.selectStoreCountByUserId(map);
-
-	    // 2. STORE가 있으면 폐업 상태 확인
-	    if (storeCnt > 0) {
-	        int closedStoreCnt = bizMyPageMapper.selectClosedStoreCount(map);
-
-	        if (closedStoreCnt == 0) {
-	            result.put("success", false);
-	            result.put("message", "업체가 폐업 상태일 때만 탈퇴 신청이 가능합니다.");
-	            return result;
-	        }
-
-	        // 3. STORE 삭제
-	        bizMyPageMapper.deleteStoreByUserId(map);
-	    }
-
-	    // 4. 회원 상태 EXT 변경
-	    bizMyPageMapper.updateWithdrawRequestStatus(map);
-
-	    result.put("success", true);
-	    result.put("message", "탈퇴되었습니다.");
-	    return result;
-	}
 	
 	// 업체 이미지 리스트
 	public HashMap<String, Object> getBizImgList(HashMap<String, Object> map){
@@ -308,27 +259,6 @@ public class BizMyPageService {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
 		try {
-			// 1. 승인된 업체가 있는지 먼저 확인
-			BizMyPage approvedStore = bizMyPageMapper.selectApprovedStore(map);
-
-			if (approvedStore == null) {
-				resultMap.put("result", "fail");
-				resultMap.put("message", "승인된 업체가 없습니다.");
-				return resultMap;
-			}
-
-			// 2. 폐업 시도일 때만 예약 상태 체크
-			if ("N".equals(String.valueOf(map.get("isOpen")))) {
-				int blockedCount = bizMyPageMapper.selectCloseBlockedReservationCount(map);
-
-				if (blockedCount > 0) {
-					resultMap.put("result", "fail");
-					resultMap.put("message", "모든 예약이 종료되어야 폐업할 수 있습니다.");
-					return resultMap;
-				}
-			}
-
-			// 3. 조건 통과 시 수정
 			bizMyPageMapper.updateBizStore(map);
 			bizMyPageMapper.updateBizStoreDetail(map);
 			bizMyPageMapper.updateBizStorePolicy(map);

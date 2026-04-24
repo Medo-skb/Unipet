@@ -182,6 +182,14 @@
 		<if test="bSubNo != null and bSubNo != ''">
 			AND B.B_SUB_NO = #{bSubNo}
 		</if>
+		
+		<if test="integratedCategory != null and integratedCategory != ''">
+			AND BTS.B_SUB_TYPE = #{integratedCategory}
+		</if>
+
+		<if test="localCategory != null and localCategory != ''">
+			AND BTS.B_SUB_TYPE = #{localCategory}
+		</if>
 	
 		<if test="localNo != null and localNo != ''">
 			AND B.LOCAL_NO = #{localNo}
@@ -247,6 +255,14 @@
 
 	<if test="bSubNo != null and bSubNo != ''">
 		AND B.B_SUB_NO = #{bSubNo}
+	</if>
+	
+	<if test="integratedCategory != null and integratedCategory != ''">
+		AND BTS.B_SUB_TYPE = #{integratedCategory}
+	</if>
+
+	<if test="localCategory != null and localCategory != ''">
+		AND BTS.B_SUB_TYPE = #{localCategory}
 	</if>
 
 	<if test="localNo != null and localNo != ''">
@@ -608,4 +624,56 @@
 		LIMIT 1
 	</select>
 
+	<insert id="insertBoardAlarm" parameterType="hashmap">
+		INSERT INTO BOARD_ALARM (
+			RECEIVER_ID,
+			SENDER_ID,
+			BOARD_NO,
+			COMMENT_NO,
+			ALARM_TYPE,
+			ALARM_CONTENT,
+			READ_YN,
+			CDATE
+		) VALUES (
+			#{receiverId},
+			#{senderId},
+			#{boardNo},
+			<choose>
+				<when test="commentNo != null and commentNo != ''">
+					#{commentNo}
+				</when>
+				<otherwise>
+					NULL
+				</otherwise>
+			</choose>,
+			#{alarmType},
+			#{alarmContent},
+			'N',
+			NOW()
+		)
+	</insert>
+
+	<select id="selectBoardAlarmList" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			ALARM_NO,
+			RECEIVER_ID,
+			SENDER_ID,
+			BOARD_NO,
+			COMMENT_NO,
+			ALARM_TYPE,
+			ALARM_CONTENT,
+			READ_YN,
+			DATE_FORMAT(CDATE, '%Y-%m-%d %H:%i:%s') AS CDATE
+		FROM BOARD_ALARM
+		WHERE RECEIVER_ID = #{sessionId}
+		ORDER BY ALARM_NO DESC
+	</select>
+
+	<update id="updateBoardAlarmRead" parameterType="hashmap">
+		UPDATE BOARD_ALARM
+		SET READ_YN = 'Y'
+		WHERE ALARM_NO = #{alarmNo}
+		AND RECEIVER_ID = #{sessionId}
+	</update>
 </mapper>
+

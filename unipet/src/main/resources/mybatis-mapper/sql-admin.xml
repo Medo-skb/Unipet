@@ -77,7 +77,6 @@
 	<!-- 예약 리뷰 신고 -->
 	<select id="selectReservationReviewReportList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
 		SELECT
-			RR.REPORT_REASON AS reportReason,
 		    RR.REPORT_NO AS reportNo,
 		    RR.REVIEW_NO AS reviewNo,
 		    R.USER_ID AS userId,
@@ -102,38 +101,5 @@
 		  AND RR.REP_STATUS = 'WAI'
 		ORDER BY RR.REPORT_NO DESC;
 	</select>
-	
-	<!-- 리뷰 신고 반려 -->
-	<update id="updateReportStatusReject">
-	    UPDATE REVIEW_REPORT
-	    SET REP_STATUS = 'REJ'
-	    WHERE REPORT_NO = #{reportNo}
-	</update>
-	
-	<!-- 리뷰 신고 승인 -->
-	<update id="updateReportStatusApprove" parameterType="map">
-	    UPDATE REVIEW_REPORT
-	    SET REP_STATUS = 'ACC'
-	    WHERE REPORT_NO = #{reportNo}
-	</update>
-	
-	<!-- 리뷰 파일 존재 여부 확인 -->
-	<select id="selectReviewFileCount" parameterType="map" resultType="int">
-	    SELECT COUNT(*)
-	    FROM REVIEW_FILE
-	    WHERE REVIEW_NO = #{reviewNo}
-	</select>
-	
-	<!-- 리뷰 파일 삭제 -->
-	<delete id="deleteReviewFile" parameterType="map">
-	    DELETE FROM REVIEW_FILE
-	    WHERE REVIEW_NO = #{reviewNo}
-	</delete>
-	
-	<!-- 리뷰 신고 승인 리뷰 삭제 -->
-	<delete id="deleteReview" parameterType="map">
-	    DELETE FROM REVIEW
-	    WHERE REVIEW_NO = #{reviewNo}
-	</delete>
 	
 </mapper>

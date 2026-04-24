@@ -2,11 +2,9 @@ package com.example.unipet.dao;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.example.unipet.common.Message;
 import com.example.unipet.mapper.AdminMapper;
@@ -106,28 +104,7 @@ public class AdminService {
 		return resultMap;
 	}
 	
-	// 리뷰 신고 반려
-	@Transactional
-	public void rejectReport(Map<String, Object> map) {
-		adminMapper.updateReportStatusReject(map);
-	}
-
-	// 리뷰 신고 승인
-	@Transactional
-	public void approveReport(Map<String, Object> map) {
-
-	    // 1. 신고 상태 승인 처리
-		adminMapper.updateReportStatusApprove(map);
-
-	    // 2. 리뷰 파일이 있으면 삭제
-	    int fileCnt = adminMapper.selectReviewFileCount(map);
-	    if (fileCnt > 0) {
-	    	adminMapper.deleteReviewFile(map);
-	    }
-
-	    // 3. 리뷰 삭제
-	    adminMapper.deleteReview(map);
-	}
+	
 	
 	
 	

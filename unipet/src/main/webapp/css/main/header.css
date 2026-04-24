@@ -1,15 +1,4 @@
-:root {
-    --main: #ff4f6d;
-    --sub: #ffe9ee;
-    --bg: #ffffff;
-    --point: #da120d;
-
-    --text-main: #222;
-    --text-sub: #777;
-    --line-soft: #eeeeee;
-    --image-soft: #f8f8f8;
-}
-
+/* 헤더 전체 */
 .site-header {
     position: sticky;
     top: 0;
@@ -17,10 +6,11 @@
     width: 100%;
     min-width: 1400px;
     padding: 10px 0;
-    background-color: var(--bg);
-    border-bottom: 1px solid var(--line-soft);
+    background-color: #ffffff;
+    border-bottom: 1px solid #eeeeee;
 }
 
+/* 헤더 안쪽 컨테이너 */
 .site-header .header-container {
     width: 100%;
     max-width: 1400px;
@@ -35,10 +25,12 @@
     flex-wrap: nowrap;
 }
 
+/* 왼쪽 영역 */
 .site-header .header-left {
     flex-shrink: 0;
 }
 
+/* 로고 링크 */
 .site-header .logo-link {
     display: inline-flex;
     align-items: center;
@@ -46,6 +38,7 @@
     text-decoration: none;
 }
 
+/* 로고 이미지 */
 .site-header .logo-image {
     width: 200px;
     height: auto;
@@ -53,6 +46,7 @@
     object-fit: contain;
 }
 
+/* 가운데 검색 영역 */
 .site-header .header-center {
     flex: 1;
     min-width: 420px;
@@ -60,24 +54,21 @@
     justify-content: center;
 }
 
+/* 검색 폼 */
 .site-header .search-form {
     width: 100%;
     max-width: 560px;
     min-width: 420px;
     height: 46px;
-    border: 2px solid var(--line-soft);
+    border: 2px solid #2f80ed;
     border-radius: 999px;
     display: flex;
     align-items: center;
     overflow: hidden;
-    background-color: var(--bg);
-    transition: box-shadow 0.2s ease;
+    background-color: #ffffff;
 }
 
-.site-header .search-form:focus-within {
-    border-color: var(--main);
-}
-
+/* 검색 입력창 */
 .site-header .search-input {
     flex: 1;
     height: 100%;
@@ -88,27 +79,30 @@
     background-color: transparent;
 }
 
+/* 검색 버튼 */
 .site-header .search-btn {
     width: 54px;
     height: 100%;
     border: none;
-    background-color: var(--bg);
+    background-color: #ffffff;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
+/* 돋보기 아이콘 */
 .site-header .search-btn svg {
     width: 22px;
     height: 22px;
     fill: none;
-    stroke: var(--main);
+    stroke: #2f80ed;
     stroke-width: 2.2;
     stroke-linecap: round;
     stroke-linejoin: round;
 }
 
+/* 오른쪽 영역 */
 .site-header .header-right {
     display: flex;
     align-items: center;
@@ -118,6 +112,7 @@
     flex-shrink: 0;
 }
 
+/* 메뉴 */
 .site-header .main-nav {
     display: flex;
     align-items: center;
@@ -125,9 +120,10 @@
     flex-wrap: nowrap;
 }
 
+/* 메뉴 링크 */
 .site-header .nav-link {
     text-decoration: none;
-    color: var(--text-main);
+    color: #222222;
     font-size: 18px;
     font-weight: 600;
     white-space: nowrap;
@@ -136,66 +132,46 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    transition: background-color 0.2s ease;
 }
 
+/* hover */
 .site-header .nav-link:hover {
-    color: var(--main);
+    background-color: #bcdcff;
+    color: #222222;
+}
+
+/* 로그인 링크 */
+.site-header .user-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    flex-shrink: 0;
+    position: relative;
+    top: 2px;
+}
+
+/* 로그인 아이콘 */
+.site-header .user-icon {
+    width: 34px;
+    height: 34px;
+    display: block;
 }
 
 .user-menu-wrap {
     display: flex;
     align-items: center;
-    gap: 12px;
-}
-
-.header-icon-link {
-    width: 36px;
-    height: 36px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-main);
-    text-decoration: none;
-    transition: color 0.2s ease;
-}
-
-.header-icon-link:hover {
-    color: var(--main);
-}
-
-.header-icon {
-    width: 32px;
-    height: 32px;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.4;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-}
-
-.header-icon-link {
-    width: 40px;
-    height: 40px;
+    gap: 10px;
 }
 
 .logout-btn {
-    padding: 0;
-    background: none;
-    border: none;
     font-size: 14px;
-    font-weight: 500;
-    color: var(--text-main);
+    color: #333;
     text-decoration: none;
     cursor: pointer;
-    transition: color 0.2s ease;
 }
 
 .logout-btn:hover {
-    color: var(--main);
-}
-
-.search-page-keyword {
-    border-bottom: 1px solid var(--line-soft);
-    padding-bottom: 10px;
+    text-decoration: underline;
 }

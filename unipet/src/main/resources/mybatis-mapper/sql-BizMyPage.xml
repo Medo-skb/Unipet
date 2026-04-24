@@ -56,65 +56,7 @@
 		ORDER BY R.RSV_DATE ASC
 	</select>
 	
-	<!-- 승인된 업체 1건 조회 -->
-	<select id="selectApprovedStore" parameterType="hashmap" resultType="com.example.unipet.model.BizMyPage">
-	    SELECT
-	        S.STORE_NO AS storeNo,
-	        S.IS_OPEN AS isOpen
-	    FROM STORE S
-	    INNER JOIN STORE_USER SU
-	        ON S.S_USER_ID = SU.S_USER_ID
-	    WHERE S.S_USER_ID = #{sUserId}
-	      AND S.S_STATUS IN ('GEN', 'AFF')
-	      AND SU.U_STATUS = 'APR'
-	    LIMIT 1
-	</select>
 	
-	<!-- 폐업 불가 예약 개수 조회 -->
-	<select id="selectCloseBlockedReservationCount" parameterType="hashmap" resultType="int">
-	    SELECT COUNT(*)
-	    FROM RESERVATION R
-	    INNER JOIN STORE S
-	        ON R.STORE_NO = S.STORE_NO
-	    INNER JOIN STORE_USER SU
-	        ON S.S_USER_ID = SU.S_USER_ID
-	    WHERE S.S_USER_ID = #{sUserId}
-	      AND S.S_STATUS IN ('GEN', 'AFF')
-	      AND SU.U_STATUS = 'APR'
-	      AND R.RSV_STATUS NOT IN ('FIN', 'CAN')
-	</select>
-	
-	<!-- 사업자 회원 탈퇴 -->
-	<select id="selectStoreCountByUserId" parameterType="map" resultType="int">
-	    SELECT COUNT(*)
-	    FROM STORE
-	    WHERE S_USER_ID = #{sUserId}
-	</select>
-	
-	<select id="selectClosedStoreCount" parameterType="map" resultType="int">
-	    SELECT COUNT(*)
-	    FROM STORE
-	    WHERE S_USER_ID = #{sUserId}
-	      AND IS_OPEN = 'N'
-	</select>
-	
-	<delete id="deleteStoreByUserId" parameterType="map">
-	    DELETE FROM STORE
-	    WHERE S_USER_ID = #{sUserId}
-	</delete>
-	
-	<update id="updateWithdrawRequestStatus" parameterType="map">
-	    UPDATE STORE_USER
-	    SET U_STATUS = 'EXT'
-	    WHERE S_USER_ID = #{sUserId}
-	</update>
-	
-	<!-- 사업자 회원 탈퇴 -->
-	<update id="updateWithdrawRequest">
-	    UPDATE STORE_USER
-	    SET U_STATUS = 'EXT'
-	    WHERE S_USER_ID = #{sUserId}
-	</update>
 	
 	<!-- 업체 이미지 리스트 -->
 	<select id="selectBizImgList" parameterType="hashmap" resultType="com.example.unipet.model.BizMyPage">
@@ -455,41 +397,44 @@
 	
 	<!-- 리뷰 목록 -->
 	<select id="selectReviewList" parameterType="hashmap" resultType="com.example.unipet.model.BizMyPage">
-		SELECT
-		    R.REVIEW_NO AS reviewNo,
-		    U.USER_NAME AS userName,
-		    U.NICKNAME AS nickname,
-		    SM.MENU_NO AS menuNo,
-		    SM.MENU_NAME AS menuName,
-		    R.RATING AS rating,
-		    R.R_CONTENTS AS rContents,
-		    R.CDATE AS reviewDate,
-		    RF.FILE_PATH AS filePath,
-		    RF.FILE_NAME AS fileName,
-		    RR.REP_STATUS AS repStatus
-		FROM REVIEW R
-		LEFT JOIN USERS U ON R.USER_ID = U.USER_ID
-		LEFT JOIN RESERVATION RE ON R.RSV_NO = RE.RSV_NO
-		LEFT JOIN STORE_MENU SM ON RE.MENU_NO = SM.MENU_NO
-		LEFT JOIN STORE S ON R.STORE_NO = S.STORE_NO
-		LEFT JOIN STORE_USER SU ON S.S_USER_ID = SU.S_USER_ID
-		LEFT JOIN REVIEW_REPORT RR 
-		    ON R.REVIEW_NO = RR.REVIEW_NO
-		    AND RR.REPORTER_ID = #{sUserId}
-		LEFT JOIN REVIEW_FILE RF
-		    ON RF.REVIEW_NO = R.REVIEW_NO
-		    AND RF.FILE_NO = (
-		        SELECT MIN(RF2.FILE_NO)
-		        FROM REVIEW_FILE RF2
-		        WHERE RF2.REVIEW_NO = R.REVIEW_NO
-		    )
-		WHERE S.S_USER_ID = #{sUserId}
-		  AND S.S_STATUS IN ('GEN', 'AFF')
-		  AND SU.U_STATUS = 'APR'
-		  <if test="menuNo != null and menuNo != ''">
-		    AND SM.MENU_NO = #{menuNo}
-		  </if>
-		ORDER BY R.CDATE DESC
+	    SELECT
+	        R.REVIEW_NO AS reviewNo,
+	        U.USER_NAME AS userName,
+	        U.NICKNAME AS nickname,
+	        SM.MENU_NO AS menuNo,
+	        SM.MENU_NAME AS menuName,
+	        R.RATING AS rating,
+	        R.R_CONTENTS AS rContents,
+	        R.CDATE AS reviewDate,
+	        RF.FILE_PATH AS filePath,
+	        RF.FILE_NAME AS fileName,
+	        CASE
+	            WHEN RR.REPORT_NO IS NOT NULL THEN 'Y'
+	            ELSE 'N'
+	        END AS isReported
+	    FROM REVIEW R
+	    LEFT JOIN USERS U ON R.USER_ID = U.USER_ID
+	    LEFT JOIN RESERVATION RE ON R.RSV_NO = RE.RSV_NO
+	    LEFT JOIN STORE_MENU SM ON RE.MENU_NO = SM.MENU_NO
+	    LEFT JOIN STORE S ON R.STORE_NO = S.STORE_NO
+	    LEFT JOIN STORE_USER SU ON S.S_USER_ID = SU.S_USER_ID
+	    LEFT JOIN REVIEW_REPORT RR 
+	        ON R.REVIEW_NO = RR.REVIEW_NO
+	        AND RR.REPORTER_ID = #{sUserId}
+	    LEFT JOIN REVIEW_FILE RF
+	        ON RF.REVIEW_NO = R.REVIEW_NO
+	        AND RF.FILE_NO = (
+	            SELECT MIN(RF2.FILE_NO)
+	            FROM REVIEW_FILE RF2
+	            WHERE RF2.REVIEW_NO = R.REVIEW_NO
+	        )
+	    WHERE S.S_USER_ID = #{sUserId}
+	      AND S.S_STATUS IN ('GEN', 'AFF')
+	      AND SU.U_STATUS = 'APR'
+	      <if test="menuNo != null and menuNo != ''">
+	        AND SM.MENU_NO = #{menuNo}
+	      </if>
+	    ORDER BY R.CDATE DESC
 	</select>
 	
 	<!-- 리뷰 메뉴 목록 -->
@@ -524,6 +469,7 @@
 	        #{reportReason}
 	    )
 	</insert>
+	
 	
 	
 </mapper>

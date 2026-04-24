@@ -277,7 +277,6 @@ table {
 /* 공통 버튼 */
 .section-btn-area {
     display: flex;
-    gap: 12px;
     justify-content: flex-end;
     margin-top: 20px;
 }

@@ -91,25 +91,3 @@ window.addEventListener("DOMContentLoaded", function () {
     showSlide(currentIndex);
     startAutoSlide();
 });
-
-window.addEventListener("DOMContentLoaded", function () {
-    const fadeItems = document.querySelectorAll(".scroll-fade-up");
-
-    if (!fadeItems.length) {
-        return;
-    }
-
-    const observer = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-            if (entry.isIntersecting) {
-                entry.target.classList.add("show");
-            }
-        });
-    }, {
-        threshold: 0.15
-    });
-
-    fadeItems.forEach(function (item) {
-        observer.observe(item);
-    });
-});

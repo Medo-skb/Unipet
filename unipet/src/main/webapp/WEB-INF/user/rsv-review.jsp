@@ -4,11 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="/css/reservation/review.css" rel="stylesheet">
+    <link href="/css/user/rsv-review.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="/js/page-change.js"></script>
-    <title>Review</title>
+    <title>예약 리뷰</title>
     
 </head>
 <body>
@@ -125,6 +125,7 @@
                     data: params,
                     success: function(data) {
                         // 콘솔 확인 결과: data.info 안에 상세 데이터가 있음
+                        console.log(data);
                         if (data.result === "success") {
                             self.info = data.info;
                         } else {
@@ -193,8 +194,8 @@
 
                 const formData = new FormData();
 
-                formData.append("userId", self.userId);
-                formData.append("rsvNo", self.rsvNo);
+                formData.append("userId", self.info.userId);
+                formData.append("rsvNo", self.info.rsvNo);
                 formData.append("storeNo", self.info.storeNo);
                 formData.append("rating", self.rating);
                 formData.append("rContents", self.reviewContent);
@@ -207,7 +208,7 @@
 
                 // 3. AJAX 통신
                 $.ajax({
-                    url: "/reservation/add-review.dox",
+                    url: "/user/mypage/add-review-rsv.dox",
                     type: "POST",
                     processData: false,    // 필수: 데이터를 쿼리 스트링으로 변환하지 않음
                     contentType: false,    // 필수: 기본 content-type 선언 방지
@@ -217,7 +218,8 @@
             
                         if (data.result === "success") {
                             alert("리뷰가 등록되었습니다.");
-                            // location.href = "...";
+                            sessionStorage.setItem("triggerFunction", "openRsvList"); // 메모 남기기
+                            location.href = "/user/mypage.do";  
                         }
                     }
                 });
