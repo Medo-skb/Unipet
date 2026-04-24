@@ -176,7 +176,6 @@ public class PaymentService {
         
         try {
             // 1. 매퍼 호출 (전달받은 map을 그대로 쿼리에 던짐)
-            // XML의 #{userId}와 collection="list"가 이 map 안의 키값들과 매칭됨
             List<HashMap<String, Object>> list = paymentMapper.selectProductList(map);
             
             // 2. 결과 담기

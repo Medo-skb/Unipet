@@ -129,7 +129,7 @@
         data() {
             return {
                 userId : "${sessionId}",
-                cartIds : JSON.parse('${cartNoList}' || '[2, 15, 17]'),
+                cartIds : JSON.parse(sessionStorage.getItem("cartNoList")) || [2, 15, 17],
                 // 1.
                 orderList: [],
                 // 2. 입력 폼 데이터 바인딩
@@ -227,14 +227,15 @@
 
                 const param = {
                     userId : self.userId,
-                    cartIds : self.cartIds
+                    list : self.cartIds
                 }
 
                 $.ajax({
                     url: "/payment/orderList.dox",
                     type: "POST",
                     dataType: "json",
-                    data : param,
+                    contentType: "application/json; charset=utf-8",
+                    data : JSON.stringify(param),
                     success: function (data) {
                         if (data.result === "success") {
                             console.log(param);
@@ -242,11 +243,11 @@
                             console.log(self.orderList);
                             if (!self.orderList || self.orderList.length == 0) {
                                 alert("결제할 상품 정보가 없습니다. 메인 페이지로 이동합니다.");
-                                location.href = "/main.do"; // 메인으로 튕겨내기
+                                // location.href = "/main.do";
                             } 
                         } else {
                             alert(data.message || "주문 정보를 불러올 수 없습니다.");
-                            location.href = "/main.do";
+                            // location.href = "/main.do";
                         }
                     }
                 });
@@ -393,6 +394,7 @@
             self.fnInfo();
             self.fnGetOrderList();
             self.fnGetBenefits();
+            console.log(self.cartIds);
         }
     });
     app.mount('#app');
