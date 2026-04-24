@@ -52,7 +52,7 @@ public class BoardController {
 	}
 
 	@RequestMapping("/board/update.do")
-	public String updateBoard(HttpSession session,
+	public String updateBoard(HttpServletRequest request, HttpSession session,
 			@RequestParam HashMap<String, Object> map,
 			@RequestParam(value = "files", required = false) MultipartFile[] files) throws Exception {
 
@@ -63,19 +63,23 @@ public class BoardController {
 
 		if (resultMap.get("result").equals("success")) {
 
+			request.setAttribute("boardNo", map.get("boardNo"));
+
 			if ("T".equals(map.get("bStatus"))) {
-				return "redirect:/board/edit.do?boardNo=" + map.get("boardNo") + "&msg=temp";
+				request.setAttribute("msg", "temp");
+				return "/board/board-edit";
 			} else {
-				return "redirect:/board/view.do?boardNo=" + map.get("boardNo") + "&msg=update";
+				request.setAttribute("msg", "update");
+				return "/board/board-view";
 			}
 
 		} else if (resultMap.get("result").equals("login")) {
-			return "redirect:/user/login.do";
+			return "/user/login";
 		} else {
-			return "redirect:/board/edit.do?boardNo=" + map.get("boardNo");
+			request.setAttribute("boardNo", map.get("boardNo"));
+			return "/board/board-edit";
 		}
 	}
-
 	@RequestMapping("/board/list.dox")
 	@ResponseBody
 	public String getBoardList(@RequestParam HashMap<String, Object> map) {
