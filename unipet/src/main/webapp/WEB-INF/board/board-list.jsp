@@ -8,170 +8,9 @@
 		<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
 		<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 		<script src="/js/page-change.js"></script>
-		<style>
-			* {
-				box-sizing: border-box;
-			}
+		
+		<link rel="stylesheet" href="/css/board/board-list.css">
 
-			body {
-				margin: 0;
-				font-family: 'Malgun Gothic';
-				background: #f7f8fa;
-			}
-
-			.wrap {
-				width: 1200px;
-				margin: 0 auto;
-				padding: 30px 0;
-			}
-
-			.page-title {
-				font-size: 28px;
-				font-weight: bold;
-				margin-bottom: 20px;
-			}
-
-			.box {
-				background: #fff;
-				border: 1px solid #ddd;
-				border-radius: 12px;
-				padding: 20px;
-				margin-bottom: 20px;
-			}
-
-			.tab-row,
-			.search-row,
-			.sort-row {
-				display: flex;
-				gap: 10px;
-				flex-wrap: wrap;
-				margin-bottom: 15px;
-			}
-
-			.tab-btn,
-			.sort-btn {
-				border: none;
-				background: #e9ecef;
-				padding: 10px 16px;
-				border-radius: 999px;
-				cursor: pointer;
-				font-weight: bold;
-			}
-
-			.tab-btn.active,
-			.sort-btn.active {
-				background: #ff7a00;
-				color: #fff;
-			}
-
-			.search-row select,
-			.search-row input {
-				height: 40px;
-				border: 1px solid #ccc;
-				border-radius: 8px;
-				padding: 0 10px;
-			}
-
-			.search-row input {
-				width: 300px;
-			}
-
-			.search-row button,
-			.write-btn {
-				height: 40px;
-				border: none;
-				border-radius: 8px;
-				background: #ff7a00;
-				color: #fff;
-				padding: 0 16px;
-				cursor: pointer;
-				font-weight: bold;
-			}
-
-			table {
-				width: 100%;
-				border-collapse: collapse;
-			}
-
-			th,
-			td {
-				padding: 14px 10px;
-				border-bottom: 1px solid #eee;
-				text-align: center;
-			}
-
-			th {
-				background: #fafafa;
-			}
-
-			.title-cell {
-				text-align: left;
-				cursor: pointer;
-				font-weight: bold;
-			}
-
-			.title-wrap {
-				display: flex;
-				align-items: center;
-				gap: 8px;
-			}
-
-			.thumb {
-				width: 60px;
-				height: 60px;
-				object-fit: cover;
-				border-radius: 8px;
-				border: 1px solid #ddd;
-				background: #f3f3f3;
-			}
-
-			.private-badge,
-			.popular-badge {
-				display: inline-block;
-				padding: 3px 8px;
-				border-radius: 999px;
-				font-size: 12px;
-			}
-
-			.private-badge {
-				background: #fff1c9;
-				color: #7b5a00;
-			}
-
-			.popular-badge {
-				background: #ffe3e3;
-				color: #d6336c;
-			}
-
-			.pagination {
-				display: flex;
-				justify-content: center;
-				gap: 8px;
-				margin-top: 20px;
-			}
-
-			.pagination button {
-				width: 36px;
-				height: 36px;
-				border: 1px solid #ccc;
-				background: white;
-				border-radius: 8px;
-				cursor: pointer;
-			}
-
-			.pagination button.active {
-				background: #ff7a00;
-				color: white;
-				border-color: #ff7a00;
-			}
-
-			.top-row {
-				display: flex;
-				justify-content: space-between;
-				align-items: center;
-				margin-bottom: 15px;
-			}
-		</style>
 	</head>
 
 	<body>
@@ -180,14 +19,36 @@
 				<div class="page-title">커뮤니티</div>
 
 				<div class="box">
+					<div class="alarm-area" @click.stop>
+						<div class="alarm-fixed" @click="fnGetAlarmList()">
+							🔔
+							<span class="alarm-badge" v-if="alarmCount > 0">{{alarmCount}}</span>
+						</div>
+
+						<div v-if="showAlarm" class="alarm-box" @click.stop>
+							<div v-if="alarmList.length == 0" class="alarm-empty">
+								알림이 없습니다
+							</div>
+
+							<div v-for="item in alarmList"
+							     @click="fnReadAlarm(item)"
+							     class="alarm-item">
+								{{item.ALARM_CONTENT}}
+								<br>
+								<small>{{item.CDATE}}</small>
+							</div>
+						</div>
+					</div>
 					<!-- 대분류 탭 -->
-					<div class="tab-row">
-						<button class="tab-btn" :class="{active : selectedMainNo == ''}"
-							@click="fnSelectMain('')">전체</button>
-						<button class="tab-btn" :class="{active : selectedMainNo == '1'}"
-							@click="fnSelectMain('1')">통합</button>
-						<button class="tab-btn" :class="{active : selectedMainNo == '2'}"
-							@click="fnSelectMain('2')">지역</button>
+					<div class="tab-row main-tab-row">
+						<div class="main-tab-left">
+							<button class="tab-btn" :class="{active : selectedMainNo == ''}"
+								@click="fnSelectMain('')">전체</button>
+							<button class="tab-btn" :class="{active : selectedMainNo == '1'}"
+								@click="fnSelectMain('1')">통합</button>
+							<button class="tab-btn" :class="{active : selectedMainNo == '2'}"
+								@click="fnSelectMain('2')">지역</button>
+						</div>
 					</div>
 					<div class="tab-row" v-if="selectedMainNo == '1'">
 						<button class="tab-btn" :class="{active : integratedCategory == ''}" @click="fnSelectIntegratedCategory('')">전체</button>
@@ -204,13 +65,33 @@
 					<!-- 지역 카테고리 필터 -->
 					<div class="tab-row" v-if="selectedMainNo == '2'">
 						<button class="tab-btn" :class="{active : localCategory == ''}" @click="fnSelectLocalCategory('')">전체</button>
-						<button class="tab-btn" :class="{active : localCategory == 'walk'}" @click="fnSelectLocalCategory('walk')">산책</button>
-						<button class="tab-btn" :class="{active : localCategory == 'meet'}" @click="fnSelectLocalCategory('meet')">소모임</button>
-						<button class="tab-btn" :class="{active : localCategory == 'travel'}" @click="fnSelectLocalCategory('travel')">여행</button>
-						<button class="tab-btn" :class="{active : localCategory == 'info'}" @click="fnSelectLocalCategory('info')">지역정보</button>
-						<button class="tab-btn" :class="{active : localCategory == 'hospital'}" @click="fnSelectLocalCategory('hospital')">병원추천</button>
-						<button class="tab-btn" :class="{active : localCategory == 'care'}" @click="fnSelectLocalCategory('care')">돌봄</button>
-						<button class="tab-btn" :class="{active : localCategory == 'market'}" @click="fnSelectLocalCategory('market')">중고거래</button>
+						<button class="tab-btn" :class="{active : localCategory == 'WALK'}" @click="fnSelectLocalCategory('WALK')">산책</button>
+						<button class="tab-btn" :class="{active : localCategory == 'MEET'}" @click="fnSelectLocalCategory('MEET')">소모임</button>
+						<button class="tab-btn" :class="{active : localCategory == 'TRAVEL'}" @click="fnSelectLocalCategory('TRAVEL')">여행</button>
+						<button class="tab-btn" :class="{active : localCategory == 'LINFO'}" @click="fnSelectLocalCategory('LINFO')">지역정보</button>
+						<button class="tab-btn" :class="{active : localCategory == 'HOSP'}" @click="fnSelectLocalCategory('HOSP')">병원추천</button>
+						<button class="tab-btn" :class="{active : localCategory == 'CARE'}" @click="fnSelectLocalCategory('CARE')">돌봄</button>
+						<button class="tab-btn" :class="{active : localCategory == 'MARKET'}" @click="fnSelectLocalCategory('MARKET')">중고거래</button>
+					</div>
+					
+					<div class="search-row" v-if="selectedMainNo == '2'">
+						<select v-model="localNo" @change="fnSelectLocalNo()">
+							<option value="">전체 지역</option>
+							<option value="1">서울</option>
+							<option value="2">인천</option>
+							<option value="3">부산</option>
+							<option value="4">대구</option>
+							<option value="5">광주</option>
+							<option value="6">대전</option>
+							<option value="7">울산</option>
+							<option value="8">세종</option>
+							<option value="9">경기</option>
+							<option value="10">강원</option>
+							<option value="11">충청</option>
+							<option value="12">전라</option>
+							<option value="13">경상</option>
+							<option value="14">제주</option>
+						</select>
 					</div>
 
 					<!-- 검색 -->
@@ -238,10 +119,12 @@
 								@click="fnChangeSort('view')">조회순</button>
 						</div>
 
-						<div style="display:flex; gap:10px;">
-							<button class="write-btn" @click="fnMoveTempList()">임시저장 글 보기</button>
+						<div class="board-btn-wrap">
+
+							<button class="write-btn" @click="fnMoveTempList()">임시저장</button>
 							<button class="write-btn" @click="fnMoveNormalList()">전체 글</button>
 							<button class="write-btn" @click="fnMoveAdd()">글쓰기</button>
+
 						</div>
 					</div>
 
@@ -272,10 +155,13 @@
 								</td>
 								<td class="title-cell" @click="fnMoveView(item.BOARD_NO)">
 									<div class="title-wrap">
-										<span v-if="item.PRIVATE == 'Y'" class="private-badge">비공개</span>
-										<span v-if="Number(item.LIKE_CNT) >= 5" class="popular-badge">인기글</span>
-										<span>[{{item.B_MAIN_TYPE}}]</span>
-										<span>{{item.TITLE}}</span>
+										<span v-if="item.PRIVATE == 'Y'" class="private-badge">🔒</span>
+										<span v-if="Number(item.LIKE_CNT) >= 5" class="popular-badge">🔥</span>
+
+										<span v-if="selectedMainNo == ''" class="main-badge">{{item.B_MAIN_TYPE}}</span>
+
+										<span class="category">[{{item.B_SUB_TYPE}}]</span>
+										<span class="title-text">{{item.TITLE}}</span>
 									</div>
 								</td>
 								<td>{{item.USER_ID}}</td>
@@ -316,7 +202,12 @@
 						pageSize: 10,
 						totalCount: 0,
 						integratedCategory: '',
-						localCategory: ''
+						localCategory: '',
+						localNo: "",
+						showAlarm: false,
+						alarmList: [],
+						
+						
 					};
 				},
 				computed: {
@@ -338,7 +229,10 @@
 								sortType: self.sortType,
 								page: self.currentPage,
 								pageSize: self.pageSize,
-								tempYn: self.tempYn
+								tempYn: self.tempYn,
+								integratedCategory: self.integratedCategory,
+								localCategory: self.localCategory,
+								localNo: self.localNo
 							},
 							success: function (data) {
 								if (data.result == "success") {
@@ -351,6 +245,9 @@
 					fnSelectMain(bMainNo) {
 						this.selectedMainNo = bMainNo;
 						this.currentPage = 1;
+						this.integratedCategory = "";
+						this.localCategory = "";
+						this.localNo = "";
 						this.fnGetBoardList();
 					},
 					fnChangeSort(sortType) {
@@ -411,10 +308,87 @@
 						this.localCategory = category;
 						this.currentPage = 1;
 						this.fnGetBoardList();
+					},
+					
+					fnSelectIntegratedCategory(category) {
+						this.integratedCategory = category;
+						this.currentPage = 1;
+						this.fnGetBoardList();
+					},
+					
+					fnSelectLocalNo() {
+						this.currentPage = 1;
+						this.fnGetBoardList();
+					},
+					
+					fnGetAlarmList() {
+						let self = this;
+
+						self.showAlarm = !self.showAlarm;
+
+						if (self.showAlarm) {
+							$.ajax({
+								url: "/board/alarm/list.dox",
+								type: "POST",
+								dataType: "json",
+								success: function(data) {
+									if (data.result == "success") {
+										self.alarmList = data.list;
+										self.alarmCount = 0;
+									}
+								}
+							});
+						}
+					},
+					fnReadAlarm(item) {
+						let self = this;
+
+						$.ajax({
+							url: "/board/alarm/read.dox",
+							type: "POST",
+							dataType: "json",
+							data: {
+								alarmNo: item.ALARM_NO
+							},
+							success: function(data) {
+								location.href = "/board/view.do?boardNo=" + item.BOARD_NO;
+							}
+						});
+					},
+					
+					fnCloseAlarmOutside(e) {
+						let alarmArea = document.querySelector(".alarm-area");
+
+						if (alarmArea != null && !alarmArea.contains(e.target)) {
+							this.showAlarm = false;
+						}
+					},
+					
+					fnGetAlarmCount() {
+						let self = this;
+
+						$.ajax({
+							url: "/board/alarm/list.dox",
+							type: "POST",
+							dataType: "json",
+							success: function(data) {
+								if (data.result == "success") {
+									self.alarmCount = data.list.length;  // ← 여기 중요
+								}
+							}
+						});
 					}
 				},
 				mounted() {
 					this.fnGetBoardList();
+					this.fnGetAlarmCount();
+					this.showAlarm = false;
+
+					document.addEventListener("click", this.fnCloseAlarmOutside);
+				},
+				
+				beforeUnmount() {
+					document.removeEventListener("click", this.fnCloseAlarmOutside);
 				}
 			});
 

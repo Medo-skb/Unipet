@@ -8,108 +8,15 @@
 		<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
 		<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 		<script src="/js/page-change.js"></script>
-		<style>
-			* {
-				box-sizing: border-box;
-			}
+		
+		<link rel="stylesheet" href="/css/board/board-add.css">
 
-			body {
-				margin: 0;
-				font-family: 'Malgun Gothic';
-				background: #f7f8fa;
-			}
-
-			.wrap {
-				width: 1000px;
-				margin: 0 auto;
-				padding: 30px 0;
-			}
-
-			.box {
-				background: #fff;
-				border: 1px solid #ddd;
-				border-radius: 12px;
-				padding: 25px;
-			}
-
-			.title {
-				font-size: 28px;
-				font-weight: bold;
-				margin-bottom: 20px;
-			}
-
-			.form-row {
-				margin-bottom: 16px;
-			}
-
-			.label {
-				font-weight: bold;
-				margin-bottom: 8px;
-			}
-
-			input[type=text],
-			textarea,
-			select {
-				width: 100%;
-				border: 1px solid #ccc;
-				border-radius: 8px;
-				padding: 10px;
-				font-size: 14px;
-				font-family: 'Malgun Gothic';
-			}
-
-			textarea {
-				height: 300px;
-				resize: none;
-			}
-
-			.radio-row {
-				display: flex;
-				gap: 20px;
-				align-items: center;
-			}
-
-			.btn-row {
-				display: flex;
-				gap: 10px;
-				margin-top: 20px;
-			}
-
-			.btn-row button {
-				height: 42px;
-				border: none;
-				border-radius: 8px;
-				padding: 0 18px;
-				cursor: pointer;
-				font-weight: bold;
-			}
-
-			.save-btn {
-				background: #ff7a00;
-				color: #fff;
-			}
-
-			.list-btn {
-				background: #333;
-				color: #fff;
-			}
-
-			.info-box {
-				background: #fafafa;
-				border: 1px solid #eee;
-				padding: 12px;
-				border-radius: 10px;
-				font-size: 13px;
-				color: #666;
-				line-height: 1.6;
-			}
-		</style>
 	</head>
 
 	<body>
 		<div id="app">
-			<div style="padding:40px 0; text-align:center;">
-				<img src="/img/board/unipet_logo.png" style="height:100px; cursor:pointer;" onclick="fnGoHome()">
+			<div class="logo-area">
+				<img src="/img/board/unipet_logo.png" class="logo-img" onclick="fnGoHome()">
 			</div>
 			<div class="wrap">
 				<div class="box">
@@ -195,6 +102,7 @@
 						} else if (self.selectedMainNo == "2") {
 							self.boardTitle = "지역 게시판 글쓰기";
 							self.isLocalBoard = true;
+							self.localNo = "2";
 						} else if (self.selectedMainNo == "3") {
 							self.boardTitle = "전문가 Q&A 글쓰기";
 							self.isLocalBoard = false;

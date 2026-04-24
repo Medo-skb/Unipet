@@ -220,4 +220,25 @@ public class BoardController {
 		HashMap<String, Object> resultMap = boardService.getRecentTempBoard(map);
 		return new Gson().toJson(resultMap);
 	}
+	
+	@RequestMapping("/board/alarm/list.dox")
+	@ResponseBody
+	public String getBoardAlarmList(HttpSession session, @RequestParam HashMap<String, Object> map) {
+		String sessionId = session.getAttribute("sessionId") == null ? "" : (String) session.getAttribute("sessionId");
+		map.put("sessionId", sessionId);
+
+		HashMap<String, Object> resultMap = boardService.getBoardAlarmList(map);
+		return new Gson().toJson(resultMap);
+	}
+	
+	@RequestMapping("/board/alarm/read.dox")
+	@ResponseBody
+	public String readBoardAlarm(HttpSession session, @RequestParam HashMap<String, Object> map) {
+		String sessionId = session.getAttribute("sessionId") == null ? "" : (String) session.getAttribute("sessionId");
+		map.put("sessionId", sessionId);
+
+		HashMap<String, Object> resultMap = boardService.readBoardAlarm(map);
+		return new Gson().toJson(resultMap);
+	}
+	
 }

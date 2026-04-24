@@ -8,117 +8,9 @@
 		<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
 		<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 		<script src="/js/page-change.js"></script>
-		<style>
-			* {
-				box-sizing: border-box;
-			}
+		
+		<link rel="stylesheet" href="/css/board/board-edit.css">
 
-			body {
-				margin: 0;
-				font-family: 'Malgun Gothic';
-				background: #f7f8fa;
-			}
-
-			.wrap {
-				width: 1000px;
-				margin: 0 auto;
-				padding: 30px 0;
-			}
-
-			.box {
-				background: #fff;
-				border: 1px solid #ddd;
-				border-radius: 12px;
-				padding: 25px;
-			}
-
-			.title {
-				font-size: 28px;
-				font-weight: bold;
-				margin-bottom: 20px;
-			}
-
-			.form-row {
-				margin-bottom: 16px;
-			}
-
-			.label {
-				font-weight: bold;
-				margin-bottom: 8px;
-			}
-
-			input[type=text],
-			textarea,
-			select {
-				width: 100%;
-				border: 1px solid #ccc;
-				border-radius: 8px;
-				padding: 10px;
-				font-size: 14px;
-				font-family: 'Malgun Gothic';
-			}
-
-			textarea {
-				height: 300px;
-				resize: none;
-			}
-
-			.radio-row {
-				display: flex;
-				gap: 20px;
-				align-items: center;
-			}
-
-			.btn-row {
-				display: flex;
-				gap: 10px;
-				margin-top: 20px;
-			}
-
-			.btn-row button {
-				height: 42px;
-				border: none;
-				border-radius: 8px;
-				padding: 0 18px;
-				cursor: pointer;
-				font-weight: bold;
-			}
-
-			.save-btn {
-				background: #ff7a00;
-				color: #fff;
-			}
-
-			.remove-btn {
-				background: #dc3545;
-				color: #fff;
-			}
-
-			.list-btn {
-				background: #333;
-				color: #fff;
-			}
-
-			.file-box {
-				background: #fafafa;
-				border: 1px solid #eee;
-				border-radius: 10px;
-				padding: 12px;
-				margin-bottom: 10px;
-			}
-
-			.file-box button {
-				margin-left: 10px;
-				height: 30px;
-				border: none;
-				border-radius: 6px;
-				background: #dc3545;
-				color: #fff;
-				padding: 0 12px;
-				cursor: pointer;
-				font-size: 13px;
-			}
-		</style>
 	</head>
 
 	<body>
@@ -133,8 +25,8 @@
 			}
 		%>
 				<div id="app">
-					<div style="margin-bottom:50px; text-align:center; cursor:pointer;" @click="fnMoveList()">
-						<img src="/img/board/unipet_logo.png" style="height:100px;">
+					<div class="logo-area" @click="fnMoveList()">
+						<img src="/img/board/unipet_logo.png" class="logo-img">
 					</div>
 					<div class="wrap" v-if="loaded">
 						<form class="box" v-if="board != null" action="/board/update.do" method="post"
