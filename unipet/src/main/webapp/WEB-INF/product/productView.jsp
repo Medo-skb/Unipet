@@ -31,6 +31,11 @@
 			</div>
 
 			<div class="wrap">
+				<div class="back-area">
+					<button class="back-btn" @click="fnMoveList()">
+						← 상품 목록으로
+					</button>
+				</div>
 				<div v-if="product" class="detail-box">
 					<div class="detail-wrap">
 						<div class="detail-left">
@@ -623,7 +628,7 @@
 							if (data.result == "success") {
 								let cartNoList = [data.cartNo];
 								sessionStorage.setItem("cartNoList", JSON.stringify(cartNoList));
-								location.href = "/payment/pay-shop.do";
+								pageChange("/payment/pay-shop.do", {});
 							} else if (data.result == "login") {
 								alert("로그인이 필요합니다.");
 								location.href = "/user/login.do";
@@ -660,11 +665,15 @@
 				},
 
 				fnMoveCart: function () {
-					location.href = "/cart.do";
+					pageChange("/cart.do", {});
 				},
 
 				fnMoveMain: function () {
-					location.href = "/product.do";
+					pageChange("/product.do", {});
+				},
+				
+				fnMoveList: function () {
+					pageChange("/product.do", {});
 				}
 			},
 			mounted() {
