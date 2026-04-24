@@ -119,23 +119,16 @@
                                 <div class="review-btn-area">
                                     <button type="button"
                                             class="line-btn danger-btn"
-                                            v-if="!item.repStatus"
+                                            v-if="item.isReported !== 'Y'"
                                             @click="fnReportReview(item.reviewNo)">
                                         신고하기
                                     </button>
 
                                     <button type="button"
                                             class="line-btn"
-                                            v-if="item.repStatus === 'WAI'"
+                                            v-if="item.isReported === 'Y'"
                                             disabled>
                                         신고됨
-                                    </button>
-
-                                    <button type="button"
-                                            class="line-btn"
-                                            v-if="item.repStatus === 'REJ'"
-                                            disabled>
-                                        반려됨
                                     </button>
                                 </div>
                             </div>

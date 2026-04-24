@@ -147,22 +147,5 @@ public class MainService {
 		}
 		return resultMap;
 	}
-	
-	// 유치원 보내주개
-	public HashMap<String, Object> getKindergartenStoreList(HashMap<String, Object> map){
-		HashMap<String, Object> resultMap = new HashMap<String, Object>();
-		try {
-			List<Main> list = mainMapper.selectKindergartenStoreList(map);
-			
-			resultMap.put("list", list);
-			resultMap.put("result", "success");
-			resultMap.put("message", Message.MSG_SEARCH);
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-			resultMap.put("result", "fail");
-			resultMap.put("message", Message.MSG_SERVER_ERR);
-		}
-		return resultMap;
-	}
     
 }

@@ -129,26 +129,22 @@
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <th>신고 사유</th>
-                                                    <td colspan="3">{{ item.reportReason }}</td>
+                                                    <th>처리상태</th>
+                                                    <td colspan="3">{{ item.repStatus }}</td>
                                                 </tr>
                                                 <tr>
-                                                    <th>처리상태</th>
-                                                    <td colspan="3">{{ fnReportStatusText(item.repStatus) }}</td>
+                                                    <th>리뷰 이미지</th>
+                                                    <td colspan="3">
+                                                        <img v-if="item.filePath" :src="item.filePath" class="report-preview-img">
+                                                        <span v-else>첨부 이미지 없음</span>
+                                                    </td>
                                                 </tr>
                                             </tbody>
                                         </table>
 
                                         <div class="report-btn-box">
-                                            <button type="button" class="btn-approve"
-                                                @click="fnApproveReport(item)">
-                                                승인
-                                            </button>
-
-                                            <button type="button" class="btn-reject"
-                                                @click="fnRejectReport(item)">
-                                                반려
-                                            </button>
+                                            <button type="button" class="btn-approve">승인</button>
+                                            <button type="button" class="btn-reject">반려</button>
                                         </div>
                                     </div>
                                 </div>
@@ -203,15 +199,8 @@
                                         </table>
 
                                         <div class="report-btn-box">
-                                            <button type="button" class="btn-approve"
-                                                @click="fnApproveReport(item)">
-                                                승인
-                                            </button>
-
-                                            <button type="button" class="btn-reject"
-                                                @click="fnRejectReport(item)">
-                                                반려
-                                            </button>
+                                            <button type="button" class="btn-approve">승인</button>
+                                            <button type="button" class="btn-reject">반려</button>
                                         </div>
                                     </div>
                                 </div>
@@ -422,11 +411,13 @@
             fnReportStatusText: function (status) {
                 if (status === "WAI") {
                     return "접수";
-                } else if (status === "REJ") {
-                    return "반려";
-                } else {
-                    return status;
-                }
+                } // else if (status === "ACC") {
+                //     return "처리완료";
+                // } else if (status === "REJ") {
+                //     return "반려";
+                // } else {
+                //     return status;
+                // }
             },
 
             fnProductReviewReportList: function () {
@@ -439,6 +430,7 @@
                     dataType: "json",
                     data: param,
                     success: function (data) {
+                        console.log("상품 리뷰 신고 목록 응답 :", data);
 
                         if (data.result === "success") {
                             self.productReviewReportList = data.list || [];
@@ -462,6 +454,7 @@
                     dataType: "json",
                     data: param,
                     success: function (data) {
+                        console.log("예약 리뷰 신고 목록 응답 :", data);
 
                         if (data.result === "success") {
                             self.bookingReviewReportList = data.list || [];
@@ -486,6 +479,7 @@
                     type: "POST",
                     data: param,
                     success: function (data) {
+                        console.log("사업자 승인 목록 응답 :", data);
 
                         if (data.result === "success") {
                             self.approveList = data.list;
@@ -567,65 +561,6 @@
                 return self.approveList.filter(function (item) {
                     return item.uStatus === "PND";
                 }).length;
-            },
-
-            fnApproveReport: function(item) {
-                let self = this;
-
-                if (!confirm("해당 신고를 승인하시겠습니까?")) {
-                    return;
-                }
-
-                $.ajax({
-                    url: "/admin/report/approve.dox",
-                    type: "POST",
-                    dataType: "json",
-                    data: {
-                        reportNo: item.reportNo,
-                        reviewNo: item.reviewNo
-                    },
-                    success: function(data) {
-                        if (data.result === "success") {
-                            alert("승인 처리되었습니다.");
-                            self.fnProductReviewReportList();
-                            self.fnBookingReviewReportList();
-                        } else {
-                            alert(data.message);
-                        }
-                    },
-                    error: function() {
-                        alert("서버 오류가 발생했습니다.");
-                    }
-                });
-            },
-
-            fnRejectReport: function(item) {
-                let self = this;
-
-                if (!confirm("해당 신고를 반려하시겠습니까?")) {
-                    return;
-                }
-
-                $.ajax({
-                    url: "/admin/report/reject.dox",
-                    type: "POST",
-                    dataType: "json",
-                    data: {
-                        reportNo: item.reportNo
-                    },
-                    success: function(data) {
-                        if (data.result === "success") {
-                            alert("반려 처리되었습니다.");
-                            self.fnProductReviewReportList();
-                            self.fnBookingReviewReportList();
-                        } else {
-                            alert(data.message);
-                        }
-                    },
-                    error: function() {
-                        alert("서버 오류가 발생했습니다.");
-                    }
-                });
             },
             
         }, // methods

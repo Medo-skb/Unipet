@@ -62,18 +62,11 @@
 
                         <div class="section-btn-area">
                             <button type="button" class="edit-btn" @click="fnEditMyInfo">수정하기</button>
-                            <button type="button" class="edit-btn danger-btn" @click="fnRequestWithdraw">회원 탈퇴</button>
-                        </div>
-                    </div>
-
-                    <div v-if="!hasApprovedStore" class="content-section">
-                        <div  class="empty-text">
-                            {{ approvedStoreMessage }}
                         </div>
                     </div>
 
                     <!-- 업체 이미지 -->
-                    <div class="content-section" v-if="hasApprovedStore">
+                    <div class="content-section">
                         <div class="section-header">
                             <h2>업체 이미지</h2>
                         </div>
@@ -120,7 +113,7 @@
                     </div>
 
                     <!-- 업체 소개 -->
-                    <div class="content-section" v-if="hasApprovedStore">
+                    <div class="content-section">
                         <div class="section-header">
                             <h2>업체 정보</h2>
                         </div>
@@ -215,7 +208,7 @@
                     </div>
 
                     <!-- 업체 메뉴 -->
-                    <div class="content-section" v-if="hasApprovedStore">
+                    <div class="content-section">
                         <div class="section-header">
                             <h2>업체 메뉴</h2>
                         </div>
@@ -487,8 +480,6 @@
                     sUserId: "",
                     ceoName: ""
                 },
-                hasApprovedStore: true,
-                approvedStoreMessage: "",
                 storeInfo: {
                     storeNo: "",
                     storeName: "",
@@ -557,83 +548,6 @@
         },
         methods: {
             // 함수(메소드) - (key : function())
-            fnCheckApprovedStore: function() {
-                let self = this;
-
-                $.ajax({
-                    url: "/getApprovedStore.dox",
-                    type: "POST",
-                    dataType: "json",
-                    data: {},
-                    success: function(data) {
-                        if (data.result === "success" && data.info) {
-                            self.hasApprovedStore = true;
-                            self.approvedStoreMessage = "";
-                            self.fnGetStoreInfo();
-                            self.fnGetFileList();
-                            self.fnGetMenuList();
-                        } else {
-                            self.hasApprovedStore = false;
-                            self.approvedStoreMessage = "승인된 업체가 없습니다.";
-
-                            self.storeInfo = {
-                                storeNo: "",
-                                storeName: "",
-                                sCategory: "",
-                                biznum: "",
-                                isOpen: "",
-                                accName: "",
-                                accNo: "",
-                                accHolder: "",
-                                sAddr: "",
-                                sFullAddr: "",
-                                subTitle: "",
-                                sContents: "",
-                                capacity: "",
-                                cutoff: "",
-                                openTime: "",
-                                closeTime: "",
-                                breakStart: "",
-                                breakEnd: "",
-                                offDay: "",
-                                refundPolicy: ""
-                            };
-
-                            self.fileList = [];
-                            self.menuList = [];
-                        }
-                    },
-                    error: function() {
-                        alert("승인된 업체 확인 중 오류가 발생했습니다.");
-                    }
-                });
-            },
-
-            fnRequestWithdraw: function() {
-                let self = this;
-
-                if (!confirm("정말 회원 탈퇴 하시겠습니까?")) {
-                    return;
-                }
-
-                $.ajax({
-                    url: "/biz/withdrawRequest.dox",
-                    type: "POST",
-                    dataType: "json",
-                    data: {},
-                    success: function(data) {
-                        alert(data.message);
-
-                        if (data.success) {
-                            location.href = "/main.do";
-                        }
-                    },
-                    error: function() {
-                        alert("회원 탈퇴 처리 중 오류가 발생했습니다.");
-                    }
-                });
-            },
-
             fnOpenTimePicker: function(refName) {
                 let self = this;
                 let target = self.$refs[refName];
@@ -1117,7 +1031,9 @@
             // 처음 시작할 때 실행되는 부분
             let self = this;
             self.fnGetMyInfo();
-            self.fnCheckApprovedStore();
+            self.fnGetFileList()
+            self.fnGetStoreInfo();
+            self.fnGetMenuList();
         }
     });
 

@@ -29,7 +29,6 @@ public class Admin {
     String reporterId;   
     String repStatus;   
     String rContents;
-    String reportReason;
 
     String reviewType;
 

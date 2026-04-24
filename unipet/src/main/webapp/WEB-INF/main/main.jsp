@@ -15,41 +15,33 @@
 </head>
 
 <body>
+    
     <div class="page-layout">
 
+        <!-- 헤더 -->
         <jsp:include page="/WEB-INF/header/header.jsp" />
 
+ 
+        <!-- 메인 배너 영역 -->
         <section class="main-banner-section">
             <div class="banner-slider" id="bannerSlider">
 
-            <a href="${pageContext.request.contextPath}/main/kindergarten.do" class="banner-slide active">
-                <img src="${pageContext.request.contextPath}/img/main/banner_1.png" 
-                    class="banner-image">
-            </a>
+                <div class="banner-slide active">
+                    <img src="${pageContext.request.contextPath}/img/main/banner_1.png" class="banner-image">
+                </div>
 
-            <a href="${pageContext.request.contextPath}/reservation/store-detail.do?storeNo=3508" class="banner-slide">
-                <img src="${pageContext.request.contextPath}/img/main/banner_2.png"
-                    class="banner-image">
-            </a>
+                <div class="banner-slide">
+                    <img src="${pageContext.request.contextPath}/img/main/banner_2.png" class="banner-image">
+                </div>
 
-            <a href="${pageContext.request.contextPath}/reservation/store-detail.do?storeNo=3538" class="banner-slide">
-                <img src="${pageContext.request.contextPath}/img/main/banner_3.png" 
-                    class="banner-image">
-            </a>
+                <div class="banner-slide">
+                    <img src="${pageContext.request.contextPath}/img/main/banner_3.png" class="banner-image">
+                </div>
 
                 <div class="banner-overlay-inner">
                     <div class="banner-controls">
-                        <button type="button" class="banner-btn prev-btn" id="prevBtn" aria-label="이전">
-                            <svg viewBox="0 0 24 24" class="banner-arrow">
-                                <path d="M15 6L9 12L15 18"></path>
-                            </svg>
-                        </button>
-
-                        <button type="button" class="banner-btn next-btn" id="nextBtn" aria-label="다음">
-                            <svg viewBox="0 0 24 24" class="banner-arrow">
-                                <path d="M9 6L15 12L9 18"></path>
-                            </svg>
-                        </button>
+                        <button type="button" class="banner-btn prev-btn" id="prevBtn">‹</button>
+                        <button type="button" class="banner-btn next-btn" id="nextBtn">›</button>
                     </div>
                 </div>
 
@@ -63,35 +55,31 @@
 
         <script src="${pageContext.request.contextPath}/js/main/main.js"></script>
 
+ 
+        <!-- 메인 컨텐츠 -->
         <div id="app">
             <div class="container-main">
 
                 <div class="under"></div>
 
+                <!-- 멤버십 배너 -->
                 <div class="membership-banner-wrap">
                     <img src="${pageContext.request.contextPath}/img/main/membership_banner.png" 
-                        class="membership-banner-img">
+                        class="membership-banner-img" 
+                        alt="멤버십 배너">
                 </div>
 
-                <section class="main-store-section scroll-fade-up">
+         
+                <!-- 최근 예약이 많은 업체 -->
+                <section class="main-store-section">
                     <div class="section-header">
                         <h2 class="section-title">최근 예약이 많은 업체</h2>
                     </div>
 
                     <div class="store-card-list">
-                        <div class="store-card"
-                            v-for="(item, index) in popularStoreList"
-                            :key="index"
-                            @click="fnGoStoreDetail(item.storeNo)">
-
+                        <div class="store-card" v-for="(item, index) in popularStoreList" :key="index">
                             <div class="store-image-box">
-                                <img v-if="item.filePath && item.fileName"
-                                    :src="item.filePath + item.fileName"
-                                    class="store-image"
-                                    @error="handleImgError">
-
-                                <div v-else class="store-image-placeholder">STORE IMAGE</div>
-
+                                <div class="store-image-placeholder">STORE IMAGE</div>
                                 <div class="store-rank-badge">{{ index + 1 }}</div>
                             </div>
 
@@ -102,7 +90,7 @@
                                 </div>
 
                                 <div class="store-best-menu">
-                                    {{ item.subTitle }}
+                                    👍 {{ item.popularMenuName }}
                                 </div>
 
                                 <div class="store-address">
@@ -113,25 +101,16 @@
                     </div>
                 </section>
 
-                <section class="main-product-section scroll-fade-up">
+                <!-- 인기 상품 -->
+                <section class="main-product-section">
                     <div class="section-header">
                         <h2 class="section-title">인기 상품</h2>
                     </div>
 
                     <div class="product-card-list">
-                        <div class="product-card"
-                            v-for="(item, index) in popularProductList"
-                            :key="index"
-                            @click="fnGoProductDetail(item.productNo)">
-
+                        <div class="product-card" v-for="(item, index) in popularProductList" :key="index">
                             <div class="product-image-box">
-                                <img v-if="item.filePath && item.fileName"
-                                    :src="item.filePath + item.fileName"
-                                    class="product-image"
-                                    @error="handleImgError">
-
-                                <div v-else class="product-image-placeholder">PRODUCT IMAGE</div>
-
+                                <div class="product-image-placeholder">PRODUCT IMAGE</div>
                                 <div class="rank-badge">{{ index + 1 }}</div>
                             </div>
 
@@ -143,112 +122,107 @@
                     </div>
                 </section>
 
-                <section class="main-recommend-section scroll-fade-up">
-                    <div class="recommend-section-block">
-
-                        <div class="section-header">
-                            <h2 class="section-title">카테고리별 추천 업체</h2>
-                        </div>
-
-                        <div class="category-tab-wrap">
-                            <button
-                                v-for="cate in categoryList"
-                                :key="cate.code"
-                                type="button"
-                                class="category-tab-btn"
-                                :class="{ active: selectedCategory === cate.code }"
-                                @click="fnCategoryStoreList(cate.code)">
-                                {{ cate.name }}
-                            </button>
-                        </div>
-
-                        <div class="recommend-card-list">
-                            <div class="recommend-card"
-                                v-for="(item, index) in storeCategoryList"
-                                :key="index"
-                                @click="fnGoStoreDetail(item.storeNo)">
-
-                                <div class="recommend-image-box">
-                                    <img v-if="item.filePath && item.fileName"
-                                        :src="item.filePath + item.fileName"
-                                        class="recommend-image"
-                                        @error="handleImgError">
-
-                                    <div v-else class="recommend-image-placeholder">STORE IMAGE</div>
-                                </div>
-
-                                <div class="recommend-card-body">
-                                    <div class="recommend-name-row">
-                                        <div class="recommend-name">{{ item.storeName }}</div>
-                                        <div class="recommend-category">{{ item.sCategoryName }}</div>
-                                    </div>
-
-                                    <div class="recommend-reason">
-                                        {{ item.subTitle }}
-                                    </div>
-
-                                    <div class="recommend-address">
-                                        {{ item.sAddr }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div v-if="isCategoryStoreLoaded && storeCategoryList.length === 0" class="empty-text">
-                            해당 카테고리의 업체가 없습니다.
-                        </div>
-                    </div>
-                </section>
-
-                <div class="recommend-section-block scroll-fade-up">
+                <!-- 카테고리별 추천 업체 -->
+                <section class="main-recommend-section">
+                <div class="recommend-section-block">
                     <div class="section-header">
-                        <h2 class="section-title">동물별 추천 상품</h2>
+                        <h2 class="section-title">카테고리별 추천 업체</h2>
                     </div>
 
+                    <!-- 카테고리 버튼 -->
                     <div class="category-tab-wrap">
                         <button
-                            v-for="cate in animalCategoryList"
-                            :key="cate.aMainNo"
+                            v-for="cate in categoryList"
+                            :key="cate.code"
                             type="button"
                             class="category-tab-btn"
-                            :class="{ active: selectedAnimalCategory === cate.aMainNo }"
-                            @click="fnAnimalProductList(cate.aMainNo)">
-                            {{ cate.aMainType }}
+                            :class="{ active: selectedCategory === cate.code }"
+                            @click="fnCategoryStoreList(cate.code)">
+                            {{ cate.name }}
                         </button>
                     </div>
 
+                    <!-- 업체 카드 -->
                     <div class="recommend-card-list">
-                        <div class="recommend-card"
-                            v-for="(item, index) in productCategoryList"
-                            :key="index"
-                            @click="fnGoProductDetail(item.productNo)">
-
+                        <div class="recommend-card" v-for="(item, index) in storeCategoryList" :key="index">
                             <div class="recommend-image-box">
-                                <img v-if="item.filePath && item.fileName"
-                                    :src="item.filePath + item.fileName"
-                                    class="recommend-image"
-                                    @error="handleImgError">
-
-                                <div v-else class="recommend-image-placeholder">PRODUCT IMAGE</div>
+                                <div class="recommend-image-placeholder">STORE IMAGE</div>
                             </div>
 
                             <div class="recommend-card-body">
-                                <div class="recommend-name">{{ item.productName }}</div>
-                                <div class="recommend-price">
-                                    {{ fnFormatPrice(item.productPrice) }}원
+                                <div class="recommend-name-row">
+                                    <div class="recommend-name">{{ item.storeName }}</div>
+                                    <div class="recommend-category">{{ item.sCategoryName }}</div>
+                                </div>
+
+                                <div class="recommend-reason">
+                                    선택한 카테고리의 추천 업체
+                                </div>
+
+                                <div class="recommend-address">
+                                    {{ item.sAddr }}
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div v-if="isAnimalProductLoaded && productCategoryList.length === 0" class="empty-text">
-                        해당 동물 카테고리의 상품이 없습니다.
+                    <!-- 데이터 없을 때 -->
+                    <div v-if="isCategoryStoreLoaded && storeCategoryList.length === 0" class="empty-text">
+                        해당 카테고리의 업체가 없습니다.
                     </div>
                 </div>
+            </section>
 
+                    <!-- 카테고리별 추천 상품 -->
+                    <div class="recommend-section-block">
+                        <div class="section-header">
+                            <h2 class="section-title">동물별 추천 상품</h2>
+                        </div>
+
+                        <!-- 동물 카테고리 버튼 -->
+                        <div class="category-tab-wrap">
+                            <button
+                                v-for="cate in animalCategoryList"
+                                :key="cate.aMainNo"
+                                type="button"
+                                class="category-tab-btn"
+                                :class="{ active: selectedAnimalCategory === cate.aMainNo }"
+                                @click="fnAnimalProductList(cate.aMainNo)">
+                                {{ cate.aMainType }}
+                            </button>
+                        </div>
+
+                        <!-- 상품 카드 -->
+                        <div class="recommend-card-list">
+                            <div class="recommend-card" v-for="(item, index) in productCategoryList" :key="index">
+                                <div class="recommend-image-box">
+                                    <div class="recommend-image-placeholder">PRODUCT IMAGE</div>
+                                </div>
+
+                                <div class="recommend-card-body">
+                                    <div class="recommend-name">{{ item.productName }}</div>
+
+                                    <div class="recommend-reason">
+                                        선택한 카테고리의 추천 상품
+                                    </div>
+
+                                    <div class="recommend-price">
+                                        {{ fnFormatPrice(item.productPrice) }}원
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 데이터 없을 때 -->
+                        <div v-if="isAnimalProductLoaded && productCategoryList.length === 0" class="empty-text">
+                            해당 동물 카테고리의 상품이 없습니다.
+                        </div>
+                    </div>
             </div>
         </div>
 
+ 
+        <!-- 푸터 -->
         <jsp:include page="/WEB-INF/footer/footer.jsp" />
 
     </div>
@@ -286,7 +260,10 @@
             // 함수(메소드) - (key : function())
             fnList: function () {
                 let self = this;
-                let param = {};
+                let param = {
+                    category: "HOSPITAL", //임시
+                    subNo: 1    //임시
+                };
                 $.ajax({
                     url: "http://localhost:8080/getMainBasicList.dox",
                     dataType: "json",
@@ -389,26 +366,7 @@
                     return "0";
                 }
                 return Number(price).toLocaleString();
-            },
-
-            handleImgError: function (event) {
-                event.target.src = "${pageContext.request.contextPath}/img/no-image.png";
-            },
-
-            fnGoStoreDetail: function (storeNo) {
-                if (!storeNo) {
-                    return;
-                }
-                location.href = "/reservation/store-detail.do?storeNo=" + storeNo;
-            },
-
-            fnGoProductDetail: function (productNo) {
-                if (!productNo) {
-                    return;
-                }
-                location.href = "/product/view.do?productNo=" + productNo;
-            },
-
+            }
         }, // methods
         mounted() {
             // 처음 시작할 때 실행되는 부분

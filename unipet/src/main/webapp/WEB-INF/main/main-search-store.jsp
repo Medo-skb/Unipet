@@ -29,17 +29,9 @@
 
             <section class="search-section">
                 <div v-if="storeList.length > 0" class="search-list">
-                    <div v-for="item in storeList"
-                        :key="item.storeNo"
-                        class="search-card search-card-row"
-                        @click="fnGoStoreDetail(item.storeNo)">
+                    <div v-for="item in storeList" :key="item.storeNo" class="search-card search-card-row">
                         <div class="search-thumb-wrap">
-                            <img v-if="item.filePath && item.fileName"
-                                :src="item.filePath + item.fileName"
-                                alt="업체 이미지"
-                                class="search-thumb-image"
-                                @error="handleImgError">
-                            <div v-else class="search-thumb"></div>
+                            <div class="search-thumb"></div>
                         </div>
 
                         <div class="search-info">
@@ -111,18 +103,7 @@
                         self.storeList = [];
                     }
                 });
-            },
-
-            handleImgError: function (event) {
-                event.target.src = "${pageContext.request.contextPath}/img/no-image.png";
-            },
-
-            fnGoStoreDetail: function (storeNo) {
-                if (!storeNo) {
-                    return;
-                }
-                location.href = "/reservation/store-detail.do?storeNo=" + storeNo;
-            },
+            }
         },
         mounted() {
             let self = this;
