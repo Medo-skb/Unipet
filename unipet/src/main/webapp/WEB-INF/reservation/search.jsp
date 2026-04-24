@@ -338,7 +338,7 @@
                 // 2. 회원사(GEN) 처리: 기존에 잘 작동하던 .do 페이지로 이동
                 if (item.sStatus === 'GEN') {
                     if (item.storeNo) {
-                        location.href = "/reservation/store-detail.do?storeNo=" + item.storeNo;
+                        pageChange("/reservation/store-detail.do", { storeNo: item.storeNo });
                     } else {
                         alert("회원사 번호가 없습니다.");
                     }

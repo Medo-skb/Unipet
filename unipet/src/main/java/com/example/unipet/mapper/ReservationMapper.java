@@ -6,7 +6,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 
 import com.example.unipet.model.Reservation;
-import com.example.unipet.model.Review;
+//import com.example.unipet.model.Review;
 import com.example.unipet.model.Store;
 
 @Mapper
@@ -20,7 +20,7 @@ public interface ReservationMapper {
 	// 업체 이미지 조회
 	public List<Store> selectStoreImgList(HashMap<String, Object> map);
 	// 업체 리뷰 조회
-	public List<Review> selectStoreReviewList(HashMap<String, Object> map);
+//	public List<Review> selectStoreReviewList(HashMap<String, Object> map);
 	// 업체 예약 슬롯 조회
 	public List<Store> selectStoreSlotList(HashMap<String, Object> map);
 	// 예약 서비스 완료 시간 지남 조회
@@ -34,7 +34,7 @@ public interface ReservationMapper {
 	// 업체 정책 조회
 	public Store selectStorePolicy(HashMap<String, Object> map);
 	// 예약 상세 정보 조회
-	public Reservation selectRsvInfo(HashMap<String, Object> map);
+//	public Reservation selectRsvInfo(HashMap<String, Object> map);
 	
 	
 	// 삭제 
@@ -64,10 +64,6 @@ public interface ReservationMapper {
 	public int insertReservation(HashMap<String, Object> map);
 	// 로그 기록 삽입
 	public int insertRsvLog(HashMap<String, Object> map);
-	// 예약 서비스 리뷰 삽입
-	public int insertReviewRsv(HashMap<String, Object> map);
-	// 예약 서비스 리뷰 파일 삽입
-	public int insertReviewRsvFile(HashMap<String, Object> map);
 	
 	
 }

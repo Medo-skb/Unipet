@@ -166,15 +166,15 @@ public class ReservationController {
 		return "/reservation/success";
 	}
 	
-	@RequestMapping(value = "/reservation/info.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
-	@ResponseBody
-	public String rInfo(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
-	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
-
-		resultMap = reservationService.getRsvInfo(map);
-	    
-	    return new Gson().toJson(resultMap); 
-	}
+//	@RequestMapping(value = "/reservation/info.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+//	@ResponseBody
+//	public String rInfo(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+//	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+//
+//		resultMap = reservationService.getRsvInfo(map);
+//	    
+//	    return new Gson().toJson(resultMap); 
+//	}
 	
 	@RequestMapping(value = "/reservation/cancel.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
@@ -192,36 +192,24 @@ public class ReservationController {
 	    return new Gson().toJson(resultMap);
 	}
 	
-	@RequestMapping("/reservation/review.do")
-	public String rReview(HttpServletRequest request, Model model,  @RequestParam HashMap<String, Object> map) throws Exception{
-		
-		request.setAttribute("map", map);
-		
-		return "/reservation/review";
-	}
-	
+//	@RequestMapping("/reservation/review.do")
+//	public String rReview(HttpServletRequest request, Model model,  @RequestParam HashMap<String, Object> map) throws Exception{
+//		
+//		request.setAttribute("map", map);
+//		
+//		return "/reservation/review";
+//	}
+//	
 //	@RequestMapping("/reservation/add-review.dox")
 //	@ResponseBody
-//	public String addReview(
+//	public HashMap<String, Object> addReview( // 리턴 타입을 HashMap으로 하면 Gson 수작업이 필요 없어요
 //	        @RequestParam HashMap<String, Object> map, 
-//	        @RequestParam("files") List<MultipartFile> files) throws Exception {
+//	        @RequestParam(value = "files", required = false) List<MultipartFile> files) throws Exception {
 //	    
-//	    // 서비스로 데이터와 파일 리스트를 함께 전달
-//	    HashMap<String, Object> resultMap = reservationService.addReviewRsv(map, files);
-//	    
-//	    return new Gson().toJson(resultMap);
+//	    // 파일이 아예 안 넘어왔을 경우를 대비해 빈 리스트를 넣어주거나 
+//	    // 서비스에서 null 체크를 하도록 넘깁니다.
+//	    return reservationService.addReviewRsv(map, files);
 //	}
-	
-	@RequestMapping("/reservation/add-review.dox")
-	@ResponseBody
-	public HashMap<String, Object> addReview( // 리턴 타입을 HashMap으로 하면 Gson 수작업이 필요 없어요
-	        @RequestParam HashMap<String, Object> map, 
-	        @RequestParam(value = "files", required = false) List<MultipartFile> files) throws Exception {
-	    
-	    // 파일이 아예 안 넘어왔을 경우를 대비해 빈 리스트를 넣어주거나 
-	    // 서비스에서 null 체크를 하도록 넘깁니다.
-	    return reservationService.addReviewRsv(map, files);
-	}
 
 	
 }
