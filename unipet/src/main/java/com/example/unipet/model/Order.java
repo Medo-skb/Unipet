@@ -31,5 +31,8 @@ public class Order {
 	public String request;     /* 요청사항 */
     
 	public String deliStatus;
+	
+	public int payNo;
+	
 
 }
