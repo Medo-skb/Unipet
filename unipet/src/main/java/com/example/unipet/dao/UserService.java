@@ -55,9 +55,19 @@ public class UserService {
         HashMap<String, Object> result = new HashMap<>();
 
         try {
+            // 중복 아이디 방지
+            int idCount = userMapper.checkUser(map);
+
+            if (idCount > 0) {
+                result.put("result", false);
+                result.put("message", "이미 사용중인 아이디입니다.");
+                return result;
+            }
+
             int count = userMapper.insertUser(map);
             result.put("result", count > 0);
             result.put("message", count > 0 ? "회원가입이 완료되었습니다." : "회원가입에 실패했습니다.");
+
         } catch (Exception e) {
             e.printStackTrace();
             result.put("result", false);
