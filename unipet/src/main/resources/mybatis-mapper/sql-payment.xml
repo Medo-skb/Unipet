@@ -63,7 +63,7 @@
 	    AND DATE(s.N_DATE) = CURDATE()
      </select>
      
-     <select id="selectProductList" resultType="hashmap">
+	<select id="selectProductList" resultType="hashmap">
 	    SELECT 
 	        c.CART_NO,
 	        p.PRODUCT_NO,
@@ -73,7 +73,7 @@
 	    FROM cart c
 	    JOIN product p ON c.PRODUCT_NO = p.PRODUCT_NO
 	    WHERE c.USER_ID = #{userId}
-	      AND c.PRODUCT_NO IN 
+	      AND c.CART_NO IN 
 	      <foreach collection="list" item="id" open="(" separator="," close=")">
 	          #{id}
 	      </foreach>
