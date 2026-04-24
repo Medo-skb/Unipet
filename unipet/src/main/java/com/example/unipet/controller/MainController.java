@@ -20,7 +20,7 @@ import jakarta.servlet.http.HttpServletRequest;
 @Controller
 public class MainController {
 
-	@Autowired
+	@Autowired 
     MainService mainService;
 
 	// 메인페이지
