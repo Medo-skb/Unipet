@@ -179,13 +179,15 @@
 											}
 										} else if (data.result == "login") {
 											alert("로그인이 필요합니다.");
-											location.href = "/user/login.do";
+											pageChange("/user/login.do", {});
 										} else if (data.result == "deny") {
 											alert(data.message);
-											location.href = "/board/view.do?boardNo=" + self.boardNo;
+											pageChange("/board/view.do", {
+												boardNo: self.boardNo
+											});
 										} else {
 											alert(data.message);
-											location.href = "/board/list.do";
+											pageChange("/board/list.do", {});
 										}
 									}
 								});
@@ -211,10 +213,10 @@
 									success: function (data) {
 										if (data.result == "success") {
 											alert(data.message);
-											location.href = "/board/list.do";
+											pageChange("/board/list.do", {});
 										} else if (data.result == "login") {
 											alert("로그인이 필요합니다.");
-											location.href = "/user/login.do";
+											pageChange("/user/login.do", {});
 										} else {
 											alert(data.message);
 										}
@@ -222,7 +224,9 @@
 								});
 							},
 							fnMoveView() {
-								location.href = "/board/view.do?boardNo=" + this.boardNo;
+								pageChange("/board/view.do", {
+									boardNo: this.boardNo
+								});
 							},
 							fnRemoveFile(fileNo) {
 								let self = this;
@@ -245,7 +249,7 @@
 											self.fnGetBoardEditInfo();
 										} else if (data.result == "login") {
 											alert("로그인이 필요합니다.");
-											location.href = "/user/login.do";
+											pageChange("/user/login.do", {});
 										} else {
 											alert(data.message);
 										}
@@ -253,7 +257,7 @@
 								});
 							},
 							fnMoveList() {
-								location.href = "/board/list.do";
+								pageChange("/board/list.do", {});
 							}
 						},
 						mounted() {

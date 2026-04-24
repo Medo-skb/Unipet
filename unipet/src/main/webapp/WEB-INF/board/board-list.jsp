@@ -206,6 +206,7 @@
 						localNo: "",
 						showAlarm: false,
 						alarmList: [],
+						alarmCount: 0
 						
 						
 					};
@@ -269,9 +270,13 @@
 					
 					fnMoveView(boardNo) {
 						if (this.tempYn == "Y") {
-							location.href = "/board/edit.do?boardNo=" + boardNo;
+							pageChange("/board/edit.do", {
+								boardNo: boardNo
+							});
 						} else {
-							location.href = "/board/view.do?boardNo=" + boardNo;
+							pageChange("/board/view.do", {
+								boardNo: boardNo
+							});
 						}
 					},
 					
@@ -281,15 +286,19 @@
 							return;
 						}
 
-						location.href = "/board/add.do?bMainNo=" + this.selectedMainNo;
+						pageChange("/board/add.do", {
+							bMainNo: this.selectedMainNo
+						});
 					},
 					
 					fnMoveTempList() {
-						location.href = "/board/list.do?tempYn=Y";
+						pageChange("/board/list.do", {
+							tempYn: "Y"
+						});
 					},
 
 					fnMoveNormalList() {
-						location.href = "/board/list.do";
+						pageChange("/board/list.do", {});
 					},
 					
 					fnTempList() {
@@ -351,7 +360,13 @@
 								alarmNo: item.ALARM_NO
 							},
 							success: function(data) {
-								location.href = "/board/view.do?boardNo=" + item.BOARD_NO;
+								if (self.alarmCount > 0) {
+									self.alarmCount--;
+								}
+
+								pageChange("/board/view.do", {
+									boardNo: item.BOARD_NO
+								});
 							}
 						});
 					},
@@ -373,7 +388,15 @@
 							dataType: "json",
 							success: function(data) {
 								if (data.result == "success") {
-									self.alarmCount = data.list.length;  // ← 여기 중요
+									let count = 0;
+
+									for (let i = 0; i < data.list.length; i++) {
+										if (data.list[i].READ_YN == "N") {
+											count++;
+										}
+									}
+
+									self.alarmCount = count;
 								}
 							}
 						});
