@@ -52,11 +52,9 @@ public class ReservationController {
 	public String sDetail(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
 	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
-	    // 1. 가게 정보 (Map 형태) 담기
 	    HashMap<String, Object> storeInfo = reservationService.getStoreInfo(map);
 	    resultMap.put("info", storeInfo.get("info"));
 
-	    // 2. 메뉴 목록 (List 형태) 담기
 	    HashMap<String, Object> menuList = reservationService.getStoreMenuList(map);
 	    resultMap.put("menuList", menuList.get("list"));
 	    
@@ -65,8 +63,11 @@ public class ReservationController {
 	    
 	    HashMap<String, Object> reviewList = reservationService.getStoreReviewList(map);
 	    resultMap.put("reviewList", reviewList.get("list"));
+	    
+	    HashMap<String, Object> reviewSummary = reservationService.getStoreReviewSummary(map);
+	    resultMap.put("reviewCount", reviewSummary.get("count"));
+	    resultMap.put("reviewAvg", reviewSummary.get("avg"));
 
-	    // Gson으로 변환하면 { "info": {...}, "menuList": [...] } 구조가 됩니다.
 	    return new Gson().toJson(resultMap); 
 	}
 	
@@ -128,53 +129,43 @@ public class ReservationController {
 	public String addRsv(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
 	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
 	    
-	    // 1. 서비스 호출 (reservation INSERT + rsv_log INSERT)
-	    // 앞서 Service에서 useGeneratedKeys 설정을 했으므로 map에 rsvNo가 담겨 돌아옵니다.
 	    resultMap = reservationService.addReservation(map);
 	    
 	    return new Gson().toJson(resultMap);
 	}
 	
 	// 결제 완료를 가정하고 completeReserviation 호출을 위한 임시 매서드
-	@GetMapping("/test/complete")
-	@ResponseBody
-	public HashMap<String, Object> testComplete(
-	        @RequestParam("rsvNo") int rsvNo,
-	        @RequestParam("slotNo") int slotNo) {
-	    
-	    HashMap<String, Object> map = new HashMap<>();
-	    map.put("rsvNo", rsvNo);
-	    map.put("slotNo", slotNo);
-	    map.put("userId", "test_user01"); // 로그 기록을 위한 임의 ID
-
-	    try {
-	        // 서비스의 completeReservation 호출
-	        return reservationService.completeReservation(map);
-	    } catch (Exception e) {
-	        HashMap<String, Object> error = new HashMap<>();
-	        error.put("result", "error");
-	        error.put("message", e.getMessage());
-	        return error;
-	    }
-	}
-	
-	@RequestMapping("/reservation/success.do")
-	public String rSuccess(HttpServletRequest request, Model model,  @RequestParam HashMap<String, Object> map) throws Exception{
-		
-		request.setAttribute("map", map);
-		
-		return "/reservation/success";
-	}
-	
-//	@RequestMapping(value = "/reservation/info.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+//	@GetMapping("/test/complete")
 //	@ResponseBody
-//	public String rInfo(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
-//	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
-//
-//		resultMap = reservationService.getRsvInfo(map);
+//	public HashMap<String, Object> testComplete(
+//	        @RequestParam("rsvNo") int rsvNo,
+//	        @RequestParam("slotNo") int slotNo) {
 //	    
-//	    return new Gson().toJson(resultMap); 
+//	    HashMap<String, Object> map = new HashMap<>();
+//	    map.put("rsvNo", rsvNo);
+//	    map.put("slotNo", slotNo);
+//	    map.put("userId", "test_user01"); // 로그 기록을 위한 임의 ID
+//
+//	    try {
+//	        return reservationService.completeReservation(map);
+//	    } catch (Exception e) {
+//	        HashMap<String, Object> error = new HashMap<>();
+//	        error.put("result", "error");
+//	        error.put("message", e.getMessage());
+//	        return error;
+//	    }
 //	}
+	
+//	@RequestMapping("/reservation/success.do")
+//	public String rSuccess(HttpServletRequest request, Model model,  @RequestParam HashMap<String, Object> map) throws Exception{
+//		
+//		request.setAttribute("map", map);
+//		
+//		return "/reservation/success";
+//	}
+	
+	
+	// 결제 완료 후 취소 시,
 	
 	@RequestMapping(value = "/reservation/cancel.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
@@ -182,7 +173,6 @@ public class ReservationController {
 	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
 	    try {
-	        // 서비스 단에서 트랜잭션 처리
 	        reservationService.removeRsv(map);
 	        resultMap.put("result", "success");
 	    } catch (Exception e) {
@@ -191,25 +181,6 @@ public class ReservationController {
 	    }
 	    return new Gson().toJson(resultMap);
 	}
-	
-//	@RequestMapping("/reservation/review.do")
-//	public String rReview(HttpServletRequest request, Model model,  @RequestParam HashMap<String, Object> map) throws Exception{
-//		
-//		request.setAttribute("map", map);
-//		
-//		return "/reservation/review";
-//	}
-//	
-//	@RequestMapping("/reservation/add-review.dox")
-//	@ResponseBody
-//	public HashMap<String, Object> addReview( // 리턴 타입을 HashMap으로 하면 Gson 수작업이 필요 없어요
-//	        @RequestParam HashMap<String, Object> map, 
-//	        @RequestParam(value = "files", required = false) List<MultipartFile> files) throws Exception {
-//	    
-//	    // 파일이 아예 안 넘어왔을 경우를 대비해 빈 리스트를 넣어주거나 
-//	    // 서비스에서 null 체크를 하도록 넘깁니다.
-//	    return reservationService.addReviewRsv(map, files);
-//	}
 
 	
 }

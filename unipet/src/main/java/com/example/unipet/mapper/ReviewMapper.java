@@ -15,8 +15,6 @@ public interface ReviewMapper {
 	
 	// 여러개 리턴 -> selectXXXList
 	public List<Default> selectDefaultList(HashMap<String, Object> map);
-	// 업체 리뷰 조회
-	public List<Review> selectStoreReviewList(HashMap<String, Object> map);
 	
 	// 한개 리턴 -> selectXXX
 	public Default selectDefault(HashMap<String, Object> map);

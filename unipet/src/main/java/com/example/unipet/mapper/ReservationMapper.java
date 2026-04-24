@@ -20,7 +20,7 @@ public interface ReservationMapper {
 	// 업체 이미지 조회
 	public List<Store> selectStoreImgList(HashMap<String, Object> map);
 	// 업체 리뷰 조회
-//	public List<Review> selectStoreReviewList(HashMap<String, Object> map);
+	public List<Store> selectStoreReviewList(HashMap<String, Object> map);
 	// 업체 예약 슬롯 조회
 	public List<Store> selectStoreSlotList(HashMap<String, Object> map);
 	// 예약 서비스 완료 시간 지남 조회
@@ -33,8 +33,8 @@ public interface ReservationMapper {
 	public int checkSlotAvailability(Object slotNo);
 	// 업체 정책 조회
 	public Store selectStorePolicy(HashMap<String, Object> map);
-	// 예약 상세 정보 조회
-//	public Reservation selectRsvInfo(HashMap<String, Object> map);
+	// 업체 리뷰 통계 조회
+	HashMap<String, Object> selectStoreReviewSummary(HashMap<String, Object> map);
 	
 	
 	// 삭제 

@@ -4,7 +4,6 @@
     margin: 0px auto;
     padding: 10px;
     box-sizing: border-box;
-    
 }
 
 #top{
@@ -51,12 +50,12 @@
 #search {
     display: flex;
     align-items: center;
-    gap: 15px; /* 그룹 간 간격 */
+    gap: 15px;
 }
 
 .button-group {
     display: flex;
-    gap: 5px; /* 버튼끼리 간격 */
+    gap: 5px;
 }
 
 .search-btn {
@@ -70,7 +69,7 @@
 }
 
 .reset-btn {
-    background-color: #f8f9fa; /* 연한 회색 */
+    background-color: #f8f9fa;
     color: #666;
     border: 1px solid #ddd;
     padding: 8px 16px;
@@ -89,13 +88,11 @@
     grid-template-rows: 500px;
     border-top: 1px solid black;
     padding-top: 10px;
-    
 }
 
 #left{
-    /* border: 1px solid black; */
     height: 100%;
-    overflow-y: auto; /* 리스트가 길어지면 스크롤 생성 */
+    overflow-y: auto; 
     background-color: #fcfcfc;
 }
 
@@ -131,53 +128,50 @@
 }
 
 .store-card.is-member {
-    border-left: 4px solid #4a90e2; /* 유니펫 브랜드 컬러가 있다면 그 색상으로 */
+    border-left: 4px solid #4a90e2;
     background-color: #f8fbff;
 }
 
-/* 이름과 버튼을 감싸는 컨테이너 */
 .name-wrap {
     display: flex;
-    justify-content: space-between; /* 이름은 왼쪽, 버튼은 오른쪽 끝 */
-    align-items: center;           /* 세로 중앙 정렬 */
+    justify-content: space-between;
+    align-items: center;           
     margin: 5px 0;
 }
 
 .member-badge {
     display: inline-block;
-    background-color: #4A90E2; /* 활성화 버튼 색상과 통일감 */
+    background-color: #4A90E2; 
     color: white;
     font-size: 10px;
     padding: 2px 6px;
     border-radius: 4px;
     font-weight: bold;
-    white-space: nowrap;      /* 배지 글자가 잘리지 않도록 설정 */
-    flex-shrink: 0;           /* 이름이 길어져도 배지 크기는 유지 */
+    white-space: nowrap;      
+    flex-shrink: 0;           
 }
-
 
 .store-name {
     margin: 0;
     font-size: 17px;
     color: #333;
     flex: 1; 
-    display: flex;       /* 추가: 이름과 배지를 정렬 */
-    align-items: center; /* 추가: 세로 중앙 맞춤 */
-    gap: 6px;           /* 추가: 이름과 배지 사이 간격 */
-    overflow: hidden;    /* 부모의 말줄임표 설정을 위해 유지 */
+    display: flex;      
+    align-items: center; 
+    gap: 6px;           
+    overflow: hidden;    
 }
 
-/* 작고 깔끔한 상세보기 버튼 */
 .detail-btn-sm {
     margin-left: 10px;
-    padding: 4px 10px;        /* 크기를 작게 조절 */
-    font-size: 11px;          /* 글자 크기 축소 */
-    background-color: #fff;   /* 배경을 흰색으로 하고 테두리만 줘도 깔끔합니다 */
+    padding: 4px 10px;
+    font-size: 11px;
+    background-color: #fff;
     color: #4A90E2;
     border: 1px solid #4A90E2;
     border-radius: 4px;
     cursor: pointer;
-    white-space: nowrap;      /* 버튼 글자가 줄바꿈되지 않도록 */
+    white-space: nowrap;
     transition: all 0.2s;
 }
 
@@ -228,7 +222,6 @@
     font-size: 13px;
     color: #666;
     margin-bottom: 3px;
-    /* 주소가 너무 길면 생략 처리 */
     display: -webkit-box;
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
@@ -267,13 +260,11 @@
     line-height: 1.6;
 }
 
-
 #right{
-    /* border: 1px solid black; */
 }
 
 #map {
-    position: relative; /* 버튼의 기준점 */
+    position: relative;
     width: 100%;
     height: 100%;
 }
@@ -282,7 +273,7 @@
     position: absolute;
     bottom: 20px;
     right: 20px;
-    z-index: 2; /* 지도보다 위로 */
+    z-index: 2;
     background: white;
     border: 1px solid #ccc;
     border-radius: 5px;
