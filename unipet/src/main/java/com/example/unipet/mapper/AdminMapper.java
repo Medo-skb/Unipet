@@ -2,6 +2,7 @@ package com.example.unipet.mapper;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 
@@ -24,4 +25,18 @@ public interface AdminMapper {
 	
 	// 상품 리뷰 신고 리스트
 	public List<Admin> selectProductReviewReportList(HashMap<String, Object> map);
+	
+	// 리뷰 신고 반려
+	int updateReportStatusReject(Map<String, Object> map);
+	
+	// 리뷰 신고 승인
+	int updateReportStatusApprove(Map<String, Object> map);
+
+	int selectReviewFileCount(Map<String, Object> map);
+
+	int deleteReviewFile(Map<String, Object> map);
+
+	int deleteReview(Map<String, Object> map);
+	
+	
 }

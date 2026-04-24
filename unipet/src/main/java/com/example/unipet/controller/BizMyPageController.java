@@ -1,6 +1,7 @@
 package com.example.unipet.controller;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -161,6 +162,45 @@ public class BizMyPageController {
 		return new Gson().toJson(resultMap);
 	}
 	
+	// 승인된 업체 조회
+	@RequestMapping(value = "/getApprovedStore.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getApprovedStore(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+	    String sessionId = (String) session.getAttribute("sessionId");
+	    String sessionRole = (String) session.getAttribute("sessionRole");
+
+	    if (sessionId == null || !"BIZ".equals(sessionRole)) {
+	        resultMap.put("result", "fail");
+	        resultMap.put("message", "로그인이 필요합니다.");
+	        return new Gson().toJson(resultMap);
+	    }
+
+	    map.put("sUserId", sessionId);
+
+	    resultMap = bizMyPageService.getApprovedStore(map);
+
+	    return new Gson().toJson(resultMap);
+	}
+	
+	// 사업자 회원 탈퇴
+	@RequestMapping(value = "/biz/withdrawRequest.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String withdrawRequest(@RequestParam HashMap<String, Object> map, HttpSession session) {
+
+	    String sessionId = (String) session.getAttribute("sessionId");
+	    map.put("sUserId", sessionId);
+
+	    Map<String, Object> result = bizMyPageService.withdrawRequest(map);
+
+	    if ((boolean) result.get("success")) {
+	        session.invalidate();
+	    }
+
+	    return new Gson().toJson(result);
+	}
+	
 	// 업체 이미지 리스트
 	@RequestMapping(value = "/getBizImgList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
@@ -241,9 +281,20 @@ public class BizMyPageController {
 	// 업체 설정 수정
 	@RequestMapping(value = "/biz/store/update.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
-	public String updateBizStoreInfo(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
-
+	public String updateBizStoreInfo(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+		String sessionId = (String) session.getAttribute("sessionId");
+		String sessionRole = (String) session.getAttribute("sessionRole");
+
+		if (sessionId == null || !"BIZ".equals(sessionRole)) {
+			resultMap.put("result", "fail");
+			resultMap.put("message", "로그인이 필요합니다.");
+			return new Gson().toJson(resultMap);
+		}
+
+		map.put("sUserId", sessionId);
+
 		resultMap = bizMyPageService.editBizStoreInfo(map);
 
 		return new Gson().toJson(resultMap);

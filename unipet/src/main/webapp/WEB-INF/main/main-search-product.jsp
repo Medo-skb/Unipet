@@ -29,9 +29,17 @@
 
             <section class="search-section">
                 <div v-if="productList.length > 0" class="search-list">
-                    <div v-for="item in productList" :key="item.productNo" class="search-card search-card-row">
+                    <div v-for="item in productList"
+                        :key="item.productNo"
+                        class="search-card search-card-row"
+                        @click="fnGoProductDetail(item.productNo)">
                         <div class="search-thumb-wrap">
-                            <div class="search-thumb"></div>
+                            <img v-if="item.filePath && item.fileName"
+                                :src="item.filePath + item.fileName"
+                                alt="상품 이미지"
+                                class="search-thumb-image"
+                                @error="handleImgError">
+                            <div v-else class="search-thumb"></div>
                         </div>
 
                         <div class="search-info">
@@ -101,7 +109,18 @@ const app = Vue.createApp({
                     self.productList = [];
                 }
             });
-        }
+        },
+        
+        handleImgError: function (event) {
+            event.target.src = "${pageContext.request.contextPath}/img/no-image.png";
+        },
+
+        fnGoProductDetail: function (productNo) {
+            if (!productNo) {
+                return;
+            }
+            location.href = "/product/view.do?productNo=" + productNo;
+        },
     },
     mounted() {
         let self = this;
