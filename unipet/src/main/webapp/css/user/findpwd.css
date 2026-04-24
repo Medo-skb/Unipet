@@ -1,0 +1,84 @@
+body {
+    margin: 0;
+    padding: 60px 0;
+    background: #f4f6fb;
+    font-family: Arial, sans-serif;
+}
+
+#app {
+    width: 520px;
+    margin: 0 auto;
+    background: #f0f4f5;
+    border: 1px solid #3b82f6;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    padding: 28px 24px;
+}
+
+#app h2 {
+    text-align: center;
+    font-size: 22px;
+    margin-bottom: 24px;
+}
+
+.row {
+    margin-bottom: 14px;
+}
+
+.row label {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.row input {
+    width: 100%;
+    height: 42px;
+    border: 1px solid #cfd8e3;
+    border-radius: 10px;
+    padding: 0 12px;
+    box-sizing: border-box;
+    font-size: 14px;
+    background: white;
+}
+
+/* 버튼 세로 영역 */
+.btn-box {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.btn-box button {
+    width: 100%;
+    height: 46px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 700;
+    border: 2px solid #8ea8d8;
+    background: #eef4ff;
+}
+
+.btn-box button:hover {
+    opacity: 0.9;
+}
+
+/* 인증 버튼 가로 */
+.inline-btn {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.inline-btn button {
+    flex: 1;
+    height: 42px;
+    border-radius: 10px;
+    border: 1px solid #8ea8d8;
+    background: #eef4ff;
+    font-weight: 700;
+    cursor: pointer;
+}

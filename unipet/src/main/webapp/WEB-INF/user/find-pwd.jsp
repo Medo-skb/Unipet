@@ -3,8 +3,11 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>비밀번호 찾기</title>
+    <link href="/css/user/findpwd.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <title>비밀번호 찾기</title>
 </head>
 <body>
     <h2>비밀번호 찾기</h2>
