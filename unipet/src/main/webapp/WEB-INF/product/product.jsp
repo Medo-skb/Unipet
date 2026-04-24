@@ -309,11 +309,13 @@
 				},
 
 				fnMoveDetail(productNo) {
-					location.href = "/product/view.do?productNo=" + productNo;
+					pageChange("/product/view.do", {
+						productNo: productNo
+					});
 				},
 
 				fnMoveCart() {
-					location.href = "/cart.do";
+					pageChange("/cart.do", {});
 				},
 
 				fnFormatPrice(price) {
@@ -321,7 +323,7 @@
 				},
 				
 				fnMoveMain() {
-					location.href = "/product.do";
+					pageChange("/product.do", {});
 				},
 			},
 			mounted() {
