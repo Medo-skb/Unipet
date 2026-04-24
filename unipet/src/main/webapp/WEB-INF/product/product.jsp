@@ -208,16 +208,26 @@
 						if (data.result == "success") {
 							self.cartCount = data.cartCount;
 						}
-					}
-				});
-			},
+					});
+				},
 
-			fnToggleAnimalSub(aMainNo) {
-				this.openAnimalMainNo = this.openAnimalMainNo == aMainNo ? "" : aMainNo;
-			},
+				fnMoveDetail(productNo) {
+					pageChange("/product/view.do", {
+						productNo: productNo
+					});
+				},
 
-			fnToggleItemSub(iMainNo) {
-				this.openItemMainNo = this.openItemMainNo == iMainNo ? "" : iMainNo;
+				fnMoveCart() {
+					pageChange("/cart.do", {});
+				},
+
+				fnFormatPrice(price) {
+					return Number(price).toLocaleString();
+				},
+				
+				fnMoveMain() {
+					pageChange("/product.do", {});
+				},
 			},
 
 			fnSelectAnimalAll() {

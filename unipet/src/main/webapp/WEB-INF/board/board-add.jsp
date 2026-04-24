@@ -182,13 +182,17 @@
 									alert(data.message);
 
 									if (status == "T") {
-										location.href = "/board/edit.do?boardNo=" + data.boardNo;
+										pageChange("/board/edit.do", {
+											boardNo: data.boardNo
+										});
 									} else {
-										location.href = "/board/view.do?boardNo=" + data.boardNo;
+										pageChange("/board/view.do", {
+											boardNo: data.boardNo
+										});
 									}
 								} else if (data.result == "login") {
 									alert("로그인이 필요합니다.");
-									location.href = "/user/login.do";
+									pageChange("/user/login.do", {});
 								} else {
 									alert(data.message);
 								}
@@ -200,7 +204,9 @@
 						});
 					},
 					fnMoveList: function () {
-						location.href = "/board/list.do?bMainNo=" + this.selectedMainNo;
+						pageChange("/board/list.do", {
+							bMainNo: this.selectedMainNo
+						});
 					},
 
 					fnLoadTempBoard: function () {
@@ -222,7 +228,7 @@
 									alert("최근 임시저장 글을 불러왔습니다.");
 								} else if (data.result == "login") {
 									alert("로그인이 필요합니다.");
-									location.href = "/user/login.do";
+									pageChange("/user/login.do", {});
 								} else {
 									alert(data.message);
 								}
@@ -237,7 +243,7 @@
 				mounted() {
 					if (this.selectedMainNo == "") {
 						alert("게시판 탭을 먼저 선택해주세요.");
-						location.href = "/board/list.do";
+						pageChange("/board/list.do", {});
 						return;
 					}
 					this.fnGetInitData();
@@ -248,7 +254,7 @@
 		</script>
 		<script>
 			function fnGoHome() {
-				location.href = "/board/list.do";
+				pageChange("/board/list.do", {});
 			}
 		</script>
 	</body>

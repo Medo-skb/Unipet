@@ -5,99 +5,13 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>사업자 회원가입</title>
 
+ <link href="/css/user/signupbiz.css" rel="stylesheet">
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<title>사업자 회원가입</title>
 
-<style>
-body {
-    margin: 0;
-    padding: 60px 0;
-    background: #f4f6fb;
-    font-family: Arial, sans-serif;
-}
-
-#app {
-    width: 520px;
-    margin: 0 auto;
-    background: #f0f4f5;
-    border: 1px solid #3b82f6;
-    border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-    padding: 28px 24px;
-}
-
-#app::before {
-    content: "사업자 회원가입";
-    display: block;
-    text-align: center;
-    font-size: 22px;
-    font-weight: 700;
-    margin-bottom: 24px;
-}
-
-.row {
-    margin-bottom: 12px;
-}
-
-.row input,
-.row select {
-    width: 100%;
-    height: 42px;
-    border: 1px solid #cfd8e3;
-    border-radius: 10px;
-    padding: 0 12px;
-    box-sizing: border-box;
-    font-size: 14px;
-    background: white;
-}
-
-.inline-box {
-    display: flex;
-    gap: 8px;
-}
-
-.inline-box input {
-    flex: 1;
-}
-
-.inline-box button {
-    width: 120px;
-    height: 42px;
-    border-radius: 10px;
-    border: 1px solid #8ea8d8;
-    background: #eef4ff;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-.info-text {
-    font-size: 12px;
-    margin-top: 5px;
-}
-
-.btn-box {
-    margin-top: 20px;
-}
-
-.btn-box button {
-    width: 100%;
-    height: 46px;
-    border-radius: 12px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: 700;
-    border: 2px solid #8ea8d8;
-    background: #eef4ff;
-}
-
-.btn-box button:hover,
-.inline-box button:hover {
-    opacity: 0.9;
-}
-</style>
 </head>
 
 <body>

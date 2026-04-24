@@ -134,8 +134,8 @@
         data() {
             return {
                 // 변수 - (key : value)
-                ordNo : "${ordNo}",
-                rsvNo: "${rsvNo}" || 1,
+                ordNo : "${ordNo}" || 4,
+                rsvNo: "${rsvNo}",
 
                 payFlg: '', // 'SHOP' 또는 'RSV'
                 info: {},    // 서버에서 받아올 상세 정보 객체

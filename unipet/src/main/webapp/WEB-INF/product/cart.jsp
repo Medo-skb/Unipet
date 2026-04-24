@@ -9,6 +9,7 @@
 
 		<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
 		<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+		<script src="/js/page-change.js"></script>
 
 		<link rel="stylesheet" href="/css/product/cart.css">
 	</head>
@@ -25,6 +26,10 @@
 			<div class="wrap">
 				<div class="page-title">장바구니</div>
 				<div class="page-sub">담아둔 상품을 확인하고 주문할 수 있어요.</div>
+				
+				<div class="cart-nav">
+					<button @click="fnMoveProduct()">← 쇼핑 계속하기</button>
+				</div>
 
 				<!-- 장바구니 비어있을 때 -->
 				<div v-if="cartList.length == 0" class="empty-box">
@@ -56,13 +61,13 @@
 									<input type="checkbox" v-model="item.checked" @change="fnCheckItem">
 								</div>
 
-								<div class="image-area">
+								<div class="image-area" @click="fnMoveDetail(item.PRODUCT_NO)">
 									<img :src="item.MAIN_IMG">
 								</div>
+								
 
 								<div class="info-area">
 									<div class="product-name">{{item.PRODUCT_NAME}}</div>
-									<div class="product-desc">상품번호 : {{item.PRODUCT_NO}}</div>
 									<div class="product-price">개당 {{formatPrice(item.PRODUCT_PRICE)}}원</div>
 								</div>
 
@@ -335,7 +340,7 @@
 				},
 
 				fnMoveProduct() {
-					location.href = "/product.do";
+					pageChange("/product.do", {});
 				},
 
 				// 결제
@@ -357,12 +362,18 @@
 					
 					sessionStorage.setItem("cartNoList", JSON.stringify(cartNoList));
 
-					location.href = "/payment/pay-shop.do";
+					pageChange("/payment/pay-shop.do", {});
 				},
 				
 				formatPrice(price) {
 					return Number(price).toLocaleString();
-				}
+				},
+				
+				fnMoveDetail(productNo) {
+					pageChange("/product/view.do", {
+						productNo: productNo
+					});
+				},
 			},
 
 			mounted() {
