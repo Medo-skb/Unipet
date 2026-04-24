@@ -2,6 +2,7 @@ package com.example.unipet.mapper;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 
@@ -18,7 +19,17 @@ public interface BizMyPageMapper {
 	// 하루 예약 건수 차트
 	public List<BizMyPage> selectDailyReservationChartList(HashMap<String, Object> map);
 	
+	// 승인된 업체 조회
+	public BizMyPage selectApprovedStore(HashMap<String, Object> map);
 	
+	// 폐업 불가 예약 개수 조회
+	public int selectCloseBlockedReservationCount(HashMap<String, Object> map);
+	
+	// 사업자 회원 탈퇴
+	int selectStoreCountByUserId(Map<String, Object> map);
+	int selectClosedStoreCount(Map<String, Object> map);
+	int deleteStoreByUserId(Map<String, Object> map);
+	int updateWithdrawRequestStatus(Map<String, Object> map);
 	
 	// 업체 이미지 리스트
 	public List<BizMyPage> selectBizImgList(HashMap<String, Object> map);

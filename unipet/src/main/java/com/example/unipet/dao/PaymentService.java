@@ -28,11 +28,17 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class PaymentService {
 
+	private final ReservationService reservationService;
+
 	@Autowired 
 	PaymentMapper paymentMapper;
 	
 	@Value("${toss.secret.key}")
     private String secretKey;
+
+	PaymentService(ReservationService reservationService) {
+		this.reservationService = reservationService;
+	}
 	
 	// 조회 -> get, 수정 -> edit, 삽입 -> add, 삭제 -> remove
 	// ex) 학생목록 : getStudentList, 학생수정 -> editStudent
@@ -94,6 +100,7 @@ public class PaymentService {
 	                }	
 	            } else if ("RSV".equals(payFlg)) {
 	                paymentMapper.updateRsvStatus(map);
+	                reservationService.completeReservation(map);
 	            } else if ("SHOP".equals(payFlg)) {	
 	            	
 	            	// --- [Step 1] 포인트 처리 ---

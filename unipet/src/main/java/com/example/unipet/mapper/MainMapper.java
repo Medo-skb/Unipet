@@ -45,4 +45,7 @@ public interface MainMapper {
     // 커뮤니티 전체 개수
     int selectSearchBoardCount(HashMap<String, Object> map);
     
+    // 유치원 업체 리스트
+    public List<Main> selectKindergartenStoreList(HashMap<String, Object> map);
+    
 }

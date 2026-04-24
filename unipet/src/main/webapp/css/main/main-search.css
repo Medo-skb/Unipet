@@ -1,8 +1,7 @@
 @charset "UTF-8";
 
-/* 전체 페이지 */
 .search-page {
-    background-color: #f8f9fb;
+    background-color: var(--bg);
     min-height: 100vh;
     padding: 40px 20px 80px;
     box-sizing: border-box;
@@ -13,12 +12,10 @@
     margin: 0 auto;
 }
 
-/* 상단 제목 영역 */
 .search-page-title-box {
-    background: #ffffff;
+    background: var(--bg);
     border-radius: 18px;
     padding: 28px 32px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
     margin-bottom: 30px;
 }
 
@@ -26,26 +23,24 @@
     margin: 0;
     font-size: 28px;
     font-weight: 700;
-    color: #222;
+    color: var(--text-main);
 }
 
 .search-page-keyword {
     margin: 10px 0 0;
     font-size: 15px;
-    color: #666;
+    color: var(--text-sub);
 }
 
 .search-page-keyword span {
     font-weight: 700;
-    color: #222;
+    color: var(--text-main);
 }
 
-/* 큰 섹션 */
 .search-section {
-    background: #ffffff;
+    background: var(--bg);
     border-radius: 18px;
     padding: 28px 32px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
     margin-bottom: 24px;
 }
 
@@ -53,11 +48,10 @@
     margin: 0 0 22px;
     font-size: 24px;
     font-weight: 700;
-    color: #222;
+    color: var(--text-main);
     padding-bottom: 12px;
 }
 
-/* 하위 구역 */
 .search-subsection {
     margin-bottom: 28px;
 }
@@ -70,32 +64,30 @@
     margin: 0 0 16px;
     font-size: 18px;
     font-weight: 700;
-    color: #333;
+    color: var(--text-main);
 }
 
-/* 리스트 */
 .search-list {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 0;
 }
 
-/* 기본 카드 */
 .search-card {
-    border: 1px solid #e8ebf0;
-    border-radius: 14px;
-    padding: 18px 20px;
-    background: #fcfcfd;
+    border: none;
+    border-bottom: 1px solid var(--line-soft);
+    border-radius: 0;
+    padding: 20px 0;
+    background: transparent;
     transition: all 0.2s ease;
+    cursor: pointer;
 }
 
 .search-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
-    border-color: #dcdfe5;
+    background: #f8f9fb;
+    border-bottom-color: var(--line-soft);
 }
 
-/* 업체/상품 카드 확장형 */
 .search-card.search-card-row {
     display: flex;
     gap: 18px;
@@ -108,8 +100,8 @@
     height: 120px;
     border-radius: 12px;
     overflow: hidden;
-    background: #f1f3f5;
-    border: 1px solid #eceff3;
+    background: var(--image-soft);
+    border: 1px solid var(--line-soft);
     flex-shrink: 0;
 }
 
@@ -127,7 +119,7 @@
 .search-card-title {
     font-size: 17px;
     font-weight: 700;
-    color: #222;
+    color: var(--text-main);
     margin-bottom: 8px;
     line-height: 1.4;
 }
@@ -135,44 +127,42 @@
 .search-card-price {
     font-size: 24px;
     font-weight: 800;
-    color: #e53935;
+    color: var(--point);
     margin-bottom: 8px;
     line-height: 1.2;
 }
 
 .search-card-rating {
     font-size: 14px;
-    color: #2563eb;
+    color: var(--main);
     margin-bottom: 8px;
     font-weight: 600;
 }
 
 .search-card-menu {
     font-size: 15px;
-    color: #444;
+    color: var(--point);
     margin-bottom: 8px;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .search-card-desc,
 .search-card-brand,
 .search-card-meta {
     font-size: 14px;
-    color: #666;
+    color: var(--text-sub);
     line-height: 1.6;
 }
 
 .search-card-brand {
     margin-bottom: 6px;
     font-weight: 600;
-    color: #555;
 }
 
 .search-card-meta {
-    color: #888;
+    opacity: 0.8;
 }
 
-/* 게시글 내용 */
 .board-content {
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -180,18 +170,16 @@
     overflow: hidden;
 }
 
-/* 결과 없음 */
 .search-empty {
-    border: 1px dashed #d9dde3;
+    border: 1px dashed var(--line-soft);
     border-radius: 12px;
     padding: 20px;
-    background: #fafbfc;
+    background: var(--bg);
     font-size: 14px;
-    color: #888;
+    color: var(--text-sub);
     text-align: center;
 }
 
-/* 더보기 */
 .search-more-wrap {
     display: flex;
     justify-content: flex-end;
@@ -202,8 +190,8 @@
     display: inline-block;
     padding: 10px 16px;
     border-radius: 999px;
-    background-color: #f2f4f7;
-    color: #333;
+    border: none;
+    color: var(--text-main);
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
@@ -211,47 +199,17 @@
 }
 
 .search-more-btn:hover {
-    background-color: #e8ecf2;
+    color: var(--main);
 }
 
-@media (max-width: 768px) {
-    .search-page {
-        padding: 24px 14px 60px;
-    }
+.search-thumb-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
 
-    .search-page-title-box,
-    .search-section {
-        padding: 22px 18px;
-        border-radius: 14px;
-    }
-
-    .search-page-title {
-        font-size: 24px;
-    }
-
-    .search-section-title {
-        font-size: 21px;
-    }
-
-    .search-subsection-title {
-        font-size: 17px;
-    }
-
-    .search-card.search-card-row {
-        gap: 14px;
-    }
-
-    .search-thumb-wrap {
-        width: 90px;
-        min-width: 90px;
-        height: 90px;
-    }
-
-    .search-card-title {
-        font-size: 16px;
-    }
-
-    .search-card-price {
-        font-size: 20px;
-    }
+.search-section-title {
+    border-bottom: 2px solid var(--line-soft);
+    padding-bottom: 12px;
 }

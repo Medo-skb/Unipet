@@ -1,24 +1,20 @@
 package com.example.unipet.controller;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.OutputStream;
-import java.nio.file.Files;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.ui.Model;
 
 import com.example.unipet.dao.AdminService;
 import com.google.gson.Gson;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 public class AdminController {
@@ -70,6 +66,30 @@ public class AdminController {
 	public String getProductReviewReportList(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 		resultMap = adminService.getProductReviewReportList(map);
-		return new Gson().toJson(resultMap); 
+		return new Gson().toJson(resultMap);
+	}
+	
+	@RequestMapping(value = "/admin/report/reject.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String rejectReport(@RequestParam HashMap<String, Object> map) {
+
+	    adminService.rejectReport(map);
+
+	    Map<String, Object> result = new HashMap<>();
+	    result.put("result", "success");
+
+	    return new Gson().toJson(result);
+	}
+	
+	@RequestMapping(value = "/admin/report/approve.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String approveReport(@RequestParam HashMap<String, Object> map) {
+
+	    adminService.approveReport(map);
+
+	    Map<String, Object> result = new HashMap<>();
+	    result.put("result", "success");
+
+	    return new Gson().toJson(result);
 	}
 }

@@ -29,7 +29,10 @@
 
             <section class="search-section">
                 <div v-if="boardList.length > 0" class="search-list">
-                    <div v-for="item in boardList" :key="item.boardNo" class="search-card">
+                    <div v-for="item in boardList"
+                        :key="item.boardNo"
+                        class="search-card"
+                        @click="fnGoBoardDetail(item.boardNo)">
                         <div class="search-card-title">{{ item.title }}</div>
                         <div class="search-card-desc board-content">{{ item.bContent }}</div>
                     </div>
@@ -90,7 +93,14 @@ const app = Vue.createApp({
                     self.boardList = [];
                 }
             });
-        }
+        },
+
+        fnGoBoardDetail: function (boardNo) {
+            if (!boardNo) {
+                return;
+            }
+            location.href = "/board/view.do?boardNo=" + boardNo;
+        },
     },
     mounted() {
         let self = this;

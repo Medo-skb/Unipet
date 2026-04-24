@@ -14,6 +14,7 @@ public class Main {
     String popularMenuName;
     String menuName1;
     Integer menuPrice1;
+    String subTitle;
     
     // 상품 정보
 	int productNo;
@@ -27,7 +28,6 @@ public class Main {
 	String aSubType;
 	double rating;
 	int reviewCount;
-	
 	
 	// 커뮤니티
 	int boardNo;

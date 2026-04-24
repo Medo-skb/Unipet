@@ -702,3 +702,40 @@ body {
 	gap: 8px;
 	margin-top: 10px;
 }
+
+.back-area {
+	margin-bottom: 20px;
+}
+
+.back-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+
+	height: 42px;
+	padding: 0 18px;
+
+	border-radius: 999px;
+	border: 1px solid #eee;
+
+	background: #fff;
+	color: #333;
+
+	font-size: 14px;
+	font-weight: bold;
+
+	cursor: pointer;
+
+	box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+	transition: all 0.2s ease;
+}
+
+
+.back-btn:hover {
+	background: #ff7a00;
+	color: #fff;
+	border-color: #ff7a00;
+
+	transform: translateY(-2px);
+	box-shadow: 0 6px 16px rgba(255,122,0,0.3);
+}

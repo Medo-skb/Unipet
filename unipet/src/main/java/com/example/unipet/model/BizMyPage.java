@@ -92,4 +92,5 @@ public class BizMyPage {
 	String rContents;
 	String reviewDate;
 	String isReported;
+	String repStatus;
 }
