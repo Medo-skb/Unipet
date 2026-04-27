@@ -23,6 +23,9 @@ public class BizMyPageService {
 	@Autowired 
 	BizMyPageMapper bizMyPageMapper;
 	
+	@Autowired
+	private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+	
 	// 오늘의 일정
 	public HashMap<String, Object> getTodayScheduleList(HashMap<String, Object> map){
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
@@ -409,6 +412,12 @@ public class BizMyPageService {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
 		try {
+			String rawPwd = String.valueOf(map.get("sUserPwd"));
+
+			String encPwd = passwordEncoder.encode(rawPwd);
+
+			map.put("sUserPwd", encPwd);
+
 			bizMyPageMapper.updateBizUser(map);
 
 			resultMap.put("result", "success");

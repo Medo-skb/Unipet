@@ -33,7 +33,7 @@
                         class="menu-item"
                         :class="{ active : currentMenu === 'report' }"
                         @click="fnChangeMenu('report')">
-                        커뮤니티 및 리뷰 신고리스트
+                        커뮤니티 및 리뷰 신고 관리
                     </div>
 
                     <div 
@@ -62,7 +62,7 @@
                                     type="button"
                                     class="report-tab-btn"
                                     :class="{ active : reportTab === 'bookingReview' }"
-                                    @click="reportTab = 'bookingReview'">
+                                    @click="fnChangeReportTab('bookingReview')">
                                     예약 리뷰 신고
                                 </button>
 
@@ -70,7 +70,7 @@
                                     type="button"
                                     class="report-tab-btn"
                                     :class="{ active : reportTab === 'productReview' }"
-                                    @click="reportTab = 'productReview'">
+                                    @click="fnChangeReportTab('productReview')">
                                     상품 리뷰 신고
                                 </button>
 
@@ -78,7 +78,7 @@
                                     type="button"
                                     class="report-tab-btn"
                                     :class="{ active : reportTab === 'communityPost' }"
-                                    @click="reportTab = 'communityPost'">
+                                    @click="fnChangeReportTab('communityPost')">
                                     커뮤니티 글 신고
                                 </button>
 
@@ -86,7 +86,7 @@
                                     type="button"
                                     class="report-tab-btn"
                                     :class="{ active : reportTab === 'communityComment' }"
-                                    @click="reportTab = 'communityComment'">
+                                    @click="fnChangeReportTab('communityComment')">
                                     커뮤니티 댓글 신고
                                 </button>
                             </div>
@@ -230,27 +230,41 @@
                                         <table class="report-table">
                                             <tbody>
                                                 <tr>
-                                                    <th>신고번호</th>
-                                                    <td>{{ item.reportNo }}</td>
                                                     <th>글번호</th>
                                                     <td>{{ item.targetNo }}</td>
+                                                    <th>신고자 아이디</th>
+                                                    <td>{{ item.reporterId }}</td>
                                                 </tr>
                                                 <tr>
-                                                    <th>신고자</th>
-                                                    <td>{{ item.reporterId }}</td>
                                                     <th>작성자</th>
                                                     <td>{{ item.reportedUserId }}</td>
+                                                    <th>신고 상태</th>
+                                                    <td>{{ fnReportStatusText(item.repStatus) }}</td>
                                                 </tr>
                                                 <tr>
-                                                    <th>신고사유</th>
-                                                    <td colspan="3">{{ fnReportStatusText(item.repStatus) }}</td>
+                                                    <th>신고 사유</th>
+                                                    <td colspan="3">{{ item.reportReason }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>게시글 이미지</th>
+                                                    <td colspan="3">
+                                                        <img v-if="item.filePath" :src="item.filePath" class="report-preview-img">
+                                                        <span v-else>첨부 이미지 없음</span>
+                                                    </td>
                                                 </tr>
                                             </tbody>
                                         </table>
 
                                         <div class="report-btn-box">
-                                            <button type="button" class="btn-approve">승인</button>
-                                            <button type="button" class="btn-reject">반려</button>
+                                            <button type="button" class="btn-approve"
+                                                @click="fnApproveCommunity(item, 'POST')">
+                                                승인
+                                            </button>
+
+                                            <button type="button" class="btn-reject"
+                                                @click="fnRejectCommunity(item)">
+                                                반려
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -269,27 +283,38 @@
                                         <table class="report-table">
                                             <tbody>
                                                 <tr>
-                                                    <th>신고번호</th>
-                                                    <td>{{ item.reportNo }}</td>
-                                                    <th>댓글번호</th>
-                                                    <td>{{ item.targetNo }}</td>
-                                                </tr>
-                                                <tr>
-                                                    <th>신고자</th>
+                                                    <th>신고자 아이디</th>
                                                     <td>{{ item.reporterId }}</td>
-                                                    <th>작성자</th>
+                                                    <th>작성자 아이디</th>
                                                     <td>{{ item.reportedUserId }}</td>
                                                 </tr>
                                                 <tr>
-                                                    <th>신고사유</th>
-                                                    <td colspan="3">{{ item.reportReason }}</td>
+                                                    <th>신고 사유</th>
+                                                    <td>{{ item.reportReason }}</td>
+                                                    <th>신고 상태</th>
+                                                    <td>{{ fnReportStatusText(item.repStatus) }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>댓글의 글 제목</th>
+                                                    <td colspan="3">
+                                                        <a href="javascript:;" class="file-link" @click="fnGoBoardDetail(item.boardNo)">
+                                                            {{ item.title }}
+                                                        </a>
+                                                    </td>
                                                 </tr>
                                             </tbody>
                                         </table>
 
                                         <div class="report-btn-box">
-                                            <button type="button" class="btn-approve">승인</button>
-                                            <button type="button" class="btn-reject">반려</button>
+                                            <button type="button" class="btn-approve"
+                                                @click="fnApproveCommunity(item, 'COMMENT')">
+                                                승인
+                                            </button>
+
+                                            <button type="button" class="btn-reject"
+                                                @click="fnRejectCommunity(item)">
+                                                반려
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -404,10 +429,26 @@
                 let self = this;
                 self.currentMenu = menuName;
 
+                localStorage.setItem("adminCurrentMenu", menuName);
+
                 if (menuName === "report") {
-                    self.reportTab = "bookingReview";
-                    self.fnProductReviewReportList();
-                    self.fnBookingReviewReportList();
+                    let savedTab = localStorage.getItem("reportTab");
+
+                    if (savedTab) {
+                        self.reportTab = savedTab;
+                    } else {
+                        self.reportTab = "bookingReview";
+                    }
+
+                    if (self.reportTab === "bookingReview") {
+                        self.fnBookingReviewReportList();
+                    } else if (self.reportTab === "productReview") {
+                        self.fnProductReviewReportList();
+                    } else if (self.reportTab === "communityPost") {
+                        self.fnCommunityPostReportList();
+                    } else if (self.reportTab === "communityComment") {
+                        self.fnCommunityCommentReportList();
+                    }
                 }
 
                 if (menuName === "storeApprove") {
@@ -416,6 +457,23 @@
 
                 if (menuName === "banner") {
                     self.fnBannerList();
+                }
+            },
+
+            fnChangeReportTab: function(tabName) {
+                let self = this;
+
+                self.reportTab = tabName;
+                localStorage.setItem("reportTab", tabName);
+
+                if (tabName === "bookingReview") {
+                    self.fnBookingReviewReportList();
+                } else if (tabName === "productReview") {
+                    self.fnProductReviewReportList();
+                } else if (tabName === "communityPost") {
+                    self.fnCommunityPostReportList();
+                } else if (tabName === "communityComment") {
+                    self.fnCommunityCommentReportList();
                 }
             },
 
@@ -627,20 +685,144 @@
                     }
                 });
             },
+
+            fnCommunityPostReportList: function () {
+                let self = this;
+
+                $.ajax({
+                    url: "/admin/report/communityPostList.dox",
+                    type: "POST",
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.result === "success") {
+                            self.communityPostReportList = data.list || [];
+                        } else {
+                            alert(data.message);
+                        }
+                    },
+                    error: function () {
+                        alert("커뮤니티 글 신고 조회 실패");
+                    }
+                });
+            },
+
+            fnCommunityCommentReportList: function () {
+                let self = this;
+
+                $.ajax({
+                    url: "/admin/report/communityCommentList.dox",
+                    type: "POST",
+                    dataType: "json",
+                    success: function (data) {
+                        console.log("댓글 신고 데이터", data);
+                        if (data.result === "success") {
+                            self.communityCommentReportList = data.list || [];
+                        } else {
+                            alert(data.message);
+                        }
+                    },
+                    error: function () {
+                        alert("커뮤니티 댓글 신고 조회 실패");
+                    }
+                });
+            },
+
+            fnGoBoardDetail: function (boardNo) {
+                location.href = "/board/view.do?boardNo=" + boardNo;
+            },
+
+            fnApproveCommunity: function(item, type) {
+                let self = this;
+
+                if (!confirm("해당 신고를 승인하시겠습니까?")) {
+                    return;
+                }
+
+                $.ajax({
+                    url: "/admin/report/communityApprove.dox",
+                    type: "POST",
+                    dataType: "json",
+                    data: {
+                        reportNo: item.reportNo,
+                        targetNo: item.targetNo,
+                        type: type   // POST or COMMENT
+                    },
+                    success: function(data) {
+                        if (data.result === "success") {
+                            alert("승인 처리되었습니다.");
+
+                            self.fnCommunityPostReportList();
+                            self.fnCommunityCommentReportList();
+                        } else {
+                            alert(data.message);
+                        }
+                    },
+                    error: function() {
+                        alert("서버 오류 발생");
+                    }
+                });
+            },
+
+            fnRejectCommunity: function(item) {
+                let self = this;
+
+                if (!confirm("해당 신고를 반려하시겠습니까?")) {
+                    return;
+                }
+
+                $.ajax({
+                    url: "/admin/report/communityReject.dox",
+                    type: "POST",
+                    dataType: "json",
+                    data: {
+                        reportNo: item.reportNo
+                    },
+                    success: function(data) {
+                        if (data.result === "success") {
+                            alert("반려 처리되었습니다.");
+
+                            self.fnCommunityPostReportList();
+                            self.fnCommunityCommentReportList();
+                        } else {
+                            alert(data.message);
+                        }
+                    },
+                    error: function() {
+                        alert("서버 오류 발생");
+                    }
+                });
+            },
             
         }, // methods
         mounted() {
             // 처음 시작할 때 실행되는 부분
             let self = this;
-            if (self.currentMenu === "storeApprove") {
-                self.fnBizList();
-            }
+            let savedMenu = localStorage.getItem("adminCurrentMenu");
+                let savedTab = localStorage.getItem("reportTab");
 
-            if (self.currentMenu === "report") {
-                self.reportTab = "bookingReview";
-                self.fnProductReviewReportList();
-                self.fnBookingReviewReportList();
-            }
+                if (savedMenu) {
+                    self.currentMenu = savedMenu;
+                }
+
+                if (savedTab) {
+                    self.reportTab = savedTab;
+                }
+
+                if (self.currentMenu === "storeApprove") {
+                    self.fnBizList();
+                }
+
+                if (self.currentMenu === "report") {
+                    if (self.reportTab === "bookingReview") {
+                        self.fnBookingReviewReportList();
+                    } else if (self.reportTab === "productReview") {
+                        self.fnProductReviewReportList();
+                    } else if (self.reportTab === "communityPost") {
+                        self.fnCommunityPostReportList();
+                    } else if (self.reportTab === "communityComment") {
+                        self.fnCommunityCommentReportList();
+                    }
+                }
         }
     });
 

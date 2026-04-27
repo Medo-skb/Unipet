@@ -6,7 +6,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-     <link href="/css/user/join.css" rel="stylesheet">
+    <!-- <link href="/css/user/join.css" rel="stylesheet"> -->
+    <link href="/css/user/join2.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="/js/page-change.js"></script>
@@ -14,6 +15,8 @@
   
 </head>
 <body>
+    <jsp:include page="/WEB-INF/header/header.jsp" />
+
     <div id="app">
          <button onclick="location.href='/user/signup-user.do'">
              일반사용자
@@ -22,6 +25,8 @@
              사업자
          </button>
     </div>
+
+    <jsp:include page="/WEB-INF/footer/footer.jsp" />
 </body>
 </html>
 

@@ -1,0 +1,85 @@
+@charset "UTF-8";
+
+#app {
+    width: 520px;
+    margin: 160px auto 200px;
+    background: var(--box-bg);
+    border: 1px solid var(--line-soft);
+    border-radius: 22px;
+    padding: 40px 36px;
+    box-sizing: border-box;
+}
+
+#app::before {
+    content: "아이디 찾기";
+    display: block;
+    text-align: center;
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 28px;
+    color: var(--text-main);
+}
+
+.row {
+    margin-bottom: 14px;
+}
+
+.row label {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text-main);
+}
+
+.row input {
+    width: 100%;
+    height: 46px;
+    border: 1px solid var(--line-soft);
+    border-radius: 12px;
+    padding: 0 14px;
+    box-sizing: border-box;
+    font-size: 14px;
+    background: var(--bg);
+    color: var(--text-main);
+    transition: border-color 0.1s;
+}
+
+.row input::placeholder {
+    color: var(--text-light);
+}
+
+.row input:focus {
+    border-color: var(--main);
+    outline: none;
+}
+
+.btn-box {
+    margin-top: 26px;
+}
+
+.btn-box button {
+    width: 100%;
+    height: 50px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 700;
+    border: 1px solid var(--main);
+    background: transparent;
+    color: var(--main);
+    transition: background 0.1s, color 0.1s;
+}
+
+.btn-box button:hover {
+    background: var(--main);
+    color: var(--bg);
+}
+
+@media (max-width: 600px) {
+    #app {
+        width: calc(100% - 32px);
+        margin: 80px auto 120px;
+        padding: 34px 20px 30px;
+    }
+}

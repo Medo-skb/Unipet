@@ -6,7 +6,8 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-    <link href="/css/user/signupuser.css" rel="stylesheet">
+    <!-- <link href="/css/user/signupuser.css" rel="stylesheet"> -->
+    <link href="/css/user/signupuser2.css" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/header.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/footer.css">
 </head>

@@ -1,158 +1,166 @@
+@charset "UTF-8";
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text-main);
+}
+
 .container-main {
     width: 100%;
     max-width: 1400px;
     min-width: 1400px;
     margin: 0 auto;
-    padding: 24px 20px 40px; /* 헤더와 본문 간격 */
+    padding: 36px 20px 60px;
     box-sizing: border-box;
 }
 
-/* 레이아웃 */
 .admin-wrap {
     display: flex;
-    align-items: flex-start; /* 왼쪽 메뉴가 내용만큼만 높이 잡히게 */
-    gap: 24px; /* 왼쪽 메뉴와 본문 사이 간격 */
+    align-items: flex-start;
+    gap: 28px;
 }
 
-/* 사이드바 */
 .admin-sidebar {
-    width: 200px;
-    background: #e1e1e1;
-    padding: 18px 16px;
-    border-radius: 14px;
+    width: 220px;
+    padding: 16px;
     box-sizing: border-box;
-
-    /* 핵심: 내용만큼만 높이 */
     height: fit-content;
+
+    border: 1px solid var(--line);
+    border-radius: 16px;
 }
 
-/* 메뉴 */
 .menu-item {
-    padding: 12px 10px;
-    margin-bottom: 10px;
-    font-size: 14px;
-    line-height: 1.4;
-    border-radius: 10px;
+    position: relative;
+    padding: 15px 14px;
+    margin-bottom: 4px;
+    font-size: 15px;
+    line-height: 1.5;
+    border-radius: 10px 0 0 10px;
     cursor: pointer;
     box-sizing: border-box;
     word-break: keep-all;
-    transition: background 0.2s ease;
+    color: var(--text-main);
+    transition: color 0.1s ease;
+}
+
+.menu-item::after {
+    display: none;
 }
 
 .menu-item:last-child {
     margin-bottom: 0;
 }
 
+.menu-item:last-child::after {
+    display: none;
+}
+
 .menu-item:hover {
-    background: #dfe5f7;
+    color: var(--main);
+    font-weight: 700;
 }
 
 .menu-item.active {
-    background: #ffffff;
+    color: var(--main);
     font-weight: 700;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
-/* 오른쪽 */
 .admin-content {
     flex: 1;
     min-width: 0;
 }
 
-/* 본문 카드 */
 .content-card {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 16px;
-    padding: 28px 32px;
-    /* min-height: 700px; */
-    min-height: calc(100vh - 160px);
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 34px 36px 44px;
+    min-height: calc(100vh - 180px);
     box-sizing: border-box;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
 .admin-content h2 {
-    margin: 0 0 12px 0;
-    font-size: 30px;
+    margin: 0 0 12px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--line);
+    font-size: 28px;
     font-weight: 700;
-    color: #111;
+    color: var(--text-main);
 }
 
 .content-desc {
+    margin: 0 0 24px;
     font-size: 15px;
-    color: #555;
+    color: var(--text-sub);
     line-height: 1.6;
 }
 
-/* 나중에 카드/리스트 들어갈 영역용 예비 스타일 */
 .section-box {
     margin-top: 24px;
-    padding: 20px;
-    border: 1px solid #ececec;
-    border-radius: 12px;
-    background: #fafafa;
+    padding: 22px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--white);
 }
 
 .section-title {
-    margin-bottom: 12px;
+    margin-bottom: 14px;
     font-size: 18px;
     font-weight: 700;
 }
 
-/* 설명 문구 */
-.content-desc {
-    margin-bottom: 20px;
-    font-size: 14px;
-    color: #666;
-}
-
-/* 승인 카드 리스트 */
 .approve-list {
     display: flex;
     flex-direction: column;
-    gap: 28px;
+    gap: 30px;
     margin-top: 20px;
 }
 
-/* 카드 1개 */
 .approve-card {
-    padding-bottom: 18px;
-    border-bottom: none;
+    padding-bottom: 20px;
 }
 
-/* 표 */
 .approve-table {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
-    background: #fff;
+    background: var(--white);
+    border-top: 1px solid var(--line-dark);
+    border-bottom: 1px solid var(--line-dark);
 }
 
 .approve-table th,
 .approve-table td {
-    border-top: 1px solid #666;
-    border-bottom: 1px solid #666;
-    padding: 18px 20px;
+    padding: 17px 20px;
     font-size: 15px;
     text-align: left;
     vertical-align: middle;
     box-sizing: border-box;
+    border-bottom: 1px solid var(--line);
+}
+
+.approve-table tr:last-child th,
+.approve-table tr:last-child td {
+    border-bottom: none;
 }
 
 .approve-table th {
-    background: #d9d9d9;
+    width: 190px;
+    background: var(--table-head);
     font-weight: 700;
-    color: #222;
+    color: var(--text-main);
+    border-right: 1px solid var(--line);
 }
 
 .approve-table td {
-    background: #f8f8f8;
-    color: #222;
+    background: var(--table-body);
+    color: var(--text-main);
 }
 
-/* 파일 링크 */
 .file-link {
-    color: #333;
+    color: var(--text-main);
     text-decoration: none;
     cursor: pointer;
 }
@@ -161,121 +169,143 @@
     text-decoration: underline;
 }
 
-/* 버튼 영역 */
-.approve-btn-box {
+.approve-btn-box,
+.report-btn-box {
     display: flex;
     justify-content: flex-end;
     gap: 10px;
-    margin-top: 16px;
+    margin-top: 18px;
 }
 
-/* 버튼 공통 */
 .btn-approve,
 .btn-reject {
-    min-width: 68px;
-    height: 36px;
-    padding: 0 16px;
-    border: none;
-    border-radius: 12px;
+    min-width: 72px;
+    height: 38px;
+    padding: 0 18px;
+    border: 1px solid var(--line-dark);
+    border-radius: 10px;
     font-size: 14px;
-    font-weight: bold;
+    font-weight: 700;
     cursor: pointer;
+    background: var(--white);
+    color: var(--text-main);
+    transition: color 0.1s ease, border-color 0.1s ease;
 }
 
-/* 승인 버튼 */
-.btn-approve {
-    background: #d9d9d9;
-    color: #222;
+.btn-approve:hover {
+    background: var(--main);
+    border-color: var(--main);
+    color: #ffffff;
 }
 
-/* 거부 버튼 */
-.btn-reject {
-    background: #d9d9d9;
-    color: #222;
+.btn-reject:hover {
+    background: #333333;
+    border-color: #333333;
+    color: #ffffff;
 }
 
-/* 빈 목록 */
 .empty-box {
     margin-top: 30px;
-    padding: 40px 20px;
-    border: 1px solid #e5e5e5;
-    border-radius: 12px;
-    background: #fafafa;
+    padding: 44px 20px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: #fcfcfc;
     text-align: center;
     font-size: 15px;
-    color: #666;
+    color: var(--text-sub);
 }
 
 .report-tab-wrap {
     display: flex;
     gap: 10px;
-    margin: 20px 0 25px;
+    margin: 22px 0 28px;
     flex-wrap: wrap;
 }
 
 .report-tab-btn {
-    border: 1px solid #dcdfe6;
-    background: #fff;
-    color: #333;
-    padding: 10px 18px;
-    border-radius: 10px;
+    border: 1px solid var(--line-dark);
+    background: none;
+    color: var(--text-main);
+    padding: 11px 18px;
+    border-radius: 999px;
     cursor: pointer;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
+    transition: color 0.1s ease, border-color 0.1s ease;
+}
+
+.report-tab-btn:hover {
+    border-color: var(--main);
+    color: var(--main);
 }
 
 .report-tab-btn.active {
-    background: #222;
-    color: #fff;
-    border: 1px solid #222;
+    background: var(--main);
+    color: #ffffff;
+    border-color: var(--main);
 }
 
 .report-section-title {
-    font-size: 18px;
+    font-size: 19px;
     font-weight: 700;
-    margin-bottom: 16px;
-    color: #222;
+    margin: 0 0 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+    color: var(--text-main);
 }
 
 .report-list {
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 22px;
 }
 
 .report-card {
-    border: 1px solid #e5e7eb;
-    border-radius: 14px;
-    padding: 20px;
-    background: #fff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 22px;
+    background: var(--white);
 }
 
 .report-table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed;
+    border-top: 1px solid var(--line-dark);
+    border-bottom: 1px solid var(--line-dark);
 }
 
 .report-table th {
-    width: 120px;
-    background: #f8f9fb;
-    color: #333;
+    width: 140px;
+    background: var(--table-head);
+    color: var(--text-main);
     text-align: left;
-    padding: 12px;
-    border: 1px solid #e5e7eb;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--line);
+    border-right: 1px solid var(--line);
     font-size: 14px;
+    font-weight: 700;
 }
 
 .report-table td {
-    padding: 12px;
-    border: 1px solid #e5e7eb;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--line);
     font-size: 14px;
-    color: #555;
+    color: var(--text-main);
+    background: var(--white);
+    word-break: break-all;
 }
 
-.report-btn-box {
-    margin-top: 16px;
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
+.report-table tr:last-child th,
+.report-table tr:last-child td {
+    border-bottom: none;
+}
+
+.report-preview-img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #f8f8f8;
 }

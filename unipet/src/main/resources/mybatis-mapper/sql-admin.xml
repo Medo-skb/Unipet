@@ -147,4 +147,80 @@
 	    WHERE REVIEW_NO = #{reviewNo}
 	</delete>
 	
+	<!-- 커뮤니티 글 신고 리스트 -->
+	<select id="selectCommunityPostReportList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        BR.BOARD_NO AS targetNo,
+	        BR.REPORTER_ID AS reporterId,
+	        B.USER_ID AS reportedUserId,
+	        BR.REPORT_REASON AS reportReason,
+	        BR.REP_STATUS AS repStatus,
+	        (
+	            SELECT BF.FILE_PATH
+	            FROM BOARD_FILE BF
+	            WHERE BF.BOARD_NO = BR.BOARD_NO
+	            ORDER BY BF.FILE_NO ASC
+	            LIMIT 1
+	        ) AS filePath
+	    FROM BOARD_REPORT BR
+	    INNER JOIN BOARD B
+	        ON BR.BOARD_NO = B.BOARD_NO
+	    WHERE BR.REP_STATUS = 'WAI'
+	    ORDER BY BR.REPORT_NO DESC
+	</select>
+	
+	<!-- 커뮤니티 댓글 신고 리스트 -->
+	<select id="selectCommunityCommentReportList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+		SELECT
+		    BR.REPORT_NO AS reportNo,
+		    BR.COMMENT_NO AS targetNo,
+		    BR.REPORTER_ID AS reporterId,
+		    BR.REPORT_REASON AS reportReason,
+		    BR.REP_STATUS AS repStatus,
+		    C.USER_ID AS reportedUserId,
+		    C.C_CONTENT AS contents,
+		    B.BOARD_NO AS boardNo,
+		    B.TITLE AS title
+		FROM BOARD_REPORT BR
+		LEFT JOIN COMMENT C 
+		    ON C.COMMENT_NO = BR.COMMENT_NO
+		LEFT JOIN BOARD B 
+		    ON C.BOARD_NO = B.BOARD_NO
+		WHERE BR.REP_STATUS = 'WAI'
+		  AND BR.COMMENT_NO IS NOT NULL
+		ORDER BY BR.REPORT_NO DESC
+	</select>
+	
+	<!-- 커뮤니티 신고 반려 -->
+	<update id="updateCommunityReportStatusReject" parameterType="map">
+	    UPDATE BOARD_REPORT
+	    SET REP_STATUS = 'REJ'
+	    WHERE REPORT_NO = #{reportNo}
+	</update>
+	
+	<!-- 커뮤니티 신고 승인 -->
+	<update id="updateCommunityReportStatusApprove" parameterType="map">
+	    UPDATE BOARD_REPORT
+	    SET REP_STATUS = 'ACC'
+	    WHERE REPORT_NO = #{reportNo}
+	</update>
+	
+	<!-- 커뮤니티 글 파일 삭제 -->
+	<delete id="deleteBoardFile" parameterType="map">
+	    DELETE FROM BOARD_FILE
+	    WHERE BOARD_NO = #{targetNo}
+	</delete>
+	
+	<!-- 커뮤니티 글 삭제 -->
+	<delete id="deleteBoard" parameterType="map">
+	    DELETE FROM BOARD
+	    WHERE BOARD_NO = #{targetNo}
+	</delete>
+	
+	<!-- 커뮤니티 댓글 삭제 -->
+	<delete id="deleteBoardComment" parameterType="map">
+	    DELETE FROM COMMENT
+	    WHERE COMMENT_NO = #{targetNo}
+	</delete>
+	
 </mapper>
