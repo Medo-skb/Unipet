@@ -357,7 +357,9 @@
 								dataType: "json",
 								success: function (data) {
 									if (data.result == "success") {
-										self.alarmList = data.list;
+										self.alarmList = data.list.filter(function (item) {
+											return item.READ_YN == "N";
+										});
 									}
 								}
 							});

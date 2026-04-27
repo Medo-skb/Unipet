@@ -25,11 +25,7 @@ public class ProductController {
 
 	@RequestMapping("/product/view.do")
 	public String view(HttpServletRequest request, @RequestParam HashMap<String, Object> map) {
-
-		System.out.println("productNo = " + map.get("productNo")); // 확인용
-
-		request.setAttribute("productNo", map.get("productNo"));  // 🔥 이거 추가
-
+		request.setAttribute("productNo", map.get("productNo"));
 		return "/product/productView";
 	}
 
