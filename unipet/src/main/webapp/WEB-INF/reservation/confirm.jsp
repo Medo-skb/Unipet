@@ -17,7 +17,7 @@
     <div id="app">
         <div id="container">
             <div class="confirm-card">
-                <div>다음과 같이 예약 및 결제를 진행하겠습니다.</div>
+                <div>다음과 같이 <span class="highlight">예약</span> 및 <span class="highlight">결제</span>를 진행하겠습니다.</div>
                 <h3 class="card-title">예약 상세정보</h3>
                 
                 <div class="info-list">
@@ -43,8 +43,8 @@
                     
                     <div class="info-item">
                         <div class="label">예약 결제 금액</div>
-                        <div class="value" style="color: #ff4757; font-weight: bold;">
-                            {{ info.reservationPrice?.toLocaleString() }} 원
+                        <div class="value">
+                            <span class="highlight">{{ info.reservationPrice?.toLocaleString() }} 원</span>
                         </div>
                     </div>
                     
@@ -120,9 +120,12 @@
                         const res = typeof data === "string" ? JSON.parse(data) : data;
 
                         if (res.result === "success") {
-                            console.log("받은 예약번호:", res.rsvNo);
-                            alert("예약은 결제 완료 후 최종 확정이 됩니다. 결제페이지로 이동합니다.");
-                            pageChange("/payment/pay-rsv.do", { rsvNo: res.rsvNo });
+                            const isConfirmed = confirm("예약은 결제 완료 후 최종 확정이 됩니다.\n" +
+                                                        "결제가 완료되지 않은 예약신청은 10분 후 자동 취소 됩니다.\n" +
+                                                        "결제 페이지로 이동 합니다.");
+                            if(isConfirmed){
+                                pageChange("/payment/pay-rsv.do", { rsvNo: res.rsvNo });
+                            }
                         } else {
                             alert("예약 처리 중 오류가 발생했습니다: " + (res.message || "서버 응답 에러"));
                         }

@@ -25,6 +25,10 @@ public interface ReservationMapper {
 	public List<Store> selectStoreSlotList(HashMap<String, Object> map);
 	// 예약 서비스 완료 시간 지남 조회
 	public List<Reservation> selectExpiredReservations(HashMap<String, Object> map);
+	// 예약 결제 미결 wait 상태 조회
+	public List<Reservation> selectExpiredWaiList(int minutes);
+	
+	
 	
 	// 한개 리턴 -> selectXXX
 	// 업체 상세 정보 조회
@@ -56,6 +60,8 @@ public interface ReservationMapper {
 	public int updateExpiredSlots();
 	// 예약 서비스 완료 시간 지남 FIN 처리
 	public int updateRsvStatusToFin(HashMap<String, Object> map);
+	// 예약 결제 미결 시간 지남 CAN 처리
+	public int updateStatusToCancel(String rsvNo);
 	
 	
 	// 삽입 

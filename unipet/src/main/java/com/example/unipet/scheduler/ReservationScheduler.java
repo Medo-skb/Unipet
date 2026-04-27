@@ -19,6 +19,7 @@ public class ReservationScheduler {
     private ReservationService reservationService;
 
     // 기존 로직: 슬롯 자동 마감
+    @Scheduled(fixedDelay = 60000)
     @Scheduled(cron = "0 * * * * *")
     public void autoCloseExpiredSlots() {
         try {
@@ -32,6 +33,7 @@ public class ReservationScheduler {
     }
 
     // 신규 로직: 이용 완료(30분 경과) 건 자동 FIN 처리 및 로그 기록
+    @Scheduled(fixedDelay = 80000)
     @Scheduled(cron = "0 * * * * *")
     public void autoFinishReservations() {
         try {
@@ -45,6 +47,23 @@ public class ReservationScheduler {
         } catch (Exception e) {
             // 에러 발생 시 원인 파악을 위해 스택 트레이스 출력 추천
             System.err.println("[시스템 에러] 예약 자동 종료 중 오류 발생");
+            e.printStackTrace();
+        }
+    }
+    
+    // 신규 로직: 미결제 예약(10분 경과) 자동 취소 및 로그 기록
+    @Scheduled(fixedDelay = 100000)
+    @Scheduled(cron = "0 * * * * *")
+    public void autoCancelPendingReservations() {
+        try {
+            // Service에서 트랜잭션 단위로 처리
+            int canceledCount = reservationService.processAutoCancel(10);
+            
+            if (canceledCount > 0) {
+                System.out.println("[시스템] " + canceledCount + "개의 미결제 예약이 자동 취소(CAN) 처리되었습니다.");
+            }
+        } catch (Exception e) {
+            System.err.println("[시스템 에러] 미결제 예약 자동 취소 중 오류 발생");
             e.printStackTrace();
         }
     }

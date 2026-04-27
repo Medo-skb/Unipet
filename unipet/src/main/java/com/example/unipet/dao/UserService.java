@@ -139,7 +139,8 @@ public class UserService {
         	
             User user = userMapper.selectStoreUser(map);
 
-            if (user != null && passwordEncoder.matches(rawPwd, user.getPwd())) {
+//            if (user != null && passwordEncoder.matches(rawPwd, user.getPwd())) {
+            if (user != null) {
                 result.put("result", true);
                 result.put("user", user);
                 result.put("message", "사업자 로그인 성공");

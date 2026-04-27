@@ -6,7 +6,8 @@
 	<select id="selectPetList" parameterType="hashmap" resultType="com.example.unipet.model.Pet">
 		SELECT PET_NO, PET_NAME, SPECIES, BREED, BIRTHDATE, GENDER, IS_MAIN
 		FROM PET
-		WHERE USER_ID = #{userId}	
+		WHERE USER_ID = #{userId}
+		ORDER BY IS_MAIN DESC, PET_NO ASC	
 	</select>
 	
 	<!-- 한개 검색 -->

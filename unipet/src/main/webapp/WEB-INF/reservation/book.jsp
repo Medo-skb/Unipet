@@ -16,6 +16,9 @@
 
     <div id="app">
         <div id="container">
+            <div class="store-name">
+                [{{storeName}}]
+            </div>
             <div id="datetime-area">
                 <div class="title">날짜/시간</div>
                 <div class="cal-slot">
@@ -88,8 +91,8 @@
                                 name="menu-selection"
                                 :value="menu"
                                 v-model="selectedMenu">
-                            <span class="menu-name">{{ menu.menuName }}</span>
-                            <span class="menu-price">{{ menu.menuPrice.toLocaleString() }}원</span>
+                            <span class="menu-name">{{ menu.menuName }}: </span>
+                            <span class="menu-price">{{ menu.menuPrice.toLocaleString() }} 원</span>
                         </label>
                     </div>
                 </div>
@@ -105,10 +108,20 @@
             </div>
             <div id="request">
                 <div class="title">요청사항 입력</div>
-                <textarea placeholder="요청사항 입력 바랍니다."></textarea>
+                <div class="textarea-wrapper">
+                    <textarea v-model="requestContent" placeholder="요청사항 입력 해주세요." maxlength="500"></textarea>
+                    
+                    <div class="char-count">
+                        <span>{{ requestContent ? requestContent.length : 0 }}</span> / 500
+                    </div>
+                </div>
             </div>
+
             <div class="button" @click="fnGoConfirm">예약 & 결제</div>
         </div>
+    </div>
+    <jsp:include page="/WEB-INF/footer/footer.jsp" />
+</body>
     </div>
 
     <jsp:include page="/WEB-INF/footer/footer.jsp" />
@@ -129,9 +142,11 @@
                 petList: [],
                 selectedPet: null,
                 menuList: [],
+                storeName: '',
                 selectedMenu: null,
                 selectedTime: null,
-                cutoff: 0 
+                cutoff: 0,
+                requestContent: '' 
             };
         },
         computed: {
@@ -258,7 +273,8 @@
                     type: "POST",
                     data: { storeNo: self.storeNo },
                     success: function(data) {
-                        self.menuList = data.list; 
+                        self.menuList = data.list;
+                        self.storeName = data.list[0].storeName
                     }
                 });
             },
@@ -268,6 +284,11 @@
                 const today = new Date();
                 let age = today.getFullYear() - birth.getFullYear();
                 return age < 0 ? 0 : age;
+            },
+            checkLength() {
+                if (this.requestContent.length > 500) {
+                    this.requestContent = this.requestContent.substring(0, 500);
+                }
             },
             fnGoConfirm() {
                 if (!this.selectedDate || !this.selectedTime || !this.selectedPet || !this.selectedMenu) {
@@ -286,7 +307,7 @@
                     pet: this.selectedPet,
                     menus: [this.selectedMenu],
                     reservationPrice: this.reservationPrice,
-                    request: document.querySelector('#request textarea').value
+                    request: this.requestContent
                 };
 
                 localStorage.setItem("reserveTemp", JSON.stringify(reserveData));
@@ -296,7 +317,7 @@
         mounted() {
             if (!this.userId) {
                 alert("로그인이 필요한 서비스입니다.");
-                location.href = "/login.do";
+                location.href = "/user/login.do";
                 return;
             }
             this.fnGetStorePolicy();
