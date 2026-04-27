@@ -12,6 +12,7 @@
 	<script src="/js/page-change.js"></script>
 
 	<link rel="stylesheet" href="/css/product/product.css">
+	<link rel="stylesheet" href="/css/product2/product.css">
 </head>
 
 <body>
@@ -172,9 +173,26 @@
 				cartCount: 0
 			};
 		},
+
 		methods: {
 			fnShowCategoryTab(type) {
 				this.categoryTab = type;
+			},
+
+			fnToggleAnimalSub(aMainNo) {
+				if (this.openAnimalMainNo == aMainNo) {
+					this.openAnimalMainNo = "";
+				} else {
+					this.openAnimalMainNo = aMainNo;
+				}
+			},
+
+			fnToggleItemSub(iMainNo) {
+				if (this.openItemMainNo == iMainNo) {
+					this.openItemMainNo = "";
+				} else {
+					this.openItemMainNo = iMainNo;
+				}
 			},
 
 			fnGetCategoryList() {
@@ -208,26 +226,8 @@
 						if (data.result == "success") {
 							self.cartCount = data.cartCount;
 						}
-					});
-				},
-
-				fnMoveDetail(productNo) {
-					pageChange("/product/view.do", {
-						productNo: productNo
-					});
-				},
-
-				fnMoveCart() {
-					pageChange("/cart.do", {});
-				},
-
-				fnFormatPrice(price) {
-					return Number(price).toLocaleString();
-				},
-				
-				fnMoveMain() {
-					pageChange("/product.do", {});
-				},
+					}
+				});
 			},
 
 			fnSelectAnimalAll() {
@@ -328,8 +328,9 @@
 
 			fnMoveMain() {
 				location.href = "/product.do";
-			},
+			}
 		},
+
 		mounted() {
 			this.fnGetCategoryList();
 			this.fnGetProductList();

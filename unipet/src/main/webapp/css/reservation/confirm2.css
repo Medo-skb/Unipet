@@ -1,0 +1,138 @@
+@charset "UTF-8";
+
+#container {
+    width: 1000px;
+    margin: 70px auto 110px;
+    padding: 34px;
+    box-sizing: border-box;
+}
+
+.confirm-card {
+    background: #fff;
+    border-radius: 22px;
+    border: 1px solid var(--line-soft);
+    padding: 34px;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.card-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 20px 0;
+    color: var(--text-main);
+}
+
+/* 정보 영역 */
+.info-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 16px;
+    font-size: 15px;
+}
+
+.label {
+    width: 160px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.value {
+    color: var(--text-sub);
+}
+
+.value.highlight {
+    color: var(--main);
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.request-box {
+    border: 1px solid var(--line-soft);
+    border-radius: 12px;
+    padding: 10px;
+    width: 100%;
+    background: #fafafa;
+}
+
+/* 안내 영역 */
+.notice-header {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 12px 0;
+    user-select: none;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.notice-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-main);
+}
+
+.arrow {
+    font-size: 12px;
+    color: var(--main);
+    transition: transform 0.2s ease;
+}
+
+.notice-content {
+    margin-top: 8px;
+    padding: 16px;
+    background-color: #fff1f3;
+    border-radius: 14px;
+    font-size: 13px;
+    color: var(--text-sub);
+    line-height: 1.6;
+    border: 1px solid var(--main);
+}
+
+/* 애니메이션 */
+.fade-enter-active, .fade-leave-active {
+    transition: opacity 0.25s ease;
+}
+.fade-enter-from, .fade-leave-to {
+    opacity: 0;
+}
+
+/* 버튼 */
+.confirm-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 30px;
+}
+
+.btn-confirm {
+    background-color: var(--main);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 12px 40px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-confirm:hover {
+    opacity: 0.9;
+}
+
+.btn-cancel {
+    background-color: #fff;
+    color: var(--main);
+    border: 1px solid var(--main);
+    border-radius: 999px;
+    padding: 12px 40px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-cancel:hover {
+    background-color: #fff1f3;
+}

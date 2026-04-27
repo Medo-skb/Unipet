@@ -4,13 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="/css/reservation/book.css" rel="stylesheet">
+    <!-- <link href="/css/reservation/book.css" rel="stylesheet"> -->
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="/js/page-change.js"></script>
     <title>예약</title>
+    <link href="/css/reservation/book2.css" rel="stylesheet">
 </head>
 <body>
+    <jsp:include page="/WEB-INF/header/header.jsp" />
+
     <div id="app">
         <div id="container">
             <div id="datetime-area">
@@ -79,7 +82,7 @@
             <div id="menu-area">
                 <div class="title">진료/서비스 선택</div>
                 <div class="menus">
-                    <div v-for="menu in menuList" :key="menu.menuNo" class="menu-item">
+                    <div v-for="menu in menuList" :key="menu.menuNo" class="menu-item" :class="{ 'selected': selectedMenu === menu }">
                         <label>
                             <input type="radio" 
                                 name="menu-selection"
@@ -107,6 +110,8 @@
             <div class="button" @click="fnGoConfirm">예약 & 결제</div>
         </div>
     </div>
+
+    <jsp:include page="/WEB-INF/footer/footer.jsp" />
 </body>
 
 <script>

@@ -18,6 +18,11 @@ public class AdminService {
 	@Autowired 
 	AdminMapper adminMapper;
 	
+	// 관리자 로그인
+	public Admin getLoginAdmin(HashMap<String, Object> map) {
+		return adminMapper.selectAdminLogin(map);
+	}
+	
 	// 사업자 승인 리스트
 	public HashMap<String, Object> getAdminBiz(HashMap<String, Object> map){
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
