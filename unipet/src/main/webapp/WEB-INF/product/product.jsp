@@ -315,7 +315,9 @@
 			},
 
 			fnMoveDetail(productNo) {
-				location.href = "/product/view.do?productNo=" + productNo;
+				pageChange("/product/view.do", {
+					productNo: productNo
+				});
 			},
 
 			fnMoveCart() {

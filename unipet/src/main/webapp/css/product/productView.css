@@ -702,3 +702,10 @@ body {
 	transform: translateY(-2px);
 	box-shadow: 0 6px 16px rgba(255,122,0,0.3);
 }
+
+.total-price {
+	margin: 10px 0 18px;
+	font-size: 18px;
+	font-weight: bold;
+	color: #ff7a00;
+}

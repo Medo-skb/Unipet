@@ -220,6 +220,7 @@
 		DATE_FORMAT(C.CDATE, '%Y-%m-%d %H:%i:%s') AS CDATE,
 		P.PRODUCT_NAME,
 		P.PRODUCT_PRICE,
+		P.STOCK_QTY,
 		CONCAT(F.FILE_PATH, F.FILE_NAME) AS MAIN_IMG
 		FROM CART C
 		JOIN PRODUCT P ON C.PRODUCT_NO = P.PRODUCT_NO
@@ -256,7 +257,7 @@
 
 	<update id="updateCartPlusQty" parameterType="hashmap">
 		UPDATE CART
-		SET QTY = QTY + #{qty}
+		SET QTY = #{qty}
 		WHERE USER_ID = #{userId}
 		AND PRODUCT_NO = #{productNo}
 	</update>
