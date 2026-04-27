@@ -24,6 +24,7 @@
         <div id="container">
             <div id="top">
                 <div>{{ storeInfo.storeName }}</div>
+                <div>{{ storeInfo.subTitle }}</div>
                 <div id="top-sub">
                     <div class="s-type">{{ storeInfo.storeType }}</div>
                     <div class="button" @click="fnRsv(storeInfo.storeNo)">예약하기</div>
@@ -41,7 +42,7 @@
                 <div class="intro">
                     <div>소개</div>
                     <hr>
-                    <div>{{ storeInfo.sContents }}</div>
+                    <div class="sContents">{{ storeInfo.sContents }}</div>
                 </div>
                 <div class="menu">
                     <div>가격표</div>
@@ -66,7 +67,7 @@
                             <div v-if="reviewList.length === 0" class="no-review">
                                 작성된 리뷰가 없습니다.
                             </div>
-
+                            <div class="sub-text"> ** 리뷰는 최근 2건만 보여집니다.</div>
                             <div v-for="rev in reviewList" :key="rev.rsvNo" class="rev-cont">
                                 <div class="rev-header">
                                     <span class="nickname">{{ rev.nickname }}</span>
@@ -79,7 +80,6 @@
                                     {{ rev.rContents }}
                                 </div>
                             </div>
-                            <div class="sub-text"> ** 리뷰는 최근 2건만 보여집니다.</div>
                         </div>
                     </div>
                     <div id="map"></div>

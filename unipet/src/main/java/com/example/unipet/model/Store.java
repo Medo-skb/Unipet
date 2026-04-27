@@ -14,6 +14,7 @@ public class Store {
 	private double lat;
 	private double lng;
 	private String sStatus;
+	private String subTitle;
 	private String sContents;
 	private String menuNo;
 	private String menuName;

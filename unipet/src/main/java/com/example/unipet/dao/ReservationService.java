@@ -13,7 +13,6 @@ import com.example.unipet.mapper.ReservationMapper;
 import com.example.unipet.mapper.ReviewMapper;
 import com.example.unipet.model.Pet;
 import com.example.unipet.model.Reservation;
-import com.example.unipet.model.Review;
 import com.example.unipet.model.Store;
 
 @Service
@@ -282,6 +281,34 @@ public class ReservationService {
 	    }
 	    
 	    return expiredList.size(); // 처리된 건수 반환
+	}
+	
+	@Transactional
+	public int processAutoCancel(int minutes) {
+	    // 1. ReservationVO 대신 Reservation 클래스 사용
+	    List<Reservation> expiredReservations = reservationMapper.selectExpiredWaiList(minutes);
+	    
+	    int count = 0;
+	    for (Reservation rsv : expiredReservations) {
+	        // 2. 상태 업데이트
+	        int updated = reservationMapper.updateStatusToCancel(rsv.getRsvNo());
+	        
+	        if (updated > 0) {
+	            // 3. rsv_log 기록
+	            HashMap<String, Object> logMap = new HashMap<>();
+	            logMap.put("rsvNo", rsv.getRsvNo());
+	            logMap.put("action", "AUTO_CANCEL");
+	            logMap.put("oldStatus", "WAI");
+	            logMap.put("newStatus", "CAN");
+	            logMap.put("actorType", "SYSTEM");
+	            logMap.put("userId", "SYSTEM"); // 기존 매퍼의 #{userId}와 대응
+	            logMap.put("remark", minutes + "분 내 미결제로 인한 자동 취소");
+	            
+	            reservationMapper.insertRsvLog(logMap);
+	            count++;
+	        }
+	    }
+	    return count;
 	}
 	
 }

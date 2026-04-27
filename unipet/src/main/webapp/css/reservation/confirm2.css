@@ -29,10 +29,12 @@
     align-items: flex-start;
     margin-bottom: 16px;
     font-size: 15px;
+    width: 100%;
 }
 
 .label {
     width: 160px;
+    flex-shrink: 0;
     font-weight: 700;
     color: var(--text-main);
 }
@@ -41,18 +43,20 @@
     color: var(--text-sub);
 }
 
-.value.highlight {
-    color: var(--main);
-    font-weight: 700;
-    font-size: 16px;
+.highlight {
+    color: #ff4757;
+    font-weight: bold;
 }
 
 .request-box {
+    flex: 1;
     border: 1px solid var(--line-soft);
     border-radius: 12px;
     padding: 10px;
     width: 100%;
     background: #fafafa;
+    box-sizing: border-box;
+    min-height: 42px;
 }
 
 /* 안내 영역 */
