@@ -388,4 +388,7 @@ public class UserMypageService {
 
 	    return result;
 	}
+	public List<HashMap<String, Object>> getCouponList(HashMap<String, Object> map){
+	    return userMypageMapper.selectCouponList(map);
+	}
 }

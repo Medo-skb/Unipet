@@ -67,9 +67,12 @@ public interface UserMypageMapper {
 	List<HashMap<String, Object>> selectMyPostList(HashMap<String, Object> map);
 
 	List<HashMap<String, Object>> selectMyCommentList(HashMap<String, Object> map);
+
 	// 현재 포인트 조회
 	HashMap<String, Object> selectPointInfo(HashMap<String, Object> map);
 
 	// 포인트 사용내역 조회
 	List<HashMap<String, Object>> selectPointUseList(HashMap<String, Object> map);
+
+	List<HashMap<String, Object>> selectCouponList(HashMap<String, Object> map);
 }

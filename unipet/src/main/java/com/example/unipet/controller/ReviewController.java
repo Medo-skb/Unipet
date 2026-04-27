@@ -30,8 +30,6 @@ public class ReviewController {
 		
 		return "/user/rsv-review";
 	}
-	
-	@RequestMapping(value = "/reservation/info.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
 	public String rInfo(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
 	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
