@@ -76,7 +76,7 @@
     display: grid;
     gap: 20px;
     grid-template-columns: 300px auto;
-    grid-template-rows: 250px;
+    grid-template-rows: 290px;
 }
 
 .sub-text{

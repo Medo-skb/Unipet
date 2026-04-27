@@ -94,9 +94,8 @@
     const app = Vue.createApp({
         data() {
             return {
-                // 1. 초기 하드코딩 데이터
-                userId: 'test_user03',
-                rsvNo: 24,
+                userId: '{sessionScope.sessionId}',
+                rsvNo: '${map.rsvNo}',
                 
                 // 2. 서버에서 받아올 예약 상세 정보
                 info: {}, 
@@ -111,7 +110,7 @@
             };
         },
         methods: {
-            // [A] 페이지 로드 시 예약 정보를 가져오는 함수
+            // 페이지 로드 시 예약 정보를 가져오는 함수
             fnGetDetail() {
                 const self = this;
                 const params = {
@@ -135,7 +134,7 @@
                 });
             },
 
-            // [B] 이미지 첨부 관련 메서드
+            // 이미지 첨부 관련 메서드
            triggerFileInput() {
                 // 이제 fileInput은 v-for 밖에 있으므로 배열이 아닌 단일 객체입니다.
                 if (this.$refs.fileInput) {
@@ -182,7 +181,7 @@
                 }
             },
 
-            // [C] 최종 리뷰 저장 함수 (INSERT)
+            // 최종 리뷰 저장 함수 (INSERT)
             fnSaveReview() {
                 const self = this;
 
@@ -210,8 +209,8 @@
                 $.ajax({
                     url: "/user/mypage/add-review-rsv.dox",
                     type: "POST",
-                    processData: false,    // 필수: 데이터를 쿼리 스트링으로 변환하지 않음
-                    contentType: false,    // 필수: 기본 content-type 선언 방지
+                    processData: false,
+                    contentType: false,
                     data: formData,
                     success: function(data) {
                         if (typeof data === "string") data = JSON.parse(data);
@@ -226,7 +225,6 @@
             }
         },
         mounted() {
-            // 페이지 진입 시 실행
             this.fnGetDetail();
         }
     }).mount('#app');

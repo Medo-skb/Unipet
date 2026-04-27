@@ -33,6 +33,7 @@ public class PaymentController {
 	
 	@RequestMapping("/payment/pay-rsv.do") 
 	public String rsv(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception{
+		model.addAttribute("rsvNo", map.get("rsvNo"));		
 		return "/payment/pay-rsv";
 	}
 	
