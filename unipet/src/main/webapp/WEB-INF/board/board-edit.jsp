@@ -8,26 +8,20 @@
 		<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
 		<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 		<script src="/js/page-change.js"></script>
-		
+
 		<link rel="stylesheet" href="/css/board/board-edit.css">
 
 	</head>
 
 	<body>
-		<%
-			String msg = request.getParameter("msg");
-			if ("temp".equals(msg)) {
-		%>
-		<script>
-			alert("임시저장되었습니다.");
-		</script>
-		<%
-			}
-		%>
+		<jsp:include page="/WEB-INF/header/header.jsp" />
+		<% String msg=request.getParameter("msg"); if ("temp".equals(msg)) { %>
+			<script>
+				alert("임시저장되었습니다.");
+			</script>
+			<% } %>
 				<div id="app">
-					<div class="logo-area" @click="fnMoveList()">
-						<img src="/img/board/unipet_logo.png" class="logo-img">
-					</div>
+				
 					<div class="wrap" v-if="loaded">
 						<form class="box" v-if="board != null" action="/board/update.do" method="post"
 							enctype="multipart/form-data">
@@ -266,6 +260,7 @@
 					});
 					app.mount("#app");
 				</script>
+				<jsp:include page="/WEB-INF/footer/footer.jsp" />
 	</body>
 
 	</html>

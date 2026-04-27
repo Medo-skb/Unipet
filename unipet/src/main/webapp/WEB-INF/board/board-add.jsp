@@ -8,17 +8,18 @@
 		<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
 		<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 		<script src="/js/page-change.js"></script>
-		
+
 		<link rel="stylesheet" href="/css/board/board-add.css">
 
 	</head>
 
 	<body>
+		<jsp:include page="/WEB-INF/header/header.jsp" />
 		<div id="app">
-			<div class="logo-area">
-				<img src="/img/board/unipet_logo.png" class="logo-img" onclick="fnGoHome()">
-			</div>
 			<div class="wrap">
+				<div class="back-area">
+					<button class="back-btn" @click="fnMoveList()">← 커뮤니티로 돌아가기</button>
+				</div>
 				<div class="box">
 					<div class="title">{{boardTitle}}</div>
 
@@ -150,7 +151,7 @@
 							alert("카테고리를 선택해주세요.");
 							return;
 						}
-						
+
 						if (self.selectedMainNo == "2" && self.localNo == "") {
 							alert("지역을 선택해주세요.");
 							return;
@@ -257,6 +258,7 @@
 				pageChange("/board/list.do", {});
 			}
 		</script>
+		<jsp:include page="/WEB-INF/footer/footer.jsp" />
 	</body>
 
 	</html>

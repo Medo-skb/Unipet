@@ -8,15 +8,16 @@
 		<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
 		<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 		<script src="/js/page-change.js"></script>
-		
+
 		<link rel="stylesheet" href="/css/board/board-list.css">
 
 	</head>
 
 	<body>
+		<jsp:include page="/WEB-INF/header/header.jsp" />
+
 		<div id="app">
 			<div class="wrap">
-				<div class="page-title">커뮤니티</div>
 
 				<div class="box">
 					<div class="alarm-area" @click.stop>
@@ -30,9 +31,7 @@
 								알림이 없습니다
 							</div>
 
-							<div v-for="item in alarmList"
-							     @click="fnReadAlarm(item)"
-							     class="alarm-item">
+							<div v-for="item in alarmList" @click="fnReadAlarm(item)" class="alarm-item">
 								{{item.ALARM_CONTENT}}
 								<br>
 								<small>{{item.CDATE}}</small>
@@ -51,29 +50,45 @@
 						</div>
 					</div>
 					<div class="tab-row" v-if="selectedMainNo == '1'">
-						<button class="tab-btn" :class="{active : integratedCategory == ''}" @click="fnSelectIntegratedCategory('')">전체</button>
-						<button class="tab-btn" :class="{active : integratedCategory == 'NTC'}" @click="fnSelectIntegratedCategory('NTC')">공지사항</button>
-						<button class="tab-btn" :class="{active : integratedCategory == 'GEN'}" @click="fnSelectIntegratedCategory('GEN')">일반</button>
-						<button class="tab-btn" :class="{active : integratedCategory == 'INF'}" @click="fnSelectIntegratedCategory('INF')">정보/팁</button>
-						<button class="tab-btn" :class="{active : integratedCategory == 'GIF'}" @click="fnSelectIntegratedCategory('GIF')">움짤</button>
-						<button class="tab-btn" :class="{active : integratedCategory == 'VID'}" @click="fnSelectIntegratedCategory('VID')">동영상</button>
-						<button class="tab-btn" :class="{active : integratedCategory == 'QNA'}" @click="fnSelectIntegratedCategory('QNA')">질문</button>
-						<button class="tab-btn" :class="{active : integratedCategory == 'MAR'}" @click="fnSelectIntegratedCategory('MAR')">나눔/장터</button>
+						<button class="tab-btn" :class="{active : integratedCategory == ''}"
+							@click="fnSelectIntegratedCategory('')">전체</button>
+						<button class="tab-btn" :class="{active : integratedCategory == 'NTC'}"
+							@click="fnSelectIntegratedCategory('NTC')">공지사항</button>
+						<button class="tab-btn" :class="{active : integratedCategory == 'GEN'}"
+							@click="fnSelectIntegratedCategory('GEN')">일반</button>
+						<button class="tab-btn" :class="{active : integratedCategory == 'INF'}"
+							@click="fnSelectIntegratedCategory('INF')">정보/팁</button>
+						<button class="tab-btn" :class="{active : integratedCategory == 'GIF'}"
+							@click="fnSelectIntegratedCategory('GIF')">움짤</button>
+						<button class="tab-btn" :class="{active : integratedCategory == 'VID'}"
+							@click="fnSelectIntegratedCategory('VID')">동영상</button>
+						<button class="tab-btn" :class="{active : integratedCategory == 'QNA'}"
+							@click="fnSelectIntegratedCategory('QNA')">질문</button>
+						<button class="tab-btn" :class="{active : integratedCategory == 'MAR'}"
+							@click="fnSelectIntegratedCategory('MAR')">나눔/장터</button>
 					</div>
-					
-					
+
+
 					<!-- 지역 카테고리 필터 -->
 					<div class="tab-row" v-if="selectedMainNo == '2'">
-						<button class="tab-btn" :class="{active : localCategory == ''}" @click="fnSelectLocalCategory('')">전체</button>
-						<button class="tab-btn" :class="{active : localCategory == 'WALK'}" @click="fnSelectLocalCategory('WALK')">산책</button>
-						<button class="tab-btn" :class="{active : localCategory == 'MEET'}" @click="fnSelectLocalCategory('MEET')">소모임</button>
-						<button class="tab-btn" :class="{active : localCategory == 'TRAVEL'}" @click="fnSelectLocalCategory('TRAVEL')">여행</button>
-						<button class="tab-btn" :class="{active : localCategory == 'LINFO'}" @click="fnSelectLocalCategory('LINFO')">지역정보</button>
-						<button class="tab-btn" :class="{active : localCategory == 'HOSP'}" @click="fnSelectLocalCategory('HOSP')">병원추천</button>
-						<button class="tab-btn" :class="{active : localCategory == 'CARE'}" @click="fnSelectLocalCategory('CARE')">돌봄</button>
-						<button class="tab-btn" :class="{active : localCategory == 'MARKET'}" @click="fnSelectLocalCategory('MARKET')">중고거래</button>
+						<button class="tab-btn" :class="{active : localCategory == ''}"
+							@click="fnSelectLocalCategory('')">전체</button>
+						<button class="tab-btn" :class="{active : localCategory == 'WALK'}"
+							@click="fnSelectLocalCategory('WALK')">산책</button>
+						<button class="tab-btn" :class="{active : localCategory == 'MEET'}"
+							@click="fnSelectLocalCategory('MEET')">소모임</button>
+						<button class="tab-btn" :class="{active : localCategory == 'TRAVEL'}"
+							@click="fnSelectLocalCategory('TRAVEL')">여행</button>
+						<button class="tab-btn" :class="{active : localCategory == 'LINFO'}"
+							@click="fnSelectLocalCategory('LINFO')">지역정보</button>
+						<button class="tab-btn" :class="{active : localCategory == 'HOSP'}"
+							@click="fnSelectLocalCategory('HOSP')">병원추천</button>
+						<button class="tab-btn" :class="{active : localCategory == 'CARE'}"
+							@click="fnSelectLocalCategory('CARE')">돌봄</button>
+						<button class="tab-btn" :class="{active : localCategory == 'MARKET'}"
+							@click="fnSelectLocalCategory('MARKET')">중고거래</button>
 					</div>
-					
+
 					<div class="search-row" v-if="selectedMainNo == '2'">
 						<select v-model="localNo" @change="fnSelectLocalNo()">
 							<option value="">전체 지역</option>
@@ -207,8 +222,8 @@
 						showAlarm: false,
 						alarmList: [],
 						alarmCount: 0
-						
-						
+
+
 					};
 				},
 				computed: {
@@ -267,7 +282,7 @@
 						this.currentPage = page;
 						this.fnGetBoardList();
 					},
-					
+
 					fnMoveView(boardNo) {
 						if (this.tempYn == "Y") {
 							pageChange("/board/edit.do", {
@@ -279,7 +294,7 @@
 							});
 						}
 					},
-					
+
 					fnMoveAdd() {
 						if (this.selectedMainNo == "") {
 							alert("글을 작성할 게시판 탭을 먼저 선택해주세요.");
@@ -290,7 +305,7 @@
 							bMainNo: this.selectedMainNo
 						});
 					},
-					
+
 					fnMoveTempList() {
 						pageChange("/board/list.do", {
 							tempYn: "Y"
@@ -300,7 +315,7 @@
 					fnMoveNormalList() {
 						pageChange("/board/list.do", {});
 					},
-					
+
 					fnTempList() {
 						this.tempYn = "Y";
 						this.currentPage = 1;
@@ -312,24 +327,24 @@
 						this.currentPage = 1;
 						this.fnGetBoardList();
 					},
-					
+
 					fnSelectLocalCategory(category) {
 						this.localCategory = category;
 						this.currentPage = 1;
 						this.fnGetBoardList();
 					},
-					
+
 					fnSelectIntegratedCategory(category) {
 						this.integratedCategory = category;
 						this.currentPage = 1;
 						this.fnGetBoardList();
 					},
-					
+
 					fnSelectLocalNo() {
 						this.currentPage = 1;
 						this.fnGetBoardList();
 					},
-					
+
 					fnGetAlarmList() {
 						let self = this;
 
@@ -340,10 +355,9 @@
 								url: "/board/alarm/list.dox",
 								type: "POST",
 								dataType: "json",
-								success: function(data) {
+								success: function (data) {
 									if (data.result == "success") {
 										self.alarmList = data.list;
-										self.alarmCount = 0;
 									}
 								}
 							});
@@ -359,7 +373,7 @@
 							data: {
 								alarmNo: item.ALARM_NO
 							},
-							success: function(data) {
+							success: function (data) {
 								if (self.alarmCount > 0) {
 									self.alarmCount--;
 								}
@@ -370,15 +384,16 @@
 							}
 						});
 					},
-					
+
 					fnCloseAlarmOutside(e) {
 						let alarmArea = document.querySelector(".alarm-area");
 
 						if (alarmArea != null && !alarmArea.contains(e.target)) {
 							this.showAlarm = false;
+							this.fnGetAlarmCount();
 						}
 					},
-					
+
 					fnGetAlarmCount() {
 						let self = this;
 
@@ -386,7 +401,7 @@
 							url: "/board/alarm/list.dox",
 							type: "POST",
 							dataType: "json",
-							success: function(data) {
+							success: function (data) {
 								if (data.result == "success") {
 									let count = 0;
 
@@ -409,7 +424,7 @@
 
 					document.addEventListener("click", this.fnCloseAlarmOutside);
 				},
-				
+
 				beforeUnmount() {
 					document.removeEventListener("click", this.fnCloseAlarmOutside);
 				}
@@ -417,6 +432,7 @@
 
 			app.mount("#app");
 		</script>
+		<jsp:include page="/WEB-INF/footer/footer.jsp" />
 	</body>
 
 	</html>
