@@ -14,15 +14,15 @@
 	</head>
 
 	<body>
+		
+		<jsp:include page="/WEB-INF/header/header.jsp" />
 		<% String msg=request.getParameter("msg"); if ("update".equals(msg)) { %>
 			<script>
 				alert("수정되었습니다.");
 			</script>
 			<% } %>
 				<div id="app">
-					<div class="logo-area">
-						<img src="../../img/board/unipet_logo.png" class="logo-img" onclick="fnGoHome()">
-					</div>
+				
 					<div class="wrap">
 						<div v-if="resultType == 'private'" class="private-box">
 							비공개 게시글입니다.
@@ -528,6 +528,7 @@
 						pageChange("/board/list.do", {});
 					}
 				</script>
+				<jsp:include page="/WEB-INF/footer/footer.jsp" />
 	</body>
 
 	</html>
