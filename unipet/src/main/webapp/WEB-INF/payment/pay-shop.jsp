@@ -238,16 +238,14 @@
                     data : JSON.stringify(param),
                     success: function (data) {
                         if (data.result === "success") {
-                            console.log(param);
                             self.orderList = data.list; // 서버가 준 리스트를 Vue 변수에 꽂기
-                            console.log(self.orderList);
                             if (!self.orderList || self.orderList.length == 0) {
                                 alert("결제할 상품 정보가 없습니다. 메인 페이지로 이동합니다.");
-                                // location.href = "/main.do";
+                                location.href = "/main.do";
                             } 
                         } else {
                             alert(data.message || "주문 정보를 불러올 수 없습니다.");
-                            // location.href = "/main.do";
+                            location.href = "/main.do";
                         }
                     }
                 });
@@ -260,7 +258,6 @@
                     dataType: "json",
                     success: function (data) {
                         self.info = data.info;
-                        console.log(data);
                     }
                 });
             },
@@ -382,7 +379,6 @@
                     success: function(data) {
                         if (data.result === "success") {
                             alert(data.message);
-                            console.log(data);
                             pageChange("/payment/pay-success.do", {ordNo : data.ordNo});
                         }
                     }
@@ -394,7 +390,6 @@
             self.fnInfo();
             self.fnGetOrderList();
             self.fnGetBenefits();
-            console.log(self.cartIds);
         }
     });
     app.mount('#app');

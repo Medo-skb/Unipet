@@ -94,7 +94,7 @@
     const app = Vue.createApp({
         data() {
             return {
-                ordNo: "${ordNo}" || 6, 
+                ordNo: "${ordNo}" || 7, 
                 
                 info: {},   // 전체 결제 정보 (totalPrice, payNo 등)
                 list: [],   // 환불할 상품 리스트 목록 배열
@@ -122,14 +122,14 @@
                     success: function (data) {
                         if(data.info) {
                             self.info = data.info;
-                            self.list = data.list || []; // 리스트 꽂아주기
+                            self.list = data.list || [];
                         } else {
                             alert("주문 정보를 찾을 수 없습니다.");
+                            location.href = "/main.do";
                         }
                     }
                 });
             },
-            // [환불 제출]
             fnSubmitRefund: function () {
                 let self = this;
 
@@ -160,7 +160,7 @@
                         success: function (data) {
                             if(data.result === "success") {
                                 alert("환불 완료!");
-                                location.href = "/user/UserMypage.dox";
+                                location.href = "/user/mypage.do";
                             } else {
                                 alert("오류: " + data.message);
                             }
