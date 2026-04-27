@@ -307,4 +307,31 @@
         	AND USER_ID = #{userId}   
     </delete>
     
+    <select id="selectPaymentInfo" parameterType="hashmap" resultType="hashmap">
+        SELECT 
+            TID AS IMP_UID, 
+            TOTALPRICE AS AMOUNT, 
+            PAY_STATUS 
+        FROM payment_master 
+        WHERE ORD_NO = #{ordNo}
+    </select>
+
+    <update id="updateOrderCancelStatus" parameterType="hashmap">
+        UPDATE orders 
+        SET ORD_STATUS = 'CAN'  WHERE ORD_NO = #{ordNo}
+    </update>
+
+    <update id="updatePaymentCancelStatus" parameterType="hashmap">
+        UPDATE payment_master 
+        SET PAY_STATUS = 'REF' 
+        WHERE ORD_NO = #{ordNo}
+    </update>
+
+    <update id="updateStockRestore" parameterType="hashmap">
+        UPDATE product p
+        JOIN order_detail od ON p.PRODUCT_NO = od.PRODUCT_NO
+        SET p.STOCK_QTY = p.STOCK_QTY + od.ORD_QTY
+        WHERE od.ORD_NO = #{ordNo}
+    </update>
+    
 </mapper>

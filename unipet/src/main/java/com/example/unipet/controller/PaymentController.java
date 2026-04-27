@@ -201,4 +201,15 @@ public class PaymentController {
 		resultMap = paymentService.getRsv(map); 
 		return new Gson().toJson(resultMap); 
 	}
+	
+    @RequestMapping(value = "/payment/productRefund.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+    @ResponseBody
+    public String productRefund(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+        HashMap<String, Object> resultMap = new HashMap<String, Object>();     
+        resultMap = paymentService.refundPayment(map);
+        
+
+        return new Gson().toJson(resultMap); 
+    }
+	
 }

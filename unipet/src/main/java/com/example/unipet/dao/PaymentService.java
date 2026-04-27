@@ -35,6 +35,12 @@ public class PaymentService {
 	
 	@Value("${toss.secret.key}")
     private String secretKey;
+	
+	@Value("${portone.api.key}")
+    private String apiKey;
+
+    @Value("${portone.api.secret}")
+    private String apiSecret;
 
 	PaymentService(ReservationService reservationService) {
 		this.reservationService = reservationService;
@@ -414,5 +420,118 @@ public class PaymentService {
 	    }
 	    return resultMap;
 	}
-}	
+	
+	@Transactional(rollbackFor = Exception.class)
+    public HashMap<String, Object> refundPayment(HashMap<String, Object> map){
+        HashMap<String, Object> resultMap = new HashMap<String, Object>();
+        
+        try {
+            // ==========================================
+            // 1. 기존 결제 정보 조회 (DB)
+            // ==========================================
+            HashMap<String, Object> paymentData = paymentMapper.selectPaymentInfo(map);
+            
+            if (paymentData == null) {
+                resultMap.put("result", "fail");
+                resultMap.put("message", "결제 정보를 찾을 수 없습니다.");
+                return resultMap; // 즉시 종료
+            }
+
+            // DB에서 가져온 값
+            String impUid = (String) paymentData.get("IMP_UID");
+            int totalAmount = Integer.parseInt(String.valueOf(paymentData.get("AMOUNT")));
+            String payStatus = (String) paymentData.get("PAY_STATUS"); // 상태 가져오기
+            
+            // 뷰(Vue)에서 넘어온 환불 요청 금액
+            int cancelRequestAmount = Integer.parseInt(String.valueOf(map.get("amount")));
+
+            // 이미 취소된 건인지 확인 (부분 취소 계산 날림)
+            if ("CANCEL".equals(payStatus)) {
+                resultMap.put("result", "fail");
+                resultMap.put("message", "이미 환불이 완료된 주문입니다.");
+                return resultMap;
+            }
+
+            // 화면에서 넘어온 금액과 DB 결제 금액이 다르면 방어
+            if (totalAmount != cancelRequestAmount) {
+                resultMap.put("result", "fail");
+                resultMap.put("message", "환불 요청 금액이 올바르지 않습니다.");
+                return resultMap;
+            }
+
+            // ==========================================
+            // 2. 포트원 서버에 Access Token 발급 요청
+            // ==========================================
+            RestTemplate restTemplate = new RestTemplate();
+            Map<String, String> tokenReq = new HashMap<>();
+            tokenReq.put("imp_key", apiKey);
+            tokenReq.put("imp_secret", apiSecret);
+
+            ResponseEntity<Map> tokenRes = restTemplate.postForEntity(
+                    "https://api.iamport.kr/users/getToken",
+                    tokenReq,
+                    Map.class
+            );
+
+            Map<String, Object> tokenResBody = tokenRes.getBody();
+            Map<String, Object> tokenData = (Map<String, Object>) tokenResBody.get("response");
+            String accessToken = (String) tokenData.get("access_token");
+
+            // ==========================================
+            // 3. 포트원 서버에 결제 취소 요청
+            // ==========================================
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(accessToken); 
+
+            Map<String, Object> cancelReq = new HashMap<>();
+            cancelReq.put("imp_uid", impUid);
+            cancelReq.put("amount", cancelRequestAmount);
+            cancelReq.put("checksum", totalAmount);
+            cancelReq.put("reason", map.get("reason")); // 화면에서 선택한 사유
+
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(cancelReq, headers);
+
+            ResponseEntity<Map> cancelRes = restTemplate.postForEntity(
+                    "https://api.iamport.kr/payments/cancel",
+                    entity,
+                    Map.class
+            );
+
+            // 환불 결과 확인 (code가 0이면 성공)
+            Map<String, Object> cancelResBody = cancelRes.getBody();
+            Integer code = (Integer) cancelResBody.get("code");
+
+            if (code != 0) { 
+                resultMap.put("result", "fail");
+                resultMap.put("message", cancelResBody.get("message")); // 포트원이 보낸 실패 사유
+                return resultMap;
+            }
+
+            // ==========================================
+            // 4. 환불 결과 DB 동기화 (업데이트)
+            // ==========================================
+            map.put("cancelAmount", cancelRequestAmount); // Mapper로 보낼 금액 세팅
+            
+            paymentMapper.updateOrderCancelStatus(map);   // 주문 상태 취소
+            paymentMapper.updatePaymentCancelStatus(map); // 결제 상태 취소
+            paymentMapper.updateStockRestore(map);        // 재고 원복 (샀던 거 다시 진열대에!)
+
+            // Default 형식과 동일하게 성공 결과 세팅
+            resultMap.put("result", "success");
+            resultMap.put("message", "환불이 정상적으로 완료되었습니다.");
+            
+        } catch (Exception e) {
+            System.out.println("환불 처리 에러: " + e.getMessage());
+            resultMap.put("result", "fail");
+            resultMap.put("message", "서버 오류가 발생했습니다.");
+            
+            // 롤백을 위해 런타임 예외 발생
+            throw new RuntimeException("Refund processing failed: " + e.getMessage()); 
+        }
+        
+        return resultMap;
+    }
+}
+	
 	
