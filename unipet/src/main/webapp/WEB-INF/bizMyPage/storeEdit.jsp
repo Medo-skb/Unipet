@@ -202,10 +202,10 @@
                                 <div class="info-label">휴무일</div>
                                 <div class="info-value">{{storeInfo.offDay}}</div>
                             </div> -->
-                            <div class="info-row">
+                            <!-- <div class="info-row">
                                 <div class="info-label">환불정책</div>
                                 <div class="info-value full-text">{{storeInfo.refundPolicy}}</div>
-                            </div>
+                            </div> -->
                         </div>
 
                         <div class="section-btn-area">
@@ -405,10 +405,10 @@
                                     <input type="text" v-model="editStoreInfo.offDay">
                                 </div> -->
 
-                                <div class="form-row">
+                                <!-- <div class="form-row">
                                     <label>환불정책</label>
                                     <textarea v-model="editStoreInfo.refundPolicy"></textarea>
-                                </div>
+                                </div> -->
                             </div>
 
                             <div class="modal-footer">

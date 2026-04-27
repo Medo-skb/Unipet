@@ -12,9 +12,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.unipet.dao.AdminService;
+import com.example.unipet.model.Admin;
 import com.google.gson.Gson;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class AdminController {
@@ -22,9 +24,50 @@ public class AdminController {
 	@Autowired
 	AdminService adminService;
 	
+	@RequestMapping("/admin/login.do") 
+	public String adminlogin(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception{
+		return "/admin/adminLogin";
+	}
+	
 	@RequestMapping("/admin.do") 
 	public String adminPage(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception{
+		HttpSession session = request.getSession();
+		String role = (String) session.getAttribute("sessionRole");
+
+		if (role == null || !role.equals("ADMIN")) {
+			return "redirect:/admin/login.do";
+		}
+
 		return "/admin/adminPage";
+	}
+	
+	@RequestMapping("/admin/logout.do")
+	public String adminLogout(HttpServletRequest request) {
+		HttpSession session = request.getSession(false);
+
+		if (session != null) {
+			session.invalidate();
+		}
+
+		return "redirect:/admin/login.do";
+	}
+	
+	@RequestMapping(value = "/admin/login.dox", method = RequestMethod.POST)
+	public String adminLoginCheck(HttpServletRequest request, @RequestParam HashMap<String, Object> map) throws Exception {
+
+		Admin admin = adminService.getLoginAdmin(map);
+
+		if (admin != null) {
+			HttpSession session = request.getSession();
+
+			session.setAttribute("sessionId", admin.getAdminId());
+			session.setAttribute("sessionRole", "ADMIN");
+
+			return "redirect:/admin.do";
+		}
+
+		request.setAttribute("msg", "아이디 또는 비밀번호가 틀렸습니다.");
+		return "/admin/adminLogin";
 	}
 	
 	@RequestMapping(value = "/adminBiz.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")

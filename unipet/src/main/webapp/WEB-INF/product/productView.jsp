@@ -11,13 +11,27 @@
 		<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 		<script src="/js/page-change.js"></script>
 
-		<link rel="stylesheet" href="/css/product/productView.css">
+		<!-- <link rel="stylesheet" href="/css/product/productView.css"> -->
+		<link rel="stylesheet" href="/css/product/productView2.css">
 
 	</head>
 
 	<body>
 		<jsp:include page="/WEB-INF/header/header.jsp" />
+
 		<div id="app">
+			<!-- <div class="header">
+				<div class="logo" @click="fnMoveMain()">
+					UniPet <span class="logo-sub">shop</span>
+				</div>
+
+				<div class="header-right">
+					<div class="cart-box" @click="fnMoveCart()">
+						<span class="cart-icon">🛒</span>
+						<span class="cart-badge" v-if="cartCount > 0">{{cartCount}}</span>
+					</div>
+				</div>
+			</div> -->
 
 			<div class="wrap">
 				<div class="back-area">
@@ -272,6 +286,9 @@
 				</div>
 			</div>
 		</div>
+
+		<jsp:include page="/WEB-INF/footer/footer.jsp" />
+	</body>
 
 
 		<script>

@@ -9,8 +9,11 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="/js/page-change.js"></script>
     <title>Confirm</title>
+    <link href="/css/reservation/confirm2.css" rel="stylesheet">
 </head>
 <body>
+    <jsp:include page="/WEB-INF/header/header.jsp" />
+    
     <div id="app">
         <div id="container">
             <div class="confirm-card">
@@ -77,6 +80,8 @@
             </div>
         </div>
     </div>
+    
+    <jsp:include page="/WEB-INF/footer/footer.jsp" />
 </body>
 
 <script>

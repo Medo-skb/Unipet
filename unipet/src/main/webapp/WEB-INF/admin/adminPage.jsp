@@ -22,12 +22,12 @@
             <div class="admin-wrap">
                 <!-- 왼쪽 메뉴 -->
                 <aside class="admin-sidebar">
-                    <div 
+                    <!-- <div 
                         class="menu-item"
                         :class="{ active : currentMenu === 'dashboard' }"
                         @click="fnChangeMenu('dashboard')">
                         전체 현황판
-                    </div>
+                    </div> -->
 
                     <div 
                         class="menu-item"
@@ -47,10 +47,10 @@
                 <!-- 오른쪽 내용 -->
                 <section class="admin-content">
                     <div class="content-card">
-                        <template v-if="currentMenu === 'dashboard'">
+                        <!-- <template v-if="currentMenu === 'dashboard'">
                             <h2>전체 현황판</h2>
                             <div class="content-desc">여기에 전체 현황판 내용 들어감</div>
-                        </template>
+                        </template> -->
 
                         <template v-if="currentMenu === 'report'">
                             <h2>커뮤니티 및 리뷰 신고 관리</h2>
@@ -384,7 +384,7 @@
         data() {
             return {
                 // 변수 - (key : value)
-                currentMenu: "dashboard",
+                currentMenu: "report",
                 reportTab: "bookingReview",
 
                 approveList: [],

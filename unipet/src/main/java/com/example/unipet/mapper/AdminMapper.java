@@ -11,6 +11,9 @@ import com.example.unipet.model.Admin;
 @Mapper
 public interface AdminMapper {
 	
+	// 관리자 로그인
+	public Admin selectAdminLogin(HashMap<String, Object> map);
+	
 	// 사업자 승인 리스트
 	public List<Admin> selectAdminBiz(HashMap<String, Object> map);
 	

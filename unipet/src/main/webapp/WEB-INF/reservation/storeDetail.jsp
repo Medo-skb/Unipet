@@ -13,9 +13,12 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=2198e0ed2782e12a610e46213693750e&libraries=services"></script>
     <title>업체 상세</title>
+    <link href="/css/reservation/storeDetail2.css" rel="stylesheet">
     
 </head>
 <body>
+    <jsp:include page="/WEB-INF/header/header.jsp" />
+    
     <div id="app">
         <!-- html 코드는 id가 app인 태그 안에서 작업 -->
         <div id="container">
@@ -85,6 +88,8 @@
             </div>
         </div>
     </div>
+
+    <jsp:include page="/WEB-INF/footer/footer.jsp" />
 </body>
 </html>
 

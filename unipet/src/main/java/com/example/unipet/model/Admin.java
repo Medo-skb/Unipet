@@ -5,6 +5,11 @@ import lombok.Data;
 @Data
 public class Admin {
 	
+	// ADMIN
+	String adminId;
+	String adminPwd;
+	String adminName;
+	
     // STORE
     int storeNo;
     String storeName;

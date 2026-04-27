@@ -1,8 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -69,10 +67,12 @@
                 <div class="under"></div>
 
                 <div class="membership-banner-wrap">
-                    <img src="${pageContext.request.contextPath}/img/main/membership_banner.png" 
-                        class="membership-banner-img">
+                    <a href="${pageContext.request.contextPath}/payment/sub.do">
+                        <img src="${pageContext.request.contextPath}/img/main/membership_banner.png" 
+                            class="membership-banner-img">
+                    </a>
                 </div>
-
+                
                 <section class="main-store-section scroll-fade-up">
                     <div class="section-header">
                         <h2 class="section-title">최근 예약이 많은 업체</h2>
