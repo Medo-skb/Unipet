@@ -9,6 +9,7 @@
         <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
         <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="/js/page-change.js"></script>
         <title>마이페이지</title>
     </head>
 
@@ -38,6 +39,9 @@
                     ⚖️<br>몸무게</div>
                 <div class="menu" :class="{active: currentMenu==='pointInfo'}" @click="changeMenu('pointInfo')">
                     💰<br>포인트</div>
+                <div class="menu" :class="{active: currentMenu==='couponInfo'}" @click="changeMenu('couponInfo')">
+                    🎟️<br>쿠폰관리
+                </div>
             </div>
 
             <div class="content">
@@ -182,10 +186,9 @@
                                             <div class="main-order-item" v-for="group in groupedOrderList.slice(0, 2)"
                                                 :key="group.orderNo">
                                                 <div style="display:flex; gap:10px; align-items:center;">
-                                                    <img :src="group.items[0]?.productImage || 'https://via.placeholder.com/48x48?text=IMG'"
-                                                        alt="상품이미지"
-                                                        style="width:48px; height:48px; object-fit:cover; border-radius:10px;">
-
+                                                    <img class="order-img" :src="group.items && group.items.length > 0 && group.items[0].productImg 
+                                                     ? group.items[0].productImg 
+                                                          : '/img/no-image.png'" alt="상품이미지">
                                                     <div>
                                                         <div class="list-title">{{ group.orderDate || '-' }}</div>
                                                         <div class="list-sub">
@@ -393,51 +396,53 @@
                                 <div
                                     style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
                                     <div class="list-title" style="font-size:16px;">
-                                        주문일자 : {{ group.orderDate }}
+                                        주문일자 : {{ (group.orderDate || '').substring(0,16) }}
                                     </div>
 
-                                    <div class="btn-box">
-                                        <button class="small-btn" @click="openOrderDetail(group)">주문상세보기</button>
-                                        <button class="small-btn" v-if="canWriteOrderReview(group)"
-                                            @click="goProductReview(group)">
-                                            리뷰작성
-                                        </button>
-                                    </div>
-                                </div>
 
 
 
 
-                                <div v-for="order in group.items"
-                                    :key="order.orderDetailNo || order.orderNo + '-' + order.productNo"
-                                    class="order-item">
 
-                                    <img :src="order.productImage || 'https://via.placeholder.com/72x72?text=IMG'"
-                                        alt="상품이미지" class="order-img">
+                                    <div v-for="order in group.items"
+                                        :key="order.orderDetailNo || order.orderNo + '-' + order.productNo"
+                                        class="order-item">
 
-                                    <div style="flex:1;">
+                                        <img class="order-img" :src="order.productImg || '/img/no-image.png'"
+                                            alt="상품이미지">
+                                        <div style="flex:1;">
 
-                                        <!-- 상품명 -->
-                                        <div class="list-title">
-                                            {{ order.productName || '-' }}
-                                        </div>
+                                            <!-- 상품명 -->
+                                            <div class="list-title">
+                                                {{ order.productName || '-' }}
+                                            </div>
 
 
 
-                                        <!-- 수량 -->
-                                        <div class="list-sub">수량 : {{ order.qty }}개</div>
+                                            <!-- 수량 -->
+                                            <div class="list-sub">수량 : {{ order.qty }}개</div>
 
-                                        <!-- 금액 -->
-                                        <div class="list-sub">금액 : {{ order.price }}원</div>
+                                            <!-- 금액 -->
+                                            <div class="list-sub">금액 : {{ order.price }}원</div>
 
-                                        <!-- 결제 상태 -->
-                                        <div class="list-status">
-                                            결제상태 : {{ getPayStatusText(order.payStatus || order.PAY_STATUS) }}
-                                        </div>
+                                            <!-- 결제 상태 -->
+                                            <div class="list-status">
+                                                결제상태 : {{ getPayStatusText(order.payStatus || order.PAY_STATUS) }}
+                                            </div>
 
-                                        <!-- 배송 상태 -->
-                                        <div class="list-status">
-                                            배송상태 : {{ getDeliStatusText(order.deliStatus || order.DELI_STATUS) }}
+                                            <!-- 배송 상태 -->
+                                            <div class="list-status">
+                                                배송상태 : {{ getDeliStatusText(order.deliStatus || order.DELI_STATUS) }}
+                                            </div>
+                                            <div class="btn-box">
+                                                <button class="small-btn" v-if="(order.deliStatus || order.DELI_STATUS) === 'CMP'
+                                                     && (order.reviewYn || order.REVIEW_YN) !== 'Y'" @click="pageChange('/user/mypage/prd-review.do', {
+                                                     productNo: order.productNo || order.PRODUCT_NO,
+                                                    ordNo: order.orderNo || order.ORDER_NO
+                                                 })">
+                                                    상품리뷰 작성
+                                                </button>
+                                            </div>
                                         </div>
 
                                     </div>
@@ -462,8 +467,8 @@
                             <div class="info-card" v-for="order in selectedOrderGroup.items"
                                 :key="'detail-' + (order.orderDetailNo || order.orderNo + '-' + order.productNo)">
                                 <div class="order-item">
-                                    <img :src="order.productImage || 'https://via.placeholder.com/72x72?text=IMG'"
-                                        alt="상품이미지" class="order-img">
+                                    <img class="order-img" :src="order.productImg || '/img/no-image.png'" alt="상품이미지">
+
                                     <div style="flex:1;">
                                         <div class="list-title">
                                             {{ order.productName || '-' }}
@@ -535,9 +540,10 @@
                                         </div>
 
                                         <div class="btn-box">
-                                            <button class="small-btn" v-if="item.rsvStatus === 'FIN'"
-                                                @click="goReservationReview(item)">
-                                                리뷰작성
+                                            <button class="small-btn" v-if="item.rsvStatus === 'FIN'" @click="pageChange('/user/mypage/rsv-review.do', {
+                                                rsvNo: item.rsvNo || item.RSV_NO
+                                                })">
+                                                예약리뷰작성
                                             </button>
                                         </div>
                                     </div>
@@ -719,6 +725,54 @@
                             </div>
                         </div>
                     </div>
+                    <div v-if="currentMenu === 'couponInfo'">
+                        <div class="section-box">
+                            <div class="section-title">쿠폰 관리</div>
+
+                            <div class="coupon-tabs">
+                                <button class="small-btn" :class="{active: couponTab === 'ALL'}"
+                                    @click="couponTab='ALL'">전체</button>
+                                <button class="small-btn" :class="{active: couponTab === 'ABLE'}"
+                                    @click="couponTab='ABLE'">사용가능</button>
+                                <button class="small-btn" :class="{active: couponTab === 'USED'}"
+                                    @click="couponTab='USED'">사용완료</button>
+                                <button class="small-btn" :class="{active: couponTab === 'EXPIRED'}"
+                                    @click="couponTab='EXPIRED'">만료</button>
+                            </div>
+
+                            <div v-if="filteredCouponList.length === 0" class="empty-text">
+                                쿠폰이 없습니다.
+                            </div>
+
+                            <div class="info-card" v-for="coupon in filteredCouponList"
+                                :key="coupon.couponNo || coupon.COUPON_NO">
+                                <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+                                    <div>
+                                        <div class="list-title">
+                                            {{ coupon.couponName || coupon.COUPON_NAME || '-' }}
+                                        </div>
+
+                                        <div class="list-sub">
+                                            할인금액 :
+                                            {{ Number(coupon.discountAmt || coupon.DISCOUNT_AMT || 0).toLocaleString()
+                                            }}원
+                                        </div>
+
+                                        <div class="list-sub">
+                                            유효기간 :
+                                            {{ coupon.startDate || coupon.START_DATE || '-' }}
+                                            ~
+                                            {{ coupon.endDate || coupon.END_DATE || '-' }}
+                                        </div>
+                                    </div>
+
+                                    <span class="status-badge" :class="getCouponStatusClass(coupon)">
+                                        {{ getCouponStatusText(coupon) }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <div v-if="currentMenu === 'pointInfo'">
                         <div class="section-box">
@@ -880,7 +934,11 @@
 
                         point: 0,
                         pointUseList: [],
-                        showPointUseList: false
+                        showPointUseList: false,
+
+                        couponTab: "ALL",
+                        couponList: []
+
                     };
                 },
 
@@ -963,11 +1021,20 @@
                                 })
                             }));
                     },
-
                     recentPostList() {
                         return [...this.myPostList]
                             .sort((a, b) => String(b.cdate || "").localeCompare(String(a.cdate || "")))
                             .slice(0, 3);
+                    },
+
+                    filteredCouponList() {
+                        if (this.couponTab === "ALL") {
+                            return this.couponList;
+                        }
+
+                        return this.couponList.filter(coupon => {
+                            return this.getCouponStatus(coupon) === this.couponTab;
+                        });
                     }
                 },
 
@@ -990,6 +1057,10 @@
                             this.loadPointInfo();
                             this.showPointUseList = false;
                             this.pointUseList = [];
+                        }
+                        if (menu === "couponInfo") {
+                            this.loadCouponList();
+                            this.couponTab = "ALL";
                         }
                     },
 
@@ -1063,29 +1134,11 @@
                         });
                     },
 
-                    goProductReview(group) {
-                        const ordNo = group.orderNo || group.ORD_NO;
-
-                        if (!ordNo) {
-                            alert("주문 정보가 없습니다.");
-                            return;
-                        }
-
-                        location.href = "/user/mypage/prd-review.do?ordNo=" + ordNo;
-                    },
 
 
                     openReservationDetail(item) {
                         this.selectedReservation = item;
                         this.currentMenu = "reservationDetail";
-                    },
-                    goReservationReview(item) {
-                        if (!item || !item.rsvNo) {
-                            alert("예약 정보가 없습니다.");
-                            return;
-                        }
-
-                        location.href = "/user/mypage/rsv-review.do?rsvNo=" + item.rsvNo;
                     },
 
 
@@ -1675,6 +1728,69 @@
                                 alert("포인트 사용내역 조회 실패");
                             }
                         });
+                    },
+                    loadCouponList() {
+                        const self = this;
+
+                        $.ajax({
+                            url: "/user/coupon-list.dox",
+                            type: "POST",
+                            dataType: "json",
+                            success: function (res) {
+                                if (res.result === true || res.result === "success") {
+                                    self.couponList = res.couponList || res.list || [];
+                                } else {
+                                    self.couponList = [];
+                                }
+                            },
+                            error: function () {
+                                self.couponList = [];
+                                alert("쿠폰 조회 실패");
+                            }
+                        });
+                    },
+                    getCouponStatus(coupon) {
+                        const status = coupon.cpStatus || coupon.CP_STATUS;
+                        const endDate = coupon.endDate || coupon.EXP_DATE;
+
+                        if (status === "USE") {
+                            return "USED";
+                        }
+
+                        if (status === "EXP") {
+                            return "EXPIRED";
+                        }
+
+                        if (endDate) {
+                            const today = new Date();
+                            const expireDate = new Date(endDate);
+
+                            today.setHours(0, 0, 0, 0);
+                            expireDate.setHours(0, 0, 0, 0);
+
+                            if (expireDate < today) {
+                                return "EXPIRED";
+                            }
+                        }
+
+                        return "ABLE";
+                    },
+
+
+                    getCouponStatusText(coupon) {
+                        const status = this.getCouponStatus(coupon);
+
+                        if (status === "USED") return "사용완료";
+                        if (status === "EXPIRED") return "만료";
+                        return "사용가능";
+                    },
+
+                    getCouponStatusClass(coupon) {
+                        const status = this.getCouponStatus(coupon);
+
+                        if (status === "USED") return "status-gray";
+                        if (status === "EXPIRED") return "status-red";
+                        return "status-green";
                     }
                 },
 
@@ -1697,6 +1813,7 @@
                         this.changeMenu("orderList");
                         sessionStorage.removeItem("triggerFunction");
                     }
+
                 }
             });
 

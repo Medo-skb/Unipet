@@ -263,8 +263,7 @@ public class UserMypageController {
 		HashMap<String, Object> result = new HashMap<>();
 
 		Object sessionId = session.getAttribute("sessionId");
-		System.out.println("포인트 조회 sessionId = " + sessionId);
-
+		
 		if (sessionId == null) {
 			result.put("result", "fail");
 			result.put("message", "로그인이 필요합니다.");
@@ -299,4 +298,26 @@ public class UserMypageController {
 
 		return userMypageService.getPointUseList(map);
 	}
+	@PostMapping("/user/coupon-list.dox")
+	@ResponseBody
+	public HashMap<String, Object> getCouponList(HttpSession session) {
+
+	    HashMap<String, Object> result = new HashMap<>();
+
+	    Object sessionId = session.getAttribute("sessionId");
+
+	    if (sessionId == null) {
+	        result.put("result", "fail");
+	        result.put("couponList", new java.util.ArrayList<>());
+	        return result;
+	    }
+
+	    HashMap<String, Object> map = new HashMap<>();
+	    map.put("userId", sessionId);
+
+	    result.put("couponList", userMypageService.getCouponList(map));
+	    result.put("result", "success");
+
+	    return result;
+}
 }
