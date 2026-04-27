@@ -26,7 +26,7 @@
 
                     <ul class="sidebar-menu">
                         <li class="menu-item active">
-                            <a href="/biz/main.do">홈</a>
+                            <a href="/biz/MyPage.do">홈</a>
                         </li>
                         <li class="menu-item">
                             <a href="/biz/storeEdit.do">내 정보 및 업체 정보 수정</a>

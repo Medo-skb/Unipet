@@ -284,7 +284,7 @@ table {
 
 .edit-btn:hover {
     border-color: var(--main);
-    background: rgba(255, 79, 109, 0.08);
+    /* background: rgba(255, 79, 109, 0.08); */
     color: var(--main);
 }
 
@@ -508,7 +508,7 @@ table {
 }
 
 .save-btn:hover {
-    background: var(--text-main);
+    opacity: 0.9;
 }
 
 .simple-card-list {
@@ -655,7 +655,7 @@ table {
 
 .reservation-tab-area .tab-btn:hover {
     border-color: var(--main);
-    background: rgba(255, 79, 109, 0.08);
+    /* background: rgba(255, 79, 109, 0.08); */
     color: var(--main);
 }
 
@@ -809,10 +809,6 @@ table {
     transition: transform 0.2s ease;
 }
 
-.store-image-card:hover {
-    transform: translateY(-4px);
-}
-
 .store-image-thumb {
     width: 100%;
     height: 250px;
@@ -874,6 +870,22 @@ table {
     border-color: var(--main);
     background: rgba(255, 79, 109, 0.08);
     color: var(--main);
+}
+
+.line-btn {
+    height: 42px;
+    padding: 0 16px;
+    border: none;
+    background: var(--main);
+    color: #fff;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.line-btn:hover {
+    opacity: 0.9;
 }
 
 .image-btn-area .danger-btn {
@@ -938,6 +950,25 @@ table {
 
 .store-image-grid::-webkit-scrollbar-track {
     background: transparent;
+}
+
+.inline-input-area {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    align-items: center;
+}
+
+.inline-input-area input {
+    width: auto;
+    flex: 1;
+    min-width: 0;
+}
+
+.inline-input-area .line-btn {
+    width: 100px;
+    height: 42px;
+    flex-shrink: 0;
 }
 
 /* @media screen and (max-width: 1024px) {

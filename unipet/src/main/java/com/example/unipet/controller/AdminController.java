@@ -135,4 +135,44 @@ public class AdminController {
 
 	    return new Gson().toJson(result);
 	}
+	
+	@RequestMapping(value = "/admin/report/communityPostList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getCommunityPostReportList(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+	    resultMap = adminService.getCommunityPostReportList(map);
+	    return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/admin/report/communityCommentList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getCommunityCommentReportList(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+	    resultMap = adminService.getCommunityCommentReportList(map);
+	    return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/admin/report/communityReject.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String rejectCommunityReport(@RequestParam HashMap<String, Object> map) {
+
+	    adminService.rejectCommunityReport(map);
+
+	    Map<String, Object> result = new HashMap<>();
+	    result.put("result", "success");
+
+	    return new Gson().toJson(result);
+	}
+
+	@RequestMapping(value = "/admin/report/communityApprove.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String approveCommunityReport(@RequestParam HashMap<String, Object> map) {
+
+	    adminService.approveCommunityReport(map);
+
+	    Map<String, Object> result = new HashMap<>();
+	    result.put("result", "success");
+
+	    return new Gson().toJson(result);
+	}
 }

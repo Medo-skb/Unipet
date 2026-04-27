@@ -134,7 +134,63 @@ public class AdminService {
 	    adminMapper.deleteReview(map);
 	}
 	
-	
+	// 커뮤니티 글 신고 리스트
+	public HashMap<String, Object> getCommunityPostReportList(HashMap<String, Object> map){
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+	    try {
+	        List<Admin> list = adminMapper.selectCommunityPostReportList(map);
+
+	        resultMap.put("list", list);
+	        resultMap.put("result", "success");
+	        resultMap.put("message", Message.MSG_SEARCH);
+	    } catch (Exception e) {
+	        System.out.println(e.getMessage());
+	        resultMap.put("result", "fail");
+	        resultMap.put("message", Message.MSG_SERVER_ERR);
+	    }
+	    return resultMap;
+	}
+
+	// 커뮤니티 댓글 신고 리스트
+	public HashMap<String, Object> getCommunityCommentReportList(HashMap<String, Object> map){
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+	    try {
+	        List<Admin> list = adminMapper.selectCommunityCommentReportList(map);
+
+	        resultMap.put("list", list);
+	        resultMap.put("result", "success");
+	        resultMap.put("message", Message.MSG_SEARCH);
+	    } catch (Exception e) {
+	        System.out.println(e.getMessage());
+	        resultMap.put("result", "fail");
+	        resultMap.put("message", Message.MSG_SERVER_ERR);
+	    }
+	    return resultMap;
+	}
+
+	// 커뮤니티 신고 반려
+	@Transactional
+	public void rejectCommunityReport(Map<String, Object> map) {
+	    adminMapper.updateCommunityReportStatusReject(map);
+	}
+
+	// 커뮤니티 신고 승인
+	@Transactional
+	public void approveCommunityReport(Map<String, Object> map) {
+
+	    // 1. 신고 상태 승인 처리
+	    adminMapper.updateCommunityReportStatusApprove(map);
+
+	    // 2. 글/댓글 실제 삭제
+	    String type = (String) map.get("type");
+
+	    if ("POST".equals(type)) {
+	        adminMapper.deleteBoardFile(map);
+	        adminMapper.deleteBoard(map);
+	    } else if ("COMMENT".equals(type)) {
+	        adminMapper.deleteBoardComment(map);
+	    }
+	}
 	
 
 	

@@ -41,5 +41,25 @@ public interface AdminMapper {
 
 	int deleteReview(Map<String, Object> map);
 	
+	// 커뮤니티 글 신고 리스트
+	public List<Admin> selectCommunityPostReportList(HashMap<String, Object> map);
+
+	// 커뮤니티 댓글 신고 리스트
+	public List<Admin> selectCommunityCommentReportList(HashMap<String, Object> map);
+
+	// 커뮤니티 신고 반려
+	public int updateCommunityReportStatusReject(Map<String, Object> map);
+
+	// 커뮤니티 신고 승인
+	public int updateCommunityReportStatusApprove(Map<String, Object> map);
+
+	// 커뮤니티 글 삭제
+	public int deleteBoard(Map<String, Object> map);
+
+	// 커뮤니티 댓글 삭제
+	public int deleteBoardComment(Map<String, Object> map);
+
+	// 커뮤니티 글 파일 삭제
+	public int deleteBoardFile(Map<String, Object> map);
 	
 }

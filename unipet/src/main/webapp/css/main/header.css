@@ -10,9 +10,10 @@
     --text-main: #222;
     --text-sub: #777;
     --text-light: #999;
+    --line-dark: #d1d5db;
+    --text-white: #ffffff;
     --line: #e5e5e5;
     --line-soft: #eeeeee;
-    --line-dark: #dddddd;
     --image-soft: #f8f8f8;
 }
 
