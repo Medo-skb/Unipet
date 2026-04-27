@@ -165,10 +165,16 @@
                                                     <div class="list-sub">{{ item.rsvStartTime || '-' }} ~ {{
                                                         item.rsvEndTime || '-' }}</div>
                                                 </div>
-                                                <div class="status-badge"
-                                                    :class="getReserveStatusClass(item.rsvStatus)">
-                                                    {{ getReservationStatusText(item.rsvStatus) }}
+                                                <div class="list-sub">
+                                                    상태 :
+                                                    <span class="status-badge"
+                                                        :class="getReserveStatusClass(item.rsvStatus || item.RSV_STATUS)">
+                                                        {{ getReservationStatusText(item.rsvStatus || item.RSV_STATUS)
+                                                        }}
+                                                    </span>
                                                 </div>
+
+
                                             </div>
 
                                             <div class="btn-box">
@@ -384,72 +390,44 @@
                             </div>
                         </div>
                     </div>
-
                     <div v-if="currentMenu === 'orderList'">
                         <div class="section-box">
                             <div class="section-title">쇼핑몰 주문 내역</div>
 
-                            <div v-if="groupedOrderList.length === 0" class="empty-text">주문 내역이 없습니다.</div>
+                            <div v-if="groupedOrderList.length === 0" class="empty-text">
+                                주문 내역이 없습니다.
+                            </div>
 
                             <div class="info-card" v-for="group in groupedOrderList" :key="group.orderNo"
                                 style="margin-bottom:16px;">
                                 <div
                                     style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-                                    <div class="list-title" style="font-size:16px;">
+                                    <div class="list-title">
                                         주문일자 : {{ (group.orderDate || '').substring(0,16) }}
                                     </div>
 
+                                    <button class="small-btn" @click="openOrderDetail(group)">
+                                        상세보기
+                                    </button>
+                                </div>
 
+                                <div v-for="order in group.items"
+                                    :key="order.orderDetailNo || order.orderNo + '-' + order.productNo"
+                                    class="order-item">
 
+                                    <img class="order-img" :src="order.productImg || '/img/no-image.png'" alt="상품이미지">
 
-
-
-                                    <div v-for="order in group.items"
-                                        :key="order.orderDetailNo || order.orderNo + '-' + order.productNo"
-                                        class="order-item">
-
-                                        <img class="order-img" :src="order.productImg || '/img/no-image.png'"
-                                            alt="상품이미지">
-                                        <div style="flex:1;">
-
-                                            <!-- 상품명 -->
-                                            <div class="list-title">
-                                                {{ order.productName || '-' }}
-                                            </div>
-
-
-
-                                            <!-- 수량 -->
-                                            <div class="list-sub">수량 : {{ order.qty }}개</div>
-
-                                            <!-- 금액 -->
-                                            <div class="list-sub">금액 : {{ order.price }}원</div>
-
-                                            <!-- 결제 상태 -->
-                                            <div class="list-status">
-                                                결제상태 : {{ getPayStatusText(order.payStatus || order.PAY_STATUS) }}
-                                            </div>
-
-                                            <!-- 배송 상태 -->
-                                            <div class="list-status">
-                                                배송상태 : {{ getDeliStatusText(order.deliStatus || order.DELI_STATUS) }}
-                                            </div>
-                                            <div class="btn-box">
-                                                <button class="small-btn" v-if="(order.deliStatus || order.DELI_STATUS) === 'CMP'
-                                                     && (order.reviewYn || order.REVIEW_YN) !== 'Y'" @click="pageChange('/user/mypage/prd-review.do', {
-                                                     productNo: order.productNo || order.PRODUCT_NO,
-                                                    ordNo: order.orderNo || order.ORDER_NO
-                                                 })">
-                                                    상품리뷰 작성
-                                                </button>
-                                            </div>
+                                    <div style="flex:1;">
+                                        <div class="list-title">{{ order.productName || '-' }}</div>
+                                        <div class="list-sub">수량 : {{ order.qty }}개</div>
+                                        <div class="list-sub">금액 : {{ Number(order.price || 0).toLocaleString() }}원
                                         </div>
-
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
                     <div v-if="currentMenu === 'orderDetail'">
                         <div class="section-box">
                             <div class="section-header">
@@ -462,39 +440,50 @@
                                 <div class="list-sub">총 상품 수 : {{ selectedOrderGroup.items.length }}건</div>
                             </div>
 
-                            <div v-if="selectedOrderGroup.items.length === 0" class="empty-text">주문 상세 내역이 없습니다.</div>
+                            <div v-if="selectedOrderGroup.items.length === 0" class="empty-text">
+                                주문 상세 내역이 없습니다.
+                            </div>
 
                             <div class="info-card" v-for="order in selectedOrderGroup.items"
                                 :key="'detail-' + (order.orderDetailNo || order.orderNo + '-' + order.productNo)">
+
                                 <div class="order-item">
                                     <img class="order-img" :src="order.productImg || '/img/no-image.png'" alt="상품이미지">
 
                                     <div style="flex:1;">
-                                        <div class="list-title">
-                                            {{ order.productName || '-' }}
-                                        </div>
-
-                                        <div class="list-sub">주문일자 : {{ order.orderDate }}</div>
+                                        <div class="list-title">{{ order.productName || '-' }}</div>
 
                                         <div class="list-sub">수량 : {{ order.qty }}개</div>
-
-                                        <div class="list-sub">
-                                            금액 : {{ Number(order.price).toLocaleString() }}원
-                                        </div>
-
-                                        <div class="list-sub">
-                                            배송추적 : {{ getDeliStatusText(order.deliStatus || order.DELI_STATUS) }}
+                                        <div class="list-sub">금액 : {{ Number(order.price || 0).toLocaleString() }}원
                                         </div>
 
                                         <div class="list-status">
-                                            상태 : {{ getPayStatusText(order.payStatus || order.PAY_STATUS) }}
+                                            결제상태 : {{ getPayStatusText(order.payStatus || order.PAY_STATUS) }}
                                         </div>
 
+                                        <div class="list-status">
+                                            배송상태 : {{ getDeliStatusText(order.deliStatus || order.DELI_STATUS) }}
+                                        </div>
+
+                                        <div class="btn-box">
+                                            <button class="small-btn" v-if="order && order.productNo && order.orderNo 
+                                                   && (order.deliStatus || order.DELI_STATUS) === 'CMP'
+                                                    && (order.reviewYn || order.REVIEW_YN) !== 'Y'"
+                                                @click="goReview(order)">
+                                                상품리뷰 작성
+                                            </button>
+
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+
+
+
+
                     <div v-if="currentMenu === 'reserveList'">
                         <div class="section-box">
                             <div class="section-header">
@@ -507,7 +496,7 @@
 
                             <div v-for="group in groupedReservationList" :key="group.date" style="margin-bottom:20px;">
                                 <div class="section-title" style="font-size:17px; margin-bottom:10px;">
-                                    {{ group.date }}
+                                    {{ formatDate(group.date) }}
                                 </div>
 
                                 <div class="info-card" v-for="item in group.items" :key="'all-' + item.rsvNo">
@@ -532,19 +521,25 @@
 
                                             <div class="list-sub">
                                                 상태 :
-                                                <span class="status-badge"
-                                                    :class="getReserveStatusClass(item.rsvStatus)">
-                                                    {{ getReservationStatusText(item.rsvStatus) }}
-                                                </span>
+                                               
+                                                    <span class="status-badge"
+                                                        :class="getReserveStatusClass(item.rsvStatus || item.RSV_STATUS)">
+                                                        {{ getReservationStatusText(item.rsvStatus || item.RSV_STATUS)
+                                                        }}
+                                                    </span>
+                                                </div>
+
                                             </div>
-                                        </div>
+                                    
 
                                         <div class="btn-box">
-                                            <button class="small-btn" v-if="item.rsvStatus === 'FIN'" @click="pageChange('/user/mypage/rsv-review.do', {
+                                            <button class="small-btn" v-if="(item.rsvStatus || item.RSV_STATUS) === 'FIN'
+                                                 && (item.reviewYn || item.REVIEW_YN) !== 'Y'" @click="pageChange('/user/mypage/rsv-review.do', {
                                                 rsvNo: item.rsvNo || item.RSV_NO
-                                                })">
+                                            })">
                                                 예약리뷰작성
                                             </button>
+
                                         </div>
                                     </div>
                                 </div>
@@ -754,7 +749,8 @@
 
                                         <div class="list-sub">
                                             할인금액 :
-                                            {{ Number(coupon.discountAmt || coupon.DISCOUNT_AMT || 0).toLocaleString()
+                                            {{ Number(coupon.discountAmt || coupon.DISCOUNT_AMT ||
+                                            0).toLocaleString()
                                             }}원
                                         </div>
 
@@ -991,27 +987,14 @@
                         const grouped = {};
 
                         this.reservationAllList.forEach(item => {
-                            let rawDate = item.rsvDate || item.RSV_DATE || item.rsv_date;
-                            let dateKey = "날짜 없음";
+                            const date = item.rsvDate || item.RSV_DATE || item.rsv_date || "날짜 없음";
 
-                            if (rawDate && rawDate !== "날짜 없음") {
-                                try {
-                                    const d = new Date(rawDate);
-                                    // 한국 시간(KST) 기준으로 YYYY-MM-DD 형식의 문자열을 바로 만듭니다.
-                                    // 결과 예: "2026-05-15"
-                                    dateKey = d.toLocaleDateString('sv-SE'); 
-                                } catch (e) {
-                                    console.error("날짜 변환 에러:", e);
-                                    dateKey = "날짜 없음";
-                                }
-                            }
-
-                            if (!grouped[dateKey]) grouped[dateKey] = [];
-                            grouped[dateKey].push(item);
+                            if (!grouped[date]) grouped[date] = [];
+                            grouped[date].push(item);
                         });
 
                         return Object.keys(grouped)
-                            .sort((a, b) => b.localeCompare(a))
+                            .sort((a, b) => String(b).localeCompare(String(a)))
                             .map(date => ({
                                 date: date,
                                 items: grouped[date].sort((a, b) => {
@@ -1039,6 +1022,13 @@
                 },
 
                 methods: {
+
+                    pageChange(url, param) {
+                        window.pageChange(url, param);
+
+                    },
+
+
                     changeMenu(menu) {
                         this.currentMenu = menu;
 
@@ -1072,6 +1062,24 @@
                     goOrderList() {
                         this.currentMenu = "orderList";
                     },
+                    goReview(order) {
+                        if (!order) return;
+
+                        const productNo = order.productNo;
+                        const orderNo = order.orderNo;
+
+                        if (!productNo || !orderNo) {
+                            console.log("리뷰 이동 데이터 오류", order);
+                            alert("리뷰 작성에 필요한 주문 정보가 없습니다.");
+                            return;
+                        }
+
+                        window.pageChange('/user/mypage/prd-review.do', {
+                            productNo: order.productNo,
+                            ordNo: order.orderNo   // ← 여기 유지 (DB는 orderNo지만 프론트는 ordNo로)
+                        });
+                    },
+
 
                     openOrderDetail(group) {
                         this.selectedOrderGroup = {
@@ -1140,33 +1148,29 @@
                         this.selectedReservation = item;
                         this.currentMenu = "reservationDetail";
                     },
-
-
-
                     getReservationStatusText(status) {
                         if (!status) return "-";
-                        switch (status) {
-                            case "WAI": return "대기";
-                            case "CNF": return "확정";
-                            case "FIN": return "완료";
-                            case "CAN": return "취소";
-                            default: return status;
-                        }
+                        status = String(status).trim().toUpperCase();
+
+                        if (status === "CNF") return "확정";
+                        if (status === "FIN") return "완료";
+                        if (status === "CAN") return "취소";
+                        if (status === "WAI") return "대기";
+
+                        return status;
                     },
+
+
+
+
                     formatDate(dateStr) {
                         if (!dateStr || dateStr === "날짜 없음") return "-";
 
-                        // 1. 이미 10자리 문자열(YYYY-MM-DD)이고 단순 출력이 목적이라면 
-                        //    Date 객체로 변환하지 않고 바로 리턴하는 것이 가장 안전합니다.
                         if (typeof dateStr === "string" && dateStr.length >= 10) {
-                            // 만약 dateStr이 "2024-04-23 10:00:00" 형태라면 "2024-04-23"만 잘라서 반환
                             return dateStr.substring(0, 10);
                         }
 
-                        // 2. Date 객체 변환이 꼭 필요한 경우 (예: Date 타입의 데이터가 들어올 때)
-                        // 하이픈(-)을 슬래시(/)로 바꿔서 타임존 버그를 방지합니다.
-                        const safeDateStr = typeof dateStr === 'string' ? dateStr.replace(/-/g, '/') : dateStr;
-                        const date = new Date(safeDateStr);
+                        const date = new Date(dateStr);
 
                         if (isNaN(date.getTime())) return "-";
 
@@ -1202,14 +1206,20 @@
                         return "status-gray";
                     },
 
+
                     getReserveStatusClass(status) {
-                        if (!status) return "status-gray";
+                        if (!status) return "status-orange";
+
+                        status = String(status).trim().toUpperCase(); // 🔥 핵심
+
                         if (status === "WAI") return "status-orange";
-                        if (status === "CNF") return "status-green";
-                        if (status === "FIN") return "status-blue";
+                        if (status === "CNF") return "status-blue";
+                        if (status === "FIN") return "status-green";
                         if (status === "CAN") return "status-red";
+
                         return "status-gray";
                     },
+
 
                     loadMypage() {
                         const self = this;
