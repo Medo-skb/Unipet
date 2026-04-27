@@ -134,7 +134,7 @@
         data() {
             return {
                 // 변수 - (key : value)
-                ordNo : "${ordNo}" || 4,
+                ordNo : "${ordNo}",
                 rsvNo: "${rsvNo}",
 
                 payFlg: '', // 'SHOP' 또는 'RSV'
