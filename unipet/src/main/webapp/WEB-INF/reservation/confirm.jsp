@@ -120,6 +120,7 @@
                         const res = typeof data === "string" ? JSON.parse(data) : data;
 
                         if (res.result === "success") {
+                            console.log("받은 예약번호:", res.rsvNo);
                             alert("예약은 결제 완료 후 최종 확정이 됩니다. 결제페이지로 이동합니다.");
                             pageChange("/payment/pay-rsv.do", { rsvNo: res.rsvNo });
                         } else {

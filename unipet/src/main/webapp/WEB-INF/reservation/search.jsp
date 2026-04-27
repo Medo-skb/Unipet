@@ -312,7 +312,9 @@
 
                 if (item.sStatus === 'GEN') {
                     if (item.storeNo) {
-                        location.href = "/reservation/store-detail.do?storeNo=" + item.storeNo;
+                        pageChange("/reservation/store-detail.do", { storeNo: item.storeNo });
+                        // location.href = "/reservation/store-detail.do?storeNo=" + item.storeNo;
+
                     } else {
                         alert("회원사 번호가 없습니다.");
                     }

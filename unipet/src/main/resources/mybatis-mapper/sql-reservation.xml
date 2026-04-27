@@ -209,26 +209,22 @@
 	
 	<update id="updateRsvSlot" parameterType="hashmap">
 	    UPDATE RSV_SLOT S
+	    /* 1. 예약 테이블과 조인하여 rsvNo로 슬롯을 특정함 */
+	    JOIN RESERVATION R ON S.SLOT_NO = R.SLOT_NO
+	    /* 2. 정책 테이블과 조인하여 Cutoff 시간 확인 */
 	    JOIN STORE_POLICY SP ON S.STORE_NO = SP.STORE_NO
 	    SET 
 	        S.CUR_COUNT = S.CUR_COUNT + 1,
-	        /* 수용 인원 도달 시 N으로 변경, 아니면 Y 유지 */
 	        S.IS_AVAILABLE = CASE 
 	                            WHEN S.CUR_COUNT + 1 >= S.CAPACITY THEN 'N'
 	                            ELSE 'Y'
 	                         END
-	    WHERE S.SLOT_NO = #{slotNo}
-	      /* 정책상 마감 시간(Cutoff) 이내인지 확인 */
+	    WHERE R.RSV_NO = #{rsvNo}  /* 3. 예약 상태가 결제 완료(CNF)인 경우에만 슬롯 카운트 증가 */
+	      AND R.RSV_STATUS = 'CNF'
+	      /* 4. 정책상 마감 시간(Cutoff) 이내인지 확인 */
 	      <![CDATA[
 	      AND TIMESTAMP(S.SLOT_DATE, S.SLOT_TIME) > DATE_ADD(NOW(), INTERVAL COALESCE(SP.CUTOFF, 0) HOUR)
 	      ]]>
-	      /* 결제 팀원이 업데이트한 상태(CNF) 확인 */
-	      AND EXISTS (
-	          SELECT 1 
-	          FROM RESERVATION R 
-	          WHERE R.RSV_NO = #{rsvNo} 
-	            AND R.RSV_STATUS = 'CNF'
-	      )
 	</update>
 	
 	<update id="updateExpiredSlots">

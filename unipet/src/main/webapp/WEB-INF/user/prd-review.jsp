@@ -88,9 +88,9 @@
     const app = Vue.createApp({
         data() {
             return {
-                ordNo: '3',
-                userId: 'test_user01',
-                productNo: '2',
+                ordNo: '${map.ordNo}',
+                userId: '{sessionScope.sessionId}',
+                productNo: '${map.prdNo}',
 
                 // 2. 서버에서 받아올 예약 상세 정보
                 info: {}, 

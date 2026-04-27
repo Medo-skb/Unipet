@@ -125,7 +125,7 @@
                 today: new Date().toISOString().split('T')[0],
                 calendarDays: [],
                 timeSlots: [],
-                userId: 'test_user03',
+                userId: '${sessionScope.sessionId}',
                 petList: [],
                 selectedPet: null,
                 menuList: [],
@@ -294,6 +294,11 @@
             }
         },
         mounted() {
+            if (!this.userId) {
+                alert("로그인이 필요한 서비스입니다.");
+                location.href = "/login.do";
+                return;
+            }
             this.fnGetStorePolicy();
             this.buildCalendar();
             this.fnGetPetList();
