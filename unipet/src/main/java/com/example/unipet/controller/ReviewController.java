@@ -28,16 +28,17 @@ public class ReviewController {
 		
 		request.setAttribute("map", map);
 		
-		return "/user/rsv-review";
+		return "user/rsv-review";
 	}
+	
+	@RequestMapping(value = "/reservation/info.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
 	public String rInfo(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
-	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
-
-		resultMap = reviewService.getRsvInfo(map);
-	    
+	    HashMap<String, Object> resultMap = reviewService.getRsvInfo(map);
 	    return new Gson().toJson(resultMap); 
 	}
+	
+
 	
 	@RequestMapping("/user/mypage/add-review-rsv.dox")
 	@ResponseBody

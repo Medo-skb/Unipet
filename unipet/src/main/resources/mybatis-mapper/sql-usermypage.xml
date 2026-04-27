@@ -142,6 +142,7 @@
 	</select>
 
 	<!-- 전체 예약 목록 조회 -->
+	<!-- 전체 예약 목록 조회 : 중복 예약은 1개만 표시 / 취소(CAN) 우선 표시 -->
 	<select id="selectReservationAllList" parameterType="hashmap"
 		resultType="hashmap">
 		SELECT
@@ -149,67 +150,119 @@
 		R.USER_ID AS userId,
 		R.STORE_NO AS storeNo,
 		S.STORE_NAME AS storeName,
+
 		R.PET_NO AS petNo,
 		P.PET_NAME AS petName,
-		R.RSV_DATE AS rsvDate,
-		R.RSV_START_TIME AS rsvStartTime,
-		R.RSV_END_TIME AS rsvEndTime,
-		R.REQUEST AS request,
-		R.RSV_STATUS AS rsvStatus
+
+		DATE_FORMAT(R.RSV_DATE, '%Y-%m-%d') AS rsvDate,
+		DATE_FORMAT(R.RSV_START_TIME, '%H:%i') AS rsvStartTime,
+		DATE_FORMAT(R.RSV_END_TIME, '%H:%i') AS rsvEndTime,
+
+		IFNULL(R.REQUEST, '') AS request,
+		R.RSV_STATUS AS rsvStatus,
+
+		CASE
+		WHEN RV.REVIEW_NO IS NOT NULL THEN 'Y'
+		ELSE 'N'
+		END AS reviewYn
+
+		FROM (
+		SELECT *
+		FROM (
+		SELECT
+		R.*,
+		ROW_NUMBER() OVER (
+		PARTITION BY
+		R.USER_ID,
+		R.STORE_NO,
+		R.PET_NO,
+		R.RSV_DATE,
+		R.RSV_START_TIME,
+		R.RSV_END_TIME
+		ORDER BY
+		CASE
+		WHEN R.RSV_STATUS = 'CAN' THEN 1
+		WHEN R.RSV_STATUS = 'CNF' THEN 2
+		WHEN R.RSV_STATUS = 'FIN' THEN 3
+		WHEN R.RSV_STATUS = 'WAI' THEN 4
+		ELSE 5
+		END,
+		R.RSV_NO DESC
+		) AS rn
 		FROM RESERVATION R
-		LEFT JOIN STORE S ON R.STORE_NO = S.STORE_NO
-		LEFT JOIN PET P ON R.PET_NO = P.PET_NO
 		WHERE R.USER_ID = #{userId}
-		ORDER BY R.RSV_DATE DESC, R.RSV_START_TIME ASC
+		) X
+		WHERE X.rn = 1
+		) R
+
+		LEFT JOIN STORE S
+		ON R.STORE_NO = S.STORE_NO
+
+		LEFT JOIN PET P
+		ON R.PET_NO = P.PET_NO
+
+		LEFT JOIN (
+		SELECT
+		RSV_NO,
+		USER_ID,
+		MAX(REVIEW_NO) AS REVIEW_NO
+		FROM REVIEW
+		WHERE RSV_NO IS NOT NULL
+		GROUP BY RSV_NO, USER_ID
+		) RV
+		ON R.RSV_NO = RV.RSV_NO
+		AND R.USER_ID = RV.USER_ID
+
+		ORDER BY R.RSV_DATE DESC, R.RSV_START_TIME ASC, R.RSV_NO DESC
 	</select>
 
 	<!-- 주문 목록 조회 -->
 	<select id="selectOrderList" parameterType="hashmap" resultType="hashmap">
-    SELECT
-        o.ORD_NO AS orderNo,
-        DATE_FORMAT(o.ORD_DATE, '%Y-%m-%d %H:%i') AS orderDate,
+		SELECT
+		o.ORD_NO AS orderNo,
+		DATE_FORMAT(o.ORD_DATE, '%Y-%m-%d %H:%i') AS orderDate,
 
-        od.ORD_DETAIL_NO AS orderDetailNo,
-        od.PRODUCT_NO AS productNo,
-        p.PRODUCT_NAME AS productName,
+		od.ORD_DETAIL_NO AS orderDetailNo,
+		od.PRODUCT_NO AS productNo,
+		p.PRODUCT_NAME AS productName,
 
-        CONCAT(pf.FILE_PATH, '/', pf.FILE_NAME) AS productImg,
+		CONCAT(pf.FILE_PATH, '/', pf.FILE_NAME) AS productImg,
 
-        od.ORD_QTY AS qty,
-        od.UNIT_PRICE AS price,
+		od.ORD_QTY AS qty,
+		od.UNIT_PRICE AS price,
 
-        o.ORD_STATUS AS payStatus,
-        o.DELI_STATUS AS deliStatus,
+		o.ORD_STATUS AS payStatus,
+		o.DELI_STATUS AS deliStatus,
 
-        CASE
-            WHEN r.REVIEW_NO IS NOT NULL THEN 'Y'
-            ELSE 'N'
-        END AS reviewYn
+		CASE
+		WHEN r.REVIEW_NO IS NOT NULL THEN 'Y'
+		ELSE 'N'
+		END AS reviewYn
 
-    FROM ORDERS o
+		FROM ORDERS o
 
-    JOIN ORDER_DETAIL od
-        ON o.ORD_NO = od.ORD_NO
+		JOIN ORDER_DETAIL od
+		ON o.ORD_NO = od.ORD_NO
 
-    JOIN PRODUCT p
-        ON od.PRODUCT_NO = p.PRODUCT_NO
+		JOIN PRODUCT p
+		ON od.PRODUCT_NO = p.PRODUCT_NO
 
-    LEFT JOIN PRODUCT_FILE pf
-        ON od.PRODUCT_NO = pf.PRODUCT_NO
-       AND pf.FILE_NO = (
-            SELECT MIN(pf2.FILE_NO)
-            FROM PRODUCT_FILE pf2
-            WHERE pf2.PRODUCT_NO = od.PRODUCT_NO
-       )
+		LEFT JOIN PRODUCT_FILE pf
+		ON od.PRODUCT_NO = pf.PRODUCT_NO
+		AND pf.FILE_NO = (
+		SELECT MIN(pf2.FILE_NO)
+		FROM PRODUCT_FILE pf2
+		WHERE pf2.PRODUCT_NO = od.PRODUCT_NO
+		)
 
-    LEFT JOIN REVIEW r
-        ON od.ORD_NO = r.ORD_NO
-       AND od.PRODUCT_NO = r.PRODUCT_NO
+		LEFT JOIN REVIEW r
+		ON od.ORD_NO = r.ORD_NO
+		AND od.PRODUCT_NO = r.PRODUCT_NO
 
-    WHERE o.USER_ID = #{userId}
+		WHERE o.USER_ID = #{userId}
 
-    ORDER BY o.ORD_DATE DESC, o.ORD_NO DESC, od.ORD_DETAIL_NO ASC
-</select>
+		ORDER BY o.ORD_DATE DESC, o.ORD_NO DESC, od.ORD_DETAIL_NO ASC
+	</select>
 
 	<!-- 체중 목록 조회 -->
 	<select id="selectWeightList" parameterType="hashmap" resultType="hashmap">
@@ -377,7 +430,7 @@
 		) VALUES (
 		#{userId},
 		#{productNo},
-		#{orderNo},
+		#{ordNo},
 		#{rating},
 		#{content}
 		)

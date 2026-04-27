@@ -94,7 +94,7 @@
     const app = Vue.createApp({
         data() {
             return {
-                userId: '{sessionScope.sessionId}',
+                userId: '${sessionScope.sessionId}',
                 rsvNo: '${map.rsvNo}',
                 
                 // 2. 서버에서 받아올 예약 상세 정보
