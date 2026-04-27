@@ -502,7 +502,7 @@
 
                             <div v-for="group in groupedReservationList" :key="group.date" style="margin-bottom:20px;">
                                 <div class="section-title" style="font-size:17px; margin-bottom:10px;">
-                                    {{ formatDate(group.date) }}
+                                    {{ group.date }}
                                 </div>
 
                                 <div class="info-card" v-for="item in group.items" :key="'all-' + item.rsvNo">
@@ -933,14 +933,27 @@
                         const grouped = {};
 
                         this.reservationAllList.forEach(item => {
-                            const date = item.rsvDate || item.RSV_DATE || item.rsv_date || "날짜 없음";
+                            let rawDate = item.rsvDate || item.RSV_DATE || item.rsv_date;
+                            let dateKey = "날짜 없음";
 
-                            if (!grouped[date]) grouped[date] = [];
-                            grouped[date].push(item);
+                            if (rawDate && rawDate !== "날짜 없음") {
+                                try {
+                                    const d = new Date(rawDate);
+                                    // 한국 시간(KST) 기준으로 YYYY-MM-DD 형식의 문자열을 바로 만듭니다.
+                                    // 결과 예: "2026-05-15"
+                                    dateKey = d.toLocaleDateString('sv-SE'); 
+                                } catch (e) {
+                                    console.error("날짜 변환 에러:", e);
+                                    dateKey = "날짜 없음";
+                                }
+                            }
+
+                            if (!grouped[dateKey]) grouped[dateKey] = [];
+                            grouped[dateKey].push(item);
                         });
 
                         return Object.keys(grouped)
-                            .sort((a, b) => String(b).localeCompare(String(a)))
+                            .sort((a, b) => b.localeCompare(a))
                             .map(date => ({
                                 date: date,
                                 items: grouped[date].sort((a, b) => {
@@ -1090,11 +1103,17 @@
                     formatDate(dateStr) {
                         if (!dateStr || dateStr === "날짜 없음") return "-";
 
+                        // 1. 이미 10자리 문자열(YYYY-MM-DD)이고 단순 출력이 목적이라면 
+                        //    Date 객체로 변환하지 않고 바로 리턴하는 것이 가장 안전합니다.
                         if (typeof dateStr === "string" && dateStr.length >= 10) {
+                            // 만약 dateStr이 "2024-04-23 10:00:00" 형태라면 "2024-04-23"만 잘라서 반환
                             return dateStr.substring(0, 10);
                         }
 
-                        const date = new Date(dateStr);
+                        // 2. Date 객체 변환이 꼭 필요한 경우 (예: Date 타입의 데이터가 들어올 때)
+                        // 하이픈(-)을 슬래시(/)로 바꿔서 타임존 버그를 방지합니다.
+                        const safeDateStr = typeof dateStr === 'string' ? dateStr.replace(/-/g, '/') : dateStr;
+                        const date = new Date(safeDateStr);
 
                         if (isNaN(date.getTime())) return "-";
 

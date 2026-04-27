@@ -121,6 +121,7 @@ public class ReservationController {
 	
 	@RequestMapping("/reservation/confirm.do")
 	public String confirm(HttpServletRequest request, Model model,  @RequestParam HashMap<String, Object> map) throws Exception{
+		
 		return "/reservation/confirm";
 	}
 	

@@ -223,7 +223,9 @@ public class ReservationService {
 	    if (resSlot <= 0) {
 	        resultMap.put("result", "fail");
 	        resultMap.put("message", "예약 확정 조건을 만족하지 않거나 마감된 슬롯입니다.");
-	        return resultMap;
+	        
+	        throw new RuntimeException("예약 확정 실패: 마감 시간이 지났거나 유효하지 않은 예약입니다.");
+	        
 	    }
 
 	    map.put("action", "UPDATE_SLOT");
