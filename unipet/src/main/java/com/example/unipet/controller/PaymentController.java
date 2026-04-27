@@ -44,11 +44,10 @@ public class PaymentController {
 	@RequestMapping("/payment/sub.do") 
 	public String sub(HttpServletRequest request, HttpServletResponse response, Model model, @RequestParam HashMap<String, Object> map) throws Exception{
 		HttpSession session = request.getSession();
-//	    String userId = (String) session.getAttribute("userId");
-		String userId = "test_user01";
+	    String userId = (String) session.getAttribute("sessionId");
 		request.setAttribute("totalprice", map.get("totalprice"));
 	    if (userId == null) {
-	        return "redirect:/login.do"; // 로그인 안 했으면 로그인부터!
+	        return "redirect:/user/login.do"; // 로그인 안 했으면 로그인부터!
 	    }
 	    int isSubscribed = paymentService.getSubStatus(userId); 
 	    
@@ -118,13 +117,13 @@ public class PaymentController {
 	    return "payment/pay-success";
 	}
 	
-	@RequestMapping("/payment/refund.do")
+	@RequestMapping("/payment/refund-shop.do")
 	public String refund(HttpServletRequest request, @RequestParam HashMap<String, Object> map) {
 	    // 2. 파라미터로 받은 orderNo(또는 rsvNo)를 request에 담기 (Attribute 세팅)
 	    request.setAttribute("ordNo", map.get("ordNo"));
 	    request.setAttribute("rsvNo", map.get("rsvNo"));
 	    
-	    return "payment/refund";
+	    return "payment/refund-shop";
 	}
 	
 	// ajax가 호출하는 주소
@@ -168,10 +167,6 @@ public class PaymentController {
 	    HttpSession session, 
 	    @RequestBody HashMap<String, Object> map // ★ @RequestParam -> @RequestBody로 변경
 	) throws Exception {
-	    
-	    // 이제 map.get("list")를 하면 [33, 32, 29]가 ArrayList 형태로 들어옵니다.
-	    System.out.println("넘어온 파라미터 전체: " + map);
-	    System.out.println("넘어온 리스트: " + map.get("list"));
 
 	    HashMap<String, Object> resultMap = paymentService.getCartList(map);
 
@@ -182,9 +177,7 @@ public class PaymentController {
 	@RequestMapping(value = "/payment/getBenefit.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
 	public String getBenefit(Model model, HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
-//	    String userId = (String) session.getAttribute("userId");
-		// 테스트용
-		String userId = "test_user01";
+	    String userId = (String) session.getAttribute("sessionId");
 	    map.put("userId", userId);
 	    
 	    HashMap<String, Object> resultMap = paymentService.getBenefit(map);

@@ -3,6 +3,7 @@ package com.example.unipet.dao;
 import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.unipet.mapper.UserMapper;
@@ -14,6 +15,9 @@ public class UserService {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    PasswordEncoder passwordEncoder;
+    
     // 사용자 아이디 중복 체크
     public HashMap<String, Object> checkUser(HashMap<String, Object> map) {
         HashMap<String, Object> result = new HashMap<>();
@@ -63,6 +67,9 @@ public class UserService {
                 result.put("message", "이미 사용중인 아이디입니다.");
                 return result;
             }
+            
+            String rawPwd = (String) map.get("pwd");
+            map.put("pwd", passwordEncoder.encode(rawPwd));
 
             int count = userMapper.insertUser(map);
             result.put("result", count > 0);
@@ -82,6 +89,9 @@ public class UserService {
         HashMap<String, Object> result = new HashMap<>();
 
         try {
+        	String rawPwd = (String) map.get("pwd");
+            map.put("pwd", passwordEncoder.encode(rawPwd));
+        	
             int count = userMapper.insertBizUser(map);
             result.put("result", count > 0);
             result.put("message", count > 0 ? "사업자 회원가입이 완료되었습니다." : "사업자 회원가입에 실패했습니다.");
@@ -99,9 +109,11 @@ public class UserService {
         HashMap<String, Object> result = new HashMap<>();
 
         try {
+        	String rawPwd = (String) map.get("pwd");
+        	
             User user = userMapper.selectUser(map);
 
-            if (user != null) {
+            if (user != null	) {
                 result.put("result", true);
                 result.put("user", user);
                 result.put("message", "로그인 성공");
@@ -123,9 +135,11 @@ public class UserService {
         HashMap<String, Object> result = new HashMap<>();
 
         try {
+        	String rawPwd = (String) map.get("pwd");
+        	
             User user = userMapper.selectStoreUser(map);
 
-            if (user != null) {
+            if (user != null && passwordEncoder.matches(rawPwd, user.getPwd())) {
                 result.put("result", true);
                 result.put("user", user);
                 result.put("message", "사업자 로그인 성공");

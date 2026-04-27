@@ -129,7 +129,7 @@
         data() {
             return {
                 userId : "${sessionId}",
-                cartIds : JSON.parse(sessionStorage.getItem("cartNoList")) || [2, 15, 17],
+                cartIds : JSON.parse(sessionStorage.getItem("cartNoList")) || [29, 32, 36],
                 // 1.
                 orderList: [],
                 // 2. 입력 폼 데이터 바인딩

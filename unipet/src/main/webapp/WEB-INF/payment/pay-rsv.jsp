@@ -167,7 +167,7 @@
                         if(data.result === "success") {
                             if(status === "PAY") {
                                 alert("예약 및 결제가 완료되었습니다!");
-                                pageChange("/payment/pay-success.do", {rsvNo : rsvNo});
+                                pageChange("/payment/pay-success.do", {rsvNo : param.rsvNo});
                             } else {
                                 // 결제 실패인데 DB 기록은 성공한 경우
                                 alert("결제 실패: " + rsp.error_msg + "\n(실패 내역이 기록되었습니다.)");

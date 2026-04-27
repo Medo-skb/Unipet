@@ -80,7 +80,6 @@
             ROLE
         FROM unipet.users
         WHERE USER_ID = #{userId}
-          AND USER_PWD = #{pwd}
     </select>
 
     <!-- 사업자 로그인 -->
@@ -94,7 +93,6 @@
             'BIZ' AS role
         FROM unipet.store_user
         WHERE S_USER_ID = #{userId}
-          AND S_USER_PWD = #{pwd}
           AND U_STATUS NOT IN ('BAN', 'EXT')
     </select>
 
