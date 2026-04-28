@@ -317,3 +317,27 @@ th {
 	align-items: center;
 	justify-content: center;
 }
+
+.date-box {
+	text-align: center;
+	line-height: 1.4;
+}
+
+.noticeRow {
+    background-color: #fff8e1 !important;
+}
+
+.noticeRow .title-text {
+    font-weight: 700;
+}
+
+.notice-badge {
+    display: inline-block;
+    padding: 4px 9px;
+    margin-right: 6px;
+    border-radius: 999px;
+    background-color: #ffedd5;
+    color: #c2410c;
+    font-size: 13px;
+    font-weight: 700;
+}

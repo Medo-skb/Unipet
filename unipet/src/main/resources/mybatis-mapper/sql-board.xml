@@ -68,170 +68,141 @@
 	</select>
 
 	<select id="selectBoardList" parameterType="hashmap" resultType="hashmap">
-		SELECT 
-			B.BOARD_NO, 
-			B.B_SUB_NO, 
-			B.LOCAL_NO, 
-			B.TITLE, 
-			B.B_CONTENT,
-			B.USER_ID, 
-			B.VIEW_COUNT, 
-			B.B_STATUS, 
-			B.PRIVATE,
-			DATE_FORMAT(B.CREATE_TIME, '%Y-%m-%d %H:%i:%s') AS CREATE_TIME,
-			DATE_FORMAT(B.UPDATE_TIME, '%Y-%m-%d %H:%i:%s') AS UPDATE_TIME,
-
-			CASE
-				WHEN BTS.B_SUB_TYPE = 'NTC' THEN '공지사항'
-				WHEN BTS.B_SUB_TYPE = 'GEN' THEN '일반'
-				WHEN BTS.B_SUB_TYPE = 'INF' THEN '정보/팁'
-				WHEN BTS.B_SUB_TYPE = 'GIF' THEN '움짤'
-				WHEN BTS.B_SUB_TYPE = 'VID' THEN '동영상'
-				WHEN BTS.B_SUB_TYPE = 'QNA' THEN '질문'
-				WHEN BTS.B_SUB_TYPE = 'MAR' THEN '나눔/장터'
-				WHEN BTS.B_SUB_TYPE = 'WALK' THEN '산책'
-				WHEN BTS.B_SUB_TYPE = 'MEET' THEN '소모임'
-				WHEN BTS.B_SUB_TYPE = 'TRAVEL' THEN '여행팸'
-				WHEN BTS.B_SUB_TYPE = 'LINFO' THEN '지역정보'
-				WHEN BTS.B_SUB_TYPE = 'CARE' THEN '돌봄'
-				WHEN BTS.B_SUB_TYPE = 'MARKET' THEN '중고거래'
-				WHEN BTS.B_SUB_TYPE = 'HOSP' THEN '병원 추천'
-				ELSE BTS.B_SUB_TYPE
-			END AS B_SUB_TYPE,
-
-			CASE
-				WHEN BTM.B_MAIN_TYPE = 'ALL' THEN '통합'
-				WHEN BTM.B_MAIN_TYPE = 'LOC' THEN '지역'
-				ELSE BTM.B_MAIN_TYPE
-			END AS B_MAIN_TYPE,
-
-			CASE
-				WHEN BTL.LOCAL_NAME = 'SEO' THEN '서울'
-				WHEN BTL.LOCAL_NAME = 'INC' THEN '인천'
-				WHEN BTL.LOCAL_NAME = 'PUS' THEN '부산'
-				WHEN BTL.LOCAL_NAME = 'DAE' THEN '대구'
-				WHEN BTL.LOCAL_NAME = 'GWA' THEN '광주'
-				WHEN BTL.LOCAL_NAME = 'DAJ' THEN '대전'
-				WHEN BTL.LOCAL_NAME = 'ULS' THEN '울산'
-				WHEN BTL.LOCAL_NAME = 'SEJ' THEN '세종'
-				WHEN BTL.LOCAL_NAME = 'GYE' THEN '경기'
-				WHEN BTL.LOCAL_NAME = 'GAN' THEN '강원'
-				WHEN BTL.LOCAL_NAME = 'CHU' THEN '충청'
-				WHEN BTL.LOCAL_NAME = 'JEO' THEN '전라'
-				WHEN BTL.LOCAL_NAME = 'GYS' THEN '경상'
-				WHEN BTL.LOCAL_NAME = 'JEJ' THEN '제주'
-				ELSE BTL.LOCAL_NAME
-			END AS LOCAL_NAME,
-
-			IFNULL(LK.LIKE_CNT, 0) AS LIKE_CNT,
-			IFNULL(CM.COMMENT_CNT, 0) AS COMMENT_CNT,
-
-			BF.FILE_PATH,
-			BF.FILE_NAME,
-			CONCAT(BF.FILE_PATH, BF.FILE_NAME) AS THUMBNAIL
+	    SELECT 
+	        B.BOARD_NO, 
+	        B.B_SUB_NO, 
+	        B.LOCAL_NO, 
+	        B.TITLE, 
+	        B.B_CONTENT,
+	        B.USER_ID, 
+	        B.VIEW_COUNT, 
+	        B.B_STATUS, 
+	        B.PRIVATE,
+	        DATE_FORMAT(B.CREATE_TIME, '%Y-%m-%d %H:%i:%s') AS CREATE_TIME,
+	        DATE_FORMAT(B.UPDATE_TIME, '%Y-%m-%d %H:%i:%s') AS UPDATE_TIME,
 	
-		FROM BOARD B
-
-		INNER JOIN BOARD_TYPE_SUB BTS 
-			ON B.B_SUB_NO = BTS.B_SUB_NO
-
-		INNER JOIN BOARD_TYPE_MAIN BTM 
-			ON BTS.B_MAIN_NO = BTM.B_MAIN_NO
-
-		LEFT JOIN BOARD_TYPE_LOCAL BTL 
-			ON B.LOCAL_NO = BTL.LOCAL_NO
-
-		LEFT JOIN (
-			SELECT BOARD_NO, COUNT(*) AS LIKE_CNT
-			FROM BOARD_LIKE
-			GROUP BY BOARD_NO
-		) LK 
-			ON B.BOARD_NO = LK.BOARD_NO
-
-		LEFT JOIN (
-			SELECT BOARD_NO, COUNT(*) AS COMMENT_CNT
-			FROM COMMENT
-			GROUP BY BOARD_NO
-		) CM 
-			ON B.BOARD_NO = CM.BOARD_NO
-
-		LEFT JOIN (
-			SELECT BOARD_NO, MIN(FILE_NO) AS FILE_NO
-			FROM BOARD_FILE
-			GROUP BY BOARD_NO
-		) BFM 
-			ON B.BOARD_NO = BFM.BOARD_NO
-
-		LEFT JOIN BOARD_FILE BF 
-			ON BFM.FILE_NO = BF.FILE_NO
-
-		WHERE 1=1
-		<choose>
-			<when test='tempYn != null and tempYn == "Y"'>
-				AND B.B_STATUS = 'T'
-			</when>
-			<otherwise>
-				AND B.B_STATUS = 'Y'
-			</otherwise>
-		</choose>
-
-		<if test="bMainNo != null and bMainNo != ''">
-			AND BTM.B_MAIN_NO = #{bMainNo}
-		</if>
-
-		<if test="bSubNo != null and bSubNo != ''">
-			AND B.B_SUB_NO = #{bSubNo}
-		</if>
-		
-		<if test="integratedCategory != null and integratedCategory != ''">
-			AND BTS.B_SUB_TYPE = #{integratedCategory}
-		</if>
-
-		<if test="localCategory != null and localCategory != ''">
-			AND BTS.B_SUB_TYPE = #{localCategory}
-		</if>
+	        CASE
+	            WHEN BTS.B_SUB_TYPE = 'NTC' THEN '공지사항'
+	            WHEN BTS.B_SUB_TYPE = 'GEN' THEN '일반'
+	            WHEN BTS.B_SUB_TYPE = 'INF' THEN '정보/팁'
+	            WHEN BTS.B_SUB_TYPE = 'GIF' THEN '움짤'
+	            WHEN BTS.B_SUB_TYPE = 'VID' THEN '동영상'
+	            WHEN BTS.B_SUB_TYPE = 'QNA' THEN '질문'
+	            WHEN BTS.B_SUB_TYPE = 'MAR' THEN '나눔/장터'
+	            WHEN BTS.B_SUB_TYPE = 'WALK' THEN '산책'
+	            WHEN BTS.B_SUB_TYPE = 'MEET' THEN '소모임'
+	            WHEN BTS.B_SUB_TYPE = 'TRAVEL' THEN '여행팸'
+	            WHEN BTS.B_SUB_TYPE = 'LINFO' THEN '지역정보'
+	            WHEN BTS.B_SUB_TYPE = 'CARE' THEN '돌봄'
+	            WHEN BTS.B_SUB_TYPE = 'MARKET' THEN '중고거래'
+	            WHEN BTS.B_SUB_TYPE = 'HOSP' THEN '병원 추천'
+	            ELSE BTS.B_SUB_TYPE
+	        END AS B_SUB_TYPE,
 	
-		<if test="localNo != null and localNo != ''">
-			AND B.LOCAL_NO = #{localNo}
-		</if>
+	        CASE
+	            WHEN BTM.B_MAIN_TYPE = 'ALL' THEN '통합'
+	            WHEN BTM.B_MAIN_TYPE = 'LOC' THEN '지역'
+	            ELSE BTM.B_MAIN_TYPE
+	        END AS B_MAIN_TYPE,
 	
-		<if test="keyword != null and keyword != ''">
-			AND (
-				<choose>
-					<when test="searchType == 'title'">
-						B.TITLE LIKE CONCAT('%', #{keyword}, '%')
-					</when>
-					<when test="searchType == 'contents'">
-						B.B_CONTENT LIKE CONCAT('%', #{keyword}, '%')
-					</when>
-					<when test="searchType == 'user'">
-						B.USER_ID LIKE CONCAT('%', #{keyword}, '%')
-					</when>
-					<otherwise>
-							(
-							B.TITLE LIKE CONCAT('%', #{keyword}, '%')
-							OR B.B_CONTENT LIKE CONCAT('%', #{keyword}, '%')
-							OR B.USER_ID LIKE CONCAT('%', #{keyword}, '%')
-						)
-					</otherwise>
-				</choose>
-			)
-		</if>
-
-		ORDER BY
-		<choose>
-			<when test="sortType == 'like'">
-				LIKE_CNT DESC, B.BOARD_NO DESC
-			</when>
-			<when test="sortType == 'view'">
-				B.VIEW_COUNT DESC, B.BOARD_NO DESC
-			</when>
-			<otherwise>
-				B.BOARD_NO DESC
-			</otherwise>
-		</choose>
-
-		LIMIT #{startIndex}, #{pageSize}
+	        IFNULL(LK.LIKE_CNT, 0) AS LIKE_CNT,
+	        IFNULL(CM.COMMENT_CNT, 0) AS COMMENT_CNT,
+	
+	        BF.FILE_PATH,
+	        BF.FILE_NAME,
+	        CONCAT(BF.FILE_PATH, BF.FILE_NAME) AS THUMBNAIL
+	
+	    FROM BOARD B
+	
+	    INNER JOIN BOARD_TYPE_SUB BTS 
+	        ON B.B_SUB_NO = BTS.B_SUB_NO
+	
+	    INNER JOIN BOARD_TYPE_MAIN BTM 
+	        ON BTS.B_MAIN_NO = BTM.B_MAIN_NO
+	
+	    LEFT JOIN (
+	        SELECT BOARD_NO, COUNT(*) AS LIKE_CNT
+	        FROM BOARD_LIKE
+	        GROUP BY BOARD_NO
+	    ) LK 
+	        ON B.BOARD_NO = LK.BOARD_NO
+	
+	    LEFT JOIN (
+	        SELECT BOARD_NO, COUNT(*) AS COMMENT_CNT
+	        FROM COMMENT
+	        GROUP BY BOARD_NO
+	    ) CM 
+	        ON B.BOARD_NO = CM.BOARD_NO
+	
+	    LEFT JOIN (
+	        SELECT BOARD_NO, MIN(FILE_NO) AS FILE_NO
+	        FROM BOARD_FILE
+	        GROUP BY BOARD_NO
+	    ) BFM 
+	        ON B.BOARD_NO = BFM.BOARD_NO
+	
+	    LEFT JOIN BOARD_FILE BF 
+	        ON BFM.FILE_NO = BF.FILE_NO
+	
+	    WHERE B.B_STATUS = 'Y'
+	
+	    <if test="bMainNo != null and bMainNo != ''">
+	        AND BTM.B_MAIN_NO = #{bMainNo}
+	    </if>
+	
+	    <if test="integratedCategory != null and integratedCategory != ''">
+	        AND BTS.B_SUB_TYPE = #{integratedCategory}
+	    </if>
+	
+	    <if test="localCategory != null and localCategory != ''">
+	        AND BTS.B_SUB_TYPE = #{localCategory}
+	    </if>
+	
+	    <if test="localNo != null and localNo != ''">
+	        AND B.LOCAL_NO = #{localNo}
+	    </if>
+	
+	    <if test="keyword != null and keyword != ''">
+	        AND (
+	            <choose>
+	                <when test="searchType == 'title'">
+	                    B.TITLE LIKE CONCAT('%', #{keyword}, '%')
+	                </when>
+	                <when test="searchType == 'contents'">
+	                    B.B_CONTENT LIKE CONCAT('%', #{keyword}, '%')
+	                </when>
+	                <when test="searchType == 'user'">
+	                    B.USER_ID LIKE CONCAT('%', #{keyword}, '%')
+	                </when>
+	                <otherwise>
+	                    (
+	                        B.TITLE LIKE CONCAT('%', #{keyword}, '%')
+	                        OR B.B_CONTENT LIKE CONCAT('%', #{keyword}, '%')
+	                        OR B.USER_ID LIKE CONCAT('%', #{keyword}, '%')
+	                    )
+	                </otherwise>
+	            </choose>
+	        )
+	    </if>
+	
+	    ORDER BY
+	        CASE 
+	            WHEN BTS.B_SUB_TYPE = 'NTC' THEN 0
+	            ELSE 1
+	        END,
+	        <choose>
+	            <when test="sortType == 'like'">
+	                LIKE_CNT DESC, B.BOARD_NO DESC
+	            </when>
+	            <when test="sortType == 'view'">
+	                B.VIEW_COUNT DESC, B.BOARD_NO DESC
+	            </when>
+	            <otherwise>
+	                B.BOARD_NO DESC
+	            </otherwise>
+	        </choose>
+	
+	    LIMIT #{startIndex}, #{pageSize}
 	</select>
 
 	<select id="selectBoardCnt" parameterType="hashmap" resultType="int">

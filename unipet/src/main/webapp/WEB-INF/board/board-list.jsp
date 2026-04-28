@@ -138,7 +138,10 @@
 
 							<button class="write-btn" @click="fnMoveTempList()">임시저장</button>
 							<button class="write-btn" @click="fnMoveNormalList()">전체 글</button>
-							<button class="write-btn" @click="fnMoveAdd()">글쓰기</button>
+							<button class="write-btn" v-if="sessionRole == 'A' || integratedCategory != 'NTC'"
+								@click="fnMoveAdd()">
+								글쓰기
+							</button>
 
 						</div>
 					</div>
@@ -162,8 +165,13 @@
 								<td colspan="8">게시글이 없습니다.</td>
 							</tr>
 
-							<tr v-for="item in boardList" :key="item.BOARD_NO">
-								<td>{{item.BOARD_NO}}</td>
+							<tr v-for="(item, index) in boardList"
+							    :key="item.BOARD_NO"
+							    :class="{noticeRow : item.B_SUB_TYPE == '공지사항'}">
+								<td>
+								  <span v-if="item.B_SUB_TYPE == '공지사항'">공지</span>
+								  <span v-else>{{item.DISPLAY_NO}}</span>
+								</td>
 								<td>
 									<img v-if="item.THUMBNAIL" :src="item.THUMBNAIL" class="thumb">
 									<img v-else src="../../img/board/unipet_logo.png" class="thumb">
@@ -175,7 +183,8 @@
 
 										<span v-if="selectedMainNo == ''" class="main-badge">{{item.B_MAIN_TYPE}}</span>
 
-										<span class="category">[{{item.B_SUB_TYPE}}]</span>
+										<span v-if="item.B_SUB_TYPE == '공지사항'" class="notice-badge">📌 공지사항</span>
+										<span v-else class="category">[{{item.B_SUB_TYPE}}]</span>
 										<span class="title-text">{{item.TITLE}}</span>
 									</div>
 								</td>
@@ -183,7 +192,12 @@
 								<td>{{item.VIEW_COUNT}}</td>
 								<td>{{item.LIKE_CNT}}</td>
 								<td>{{item.COMMENT_CNT}}</td>
-								<td>{{item.CREATE_TIME}}</td>
+								<td>
+									<div class="date-box">
+										<div>{{item.CREATE_TIME.substring(0,10)}}</div>
+										<div>{{item.CREATE_TIME.substring(11,16)}}</div>
+									</div>
+								</td>
 							</tr>
 						</tbody>
 					</table>
@@ -214,6 +228,7 @@
 						sortType: '<%=request.getAttribute("sortType") == null || request.getAttribute("sortType").equals("") ? "new" : request.getAttribute("sortType")%>',
 						currentPage: Number('<%=request.getAttribute("page") == null || request.getAttribute("page").equals("") ? "1" : request.getAttribute("page")%>'),
 						tempYn: '<%=request.getAttribute("tempYn") == null ? "" : request.getAttribute("tempYn")%>',
+						sessionRole: '<%=session.getAttribute("sessionRole")%>',
 						pageSize: 10,
 						totalCount: 0,
 						integratedCategory: '',
@@ -296,16 +311,17 @@
 					},
 
 					fnMoveAdd() {
-						if (this.selectedMainNo == "") {
-							alert("글을 작성할 게시판 탭을 먼저 선택해주세요.");
-							return;
-						}
 
-						pageChange("/board/add.do", {
-							bMainNo: this.selectedMainNo
-						});
+					    if (this.selectedMainNo == "") {
+					        alert("통합 또는 지역 게시판을 먼저 선택해주세요.");
+					        return;
+					    }
+
+					    pageChange("/board/add.do", {
+					        bMainNo: this.selectedMainNo
+					    });
 					},
-
+					
 					fnMoveTempList() {
 						pageChange("/board/list.do", {
 							tempYn: "Y"
@@ -329,15 +345,17 @@
 					},
 
 					fnSelectLocalCategory(category) {
-						this.localCategory = category;
-						this.currentPage = 1;
-						this.fnGetBoardList();
+					    this.selectedMainNo = "2"; 
+					    this.localCategory = category;
+					    this.currentPage = 1;
+					    this.fnGetBoardList();
 					},
 
 					fnSelectIntegratedCategory(category) {
-						this.integratedCategory = category;
-						this.currentPage = 1;
-						this.fnGetBoardList();
+					    this.selectedMainNo = "1";
+					    this.integratedCategory = category;
+					    this.currentPage = 1;
+					    this.fnGetBoardList();
 					},
 
 					fnSelectLocalNo() {

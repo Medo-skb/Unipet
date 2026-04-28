@@ -40,8 +40,10 @@ public class BoardController {
 	}
 
 	@RequestMapping("/board/add.do")
-	public String add(HttpServletRequest request, @RequestParam HashMap<String, Object> map) throws Exception {
+	public String add(HttpServletRequest request, HttpSession session, @RequestParam HashMap<String, Object> map) {
+
 		request.setAttribute("bMainNo", map.get("bMainNo"));
+
 		return "/board/board-add";
 	}
 
@@ -80,6 +82,7 @@ public class BoardController {
 			return "/board/board-edit";
 		}
 	}
+
 	@RequestMapping("/board/list.dox")
 	@ResponseBody
 	public String getBoardList(@RequestParam HashMap<String, Object> map) {
@@ -137,14 +140,41 @@ public class BoardController {
 	@RequestMapping("/board/add.dox")
 	@ResponseBody
 	public String addBoard(HttpSession session, @RequestParam HashMap<String, Object> map,
-			@RequestParam(value = "files", required = false) MultipartFile[] files) {
-		String sessionId = session.getAttribute("sessionId") == null ? "" : (String) session.getAttribute("sessionId");
-		map.put("sessionId", sessionId);
+	        @RequestParam(value = "files", required = false) MultipartFile[] files) {
 
-		HashMap<String, Object> resultMap = boardService.addBoard(map, files);
-		return new Gson().toJson(resultMap);
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+	    try {
+	        String sessionId = session.getAttribute("sessionId") == null ? "" : (String) session.getAttribute("sessionId");
+	        String sessionRole = session.getAttribute("sessionRole") == null ? "" : (String) session.getAttribute("sessionRole");
+
+	        map.put("sessionId", sessionId);
+	        map.put("sessionRole", sessionRole);
+
+	        if (sessionId.equals("")) {
+	            resultMap.put("result", "login");
+	            resultMap.put("message", "로그인이 필요합니다.");
+	            return new Gson().toJson(resultMap);
+	        }
+
+	        if ("1".equals(String.valueOf(map.get("bSubNo")))
+	                && !"A".equals(sessionRole)
+	                && !"BIZ".equals(sessionRole)) {
+	            resultMap.put("result", "fail");
+	            resultMap.put("message", "공지사항은 관리자만 작성할 수 있습니다.");
+	            return new Gson().toJson(resultMap);
+	        }
+
+	        resultMap = boardService.addBoard(map, files);
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        resultMap.put("result", "fail");
+	        resultMap.put("message", "게시글 등록 중 오류가 발생했습니다.");
+	    }
+
+	    return new Gson().toJson(resultMap);
 	}
-
 	@RequestMapping("/board/edit-info.dox")
 	@ResponseBody
 	public String getBoardEditInfo(HttpSession session, @RequestParam HashMap<String, Object> map) {
@@ -224,7 +254,7 @@ public class BoardController {
 		HashMap<String, Object> resultMap = boardService.getRecentTempBoard(map);
 		return new Gson().toJson(resultMap);
 	}
-	
+
 	@RequestMapping("/board/alarm/list.dox")
 	@ResponseBody
 	public String getBoardAlarmList(HttpSession session, @RequestParam HashMap<String, Object> map) {
@@ -234,7 +264,7 @@ public class BoardController {
 		HashMap<String, Object> resultMap = boardService.getBoardAlarmList(map);
 		return new Gson().toJson(resultMap);
 	}
-	
+
 	@RequestMapping("/board/alarm/read.dox")
 	@ResponseBody
 	public String readBoardAlarm(HttpSession session, @RequestParam HashMap<String, Object> map) {
@@ -244,5 +274,5 @@ public class BoardController {
 		HashMap<String, Object> resultMap = boardService.readBoardAlarm(map);
 		return new Gson().toJson(resultMap);
 	}
-	
+
 }
