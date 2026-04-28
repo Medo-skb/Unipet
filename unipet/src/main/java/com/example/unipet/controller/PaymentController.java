@@ -122,10 +122,16 @@ public class PaymentController {
 	public String refund(HttpServletRequest request, @RequestParam HashMap<String, Object> map) {
 	    // 2. 파라미터로 받은 orderNo(또는 rsvNo)를 request에 담기 (Attribute 세팅)
 	    request.setAttribute("ordNo", map.get("ordNo"));
-	    request.setAttribute("rsvNo", map.get("rsvNo"));
 	    
 	    return "payment/refund-shop";
 	}
+	
+	@RequestMapping("/payment/refund-rsv.do")
+    public String refundReservation(HttpServletRequest request, @RequestParam HashMap<String, Object> map) {
+        // 예약 번호(rsvNo)를 넘겨받아 페이지에 전달
+        request.setAttribute("rsvNo", map.get("rsvNo"));
+        return "payment/refund-rsv";
+    }
 	
 	// ajax가 호출하는 주소
 	@RequestMapping(value = "/payment/rsv.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
@@ -209,6 +215,25 @@ public class PaymentController {
         resultMap = paymentService.refundPayment(map);
         
 
+        return new Gson().toJson(resultMap); 
+    }
+    
+    @RequestMapping(value = "/payment/rsvRefund.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+    @ResponseBody
+    public String reservationRefund(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+        HashMap<String, Object> resultMap = new HashMap<String, Object>();     
+        // 예약 전용 서비스 함수 호출
+        resultMap = paymentService.refundReservation(map);
+        return new Gson().toJson(resultMap); 
+    }
+    
+    @RequestMapping(value = "/payment/getRsvDetail.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+    @ResponseBody
+    public String getReservationDetail(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+        HashMap<String, Object> resultMap = new HashMap<String, Object>();
+        
+        resultMap = paymentService.getRsvDetail(map);
+        
         return new Gson().toJson(resultMap); 
     }
 	
