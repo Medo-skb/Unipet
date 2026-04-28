@@ -5,61 +5,62 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 
+import com.example.unipet.model.Product;
+
 @Mapper
 public interface ProductMapper {
 
-	// ===== 카테고리 =====
-	public List<HashMap<String, Object>> selectAnimalMainList(HashMap<String, Object> map);
+	// 여러개 리턴 -> selectXXXList
+	public List<Product> selectAnimalMainList(HashMap<String, Object> map);
 
-	public List<HashMap<String, Object>> selectAnimalSubList(HashMap<String, Object> map);
+	public List<Product> selectAnimalSubList(HashMap<String, Object> map);
 
-	public List<HashMap<String, Object>> selectItemMainList(HashMap<String, Object> map);
+	public List<Product> selectItemMainList(HashMap<String, Object> map);
 
-	public List<HashMap<String, Object>> selectItemSubList(HashMap<String, Object> map);
+	public List<Product> selectItemSubList(HashMap<String, Object> map);
 
-	// ===== 상품 =====
-	public List<HashMap<String, Object>> selectProductList(HashMap<String, Object> map);
+	public List<Product> selectProductList(HashMap<String, Object> map);
 
-	public HashMap<String, Object> selectProductView(HashMap<String, Object> map);
+	public List<Product> selectProductFileList(HashMap<String, Object> map);
 
-	public List<HashMap<String, Object>> selectProductFileList(HashMap<String, Object> map);
+	public List<Product> selectProductImageList(HashMap<String, Object> map);
 
-	// ===== 상세 =====
-	public HashMap<String, Object> selectProductDetail(HashMap<String, Object> map);
+	public List<Product> selectProductDetailImageList(HashMap<String, Object> map);
 
-	public List<HashMap<String, Object>> selectProductImageList(HashMap<String, Object> map);
+	public List<Product> selectReviewList(HashMap<String, Object> map);
 
-	public List<HashMap<String, Object>> selectProductDetailImageList(HashMap<String, Object> map);
+	public List<Product> selectQnaList(HashMap<String, Object> map);
 
-	// ===== 리뷰 =====
-	public List<HashMap<String, Object>> selectReviewList(HashMap<String, Object> map);
+	public List<Product> selectCartList(HashMap<String, Object> map);
 
-	public HashMap<String, Object> selectReviewSummary(HashMap<String, Object> map);
+	// 한개 리턴 -> selectXXX
+	public Product selectProductView(HashMap<String, Object> map);
 
-	// ===== QNA =====
-	public List<HashMap<String, Object>> selectQnaList(HashMap<String, Object> map);
+	public Product selectProductDetail(HashMap<String, Object> map);
 
-	public HashMap<String, Object> selectQnaOne(HashMap<String, Object> map);
+	public Product selectReviewSummary(HashMap<String, Object> map);
 
-	public int insertQna(HashMap<String, Object> map);
+	public Product selectQnaOne(HashMap<String, Object> map);
 
-	public int updateQna(HashMap<String, Object> map);
+	public Product selectCartOne(HashMap<String, Object> map);
 
+	public int selectCartCount(HashMap<String, Object> map);
+
+	// 삭제
 	public int deleteQna(HashMap<String, Object> map);
-
-	// ===== 장바구니 =====
-	public int insertCart(HashMap<String, Object> map);
-
-	public HashMap<String, Object> selectCartOne(HashMap<String, Object> map);
-
-	public int updateCartPlusQty(HashMap<String, Object> map);
-
-	public List<HashMap<String, Object>> selectCartList(HashMap<String, Object> map);
-
-	public int updateCartQty(HashMap<String, Object> map);
 
 	public int deleteCart(HashMap<String, Object> map);
 
-	public int selectCartCount(HashMap<String, Object> map);
+	// 수정
+	public int updateQna(HashMap<String, Object> map);
+
+	public int updateCartPlusQty(HashMap<String, Object> map);
+
+	public int updateCartQty(HashMap<String, Object> map);
+
+	// 삽입
+	public int insertQna(HashMap<String, Object> map);
+
+	public int insertCart(HashMap<String, Object> map);
 
 }

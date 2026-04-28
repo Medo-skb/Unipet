@@ -1,7 +1,9 @@
 package com.example.unipet.dao;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -9,9 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.unipet.common.Message;
 import com.example.unipet.mapper.BoardMapper;
-
-import java.io.File;
-import java.util.UUID;
+import com.example.unipet.model.Board;
 
 @Service
 public class BoardService {
@@ -19,99 +19,108 @@ public class BoardService {
 	@Autowired
 	BoardMapper boardMapper;
 
-	public HashMap<String, Object> getBoardList(HashMap<String, Object> map){
-	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+	// 조회 -> get, 수정 -> update, 삽입 -> add, 삭제 -> remove
+	// ex) 게시글목록 : getBoardList, 게시글수정 -> updateBoard
 
-	    try {
-	        int page = map.get("page") == null || map.get("page").equals("") ? 1
-	                : Integer.parseInt(map.get("page").toString());
+	// === Mapper 호출 시 ===
+	// 여러개 리턴 -> selectXXXList
+	// 한개 리턴 -> selectXXX
+	// 수정, 삭제, 삽입 -> updateXXX, deleteXXX, insertXXX
 
-	        int pageSize = map.get("pageSize") == null || map.get("pageSize").equals("") ? 10
-	                : Integer.parseInt(map.get("pageSize").toString());
+	public HashMap<String, Object> getBoardList(HashMap<String, Object> map) {
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
-	        int count = boardMapper.selectBoardCnt(map);
+		try {
+			int page = map.get("page") == null || map.get("page").equals("") ? 1
+					: Integer.parseInt(map.get("page").toString());
 
-	        int firstPageSize = count % pageSize;
-	        if(firstPageSize == 0 && count > 0){
-	            firstPageSize = pageSize;
-	        }
+			int pageSize = map.get("pageSize") == null || map.get("pageSize").equals("") ? 10
+					: Integer.parseInt(map.get("pageSize").toString());
 
-	        int startIndex = 0;
-	        int limitSize = pageSize;
+			int count = boardMapper.selectBoardCnt(map);
 
-	        if(page == 1){
-	            startIndex = 0;
-	            limitSize = firstPageSize;
-	        } else {
-	            startIndex = firstPageSize + ((page - 2) * pageSize);
-	            limitSize = pageSize;
-	        }
+			int startIndex = (page - 1) * pageSize;
 
-	        map.put("startIndex", startIndex);
-	        map.put("pageSize", limitSize);
+			map.put("startIndex", startIndex);
+			map.put("pageSize", pageSize);
 
-	        List<HashMap<String, Object>> list = boardMapper.selectBoardList(map);
+			List<Board> list = boardMapper.selectBoardList(map);
 
-	        for(int i=0; i<list.size(); i++){
-	            list.get(i).put("DISPLAY_NO", count - startIndex - i);
-	        }
+			for (int i = 0; i < list.size(); i++) {
+				list.get(i).setDisplayNo(count - startIndex - i);
+			}
 
-	        List<HashMap<String, Object>> categoryMainList = boardMapper.selectBoardMainTypeList(map);
-	        List<HashMap<String, Object>> categorySubList = boardMapper.selectBoardSubTypeList(map);
-	        List<HashMap<String, Object>> localList = boardMapper.selectBoardLocalList(map);
+			List<Board> categoryMainList = boardMapper.selectBoardMainTypeList(map);
+			List<Board> categorySubList = boardMapper.selectBoardSubTypeList(map);
+			List<Board> localList = boardMapper.selectBoardLocalList(map);
 
-	        resultMap.put("list", list);
-	        resultMap.put("count", count);
-	        resultMap.put("mainTypeList", categoryMainList);
-	        resultMap.put("subTypeList", categorySubList);
-	        resultMap.put("localList", localList);
-	        resultMap.put("result", "success");
+			resultMap.put("list", list);
+			resultMap.put("count", count);
+			resultMap.put("mainTypeList", categoryMainList);
+			resultMap.put("subTypeList", categorySubList);
+			resultMap.put("localList", localList);
+			resultMap.put("result", "success");
 
-	    } catch (Exception e) {
-	        System.out.println(e.getMessage());
-	        resultMap.put("result", "fail");
-	        resultMap.put("message", Message.MSG_SERVER_ERR);
-	    }
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			resultMap.put("result", "fail");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
+		}
 
-	    return resultMap;
+		return resultMap;
 	}
+
 	public HashMap<String, Object> getBoardDetail(HashMap<String, Object> map) {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
-		if (map.get("boardNo") == null || map.get("boardNo").equals("")) {
+		try {
+			if (map.get("boardNo") == null || map.get("boardNo").equals("")) {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "잘못된 접근입니다.");
+				return resultMap;
+			}
+
+			boardMapper.updateViewCount(map);
+
+			Board info = boardMapper.selectBoardInfo(map);
+
+			if (info == null) {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "존재하지 않는 게시글입니다.");
+				return resultMap;
+			}
+
+			String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
+			String writerId = info.getUserId() == null ? "" : info.getUserId();
+			String privateYn = info.getPrivateYn() == null ? "N" : info.getPrivateYn();
+
+			if ("Y".equals(privateYn) && !sessionId.equals(writerId)) {
+				resultMap.put("result", "private");
+				resultMap.put("message", "비공개 게시글입니다.");
+				return resultMap;
+			}
+
+			List<Board> fileList = boardMapper.selectBoardFileList(map);
+			Board likeInfo = boardMapper.selectBoardLikeInfo(map);
+
+			resultMap.put("board", info);
+			resultMap.put("fileList", fileList);
+
+			if (likeInfo == null) {
+				resultMap.put("likeCnt", 0);
+				resultMap.put("myLike", "N");
+			} else {
+				resultMap.put("likeCnt", likeInfo.getLikeCnt());
+				resultMap.put("myLike", likeInfo.getMyLike());
+			}
+
+			resultMap.put("result", "success");
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
 			resultMap.put("result", "fail");
-			resultMap.put("message", "잘못된 접근입니다.");
-			return resultMap;
+			resultMap.put("message", Message.MSG_SERVER_ERR);
 		}
-
-		boardMapper.updateViewCount(map);
-
-		HashMap<String, Object> info = boardMapper.selectBoardInfo(map);
-
-		if (info == null) {
-			resultMap.put("result", "fail");
-			resultMap.put("message", "존재하지 않는 게시글입니다.");
-			return resultMap;
-		}
-
-		String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
-		String writerId = info.get("USER_ID") == null ? "" : info.get("USER_ID").toString();
-		String privateYn = info.get("PRIVATE") == null ? "N" : info.get("PRIVATE").toString();
-
-		if ("Y".equals(privateYn) && !sessionId.equals(writerId)) {
-			resultMap.put("result", "private");
-			resultMap.put("message", "비공개 게시글입니다.");
-			return resultMap;
-		}
-
-		List<HashMap<String, Object>> fileList = boardMapper.selectBoardFileList(map);
-		HashMap<String, Object> likeInfo = boardMapper.selectBoardLikeInfo(map);
-
-		resultMap.put("board", info);
-		resultMap.put("fileList", fileList);
-		resultMap.put("likeCnt", likeInfo == null ? 0 : likeInfo.get("LIKE_CNT"));
-		resultMap.put("myLike", likeInfo == null ? "N" : likeInfo.get("MY_LIKE"));
-		resultMap.put("result", "success");
 
 		return resultMap;
 	}
@@ -119,62 +128,77 @@ public class BoardService {
 	public HashMap<String, Object> getCommentList(HashMap<String, Object> map) {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
-		List<HashMap<String, Object>> list = boardMapper.selectCommentList(map);
+		try {
+			List<Board> list = boardMapper.selectCommentList(map);
 
-		resultMap.put("list", list);
-		resultMap.put("result", "success");
+			resultMap.put("list", list);
+			resultMap.put("result", "success");
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			resultMap.put("result", "fail");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
+		}
+
 		return resultMap;
 	}
 
 	public HashMap<String, Object> addComment(HashMap<String, Object> map) {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
-		String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
-		String contents = map.get("contents") == null ? "" : map.get("contents").toString();
+		try {
+			String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
+			String contents = map.get("contents") == null ? "" : map.get("contents").toString();
 
-		if (sessionId.equals("")) {
-			resultMap.put("result", "login");
-			resultMap.put("message", "로그인이 필요합니다.");
-			return resultMap;
-		}
-
-		if (contents.equals("")) {
-			resultMap.put("result", "fail");
-			resultMap.put("message", "댓글 내용을 입력해주세요.");
-			return resultMap;
-		}
-
-		contents = badWordFilter(contents);
-		map.put("contents", contents);
-		map.put("userId", sessionId);
-
-		int cnt = boardMapper.insertComment(map);
-
-		if (cnt > 0) {
-			HashMap<String, Object> boardInfo = boardMapper.selectBoardInfo(map);
-
-			if (boardInfo != null) {
-				String writerId = boardInfo.get("USER_ID").toString();
-				String senderId = map.get("sessionId").toString();
-
-				if (!writerId.equals(senderId)) {
-					HashMap<String, Object> alarmMap = new HashMap<String, Object>();
-					alarmMap.put("receiverId", writerId);
-					alarmMap.put("senderId", senderId);
-					alarmMap.put("boardNo", map.get("boardNo"));
-					alarmMap.put("commentNo", "");
-					alarmMap.put("alarmType", "COMMENT");
-					alarmMap.put("alarmContent", senderId + "님이 내 게시글에 댓글을 남겼습니다.");
-
-					boardMapper.insertBoardAlarm(alarmMap);
-				}
+			if (sessionId.equals("")) {
+				resultMap.put("result", "login");
+				resultMap.put("message", "로그인이 필요합니다.");
+				return resultMap;
 			}
-			
-			resultMap.put("result", "success");
-			resultMap.put("message", "댓글이 등록되었습니다.");
-		} else {
+
+			if (contents.equals("")) {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "댓글 내용을 입력해주세요.");
+				return resultMap;
+			}
+
+			contents = badWordFilter(contents);
+			map.put("contents", contents);
+			map.put("userId", sessionId);
+
+			int cnt = boardMapper.insertComment(map);
+
+			if (cnt > 0) {
+				Board boardInfo = boardMapper.selectBoardInfo(map);
+
+				if (boardInfo != null) {
+					String writerId = boardInfo.getUserId();
+					String senderId = map.get("sessionId").toString();
+
+					if (!writerId.equals(senderId)) {
+						HashMap<String, Object> alarmMap = new HashMap<String, Object>();
+						alarmMap.put("receiverId", writerId);
+						alarmMap.put("senderId", senderId);
+						alarmMap.put("boardNo", map.get("boardNo"));
+						alarmMap.put("commentNo", "");
+						alarmMap.put("alarmType", "COMMENT");
+						alarmMap.put("alarmContent", senderId + "님이 내 게시글에 댓글을 남겼습니다.");
+
+						boardMapper.insertBoardAlarm(alarmMap);
+					}
+				}
+
+				resultMap.put("result", "success");
+				resultMap.put("message", "댓글이 등록되었습니다.");
+			} else {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "댓글 등록 실패");
+			}
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
 			resultMap.put("result", "fail");
-			resultMap.put("message", "댓글 등록 실패");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
 		}
 
 		return resultMap;
@@ -183,50 +207,64 @@ public class BoardService {
 	public HashMap<String, Object> boardLike(HashMap<String, Object> map) {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
-		String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
+		try {
+			String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
 
-		if (sessionId.equals("")) {
-			resultMap.put("result", "login");
-			resultMap.put("message", "로그인이 필요합니다.");
-			return resultMap;
-		}
-
-		map.put("userId", sessionId);
-
-		HashMap<String, Object> check = boardMapper.selectBoardLikeCheck(map);
-
-		if (check == null) {
-			boardMapper.insertBoardLike(map);
-			HashMap<String, Object> boardInfo = boardMapper.selectBoardInfo(map);
-
-			if (boardInfo != null) {
-				String writerId = boardInfo.get("USER_ID").toString();
-				String senderId = map.get("sessionId").toString();
-
-				if (!writerId.equals(senderId)) {
-					HashMap<String, Object> alarmMap = new HashMap<String, Object>();
-					alarmMap.put("receiverId", writerId);
-					alarmMap.put("senderId", senderId);
-					alarmMap.put("boardNo", map.get("boardNo"));
-					alarmMap.put("commentNo", "");
-					alarmMap.put("alarmType", "LIKE");
-					alarmMap.put("alarmContent", senderId + "님이 내 게시글을 추천했습니다.");
-
-					boardMapper.insertBoardAlarm(alarmMap);
-				}
+			if (sessionId.equals("")) {
+				resultMap.put("result", "login");
+				resultMap.put("message", "로그인이 필요합니다.");
+				return resultMap;
 			}
-			
-			resultMap.put("message", "추천되었습니다.");
-		} else {
-			boardMapper.deleteBoardLike(map);
-			resultMap.put("message", "추천이 취소되었습니다.");
+
+			map.put("userId", sessionId);
+
+			Board check = boardMapper.selectBoardLikeCheck(map);
+
+			if (check == null) {
+				boardMapper.insertBoardLike(map);
+
+				Board boardInfo = boardMapper.selectBoardInfo(map);
+
+				if (boardInfo != null) {
+					String writerId = boardInfo.getUserId();
+					String senderId = map.get("sessionId").toString();
+
+					if (!writerId.equals(senderId)) {
+						HashMap<String, Object> alarmMap = new HashMap<String, Object>();
+						alarmMap.put("receiverId", writerId);
+						alarmMap.put("senderId", senderId);
+						alarmMap.put("boardNo", map.get("boardNo"));
+						alarmMap.put("commentNo", "");
+						alarmMap.put("alarmType", "LIKE");
+						alarmMap.put("alarmContent", senderId + "님이 내 게시글을 추천했습니다.");
+
+						boardMapper.insertBoardAlarm(alarmMap);
+					}
+				}
+
+				resultMap.put("message", "추천되었습니다.");
+			} else {
+				boardMapper.deleteBoardLike(map);
+				resultMap.put("message", "추천이 취소되었습니다.");
+			}
+
+			Board likeInfo = boardMapper.selectBoardLikeInfo(map);
+
+			if (likeInfo == null) {
+				resultMap.put("likeCnt", 0);
+				resultMap.put("myLike", "N");
+			} else {
+				resultMap.put("likeCnt", likeInfo.getLikeCnt());
+				resultMap.put("myLike", likeInfo.getMyLike());
+			}
+
+			resultMap.put("result", "success");
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			resultMap.put("result", "fail");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
 		}
-
-		HashMap<String, Object> likeInfo = boardMapper.selectBoardLikeInfo(map);
-
-		resultMap.put("likeCnt", likeInfo == null ? 0 : likeInfo.get("LIKE_CNT"));
-		resultMap.put("myLike", likeInfo == null ? "N" : likeInfo.get("MY_LIKE"));
-		resultMap.put("result", "success");
 
 		return resultMap;
 	}
@@ -234,25 +272,27 @@ public class BoardService {
 	public HashMap<String, Object> boardReport(HashMap<String, Object> map) {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
-		String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
-
-		if (sessionId.equals("")) {
-			resultMap.put("result", "login");
-			resultMap.put("message", "로그인이 필요합니다.");
-			return resultMap;
-		}
-
-		if (map.get("reportReason") == null || map.get("reportReason").equals("")) {
-			resultMap.put("result", "fail");
-			resultMap.put("message", "신고 사유를 선택해주세요.");
-			return resultMap;
-		}
-
-		map.put("reporterId", sessionId);
-		if (map.get("commentNo") == null || "".equals(map.get("commentNo"))) {
-			map.put("commentNo", null);
-		}
 		try {
+			String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
+
+			if (sessionId.equals("")) {
+				resultMap.put("result", "login");
+				resultMap.put("message", "로그인이 필요합니다.");
+				return resultMap;
+			}
+
+			if (map.get("reportReason") == null || map.get("reportReason").equals("")) {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "신고 사유를 선택해주세요.");
+				return resultMap;
+			}
+
+			map.put("reporterId", sessionId);
+
+			if (map.get("commentNo") == null || "".equals(map.get("commentNo"))) {
+				map.put("commentNo", null);
+			}
+
 			int cnt = boardMapper.insertBoardReport(map);
 
 			if (cnt > 0) {
@@ -262,7 +302,9 @@ public class BoardService {
 				resultMap.put("result", "fail");
 				resultMap.put("message", "신고 접수 실패");
 			}
+
 		} catch (Exception e) {
+			System.out.println(e.getMessage());
 			resultMap.put("result", "fail");
 			resultMap.put("message", "이미 신고한 대상입니다.");
 		}
@@ -288,45 +330,52 @@ public class BoardService {
 	public HashMap<String, Object> addBoard(HashMap<String, Object> map, MultipartFile[] files) {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
-		String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
-		String title = map.get("title") == null ? "" : map.get("title").toString();
-		String bContent = map.get("bContent") == null ? "" : map.get("bContent").toString();
-		String bSubNo = map.get("bSubNo") == null ? "" : map.get("bSubNo").toString();
-		String privateYn = map.get("privateYn") == null ? "N" : map.get("privateYn").toString();
-		String bStatus = map.get("bStatus") == null ? "Y" : map.get("bStatus").toString();
+		try {
+			String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
+			String sessionRole = map.get("sessionRole") == null ? "" : map.get("sessionRole").toString();
+			String title = map.get("title") == null ? "" : map.get("title").toString();
+			String bContent = map.get("bContent") == null ? "" : map.get("bContent").toString();
+			String bSubNo = map.get("bSubNo") == null ? "" : map.get("bSubNo").toString();
+			String privateYn = map.get("privateYn") == null ? "N" : map.get("privateYn").toString();
+			String bStatus = map.get("bStatus") == null ? "Y" : map.get("bStatus").toString();
 
-		if (sessionId.equals("")) {
-			resultMap.put("result", "login");
-			resultMap.put("message", "로그인이 필요합니다.");
-			return resultMap;
-		}
+			if (sessionId.equals("")) {
+				resultMap.put("result", "login");
+				resultMap.put("message", "로그인이 필요합니다.");
+				return resultMap;
+			}
 
-		if (title.equals("")) {
-			resultMap.put("result", "fail");
-			resultMap.put("message", "제목을 입력해주세요.");
-			return resultMap;
-		}
+			if ("1".equals(bSubNo) && !"A".equals(sessionRole) && !"BIZ".equals(sessionRole)) {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "공지사항은 관리자만 작성할 수 있습니다.");
+				return resultMap;
+			}
 
-		if (bContent.equals("")) {
-			resultMap.put("result", "fail");
-			resultMap.put("message", "본문을 입력해주세요.");
-			return resultMap;
-		}
+			if (title.equals("")) {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "제목을 입력해주세요.");
+				return resultMap;
+			}
 
-		if (bSubNo.equals("")) {
-			resultMap.put("result", "fail");
-			resultMap.put("message", "카테고리를 선택해주세요.");
-			return resultMap;
-		}
+			if (bContent.equals("")) {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "본문을 입력해주세요.");
+				return resultMap;
+			}
 
-		map.put("userId", sessionId);
-		map.put("privateYn", privateYn);
-		map.put("bStatus", bStatus);
+			if (bSubNo.equals("")) {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "카테고리를 선택해주세요.");
+				return resultMap;
+			}
 
-		int cnt = boardMapper.insertBoard(map);
+			map.put("userId", sessionId);
+			map.put("privateYn", privateYn);
+			map.put("bStatus", bStatus);
 
-		if (cnt > 0) {
-			try {
+			int cnt = boardMapper.insertBoard(map);
+
+			if (cnt > 0) {
 				int boardNo = Integer.parseInt(String.valueOf(map.get("boardNo")));
 
 				String uploadPath = "C:/upload/board/";
@@ -349,8 +398,9 @@ public class BoardService {
 							}
 
 							String fileName = UUID.randomUUID().toString();
+
 							if (!fileExt.equals("")) {
-								fileName += "." + fileExt;
+								fileName = fileName + "." + fileExt;
 							}
 
 							File dest = new File(uploadPath + fileName);
@@ -379,14 +429,15 @@ public class BoardService {
 
 				resultMap.put("boardNo", boardNo);
 
-			} catch (Exception e) {
-				e.printStackTrace();
+			} else {
 				resultMap.put("result", "fail");
-				resultMap.put("message", "파일 업로드 중 오류가 발생했습니다.");
+				resultMap.put("message", "게시글 등록 실패");
 			}
-		} else {
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
 			resultMap.put("result", "fail");
-			resultMap.put("message", "게시글 등록 실패");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
 		}
 
 		return resultMap;
@@ -395,41 +446,48 @@ public class BoardService {
 	public HashMap<String, Object> getBoardEditInfo(HashMap<String, Object> map) {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
-		String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
+		try {
+			String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
 
-		if (sessionId.equals("")) {
-			resultMap.put("result", "login");
-			resultMap.put("message", "로그인이 필요합니다.");
-			return resultMap;
-		}
+			if (sessionId.equals("")) {
+				resultMap.put("result", "login");
+				resultMap.put("message", "로그인이 필요합니다.");
+				return resultMap;
+			}
 
-		HashMap<String, Object> board = boardMapper.selectBoardInfoForEdit(map);
+			Board board = boardMapper.selectBoardInfoForEdit(map);
 
-		if (board == null) {
+			if (board == null) {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "존재하지 않는 게시글입니다.");
+				return resultMap;
+			}
+
+			String writerId = board.getUserId() == null ? "" : board.getUserId();
+
+			if (!sessionId.equals(writerId)) {
+				resultMap.put("result", "deny");
+				resultMap.put("message", "수정 권한이 없습니다.");
+				return resultMap;
+			}
+
+			List<Board> categoryMainList = boardMapper.selectBoardMainTypeList(map);
+			List<Board> categorySubList = boardMapper.selectBoardSubTypeList(map);
+			List<Board> localList = boardMapper.selectBoardLocalList(map);
+			List<Board> fileList = boardMapper.selectBoardFileList(map);
+
+			resultMap.put("board", board);
+			resultMap.put("mainTypeList", categoryMainList);
+			resultMap.put("subTypeList", categorySubList);
+			resultMap.put("localList", localList);
+			resultMap.put("fileList", fileList);
+			resultMap.put("result", "success");
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
 			resultMap.put("result", "fail");
-			resultMap.put("message", "존재하지 않는 게시글입니다.");
-			return resultMap;
+			resultMap.put("message", Message.MSG_SERVER_ERR);
 		}
-
-		String writerId = board.get("USER_ID") == null ? "" : board.get("USER_ID").toString();
-
-		if (!sessionId.equals(writerId)) {
-			resultMap.put("result", "deny");
-			resultMap.put("message", "수정 권한이 없습니다.");
-			return resultMap;
-		}
-
-		List<HashMap<String, Object>> categoryMainList = boardMapper.selectBoardMainTypeList(map);
-		List<HashMap<String, Object>> categorySubList = boardMapper.selectBoardSubTypeList(map);
-		List<HashMap<String, Object>> localList = boardMapper.selectBoardLocalList(map);
-		List<HashMap<String, Object>> fileList = boardMapper.selectBoardFileList(map);
-
-		resultMap.put("board", board);
-		resultMap.put("mainTypeList", categoryMainList);
-		resultMap.put("subTypeList", categorySubList);
-		resultMap.put("localList", localList);
-		resultMap.put("fileList", fileList);
-		resultMap.put("result", "success");
 
 		return resultMap;
 	}
@@ -437,60 +495,61 @@ public class BoardService {
 	public HashMap<String, Object> updateBoard(HashMap<String, Object> map, MultipartFile[] files) {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
-		String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
-		String title = map.get("title") == null ? "" : map.get("title").toString();
-		String bContent = map.get("bContent") == null ? "" : map.get("bContent").toString();
-		String bSubNo = map.get("bSubNo") == null ? "" : map.get("bSubNo").toString();
-		String privateYn = map.get("privateYn") == null ? "N" : map.get("privateYn").toString();
-		String bStatus = map.get("bStatus") == null ? "Y" : map.get("bStatus").toString();
-		map.put("bStatus", bStatus);
+		try {
+			String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
+			String title = map.get("title") == null ? "" : map.get("title").toString();
+			String bContent = map.get("bContent") == null ? "" : map.get("bContent").toString();
+			String bSubNo = map.get("bSubNo") == null ? "" : map.get("bSubNo").toString();
+			String privateYn = map.get("privateYn") == null ? "N" : map.get("privateYn").toString();
+			String bStatus = map.get("bStatus") == null ? "Y" : map.get("bStatus").toString();
 
-		if (sessionId.equals("")) {
-			resultMap.put("result", "login");
-			resultMap.put("message", "로그인이 필요합니다.");
-			return resultMap;
-		}
+			map.put("bStatus", bStatus);
 
-		if (title.equals("")) {
-			resultMap.put("result", "fail");
-			resultMap.put("message", "제목을 입력해주세요.");
-			return resultMap;
-		}
+			if (sessionId.equals("")) {
+				resultMap.put("result", "login");
+				resultMap.put("message", "로그인이 필요합니다.");
+				return resultMap;
+			}
 
-		if (bContent.equals("")) {
-			resultMap.put("result", "fail");
-			resultMap.put("message", "본문을 입력해주세요.");
-			return resultMap;
-		}
+			if (title.equals("")) {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "제목을 입력해주세요.");
+				return resultMap;
+			}
 
-		if (bSubNo.equals("")) {
-			resultMap.put("result", "fail");
-			resultMap.put("message", "카테고리를 선택해주세요.");
-			return resultMap;
-		}
+			if (bContent.equals("")) {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "본문을 입력해주세요.");
+				return resultMap;
+			}
 
-		HashMap<String, Object> board = boardMapper.selectBoardInfoForEdit(map);
+			if (bSubNo.equals("")) {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "카테고리를 선택해주세요.");
+				return resultMap;
+			}
 
-		if (board == null) {
-			resultMap.put("result", "fail");
-			resultMap.put("message", "존재하지 않는 게시글입니다.");
-			return resultMap;
-		}
+			Board board = boardMapper.selectBoardInfoForEdit(map);
 
-		String writerId = board.get("USER_ID") == null ? "" : board.get("USER_ID").toString();
+			if (board == null) {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "존재하지 않는 게시글입니다.");
+				return resultMap;
+			}
 
-		if (!sessionId.equals(writerId)) {
-			resultMap.put("result", "deny");
-			resultMap.put("message", "수정 권한이 없습니다.");
-			return resultMap;
-		}
+			String writerId = board.getUserId() == null ? "" : board.getUserId();
 
-		map.put("privateYn", privateYn);
+			if (!sessionId.equals(writerId)) {
+				resultMap.put("result", "deny");
+				resultMap.put("message", "수정 권한이 없습니다.");
+				return resultMap;
+			}
 
-		int cnt = boardMapper.updateBoard(map);
+			map.put("privateYn", privateYn);
 
-		if (cnt > 0) {
-			try {
+			int cnt = boardMapper.updateBoard(map);
+
+			if (cnt > 0) {
 				int boardNo = Integer.parseInt(String.valueOf(map.get("boardNo")));
 
 				String uploadPath = "C:/upload/board/";
@@ -513,6 +572,7 @@ public class BoardService {
 							}
 
 							String fileName = UUID.randomUUID().toString();
+
 							if (!fileExt.equals("")) {
 								fileName = fileName + "." + fileExt;
 							}
@@ -536,14 +596,15 @@ public class BoardService {
 				resultMap.put("result", "success");
 				resultMap.put("message", "게시글이 수정되었습니다.");
 
-			} catch (Exception e) {
-				e.printStackTrace();
+			} else {
 				resultMap.put("result", "fail");
-				resultMap.put("message", "파일 업로드 중 오류가 발생했습니다.");
+				resultMap.put("message", "게시글 수정 실패");
 			}
-		} else {
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
 			resultMap.put("result", "fail");
-			resultMap.put("message", "게시글 수정 실패");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
 		}
 
 		return resultMap;
@@ -552,84 +613,90 @@ public class BoardService {
 	public HashMap<String, Object> removeBoard(HashMap<String, Object> map) {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
-		String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
-		String sessionRole = map.get("sessionRole") == null ? "" : map.get("sessionRole").toString();
+		try {
+			String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
+			String sessionRole = map.get("sessionRole") == null ? "" : map.get("sessionRole").toString();
 
-		if (sessionId.equals("")) {
-			resultMap.put("result", "login");
-			resultMap.put("message", "로그인이 필요합니다.");
-			return resultMap;
-		}
+			if (sessionId.equals("")) {
+				resultMap.put("result", "login");
+				resultMap.put("message", "로그인이 필요합니다.");
+				return resultMap;
+			}
 
-		HashMap<String, Object> board = boardMapper.selectBoardInfoForEdit(map);
+			Board board = boardMapper.selectBoardInfoForEdit(map);
 
-		if (board == null) {
+			if (board == null) {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "존재하지 않는 게시글입니다.");
+				return resultMap;
+			}
+
+			String writerId = board.getUserId() == null ? "" : board.getUserId();
+
+			if (!sessionId.equals(writerId) && !sessionRole.equals("A")) {
+				resultMap.put("result", "deny");
+				resultMap.put("message", "삭제 권한이 없습니다.");
+				return resultMap;
+			}
+
+			int cnt = boardMapper.deleteBoard(map);
+
+			if (cnt > 0) {
+				resultMap.put("result", "success");
+				resultMap.put("message", "게시글이 삭제되었습니다.");
+			} else {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "게시글 삭제 실패");
+			}
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
 			resultMap.put("result", "fail");
-			resultMap.put("message", "존재하지 않는 게시글입니다.");
-			return resultMap;
-		}
-
-		String writerId = board.get("USER_ID") == null ? "" : board.get("USER_ID").toString();
-
-		if (!sessionId.equals(writerId) && !sessionRole.equals("A")) {
-			resultMap.put("result", "deny");
-			resultMap.put("message", "삭제 권한이 없습니다.");
-			return resultMap;
-		}
-
-		int cnt = boardMapper.deleteBoard(map);
-
-		if (cnt > 0) {
-			resultMap.put("result", "success");
-			resultMap.put("message", "게시글이 삭제되었습니다.");
-		} else {
-			resultMap.put("result", "fail");
-			resultMap.put("message", "게시글 삭제 실패");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
 		}
 
 		return resultMap;
 	}
 
 	public HashMap<String, Object> removeBoardFile(HashMap<String, Object> map) {
-
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
-		String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
-		String boardNo = map.get("boardNo") == null ? "" : map.get("boardNo").toString();
-
-		if (sessionId.equals("")) {
-			resultMap.put("result", "login");
-			resultMap.put("message", "로그인이 필요합니다.");
-			return resultMap;
-		}
-
-		// 파일 정보 조회
-		HashMap<String, Object> fileInfo = boardMapper.selectBoardFileInfo(map);
-
-		if (fileInfo == null) {
-			resultMap.put("result", "fail");
-			resultMap.put("message", "파일 정보가 없습니다.");
-			return resultMap;
-		}
-
-		// 실제 파일 삭제
 		try {
-			String filePath = fileInfo.get("FILE_PATH").toString();
-			String fileName = fileInfo.get("FILE_NAME").toString();
+			String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
+
+			if (sessionId.equals("")) {
+				resultMap.put("result", "login");
+				resultMap.put("message", "로그인이 필요합니다.");
+				return resultMap;
+			}
+
+			Board fileInfo = boardMapper.selectBoardFileInfo(map);
+
+			if (fileInfo == null) {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "파일 정보가 없습니다.");
+				return resultMap;
+			}
+
+			String filePath = fileInfo.getFilePath();
+			String fileName = fileInfo.getFileName();
 
 			File file = new File("C:" + filePath + fileName);
+
 			if (file.exists()) {
 				file.delete();
 			}
+
+			boardMapper.deleteBoardFile(map);
+
+			resultMap.put("result", "success");
+			resultMap.put("message", "파일이 삭제되었습니다.");
+
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println(e.getMessage());
+			resultMap.put("result", "fail");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
 		}
-
-		// DB 삭제
-		boardMapper.deleteBoardFile(map);
-
-		resultMap.put("result", "success");
-		resultMap.put("message", "파일이 삭제되었습니다.");
 
 		return resultMap;
 	}
@@ -637,49 +704,56 @@ public class BoardService {
 	public HashMap<String, Object> updateComment(HashMap<String, Object> map) {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
-		String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
-		String sessionRole = map.get("sessionRole") == null ? "" : map.get("sessionRole").toString();
-		String contents = map.get("contents") == null ? "" : map.get("contents").toString();
+		try {
+			String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
+			String sessionRole = map.get("sessionRole") == null ? "" : map.get("sessionRole").toString();
+			String contents = map.get("contents") == null ? "" : map.get("contents").toString();
 
-		if (sessionId.equals("")) {
-			resultMap.put("result", "login");
-			resultMap.put("message", "로그인이 필요합니다.");
-			return resultMap;
-		}
+			if (sessionId.equals("")) {
+				resultMap.put("result", "login");
+				resultMap.put("message", "로그인이 필요합니다.");
+				return resultMap;
+			}
 
-		if (contents.equals("")) {
+			if (contents.equals("")) {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "댓글 내용을 입력해주세요.");
+				return resultMap;
+			}
+
+			Board commentInfo = boardMapper.selectCommentInfo(map);
+
+			if (commentInfo == null) {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "존재하지 않는 댓글입니다.");
+				return resultMap;
+			}
+
+			String writerId = commentInfo.getUserId() == null ? "" : commentInfo.getUserId();
+
+			if (!sessionId.equals(writerId) && !sessionRole.equals("A")) {
+				resultMap.put("result", "deny");
+				resultMap.put("message", "수정 권한이 없습니다.");
+				return resultMap;
+			}
+
+			contents = badWordFilter(contents);
+			map.put("contents", contents);
+
+			int cnt = boardMapper.updateComment(map);
+
+			if (cnt > 0) {
+				resultMap.put("result", "success");
+				resultMap.put("message", "댓글이 수정되었습니다.");
+			} else {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "댓글 수정 실패");
+			}
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
 			resultMap.put("result", "fail");
-			resultMap.put("message", "댓글 내용을 입력해주세요.");
-			return resultMap;
-		}
-
-		HashMap<String, Object> commentInfo = boardMapper.selectCommentInfo(map);
-
-		if (commentInfo == null) {
-			resultMap.put("result", "fail");
-			resultMap.put("message", "존재하지 않는 댓글입니다.");
-			return resultMap;
-		}
-
-		String writerId = commentInfo.get("USER_ID") == null ? "" : commentInfo.get("USER_ID").toString();
-
-		if (!sessionId.equals(writerId) && !sessionRole.equals("A")) {
-			resultMap.put("result", "deny");
-			resultMap.put("message", "수정 권한이 없습니다.");
-			return resultMap;
-		}
-
-		contents = badWordFilter(contents);
-		map.put("contents", contents);
-
-		int cnt = boardMapper.updateComment(map);
-
-		if (cnt > 0) {
-			resultMap.put("result", "success");
-			resultMap.put("message", "댓글이 수정되었습니다.");
-		} else {
-			resultMap.put("result", "fail");
-			resultMap.put("message", "댓글 수정 실패");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
 		}
 
 		return resultMap;
@@ -688,39 +762,46 @@ public class BoardService {
 	public HashMap<String, Object> removeComment(HashMap<String, Object> map) {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
-		String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
-		String sessionRole = map.get("sessionRole") == null ? "" : map.get("sessionRole").toString();
+		try {
+			String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
+			String sessionRole = map.get("sessionRole") == null ? "" : map.get("sessionRole").toString();
 
-		if (sessionId.equals("")) {
-			resultMap.put("result", "login");
-			resultMap.put("message", "로그인이 필요합니다.");
-			return resultMap;
-		}
+			if (sessionId.equals("")) {
+				resultMap.put("result", "login");
+				resultMap.put("message", "로그인이 필요합니다.");
+				return resultMap;
+			}
 
-		HashMap<String, Object> commentInfo = boardMapper.selectCommentInfo(map);
+			Board commentInfo = boardMapper.selectCommentInfo(map);
 
-		if (commentInfo == null) {
+			if (commentInfo == null) {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "존재하지 않는 댓글입니다.");
+				return resultMap;
+			}
+
+			String writerId = commentInfo.getUserId() == null ? "" : commentInfo.getUserId();
+
+			if (!sessionId.equals(writerId) && !sessionRole.equals("A")) {
+				resultMap.put("result", "deny");
+				resultMap.put("message", "삭제 권한이 없습니다.");
+				return resultMap;
+			}
+
+			int cnt = boardMapper.deleteComment(map);
+
+			if (cnt > 0) {
+				resultMap.put("result", "success");
+				resultMap.put("message", "댓글이 삭제되었습니다.");
+			} else {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "댓글 삭제 실패");
+			}
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
 			resultMap.put("result", "fail");
-			resultMap.put("message", "존재하지 않는 댓글입니다.");
-			return resultMap;
-		}
-
-		String writerId = commentInfo.get("USER_ID") == null ? "" : commentInfo.get("USER_ID").toString();
-
-		if (!sessionId.equals(writerId) && !sessionRole.equals("A")) {
-			resultMap.put("result", "deny");
-			resultMap.put("message", "삭제 권한이 없습니다.");
-			return resultMap;
-		}
-
-		int cnt = boardMapper.deleteComment(map);
-
-		if (cnt > 0) {
-			resultMap.put("result", "success");
-			resultMap.put("message", "댓글이 삭제되었습니다.");
-		} else {
-			resultMap.put("result", "fail");
-			resultMap.put("message", "댓글 삭제 실패");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
 		}
 
 		return resultMap;
@@ -729,76 +810,106 @@ public class BoardService {
 	public HashMap<String, Object> getBoardCategoryList(HashMap<String, Object> map) {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
-		List<HashMap<String, Object>> mainTypeList = boardMapper.selectBoardMainTypeList(map);
-		List<HashMap<String, Object>> subTypeList = boardMapper.selectBoardSubTypeList(map);
-		List<HashMap<String, Object>> localList = boardMapper.selectBoardLocalList(map);
+		try {
+			List<Board> mainTypeList = boardMapper.selectBoardMainTypeList(map);
+			List<Board> subTypeList = boardMapper.selectBoardSubTypeList(map);
+			List<Board> localList = boardMapper.selectBoardLocalList(map);
 
-		resultMap.put("mainTypeList", mainTypeList);
-		resultMap.put("subTypeList", subTypeList);
-		resultMap.put("localList", localList);
-		resultMap.put("result", "success");
+			resultMap.put("mainTypeList", mainTypeList);
+			resultMap.put("subTypeList", subTypeList);
+			resultMap.put("localList", localList);
+			resultMap.put("result", "success");
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			resultMap.put("result", "fail");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
+		}
 
 		return resultMap;
 	}
-	
+
 	public HashMap<String, Object> getRecentTempBoard(HashMap<String, Object> map) {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
-		String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
+		try {
+			String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
 
-		if (sessionId.equals("")) {
-			resultMap.put("result", "login");
-			resultMap.put("message", "로그인이 필요합니다.");
-			return resultMap;
-		}
+			if (sessionId.equals("")) {
+				resultMap.put("result", "login");
+				resultMap.put("message", "로그인이 필요합니다.");
+				return resultMap;
+			}
 
-		HashMap<String, Object> info = boardMapper.selectRecentTempBoard(map);
+			Board info = boardMapper.selectRecentTempBoard(map);
 
-		if (info == null) {
+			if (info == null) {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "최근 임시저장 글이 없습니다.");
+				return resultMap;
+			}
+
+			resultMap.put("info", info);
+			resultMap.put("result", "success");
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
 			resultMap.put("result", "fail");
-			resultMap.put("message", "최근 임시저장 글이 없습니다.");
-			return resultMap;
+			resultMap.put("message", Message.MSG_SERVER_ERR);
 		}
-
-		resultMap.put("info", info);
-		resultMap.put("result", "success");
 
 		return resultMap;
 	}
-	
+
 	public HashMap<String, Object> getBoardAlarmList(HashMap<String, Object> map) {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
-		String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
+		try {
+			String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
 
-		if (sessionId.equals("")) {
-			resultMap.put("result", "login");
-			resultMap.put("message", "로그인이 필요합니다.");
-			return resultMap;
+			if (sessionId.equals("")) {
+				resultMap.put("result", "login");
+				resultMap.put("message", "로그인이 필요합니다.");
+				return resultMap;
+			}
+
+			List<Board> list = boardMapper.selectBoardAlarmList(map);
+
+			resultMap.put("list", list);
+			resultMap.put("result", "success");
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			resultMap.put("result", "fail");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
 		}
-
-		List<HashMap<String, Object>> list = boardMapper.selectBoardAlarmList(map);
-
-		resultMap.put("list", list);
-		resultMap.put("result", "success");
 
 		return resultMap;
 	}
-	
+
 	public HashMap<String, Object> readBoardAlarm(HashMap<String, Object> map) {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
-		String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
+		try {
+			String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
 
-		if (sessionId.equals("")) {
-			resultMap.put("result", "login");
-			resultMap.put("message", "로그인이 필요합니다.");
-			return resultMap;
+			if (sessionId.equals("")) {
+				resultMap.put("result", "login");
+				resultMap.put("message", "로그인이 필요합니다.");
+				return resultMap;
+			}
+
+			boardMapper.updateBoardAlarmRead(map);
+
+			resultMap.put("result", "success");
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			resultMap.put("result", "fail");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
 		}
 
-		boardMapper.updateBoardAlarmRead(map);
-
-		resultMap.put("result", "success");
 		return resultMap;
 	}
+
 }

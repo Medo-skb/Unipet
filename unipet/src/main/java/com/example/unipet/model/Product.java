@@ -6,45 +6,62 @@ import lombok.Data;
 public class Product {
 
 	// ===== 상품 =====
-	int PRODUCT_NO;
-	int STORE_NO;
-	String PRODUCT_NAME;
-	String BRAND;
-	int PRODUCT_PRICE;
-	int STOCK_QTY;
-	int A_SUB_NO;
-	int I_SUB_NO;
-	String PRODUCT_STATUS;
-	String CDATE;
+	int productNo;
+	Integer storeNo;
+	String productName;
+	String brand;
+	int productPrice;
+	int stockQty;
+	int aSubNo;
+	int iSubNo;
+	String productStatus;
+	String cdate;
 
-	// ===== 카테고리 =====
-	String A_MAIN_TYPE;
-	String A_SUB_TYPE;
-	String I_MAIN_TYPE;
-	String I_SUB_TYPE;
+	// ===== 동물 카테고리 =====
+	int aMainNo;
+	String aMainType;
+	String aSubType;
 
-	// ===== 검색 =====
-	String SORT_TYPE;
-	String KEYWORD;
+	// ===== 상품 카테고리 =====
+	int iMainNo;
+	String iMainType;
+	String iSubType;
+
+	// ===== 상품 이미지 / 파일 =====
+	int fileNo;
+	String filePath;
+	String fileName;
+	String originName;
+	long fileSize;
+	String fileExt;
+	String fileUrl;
+	String img;
+
+	// ===== 리뷰 =====
+	int reviewNo;
+	String userId;
+	String userName;
+	int rating;
+	String contents;
+	String reviewContents;
+	String reviewCdate;
+	double avgRating;
+	int reviewCount;
 
 	// ===== QNA =====
-	int QNA_NO;
-	String QNA_TITLE;
-	String Q_CONTENTS;
-	String A_CONTENTS;
-	String ANS_STATUS;
-	String IS_SECRET;
-	String ADATE;
+	int qnaNo;
+	String qnaTitle;
+	String qnaContents;
+	String qnaAnswer;
+	String qnaStatus;
+	String privateYn;
+	String qnaCdate;
+	String updateTime;
 
 	// ===== 장바구니 =====
-	String USER_ID;
-	int QTY;
-	int CART_NO;
+	int cartNo;
+	int qty;
+	int cartQty;
+	int totalPrice;
 
-	// ===== 주문 =====
-	int ORD_NO;
-
-	// ===== 이미지 =====
-	String FILE_PATH;
-	String FILE_NAME;
 }
