@@ -14,7 +14,8 @@
     <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/header.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/footer.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/payment/pay-rsv.css">
+    <!-- <link rel="stylesheet" href="${pageContext.request.contextPath}/css/payment/pay-rsv.css"> -->
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/payment/pay-rsv2.css">
 </head>
 <body>
 

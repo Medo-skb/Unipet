@@ -100,5 +100,8 @@ public interface BizMyPageMapper {
 	// 리뷰 신고 등록
 	public void insertReviewReport(HashMap<String, Object> map);
 	
+	// 반려 후 재신청
+	int updateRejectedStore(HashMap<String, Object> map);
+	
 	
 }

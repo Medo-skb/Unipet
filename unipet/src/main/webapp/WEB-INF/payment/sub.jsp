@@ -14,7 +14,8 @@
     <script src="https://js.tosspayments.com/v1/payment"></script>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/header.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/footer.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/payment/sub.css">
+    <!-- <link rel="stylesheet" href="${pageContext.request.contextPath}/css/payment/sub.css"> -->
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/payment/sub2.css">
 </head>
 <body>
 

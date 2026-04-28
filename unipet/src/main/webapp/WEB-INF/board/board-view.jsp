@@ -9,7 +9,8 @@
 		<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 		<script src="/js/page-change.js"></script>
 
-		<link rel="stylesheet" href="/css/board/board-view.css">
+		<!-- <link rel="stylesheet" href="/css/board/board-view.css"> -->
+		<link rel="stylesheet" href="/css/board/board-view2.css">
 
 	</head>
 
