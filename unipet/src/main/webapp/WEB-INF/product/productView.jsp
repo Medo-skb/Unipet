@@ -21,16 +21,16 @@
 
 		<div id="app">
 			<div class="header">
-			    <div class="logo" @click="fnMoveMain()">
-			        UniPet <span class="logo-sub">shop</span>
-			    </div>
+				<div class="logo" @click="fnMoveMain()">
+					UniPet <span class="logo-sub">shop</span>
+				</div>
 
-			    <div class="header-right">
-			        <div class="cart-box" @click="fnMoveCart()">
-			            <span class="cart-icon">🛒</span>
-			            <span class="cart-badge" v-if="cartCount > 0">{{cartCount}}</span>
-			        </div>
-			    </div>
+				<div class="header-right">
+					<div class="cart-box" @click="fnMoveCart()">
+						<span class="cart-icon">🛒</span>
+						<span class="cart-badge" v-if="cartCount > 0">{{cartCount}}</span>
+					</div>
+				</div>
 			</div>
 
 			<div class="wrap">
@@ -90,14 +90,8 @@
 							<div class="qty-box">
 								<button @click="fnQty(-1)">-</button>
 
-								<input 
-									type="number"
-									class="qty-input"
-									v-model="qty"
-									@change="fnChangeQty()"
-									min="1"
-									:max="product.STOCK_QTY"
-								>
+								<input type="number" class="qty-input" v-model="qty" @change="fnChangeQty()" min="1"
+									:max="product.STOCK_QTY">
 
 								<button @click="fnQty(1)">+</button>
 							</div>
@@ -110,16 +104,12 @@
 							</div>
 
 							<div class="btn-area">
-								<button class="btn-cart" 
-									@click="fnAddCart()" 
-									:disabled="product.STOCK_QTY == 0">
-								장바구니
+								<button class="btn-cart" @click="fnAddCart()" :disabled="product.STOCK_QTY == 0">
+									장바구니
 								</button>
 
-								<button class="btn-buy" 
-									@click="fnDirectOrder()" 
-									:disabled="product.STOCK_QTY == 0">
-								구매하기
+								<button class="btn-buy" @click="fnDirectOrder()" :disabled="product.STOCK_QTY == 0">
+									구매하기
 								</button>
 							</div>
 						</div>
@@ -146,7 +136,7 @@
 					</div>
 
 					<div class="detail-point-wrap">
-						
+
 						<div class="detail-point-box">
 							<div class="detail-point-title">추천 대상</div>
 							<div class="detail-point-text">
@@ -168,7 +158,7 @@
 							</div>
 						</div>
 					</div>
-					
+
 					<div class="detail-section-title">상품 설명</div>
 
 					<div class="detail-desc-text">
@@ -177,10 +167,10 @@
 						✔ 일상에서 편리하게 사용 가능<br>
 						✔ {{product.A_SUB_TYPE}} 맞춤 설계 상품
 					</div>
-					
+
 					<br>
-					
-			
+
+
 					<div class="detail-section-title">상세 이미지</div>
 
 					<div v-if="detailImageList.length > 0" class="detail-img-list">
@@ -324,451 +314,470 @@
 			</div>
 		</div>
 
-	<script>
-		const app = Vue.createApp({
-			data() {
-				return {
-					productNo: '<%=request.getAttribute("productNo")%>',
-					currentUserId: '<%=(String)session.getAttribute("sessionId") == null ? "" : (String)session.getAttribute("sessionId")%>',
-					currentUserRole: '<%=(String)session.getAttribute("sessionRole") == null ? "" : (String)session.getAttribute("sessionRole")%>',
-					product: null,
-					fileList: [],
-					detailImageList: [],
-					mainImage: "",
-					qty: 1,
-					reviewList: [],
-					reviewCount: 0,
-					reviewAvg: 0,
-					qnaList: [],
-					cartCount: 0,
-					tab: "detail",
-					qnaForm: {
-						title: "",
-						contents: "",
-						secretYn: "N"
-					}
-				};
-			},
-			methods: {
-				fnGetProductView: function () {
-					let self = this;
-					let param = {
-						productNo: self.productNo
+		<script>
+			const app = Vue.createApp({
+				data() {
+					return {
+						productNo: '<%=request.getAttribute("productNo")%>',
+						currentUserId: '<%=(String)session.getAttribute("sessionId") == null ? "" : (String)session.getAttribute("sessionId")%>',
+						currentUserRole: '<%=(String)session.getAttribute("sessionRole") == null ? "" : (String)session.getAttribute("sessionRole")%>',
+						product: null,
+						fileList: [],
+						detailImageList: [],
+						mainImage: "",
+						qty: 1,
+						reviewList: [],
+						reviewCount: 0,
+						reviewAvg: 0,
+						qnaList: [],
+						cartCount: 0,
+						tab: "detail",
+						qnaForm: {
+							title: "",
+							contents: "",
+							secretYn: "N"
+						}
 					};
+				},
+				methods: {
+					fnGetProductView: function () {
+						let self = this;
+						let param = {
+							productNo: self.productNo
+						};
 
-					$.ajax({
-						url: "/product/detail.dox",
-						dataType: "json",
-						type: "POST",
-						data: param,
-						success: function (data) {
-							if (data.result == "success" && data.product != null) {
-								self.product = data.product;
-								self.fileList = data.imageList || [];
-								self.detailImageList = data.detailImageList || [];
+						$.ajax({
+							url: "/product/detail.dox",
+							dataType: "json",
+							type: "POST",
+							data: param,
+							success: function (data) {
+								if (data.result == "success" && data.product != null) {
+									self.product = data.product;
+									self.fileList = data.imageList || [];
+									self.detailImageList = data.detailImageList || [];
 
-								if (self.fileList.length > 0) {
-									self.mainImage = self.fileList[0].IMG;
+									if (self.fileList.length > 0) {
+										self.mainImage = self.fileList[0].IMG;
+									} else {
+										self.mainImage = "";
+									}
 								} else {
-									self.mainImage = "";
+									self.product = null;
 								}
-							} else {
-								self.product = null;
+							},
+							error: function () {
+								alert("상품 상세 조회 중 오류가 발생했습니다.");
 							}
-						},
-						error: function () {
-							alert("상품 상세 조회 중 오류가 발생했습니다.");
-						}
-					});
-				},
+						});
+					},
 
-				fnGetReviewList: function () {
-					let self = this;
-					let param = {
-						productNo: self.productNo
-					};
+					fnGetReviewList: function () {
+						let self = this;
+						let param = {
+							productNo: self.productNo
+						};
 
-					$.ajax({
-						url: "/review/list.dox",
-						dataType: "json",
-						type: "POST",
-						data: param,
-						success: function (data) {
-							console.log(data);
-							if (data.result == "success") {
-								self.reviewList = data.list || [];
-								self.reviewCount = data.summary != null ? data.summary.REVIEW_COUNT : 0;
-								self.reviewAvg = data.summary != null ? data.summary.REVIEW_AVG : 0;
-							} else {
-								self.reviewList = [];
-								self.reviewCount = 0;
-								self.reviewAvg = 0;
-							}
-						},
-						error: function () {
-							alert("리뷰 조회 중 오류가 발생했습니다.");
-						}
-					});
-				},
-
-				fnGetQnaList: function () {
-					let self = this;
-					let param = {
-						productNo: self.productNo
-					};
-
-					$.ajax({
-						url: "/qna/list.dox",
-						dataType: "json",
-						type: "POST",
-						data: param,
-						success: function (data) {
-							if (data.result == "success") {
-								self.qnaList = data.list || [];
-
-								for (let i = 0; i < self.qnaList.length; i++) {
-									self.qnaList[i].open = false;
-									self.qnaList[i].editMode = false;
-									self.qnaList[i].editTitle = self.qnaList[i].QNA_TITLE;
-									self.qnaList[i].editContents = self.qnaList[i].Q_CONTENTS;
+						$.ajax({
+							url: "/review/list.dox",
+							dataType: "json",
+							type: "POST",
+							data: param,
+							success: function (data) {
+								console.log(data);
+								if (data.result == "success") {
+									self.reviewList = data.list || [];
+									self.reviewCount = data.summary != null ? data.summary.REVIEW_COUNT : 0;
+									self.reviewAvg = data.summary != null ? data.summary.REVIEW_AVG : 0;
+								} else {
+									self.reviewList = [];
+									self.reviewCount = 0;
+									self.reviewAvg = 0;
 								}
+							},
+							error: function () {
+								alert("리뷰 조회 중 오류가 발생했습니다.");
+							}
+						});
+					},
+
+					fnGetQnaList: function () {
+						let self = this;
+						let param = {
+							productNo: self.productNo
+						};
+
+						$.ajax({
+							url: "/qna/list.dox",
+							dataType: "json",
+							type: "POST",
+							data: param,
+							success: function (data) {
+								if (data.result == "success") {
+									self.qnaList = data.list || [];
+
+									for (let i = 0; i < self.qnaList.length; i++) {
+										self.qnaList[i].open = false;
+										self.qnaList[i].editMode = false;
+										self.qnaList[i].editTitle = self.qnaList[i].QNA_TITLE;
+										self.qnaList[i].editContents = self.qnaList[i].Q_CONTENTS;
+									}
+								} else {
+									self.qnaList = [];
+								}
+							},
+							error: function () {
+								alert("문의 조회 중 오류가 발생했습니다.");
+							}
+						});
+					},
+
+					fnCanReadQna: function (qna) {
+						if (qna.IS_SECRET != "Y") {
+							return true;
+						}
+
+						if (this.currentUserRole == "A") {
+							return true;
+						}
+
+						if (this.currentUserId != "" && this.currentUserId == qna.USER_ID) {
+							return true;
+						}
+
+						return false;
+					},
+
+					fnCanManageQna: function (qna) {
+						if (this.currentUserRole == "A") {
+							return true;
+						}
+
+						if (this.currentUserId != "" && this.currentUserId == qna.USER_ID) {
+							return true;
+						}
+
+						return false;
+					},
+
+					fnToggleQna: function (qna) {
+						qna.open = !qna.open;
+					},
+
+					fnEditQna: function (qna) {
+						qna.editMode = true;
+						qna.editTitle = qna.QNA_TITLE;
+						qna.editContents = qna.Q_CONTENTS;
+					},
+
+					fnCancelEditQna: function (qna) {
+						qna.editMode = false;
+						qna.editTitle = qna.QNA_TITLE;
+						qna.editContents = qna.Q_CONTENTS;
+					},
+
+					fnSaveQna: function (qna) {
+						let self = this;
+
+						if (qna.editTitle == "") {
+							alert("문의 제목을 입력해주세요.");
+							return;
+						}
+
+						if (qna.editContents == "") {
+							alert("문의 내용을 입력해주세요.");
+							return;
+						}
+
+						$.ajax({
+							url: "/qna/update.dox",
+							dataType: "json",
+							type: "POST",
+							data: {
+								qnaNo: qna.QNA_NO,
+								title: qna.editTitle,
+								contents: qna.editContents
+							},
+							success: function (data) {
+								if (data.result == "success") {
+									alert("문의가 수정되었습니다.");
+									self.fnGetQnaList();
+								} else if (data.result == "login") {
+									alert("로그인이 필요합니다.");
+									location.href = "/user/login.do";
+								} else {
+									alert("문의 수정 실패");
+								}
+							},
+							error: function () {
+								alert("문의 수정 중 오류가 발생했습니다.");
+							}
+						});
+					},
+
+					fnDeleteQna: function (qnaNo) {
+						let self = this;
+
+						if (!confirm("문의글을 삭제하시겠습니까?")) {
+							return;
+						}
+
+						$.ajax({
+							url: "/qna/delete.dox",
+							dataType: "json",
+							type: "POST",
+							data: {
+								qnaNo: qnaNo
+							},
+							success: function (data) {
+								if (data.result == "success") {
+									alert("문의가 삭제되었습니다.");
+									self.fnGetQnaList();
+								} else if (data.result == "login") {
+									alert("로그인이 필요합니다.");
+									location.href = "/user/login.do";
+								} else {
+									alert("문의 삭제 실패");
+								}
+							},
+							error: function () {
+								alert("문의 삭제 중 오류가 발생했습니다.");
+							}
+						});
+					},
+
+					fnAddQna: function () {
+						let self = this;
+
+						if (self.currentUserId == "") {
+							alert("로그인이 필요합니다.");
+							location.href = "/user/login.do";
+							return;
+						}
+
+						if (self.qnaForm.title == "") {
+							alert("문의 제목을 입력해주세요.");
+							return;
+						}
+
+						if (self.qnaForm.contents == "") {
+							alert("문의 내용을 입력해주세요.");
+							return;
+						}
+
+						let param = {
+							productNo: self.productNo,
+							title: self.qnaForm.title,
+							contents: self.qnaForm.contents,
+							secretYn: self.qnaForm.secretYn
+						};
+
+						$.ajax({
+							url: "/qna/add.dox",
+							dataType: "json",
+							type: "POST",
+							data: param,
+							success: function (data) {
+								if (data.result == "success") {
+									alert("문의가 등록되었습니다.");
+									self.qnaForm.title = "";
+									self.qnaForm.contents = "";
+									self.qnaForm.secretYn = "N";
+									self.fnGetQnaList();
+									self.tab = "qna";
+								} else if (data.result == "login") {
+									alert("로그인이 필요합니다.");
+									location.href = "/user/login.do";
+								} else {
+									alert("문의 등록 실패");
+								}
+							},
+							error: function () {
+								alert("문의 등록 중 오류가 발생했습니다.");
+							}
+						});
+					},
+
+					fnChangeMainImage: function (img) {
+						this.mainImage = img;
+					},
+
+					fnQty: function (num) {
+						let self = this;
+						let newQty = Number(self.qty) + num;
+
+						if (newQty < 1) {
+							return;
+						}
+
+						if (newQty > self.product.STOCK_QTY) {
+							alert("재고수량을 초과할 수 없습니다.");
+							return;
+						}
+
+						self.qty = newQty;
+					},
+
+					fnChangeQty: function () {
+						let self = this;
+						let newQty = Number(self.qty);
+
+						if (newQty < 1 || isNaN(newQty)) {
+							alert("수량은 1개 이상 입력해주세요.");
+							self.qty = 1;
+							return;
+						}
+
+						if (newQty > self.product.STOCK_QTY) {
+							alert("재고수량을 초과할 수 없습니다.");
+							self.qty = self.product.STOCK_QTY;
+							return;
+						}
+
+						self.qty = newQty;
+					},
+
+					fnAddCart: function () {
+						let self = this;
+						if (self.qty > self.product.STOCK_QTY) {
+							alert("재고수량을 초과할 수 없습니다.");
+							return;
+						}
+						let param = {
+							productNo: self.productNo,
+							qty: self.qty
+						};
+
+						$.ajax({
+							url: "/cart/add.dox",
+							dataType: "json",
+							type: "POST",
+							data: param,
+							success: function (data) {
+								if (data.result == "success") {
+									alert("장바구니에 담았습니다.");
+									self.fnGetCartCount();
+									window.dispatchEvent(new Event("cartCountUpdate"));
+								} else if (data.result == "login") {
+									alert("로그인이 필요합니다.");
+									location.href = "/user/login.do";
+								} else {
+									alert("장바구니 담기 실패");
+								}
+							},
+							error: function () {
+								alert("장바구니 처리 중 오류가 발생했습니다.");
+							}
+						});
+					},
+
+					fnDirectOrder: function () {
+						let self = this;
+						if (self.qty > self.product.STOCK_QTY) {
+							alert("재고수량을 초과할 수 없습니다.");
+							return;
+						}
+						let param = {
+							productNo: self.productNo,
+							qty: self.qty
+						};
+
+						$.ajax({
+							url: "/cart/add.dox",
+							dataType: "json",
+							type: "POST",
+							data: param,
+							success: function (data) {
+								if (data.result == "success") {
+									let cartNoList = [data.cartNo];
+									sessionStorage.setItem("cartNoList", JSON.stringify(cartNoList));
+									pageChange("/payment/pay-shop.do", {});
+								} else if (data.result == "login") {
+									alert("로그인이 필요합니다.");
+									location.href = "/user/login.do";
+								} else {
+									alert("바로구매 처리 실패");
+								}
+							},
+							error: function () {
+								alert("바로구매 처리 중 오류가 발생했습니다.");
+							}
+						});
+					},
+
+					fnUpdateCartBadge: function (count) {
+						let self = this;
+
+						self.cartCount = count;
+
+						let badge = document.querySelector(".cart-badge");
+
+						if (badge != null) {
+							if (count > 0) {
+								badge.innerText = count;
+								badge.style.display = "inline-block";
 							} else {
-								self.qnaList = [];
-							}
-						},
-						error: function () {
-							alert("문의 조회 중 오류가 발생했습니다.");
-						}
-					});
-				},
-
-				fnCanReadQna: function (qna) {
-					if (qna.IS_SECRET != "Y") {
-						return true;
-					}
-
-					if (this.currentUserRole == "A") {
-						return true;
-					}
-
-					if (this.currentUserId != "" && this.currentUserId == qna.USER_ID) {
-						return true;
-					}
-
-					return false;
-				},
-
-				fnCanManageQna: function (qna) {
-					if (this.currentUserRole == "A") {
-						return true;
-					}
-
-					if (this.currentUserId != "" && this.currentUserId == qna.USER_ID) {
-						return true;
-					}
-
-					return false;
-				},
-
-				fnToggleQna: function (qna) {
-					qna.open = !qna.open;
-				},
-
-				fnEditQna: function (qna) {
-					qna.editMode = true;
-					qna.editTitle = qna.QNA_TITLE;
-					qna.editContents = qna.Q_CONTENTS;
-				},
-
-				fnCancelEditQna: function (qna) {
-					qna.editMode = false;
-					qna.editTitle = qna.QNA_TITLE;
-					qna.editContents = qna.Q_CONTENTS;
-				},
-
-				fnSaveQna: function (qna) {
-					let self = this;
-
-					if (qna.editTitle == "") {
-						alert("문의 제목을 입력해주세요.");
-						return;
-					}
-
-					if (qna.editContents == "") {
-						alert("문의 내용을 입력해주세요.");
-						return;
-					}
-
-					$.ajax({
-						url: "/qna/update.dox",
-						dataType: "json",
-						type: "POST",
-						data: {
-							qnaNo: qna.QNA_NO,
-							title: qna.editTitle,
-							contents: qna.editContents
-						},
-						success: function (data) {
-							if (data.result == "success") {
-								alert("문의가 수정되었습니다.");
-								self.fnGetQnaList();
-							} else if (data.result == "login") {
-								alert("로그인이 필요합니다.");
-								location.href = "/user/login.do";
-							} else {
-								alert("문의 수정 실패");
-							}
-						},
-						error: function () {
-							alert("문의 수정 중 오류가 발생했습니다.");
-						}
-					});
-				},
-
-				fnDeleteQna: function (qnaNo) {
-					let self = this;
-
-					if (!confirm("문의글을 삭제하시겠습니까?")) {
-						return;
-					}
-
-					$.ajax({
-						url: "/qna/delete.dox",
-						dataType: "json",
-						type: "POST",
-						data: {
-							qnaNo: qnaNo
-						},
-						success: function (data) {
-							if (data.result == "success") {
-								alert("문의가 삭제되었습니다.");
-								self.fnGetQnaList();
-							} else if (data.result == "login") {
-								alert("로그인이 필요합니다.");
-								location.href = "/user/login.do";
-							} else {
-								alert("문의 삭제 실패");
-							}
-						},
-						error: function () {
-							alert("문의 삭제 중 오류가 발생했습니다.");
-						}
-					});
-				},
-
-				fnAddQna: function () {
-					let self = this;
-
-					if (self.currentUserId == "") {
-						alert("로그인이 필요합니다.");
-						location.href = "/user/login.do";
-						return;
-					}
-
-					if (self.qnaForm.title == "") {
-						alert("문의 제목을 입력해주세요.");
-						return;
-					}
-
-					if (self.qnaForm.contents == "") {
-						alert("문의 내용을 입력해주세요.");
-						return;
-					}
-
-					let param = {
-						productNo: self.productNo,
-						title: self.qnaForm.title,
-						contents: self.qnaForm.contents,
-						secretYn: self.qnaForm.secretYn
-					};
-
-					$.ajax({
-						url: "/qna/add.dox",
-						dataType: "json",
-						type: "POST",
-						data: param,
-						success: function (data) {
-							if (data.result == "success") {
-								alert("문의가 등록되었습니다.");
-								self.qnaForm.title = "";
-								self.qnaForm.contents = "";
-								self.qnaForm.secretYn = "N";
-								self.fnGetQnaList();
-								self.tab = "qna";
-							} else if (data.result == "login") {
-								alert("로그인이 필요합니다.");
-								location.href = "/user/login.do";
-							} else {
-								alert("문의 등록 실패");
-							}
-						},
-						error: function () {
-							alert("문의 등록 중 오류가 발생했습니다.");
-						}
-					});
-				},
-
-				fnChangeMainImage: function (img) {
-					this.mainImage = img;
-				},
-
-				fnQty: function (num) {
-					let self = this;
-					let newQty = Number(self.qty) + num;
-
-					if (newQty < 1) {
-						return;
-					}
-
-					if (newQty > self.product.STOCK_QTY) {
-						alert("재고수량을 초과할 수 없습니다.");
-						return;
-					}
-
-					self.qty = newQty;
-				},
-
-				fnChangeQty: function () {
-					let self = this;
-					let newQty = Number(self.qty);
-
-					if (newQty < 1 || isNaN(newQty)) {
-						alert("수량은 1개 이상 입력해주세요.");
-						self.qty = 1;
-						return;
-					}
-
-					if (newQty > self.product.STOCK_QTY) {
-						alert("재고수량을 초과할 수 없습니다.");
-						self.qty = self.product.STOCK_QTY;
-						return;
-					}
-
-					self.qty = newQty;
-				},
-
-				fnAddCart: function () {
-					let self = this;
-					if (self.qty > self.product.STOCK_QTY) {
-						alert("재고수량을 초과할 수 없습니다.");
-						return;
-					}
-					let param = {
-						productNo: self.productNo,
-						qty: self.qty
-					};
-
-					$.ajax({
-						url: "/cart/add.dox",
-						dataType: "json",
-						type: "POST",
-						data: param,
-						success: function (data) {
-							if (data.result == "success") {
-							    alert("장바구니에 담았습니다.");
-							    self.fnGetCartCount();
-							    window.dispatchEvent(new Event("cartCountUpdate"));
-							} else if (data.result == "login") {
-								alert("로그인이 필요합니다.");
-								location.href = "/user/login.do";
-							} else {
-								alert("장바구니 담기 실패");
-							}
-						},
-						error: function () {
-							alert("장바구니 처리 중 오류가 발생했습니다.");
-						}
-					});
-				},
-
-				fnDirectOrder: function () {
-					let self = this;
-					if (self.qty > self.product.STOCK_QTY) {
-						alert("재고수량을 초과할 수 없습니다.");
-						return;
-					}
-					let param = {
-						productNo: self.productNo,
-						qty: self.qty
-					};
-
-					$.ajax({
-						url: "/cart/add.dox",
-						dataType: "json",
-						type: "POST",
-						data: param,
-						success: function (data) {
-							if (data.result == "success") {
-								let cartNoList = [data.cartNo];
-								sessionStorage.setItem("cartNoList", JSON.stringify(cartNoList));
-								pageChange("/payment/pay-shop.do", {});
-							} else if (data.result == "login") {
-								alert("로그인이 필요합니다.");
-								location.href = "/user/login.do";
-							} else {
-								alert("바로구매 처리 실패");
-							}
-						},
-						error: function () {
-							alert("바로구매 처리 중 오류가 발생했습니다.");
-						}
-					});
-				},
-
-				fnGetCartCount: function () {
-					let self = this;
-					$.ajax({
-						url: "/cart/count.dox",
-						dataType: "json",
-						type: "POST",
-						data: {},
-						success: function (data) {
-							if (data.result == "success") {
-								self.cartCount = data.cartCount;
+								badge.innerText = "";
+								badge.style.display = "none";
 							}
 						}
-					});
-				},
+					},
 
-				formatPrice: function (price) {
-					if (price == null || price == undefined || price == "") {
-						return "0";
+					fnGetCartCount: function () {
+						let self = this;
+
+						$.ajax({
+							url: "/cart/count.dox",
+							dataType: "json",
+							type: "POST",
+							data: {},
+							success: function (data) {
+								if (data.result == "success") {
+									self.fnUpdateCartBadge(data.cartCount);
+								}
+							}
+						});
+					},
+
+					formatPrice: function (price) {
+						if (price == null || price == undefined || price == "") {
+							return "0";
+						}
+						return Number(price).toLocaleString();
+					},
+
+					fnMoveCart: function () {
+						pageChange("/cart.do", {});
+					},
+
+					fnMoveMain: function () {
+						pageChange("/product.do", {});
+					},
+
+					fnMoveList: function () {
+						pageChange("/product.do", {});
+					},
+
+					fnTotalPrice: function () {
+						if (this.product == null) {
+							return 0;
+						}
+
+						return Number(this.product.PRODUCT_PRICE) * Number(this.qty);
 					}
-					return Number(price).toLocaleString();
 				},
-
-				fnMoveCart: function () {
-					pageChange("/cart.do", {});
-				},
-
-				fnMoveMain: function () {
-					pageChange("/product.do", {});
-				},
-
-				fnMoveList: function () {
-					pageChange("/product.do", {});
-				},
-				
-				fnTotalPrice: function () {
-					if (this.product == null) {
-						return 0;
-					}
-
-					return Number(this.product.PRODUCT_PRICE) * Number(this.qty);
+				mounted() {
+					this.fnGetProductView();
+					this.fnGetReviewList();
+					this.fnGetQnaList();
+					this.fnGetCartCount();
 				}
-			},
-			mounted() {
-				this.fnGetProductView();
-				this.fnGetReviewList();
-				this.fnGetQnaList();
-				this.fnGetCartCount();
-			}
-		});
+			});
 
-		app.mount('#app');
-	</script>
+			app.mount('#app');
+		</script>
 
-	<jsp:include page="/WEB-INF/footer/footer.jsp" />
+		<jsp:include page="/WEB-INF/footer/footer.jsp" />
 
 	</body>
 

@@ -282,15 +282,4 @@ public class ProductService {
 		return resultMap;
 	}
 	
-	public HashMap<String, Object> getRecommendProduct(HashMap<String, Object> map) {
-
-	    HashMap<String, Object> resultMap = new HashMap<>();
-
-	    List<HashMap<String, Object>> list = productMapper.selectRecommendProduct(map);
-
-	    resultMap.put("list", list);
-	    resultMap.put("result", "success");
-
-	    return resultMap;
-	}
 }
