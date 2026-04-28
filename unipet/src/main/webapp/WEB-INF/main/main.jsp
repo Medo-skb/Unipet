@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -62,6 +63,20 @@
         <script src="${pageContext.request.contextPath}/js/main/main.js"></script>
 
         <div id="app">
+
+            <div class="basic-info-modal-wrap" v-if="showBasicInfoModal">
+                <div class="basic-info-modal-box">
+                    <div class="basic-info-modal-title">기본정보 입력이 필요합니다</div>
+                    <div class="basic-info-modal-text">
+                        소셜 로그인 회원은 서비스 이용을 위해<br>
+                        기본정보를 먼저 입력해야 합니다.
+                    </div>
+                    <button type="button" class="basic-info-modal-btn" @click="goBasicInfoPage">
+                        기본정보 입력하러 가기
+                    </button>
+                </div>
+            </div>
+
             <div class="container-main">
 
                 <div class="under"></div>
@@ -256,19 +271,26 @@
 
 </html>
 
+<c:if test="${param.bizBlock eq 'Y'}">
+    <script>
+        alert('사업자 회원은 해당 메뉴를 이용할 수 없습니다.');
+    </script>
+</c:if>
+
 <script>
     const app = Vue.createApp({
         data() {
             return {
-                // 변수 - (key : value)
+                showBasicInfoModal: false,
+
                 popularStoreList: [],
                 popularProductList: [],
                 storeCategoryList: [],
                 productCategoryList: [],
 
-                animalCategoryList: [],        // 버튼 목록
-                selectedAnimalCategory: null,  // 선택된 카테고리
-                animalProductCache: {},        // 캐시
+                animalCategoryList: [],
+                selectedAnimalCategory: null,
+                animalProductCache: {},
                 isAnimalProductLoaded: false,
 
                 categoryList: [
@@ -284,6 +306,27 @@
         },
         methods: {
             // 함수(메소드) - (key : function())
+            fnCheckSocialBasicInfo: function () {
+                let self = this;
+
+                $.ajax({
+                    url: "/main/social-basic-check.dox",
+                    dataType: "json",
+                    type: "POST",
+                    success: function (data) {
+                        if (data.result === "success" && data.needBasicInfo === true) {
+                            self.showBasicInfoModal = true;
+                        }
+                    },
+                    error: function () {
+                        console.log("소셜 기본정보 체크 오류");
+                    }
+                });
+            },
+
+            goBasicInfoPage: function () {
+                location.href = "/user/social-basic-info.do";
+            },
             fnList: function () {
                 let self = this;
                 let param = {};
@@ -415,9 +458,13 @@
             let self = this;
             self.fnList();
             self.fnCategoryStoreList(self.selectedCategory);
+            <c:if test="${not empty sessionScope.sessionId and sessionScope.sessionRole eq 'USER'}">
+                self.fnCheckSocialBasicInfo();
+            </c:if>
             
         }
     });
 
     app.mount('#app');
+    
 </script>

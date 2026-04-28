@@ -27,6 +27,9 @@ public interface MainMapper {
     // 카테고리별 랜덤 상품 조회
     public List<Main> selectAnimalMainCategoryList(HashMap<String, Object> map);
     
+    // 소셜 로그인 기본정보 입력 여부 체크
+    public Main selectSocialBasicCheck(HashMap<String, Object> map);
+    
     // 통합 검색 업체
     public List<Main> selectSearchStoreList(HashMap<String, Object> map);
     

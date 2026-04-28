@@ -452,7 +452,6 @@
 		DATE_FORMAT(CDATE, '%Y-%m-%d %H:%i') AS cdate
 		FROM USER_POINT
 		WHERE USER_ID = #{userId}
-		AND POINT_AMOUNT &lt; 0
 		ORDER BY CDATE DESC
 	</select>
 

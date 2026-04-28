@@ -21,19 +21,21 @@
                     <img src="${pageContext.request.contextPath}/img/main/logo.png" alt="로고" class="logo-image">
                 </a>
             </div>
+                <c:if test="${sessionScope.sessionRole ne 'BIZ'}">
+                    <div class="header-center">
+                        <form class="search-form" action="${pageContext.request.contextPath}/main/search.do" method="get">
+                            <input spellcheck="false" autocorrect="off" autocomplete="off"
+                                type="text" name="keyword" class="search-input" placeholder="검색어를 입력하세요">
 
-            <div class="header-center">
-                <form class="search-form" action="${pageContext.request.contextPath}/main/search.do" method="get">
-                    <input spellcheck="false" autocorrect="off" autocomplete="off"
-                        type="text" name="keyword" class="search-input" placeholder="검색어를 입력하세요">
-                    <button type="submit" class="search-btn" aria-label="검색">
-                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                            <circle cx="11" cy="11" r="7"></circle>
-                            <line x1="20" y1="20" x2="16.65" y2="16.65"></line>
-                        </svg>
-                    </button>
-                </form>
-            </div>
+                            <button type="submit" class="search-btn" aria-label="검색">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <circle cx="11" cy="11" r="7"></circle>
+                                    <line x1="20" y1="20" x2="16.65" y2="16.65"></line>
+                                </svg>
+                            </button>
+                        </form>
+                    </div>
+                </c:if>
 
             <div class="header-right">
                 <nav class="main-nav">

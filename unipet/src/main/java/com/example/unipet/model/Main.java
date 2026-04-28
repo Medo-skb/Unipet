@@ -39,5 +39,8 @@ public class Main {
 	String filePath;
 	String fileName;
 	
+	// 사용자 정보
+	String userId;
+	String socialType;
 	
 }
