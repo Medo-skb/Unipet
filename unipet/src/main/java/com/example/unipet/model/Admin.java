@@ -45,12 +45,12 @@ public class Admin {
     // 예약 리뷰용
     Integer rsvNo;
     
- // 커뮤니티 신고 관련
+    // 커뮤니티 신고 관련
     int targetNo;
     int boardNo;
     String reportedUserId;
     String contents;
     String title;
-    
+	    
 
 }

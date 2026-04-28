@@ -20,18 +20,18 @@
 		<jsp:include page="/WEB-INF/header/header.jsp" />
 
 		<div id="app">
-			<!-- <div class="header">
-				<div class="logo" @click="fnMoveMain()">
-					UniPet <span class="logo-sub">shop</span>
-				</div>
+			<div class="header">
+			    <div class="logo" @click="fnMoveMain()">
+			        UniPet <span class="logo-sub">shop</span>
+			    </div>
 
-				<div class="header-right">
-					<div class="cart-box" @click="fnMoveCart()">
-						<span class="cart-icon">🛒</span>
-						<span class="cart-badge" v-if="cartCount > 0">{{cartCount}}</span>
-					</div>
-				</div>
-			</div> -->
+			    <div class="header-right">
+			        <div class="cart-box" @click="fnMoveCart()">
+			            <span class="cart-icon">🛒</span>
+			            <span class="cart-badge" v-if="cartCount > 0">{{cartCount}}</span>
+			        </div>
+			    </div>
+			</div>
 
 			<div class="wrap">
 				<div class="back-area">
@@ -665,8 +665,9 @@
 						data: param,
 						success: function (data) {
 							if (data.result == "success") {
-								alert("장바구니에 담았습니다.");
-								self.fnGetCartCount();
+							    alert("장바구니에 담았습니다.");
+							    self.fnGetCartCount();
+							    window.dispatchEvent(new Event("cartCountUpdate"));
 							} else if (data.result == "login") {
 								alert("로그인이 필요합니다.");
 								location.href = "/user/login.do";

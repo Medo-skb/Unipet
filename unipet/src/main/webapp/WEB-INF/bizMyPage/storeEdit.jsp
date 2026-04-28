@@ -9,6 +9,8 @@
     <title>UNIPET</title>
     <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=본인_JAVASCRIPT_KEY&libraries=services"></script>
     <script src="/js/page-change.js"></script>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/bizMyPage/bizCommon.css">
 </head>
@@ -66,8 +68,14 @@
                     </div>
 
                     <div v-if="!hasApprovedStore" class="content-section">
-                        <div  class="empty-text">
+                        <div class="empty-text" style="white-space: pre-line;">
                             {{ approvedStoreMessage }}
+                        </div>
+
+                        <div class="section-btn-area" v-if="storeInfo.sStatus === 'REJ'">
+                            <button type="button" class="edit-btn" @click="fnEditRejectedStore">
+                                업체 정보 수정
+                            </button>
                         </div>
                     </div>
 
@@ -348,12 +356,17 @@
 
                                 <div class="form-row">
                                     <label>주소</label>
-                                    <input type="text" v-model="editStoreInfo.sAddr" readonly>
+                                    <div class="inline-input-area">
+                                        <input type="text" v-model="editStoreInfo.sAddr" readonly>
+                                        <button type="button" class="line-btn" @click="fnOpenPostcode">
+                                            주소검색
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <div class="form-row">
                                     <label>상세주소</label>
-                                    <input type="text" v-model="editStoreInfo.sFullAddr" readonly>
+                                    <input type="text" v-model="editStoreInfo.sFullAddr">
                                 </div>
 
                                 <div class="form-row">
@@ -377,7 +390,16 @@
 
                                 <div class="form-row">
                                     <label>예약 마감 시간</label>
-                                    <input type="text" v-model="editStoreInfo.cutoff" readonly>
+
+                                    <div class="cutoff-input-area">
+                                        <span>예약</span>
+                                        <input type="number"
+                                            v-model="editStoreInfo.cutoff"
+                                            min="1"
+                                            max="72"
+                                            @input="fnCheckCutoff">
+                                        <span>시간 전 * 1시간부터 72시간까지만 설정 가능합니다.</span>
+                                    </div>
                                 </div>
 
                                 <div class="form-row">
@@ -469,6 +491,67 @@
                         </div>
                     </div>
 
+                    <!-- 반려 업체 재신청 수정 모달 -->
+                    <div v-if="showRejectedStoreEditModal" class="modal-overlay">
+                        <div class="edit-modal-box">
+                            <div class="modal-header">
+                                <h2>반려 업체 정보 수정</h2>
+                                <button type="button" class="modal-close-btn" @click="fnCloseRejectedStoreModal">X</button>
+                            </div>
+
+                            <div class="modal-body">
+                                <div class="form-row">
+                                    <label>업체명</label>
+                                    <input type="text" v-model="editStoreInfo.storeName">
+                                </div>
+
+                                <div class="form-row">
+                                    <label>업종</label>
+                                    <input type="text" v-model="editStoreInfo.sCategory">
+                                </div>
+
+                                <div class="form-row">
+                                    <label>사업자번호</label>
+                                    <input type="text" v-model="editStoreInfo.biznum">
+                                </div>
+
+                                <div class="form-row">
+                                    <label>은행명</label>
+                                    <input type="text" v-model="editStoreInfo.accName">
+                                </div>
+
+                                <div class="form-row">
+                                    <label>계좌번호</label>
+                                    <input type="text" v-model="editStoreInfo.accNo">
+                                </div>
+
+                                <div class="form-row">
+                                    <label>예금주</label>
+                                    <input type="text" v-model="editStoreInfo.accHolder">
+                                </div>
+
+                                <div class="form-row">
+                                    <label>주소</label>
+                                    <div class="inline-input-area">
+                                        <input type="text" v-model="editStoreInfo.sAddr" readonly>
+                                        <button type="button" class="line-btn" @click="fnOpenPostcode">
+                                            주소검색
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <label>상세주소</label>
+                                    <input type="text" v-model="editStoreInfo.sFullAddr">
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="cancel-btn" @click="fnCloseRejectedStoreModal">취소</button>
+                                <button type="button" class="save-btn" @click="fnSaveRejectedStore">재신청</button>
+                            </div>
+                        </div>
+                    </div>
                 </section>
             </div>
         </div>
@@ -508,19 +591,24 @@
                     breakStart: "",
                     breakEnd: "",
                     offDay: "",
-                    refundPolicy: ""
+                    refundPolicy: "",
+                    sStatus: "",
+                    rejReason: ""
                 },
                 fileList: [],
                 menuList: [],
 
                 showStoreEditModal: false,
                 showMenuEditModal: false,
+                showRejectedStoreEditModal: false,
 
                 editStoreInfo: {
                     storeNo: "",
                     storeName: "",
                     sCategory: "",
                     biznum: "",
+                    lat: "",
+                    lng: "",
                     isOpen: "",
                     accName: "",
                     accNo: "",
@@ -556,16 +644,21 @@
         },
         methods: {
             // 함수(메소드) - (key : function())
-            fnCheckApprovedStore: function() {
-                let self = this;
+        fnCheckApprovedStore: function() {
+            let self = this;
 
-                $.ajax({
-                    url: "/getApprovedStore.dox",
-                    type: "POST",
-                    dataType: "json",
-                    data: {},
-                    success: function(data) {
-                        if (data.result === "success" && data.info) {
+            $.ajax({
+                url: "/getApprovedStore.dox",
+                type: "POST",
+                dataType: "json",
+                data: {
+                    sUserId: "${sessionScope.sessionId}"
+                },
+                success: function(data) {
+                    if (data.result === "success" && data.info) {
+                        self.storeInfo = data.info;
+
+                        if (data.info.sStatus === "GEN" || data.info.sStatus === "AFF") {
                             self.hasApprovedStore = true;
                             self.approvedStoreMessage = "";
                             self.fnGetStoreInfo();
@@ -573,40 +666,59 @@
                             self.fnGetMenuList();
                         } else {
                             self.hasApprovedStore = false;
-                            self.approvedStoreMessage = "승인된 업체가 없습니다.";
-
-                            self.storeInfo = {
-                                storeNo: "",
-                                storeName: "",
-                                sCategory: "",
-                                biznum: "",
-                                isOpen: "",
-                                accName: "",
-                                accNo: "",
-                                accHolder: "",
-                                sAddr: "",
-                                sFullAddr: "",
-                                subTitle: "",
-                                sContents: "",
-                                capacity: "",
-                                cutoff: "",
-                                openTime: "",
-                                closeTime: "",
-                                breakStart: "",
-                                breakEnd: "",
-                                offDay: "",
-                                refundPolicy: ""
-                            };
-
                             self.fileList = [];
                             self.menuList = [];
+
+                            if (data.info.sStatus === "REJ") {
+                                self.approvedStoreMessage = "사업자 승인이 반려되었습니다.";
+
+                                if (data.info.rejReason) {
+                                    self.approvedStoreMessage += "\n반려 사유: " + data.info.rejReason;
+                                }
+                            } else if (data.info.sStatus === "PND") {
+                                self.approvedStoreMessage = "사업자 승인 대기중입니다.";
+                            } else {
+                                self.approvedStoreMessage = "승인된 업체가 없습니다.";
+                            }
                         }
-                    },
-                    error: function() {
-                        alert("승인된 업체 확인 중 오류가 발생했습니다.");
+                    } else {
+                        self.hasApprovedStore = false;
+                        self.approvedStoreMessage = "승인된 업체가 없습니다.";
+
+                        self.storeInfo = {
+                            storeNo: "",
+                            storeName: "",
+                            sCategory: "",
+                            biznum: "",
+                            isOpen: "",
+                            accName: "",
+                            accNo: "",
+                            accHolder: "",
+                            sAddr: "",
+                            sFullAddr: "",
+                            subTitle: "",
+                            sContents: "",
+                            capacity: "",
+                            cutoff: "",
+                            openTime: "",
+                            closeTime: "",
+                            breakStart: "",
+                            breakEnd: "",
+                            offDay: "",
+                            refundPolicy: "",
+                            sStatus: "",
+                            rejReason: ""
+                        };
+
+                        self.fileList = [];
+                        self.menuList = [];
                     }
-                });
-            },
+                },
+                error: function() {
+                    alert("승인된 업체 확인 중 오류가 발생했습니다.");
+                }
+            });
+        },
 
             fnRequestWithdraw: function() {
                 let self = this;
@@ -762,6 +874,40 @@
                         alert("업체 메뉴 정보를 불러오는데 실패했습니다.");
                     }
                 });
+            },
+
+            fnEditRejectedStore: function() {
+                let self = this;
+
+                self.editStoreInfo = {
+                    storeNo: self.storeInfo.storeNo,
+                    storeName: self.storeInfo.storeName,
+                    sCategory: self.storeInfo.sCategory,
+                    biznum: self.storeInfo.biznum,
+                    isOpen: self.storeInfo.isOpen,
+                    accName: self.storeInfo.accName,
+                    accNo: self.storeInfo.accNo,
+                    accHolder: self.storeInfo.accHolder,
+                    sAddr: self.storeInfo.sAddr,
+                    sFullAddr: self.storeInfo.sFullAddr,
+                    subTitle: self.storeInfo.subTitle,
+                    sContents: self.storeInfo.sContents,
+                    capacity: self.storeInfo.capacity,
+                    cutoff: self.storeInfo.cutoff,
+                    openTime: self.storeInfo.openTime,
+                    closeTime: self.storeInfo.closeTime,
+                    breakStart: self.storeInfo.breakStart,
+                    breakEnd: self.storeInfo.breakEnd,
+                    offDay: self.storeInfo.offDay,
+                    refundPolicy: self.storeInfo.refundPolicy
+                };
+
+                self.showRejectedStoreEditModal = true;
+            },
+
+            fnCloseRejectedStoreModal: function() {
+                let self = this;
+                self.showRejectedStoreEditModal = false;
             },
 
             fnEditStoreInfo: function() {
@@ -925,8 +1071,50 @@
                 });
             },
 
+            fnSaveRejectedStore: function() {
+                let self = this;
+
+                let param = {
+                    storeNo: self.editStoreInfo.storeNo,
+                    storeName: self.editStoreInfo.storeName,
+                    sCategory: self.editStoreInfo.sCategory,
+                    biznum: self.editStoreInfo.biznum,
+                    accName: self.editStoreInfo.accName,
+                    accNo: self.editStoreInfo.accNo,
+                    accHolder: self.editStoreInfo.accHolder,
+                    sAddr: self.editStoreInfo.sAddr,
+                    sFullAddr: self.editStoreInfo.sFullAddr,
+                    lat: self.editStoreInfo.lat || null,
+                    lng: self.editStoreInfo.lng || null
+                };
+
+                $.ajax({
+                    url: "/biz/store/reapply.dox",
+                    type: "POST",
+                    dataType: "json",
+                    data: param,
+                    success: function(data) {
+                        if (data.result === "success") {
+                            alert("재신청되었습니다.");
+                            self.fnCloseRejectedStoreModal();
+                            self.fnCheckApprovedStore();
+                        } else {
+                            alert(data.message || "재신청에 실패했습니다.");
+                        }
+                    },
+                    error: function() {
+                        alert("재신청 처리 중 오류가 발생했습니다.");
+                    }
+                });
+            },
+
             fnSaveStoreInfo: function() {
                 let self = this;
+
+                if (!self.editStoreInfo.cutoff || self.editStoreInfo.cutoff < 1 || self.editStoreInfo.cutoff > 72) {
+                    alert("예약 마감 시간은 1~72 사이의 숫자만 입력할 수 있습니다.");
+                    return;
+                }
 
                 let param = {
                     storeNo: self.editStoreInfo.storeNo,
@@ -934,6 +1122,8 @@
                     accName: self.editStoreInfo.accName,
                     accNo: self.editStoreInfo.accNo,
                     accHolder: self.editStoreInfo.accHolder,
+                    sAddr: self.editStoreInfo.sAddr,
+                    sFullAddr: self.editStoreInfo.sFullAddr,
                     subTitle: self.editStoreInfo.subTitle,
                     sContents: self.editStoreInfo.sContents,
                     capacity: self.editStoreInfo.capacity,
@@ -942,11 +1132,17 @@
                     breakStart: self.editStoreInfo.breakStart,
                     breakEnd: self.editStoreInfo.breakEnd,
                     offDay: self.editStoreInfo.offDay,
-                    refundPolicy: self.editStoreInfo.refundPolicy
+                    refundPolicy: self.editStoreInfo.refundPolicy,
+                    lat: self.editStoreInfo.lat || null,
+                    lng: self.editStoreInfo.lng || null
                 };
 
+                let saveUrl = self.storeInfo.sStatus === "REJ"
+                    ? "/biz/store/reapply.dox"
+                    : "/biz/store/update.dox";
+
                 $.ajax({
-                    url: "/biz/store/update.dox",
+                    url: saveUrl,
                     type: "POST",
                     dataType: "json",
                     data: param,
@@ -1109,6 +1305,44 @@
                     sUserPwd: "",
                     sUserPwdConfirm: ""
                 };
+            },
+
+            fnOpenPostcode: function() {
+                let self = this;
+
+                new daum.Postcode({
+                    oncomplete: function(data) {
+                        let address = data.roadAddress || data.address;
+
+                        self.editStoreInfo.sAddr = address;
+                        self.editStoreInfo.sFullAddr = "";
+                        self.editStoreInfo.lat = null;
+                        self.editStoreInfo.lng = null;
+
+                        let geocoder = new kakao.maps.services.Geocoder();
+
+                        geocoder.addressSearch(address, function(result, status) {
+                            if (status === kakao.maps.services.Status.OK) {
+                                self.editStoreInfo.lng = result[0].x;
+                                self.editStoreInfo.lat = result[0].y;
+                            }
+                        });
+                    }
+                }).open({
+                    popupName: "postcodePopup"
+                });
+            },
+
+            fnCheckCutoff: function() {
+                let self = this;
+
+                if (self.editStoreInfo.cutoff < 1) {
+                    self.editStoreInfo.cutoff = 1;
+                }
+
+                if (self.editStoreInfo.cutoff > 72) {
+                    self.editStoreInfo.cutoff = 72;
+                }
             },
 
         }, // methods

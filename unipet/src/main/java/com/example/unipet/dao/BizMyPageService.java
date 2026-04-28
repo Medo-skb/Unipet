@@ -544,4 +544,22 @@ public class BizMyPageService {
 	    return resultMap;
 	}
 	
+	// 반려 후 재신청
+	public HashMap<String, Object> editRejectedStore(HashMap<String, Object> map) {
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+		try {
+			int result = bizMyPageMapper.updateRejectedStore(map);
+
+			resultMap.put("result", "success");
+			resultMap.put("message", "재신청되었습니다.");
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			resultMap.put("result", "fail");
+			resultMap.put("message", "서버 오류가 발생했습니다.");
+		}
+
+		return resultMap;
+	}
+	
 }

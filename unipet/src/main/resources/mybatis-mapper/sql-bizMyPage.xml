@@ -58,16 +58,23 @@
 	
 	<!-- 승인된 업체 1건 조회 -->
 	<select id="selectApprovedStore" parameterType="hashmap" resultType="com.example.unipet.model.BizMyPage">
-	    SELECT
-	        S.STORE_NO AS storeNo,
-	        S.IS_OPEN AS isOpen
-	    FROM STORE S
-	    INNER JOIN STORE_USER SU
-	        ON S.S_USER_ID = SU.S_USER_ID
-	    WHERE S.S_USER_ID = #{sUserId}
-	      AND S.S_STATUS IN ('GEN', 'AFF')
-	      AND SU.U_STATUS = 'APR'
-	    LIMIT 1
+		SELECT
+		    S.STORE_NO AS storeNo,
+		    S.STORE_NAME AS storeName,
+		    S.S_CATEGORY AS sCategory,
+		    S.BIZNUM AS biznum,
+		    S.IS_OPEN AS isOpen,
+		    S.ACC_NAME AS accName,
+		    S.ACC_NO AS accNo,
+		    S.ACC_HOLDER AS accHolder,
+		    S.S_ADDR AS sAddr,
+		    S.S_FULL_ADDR AS sFullAddr,
+		    S.S_STATUS AS sStatus,
+		    S.REJ_REASON AS rejReason
+		FROM STORE S
+		INNER JOIN STORE_USER SU
+		    ON S.S_USER_ID = SU.S_USER_ID
+		WHERE S.S_USER_ID = #{sUserId}
 	</select>
 	
 	<!-- 폐업 불가 예약 개수 조회 -->
@@ -268,10 +275,14 @@
 	<update id="updateBizStore" parameterType="hashmap">
 		UPDATE STORE
 		SET
-			IS_OPEN = #{isOpen},
-			ACC_NAME = #{accName},
-			ACC_NO = #{accNo},
-			ACC_HOLDER = #{accHolder}
+		    IS_OPEN = #{isOpen},
+		    ACC_NAME = #{accName},
+		    ACC_NO = #{accNo},
+		    ACC_HOLDER = #{accHolder},
+		    S_ADDR = #{sAddr},
+		    S_FULL_ADDR = #{sFullAddr},
+		    LAT = NULLIF(#{lat}, ''),
+		    LNG = NULLIF(#{lng}, '')
 		WHERE STORE_NO = #{storeNo}
 	</update>
 	
@@ -525,5 +536,27 @@
 	    )
 	</insert>
 	
+	<!-- 반려 후 재신청 -->
+	<update id="updateRejectedStore" parameterType="hashmap">
+		UPDATE STORE S
+		JOIN STORE_USER SU ON S.S_USER_ID = SU.S_USER_ID
+		SET
+			S.STORE_NAME = #{storeName},
+			S.S_CATEGORY = #{sCategory},
+			S.BIZNUM = #{biznum},
+			S.S_ADDR = #{sAddr},
+			S.S_FULL_ADDR = #{sFullAddr},
+			S.LAT = NULLIF(#{lat}, ''),
+			S.LNG = NULLIF(#{lng}, ''),
+			S.ACC_NAME = #{accName},
+			S.ACC_NO = #{accNo},
+			S.ACC_HOLDER = #{accHolder},
+			S.IS_OPEN = 'Y',
+			S.S_STATUS = 'PND',
+			S.REJ_REASON = NULL,
+			SU.U_STATUS = 'PND'
+		WHERE S.STORE_NO = #{storeNo}
+		  AND S.S_STATUS = 'REJ'
+	</update>
 	
 </mapper>

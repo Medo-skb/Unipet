@@ -11,7 +11,8 @@
     <script src="/js/page-change.js"></script>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/header.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/footer.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/payment/pay-shop.css">
+    <!-- <link rel="stylesheet" href="${pageContext.request.contextPath}/css/payment/pay-shop.css"> -->
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/payment/pay-shop2.css">
 </head>
 <body>
 
@@ -189,7 +190,7 @@
             shippingFee() {
                 if (this.orderList.length === 0) return 0;
                 if (this.isPremium) return 0; // 프리미엄 회원은 0원!
-                return this.totalPrice >= 50000 ? 0 : 2000;
+                return this.totalPrice >= 30000 ? 0 : 3000;
             },
         },
         methods: {
