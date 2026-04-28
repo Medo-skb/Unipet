@@ -143,7 +143,39 @@
 	    JOIN store_menu m ON r.MENU_NO = m.MENU_NO
 	    WHERE r.RSV_NO = #{id}
 	</select>
-
+	
+	<select id="selectRsvDetail" parameterType="hashmap" resultType="hashmap">
+	    SELECT 
+	    	pm.PAY_NO		   AS payNo,
+	        pm.RSV_NO          AS rsvNo,
+	        pm.TID             AS tid,            
+	        pm.TOTALPRICE      AS totalPrice,     
+	        pm.PAY_STATUS      AS payStatus,      
+	        pm.ORD_NAME        AS ordName,        
+	
+	        r.RSV_DATE         AS rsvDate,     
+	        r.SLOT_NO		   AS slotNo,   
+	        r.RSV_START_TIME   AS startTime,      
+	        r.RSV_END_TIME     AS endTime,        
+	        r.RSV_STATUS       AS rsvStatus,      
+	        r.REQUEST          AS request,        
+	
+	        s.STORE_NAME       AS storeName,      
+	        s.S_ADDR           AS storeAddr,      
+	        m.MENU_NAME        AS menuName,       
+	        m.MENU_PRICE       AS menuPrice
+	    FROM 
+	        payment_master pm
+	    INNER JOIN 
+	        reservation r   ON pm.RSV_NO = r.RSV_NO
+	    LEFT JOIN 
+	        store s         ON r.STORE_NO = s.STORE_NO
+	    LEFT JOIN 
+	        store_menu m    ON r.MENU_NO = m.MENU_NO
+	    WHERE 
+	        pm.RSV_NO = #{rsvNo}
+	        AND pm.PAY_STATUS = 'PAY'
+	</select>
     
 	<insert id="insertPayment" parameterType="hashmap">
 	    INSERT INTO payment_master (
@@ -321,10 +353,10 @@
         SET ORD_STATUS = 'CAN'  WHERE ORD_NO = #{ordNo}
     </update>
 
-    <update id="updatePaymentCancelStatus" parameterType="hashmap">
+    <update id="updatePaymentStatus" parameterType="hashmap">
         UPDATE payment_master 
         SET PAY_STATUS = 'REF' 
-        WHERE ORD_NO = #{ordNo}
+        WHERE PAY_NO = #{payNo}
     </update>
 
     <update id="updateStockRestore" parameterType="hashmap">
@@ -333,5 +365,11 @@
         SET p.STOCK_QTY = p.STOCK_QTY + od.ORD_QTY
         WHERE od.ORD_NO = #{ordNo}
     </update>
+    
+    <update id="updateReservationCancel" parameterType="hashmap">
+	    UPDATE reservation 
+	    SET RSV_STATUS = 'CAN' 
+	    WHERE RSV_NO = #{rsvNo}
+	</update>
     
 </mapper>
