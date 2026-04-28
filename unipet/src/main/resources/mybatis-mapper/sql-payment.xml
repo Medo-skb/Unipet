@@ -20,7 +20,8 @@
 
 			u.user_id, 
             u.USER_NAME, 
-            u.PHONE          
+            u.PHONE,
+            u.email          
             
         FROM reservation r
         INNER JOIN store s ON r.STORE_NO = s.STORE_NO
@@ -38,8 +39,7 @@
             user_addr,
             full_addr
 		FROM USERS 
-        <!-- WHERE USER_ID = #{userId} -->
-		where USER_ID = 'test_user01'
+        WHERE USER_ID = #{userId}
     </select>
 	
 	<select id="selectSubStatus" parameterType="String" resultType="int">

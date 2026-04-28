@@ -113,6 +113,9 @@
                         <span>최종 결제금액</span>
                         <span>{{ finalPrice.toLocaleString() }}원</span>
                     </div>
+                    <div>
+                        * 최소 결제금액은 1,000원입니다.
+                    </div>
                 </div>
                 <button class="btn-submit" @click="fnPay">결제하기</button>
             </div>
@@ -152,15 +155,27 @@
             // 모드가 변경될 때 데이터가 꼬이지 않도록 초기화해주는 감시자 로직
             discountMode(newMode) {
                 if (newMode === 'coupon') {
-                    this.usedPoint = 0; // 포인트 초기화
+                    this.usedPoint = 0;
                 } else if (newMode === 'point') {
-                    this.selectedCoupon = null; // 쿠폰 초기화
+                    this.selectedCoupon = null;
                 } else {
                     this.usedPoint = 0;
                     this.selectedCoupon = null;
                 }
             },
-            
+            // [추가] 쿠폰 선택 시 최소 결제 금액(1,000원) 체크
+            selectedCoupon(newVal) {
+                if (newVal) {
+                    const afterDiscount = (this.totalPrice + this.shippingFee) - newVal.deduceprice;
+                    if (afterDiscount < 1000) {
+                        alert("쿠폰 할인 적용 시 최소 결제 금액(1,000원) 미만이 되어 사용이 불가합니다.");
+                        // 비동기 루프 방지를 위해 $nextTick 등을 사용할 수 있으나 기본적으로 null 처리가 안전함
+                        this.$nextTick(() => {
+                            this.selectedCoupon = null;
+                        });
+                    }
+                }
+            }     
         },
         computed: {
             totalPrice() {
@@ -195,32 +210,53 @@
         },
         methods: {
             fnAllPoint() {
-                // 보유 포인트가 1250P라면 -> 1200P만 적용되도록 Math.floor 사용
-                this.usedPoint = Math.floor(this.userPoint / 100) * 100;
-                
                 if (this.userPoint < 100) {
                     alert("포인트는 100P 이상부터 사용 가능합니다.");
+                    this.usedPoint = 0;
+                    return;
+                }
+
+                // 1. (상품금액 + 배송비) - 1,000원 = 사용 가능한 최대 포인트
+                const maxPointAllowed = (this.totalPrice + this.shippingFee) - 1000;
+                
+                // 2. 내가 가진 포인트와 최대 허용 포인트 중 작은 값 선택
+                const targetPoint = Math.min(this.userPoint, maxPointAllowed);
+                
+                // 3. 100단위 절삭
+                this.usedPoint = Math.floor(targetPoint / 100) * 100;
+
+                if (this.usedPoint <= 0) {
+                    alert("최소 결제 금액 1,000원을 제외하면 사용할 수 있는 포인트가 없습니다.");
                     this.usedPoint = 0;
                 }
             },
             
             // 2. [추가] 직접 입력 후 검사 로직
             fnCheckPoint() {
-                let Point = this.usedPoint || 0;
-                // 1단계: 마이너스 입력 방지
-                if (Point < 0) {
+                let point = this.usedPoint || 0;
+
+                // 1단계: 마이너스 방지
+                if (point < 0) {
                     this.usedPoint = 0;
                     return;
                 }
+
                 // 2단계: 보유 포인트 초과 체크
-                if (Point > this.userPoint) {
-                    alert("보유하신 포인트(" + this.userPoint + "P)를 초과할 수 없습니다.");
-                    Point = this.userPoint;
+                if (point > this.userPoint) {
+                    alert("보유하신 포인트(" + this.userPoint.toLocaleString() + "P)를 초과할 수 없습니다.");
+                    point = this.userPoint;
                 }
-                // 3단계: 100단위로 자르기 (나머지 버림)
-                const flooredPoint = Math.floor(Point / 100) * 100;
-                // 최종적으로 정제된 100단위 값을 다시 바인딩
-                this.usedPoint = flooredPoint;
+
+                // 3단계: 최소 결제 금액 1,000원 보장 로직 추가
+                const maxPointAllowed = (this.totalPrice + this.shippingFee) - 1000;
+                if (point > maxPointAllowed) {
+                    const safePoint = Math.max(0, Math.floor(maxPointAllowed / 100) * 100);
+                    alert("최소 결제 금액 1,000원을 제외하고 최대 " + safePoint.toLocaleString() + "P 까지 사용 가능합니다.");
+                    point = safePoint;
+                }
+
+                // 4단계: 100단위로 자르기
+                this.usedPoint = Math.floor(point / 100) * 100;
             },
 
             fnGetOrderList: function () {
@@ -257,8 +293,10 @@
                     url: "/payment/info.dox",
                     type: "POST",
                     dataType: "json",
+                    data: { userId : self.userId },
                     success: function (data) {
                         self.info = data.info;
+                        console.log(data);
                     }
                 });
             },
@@ -306,12 +344,9 @@
                     orderName += " 외 " + (self.orderList.length - 1) + "건";
                 }
 
-                // ★ 1-3. 전액 포인트/쿠폰 결제로 최종 금액이 0원일 경우 PG사 결제 생략!
-                if (self.finalPrice === 0) {
-                    if (confirm("전액 할인 적용되어 0원 결제됩니다. 주문을 완료하시겠습니까?")) {
-                        // 결제창 안 띄우고 바로 DB 저장 로직으로 직행
-                        self.fnSubmitOrder(null); 
-                    }
+                // [추가] 결제 전 최종 금액 검증 (보안 및 에러 방지)
+                if (self.finalPrice < 1000 && self.finalPrice !== 0) {
+                    alert("최소 결제 금액은 1,000원입니다. 포인트나 쿠폰 사용량을 조절해주세요.");
                     return;
                 }
 
