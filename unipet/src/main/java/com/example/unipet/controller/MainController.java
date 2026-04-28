@@ -73,7 +73,7 @@ public class MainController {
     }
     
     // 챗봇
-    @RequestMapping("/gemini/test.do")
+    @RequestMapping("/unipet/chatbot.do")
 	public String gemini(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception {
 		return "main/gemini-chat";
 	}
