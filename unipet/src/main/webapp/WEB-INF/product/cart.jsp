@@ -11,7 +11,8 @@
 		<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 		<script src="/js/page-change.js"></script>
 
-		<link rel="stylesheet" href="/css/product/cart.css">
+		<!-- <link rel="stylesheet" href="/css/product/cart.css"> -->
+		<link rel="stylesheet" href="/css/product/cart2.css">
 	</head>
 
 
@@ -127,7 +128,6 @@
 
 			</div>
 		</div>
-
 
 		<script>
 			const app = Vue.createApp({

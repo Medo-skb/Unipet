@@ -22,20 +22,12 @@
             <div class="admin-wrap">
                 <!-- 왼쪽 메뉴 -->
                 <aside class="admin-sidebar">
-                    <!-- <div 
-                        class="menu-item"
-                        :class="{ active : currentMenu === 'dashboard' }"
-                        @click="fnChangeMenu('dashboard')">
-                        전체 현황판
-                    </div> -->
-
                     <div 
                         class="menu-item"
                         :class="{ active : currentMenu === 'report' }"
                         @click="fnChangeMenu('report')">
                         커뮤니티 및 리뷰 신고 관리
                     </div>
-
                     <div 
                         class="menu-item"
                         :class="{ active : currentMenu === 'storeApprove' }"
@@ -47,11 +39,6 @@
                 <!-- 오른쪽 내용 -->
                 <section class="admin-content">
                     <div class="content-card">
-                        <!-- <template v-if="currentMenu === 'dashboard'">
-                            <h2>전체 현황판</h2>
-                            <div class="content-desc">여기에 전체 현황판 내용 들어감</div>
-                        </template> -->
-
                         <template v-if="currentMenu === 'report'">
                             <h2>커뮤니티 및 리뷰 신고 관리</h2>
                             <div class="content-desc">신고 유형별로 접수된 신고를 확인하고 처리할 수 있습니다.</div>
@@ -589,9 +576,17 @@
             fnReject: function (item) {
                 let self = this;
 
-                if (!confirm(item.storeName + " 업체를 거부하시겠습니까?")) {
+                if (!confirm(item.storeName + " 업체를 반려하시겠습니까?")) {
                     return;
                 }
+
+                let rejReason = prompt("반려 사유를 입력하세요.");
+
+                if (rejReason === null) {
+                    return;
+                }
+
+                rejReason = rejReason.trim();
 
                 $.ajax({
                     url: "/editBizStatusRej.dox",
@@ -599,11 +594,12 @@
                     type: "POST",
                     data: {
                         storeNo: item.storeNo,
-                        sUserId: item.sUserId
+                        sUserId: item.sUserId,
+                        rejReason: rejReason
                     },
                     success: function (data) {
                         if (data.result === "success") {
-                            alert("거부 완료되었습니다.");
+                            alert("반려 완료되었습니다.");
                             self.fnBizList();
                         } else {
                             alert(data.message);
@@ -634,13 +630,21 @@
                     return;
                 }
 
+                let banYn = "N";
+
+                if (confirm("신고당한 사람의 계정을 정지하시겠습니까?")) {
+                    banYn = "Y";
+                }
+
                 $.ajax({
                     url: "/admin/report/approve.dox",
                     type: "POST",
                     dataType: "json",
                     data: {
                         reportNo: item.reportNo,
-                        reviewNo: item.reviewNo
+                        reviewNo: item.reviewNo,
+                        reportedUserId: item.userId,
+                        banYn: banYn
                     },
                     success: function(data) {
                         if (data.result === "success") {
@@ -738,6 +742,12 @@
                     return;
                 }
 
+                let banYn = "N";
+
+                if (confirm("신고당한 사람의 계정을 정지하시겠습니까?")) {
+                    banYn = "Y";
+                }
+
                 $.ajax({
                     url: "/admin/report/communityApprove.dox",
                     type: "POST",
@@ -745,7 +755,9 @@
                     data: {
                         reportNo: item.reportNo,
                         targetNo: item.targetNo,
-                        type: type   // POST or COMMENT
+                        type: type,
+                        reportedUserId: item.reportedUserId,
+                        banYn: banYn
                     },
                     success: function(data) {
                         if (data.result === "success") {

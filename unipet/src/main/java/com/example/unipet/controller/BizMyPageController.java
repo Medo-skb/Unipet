@@ -492,5 +492,13 @@ public class BizMyPageController {
 
 	    return new Gson().toJson(resultMap);
 	}
+	
+	// 반려 후 재신청
+	@RequestMapping(value = "/biz/store/reapply.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String editRejectedStore(@RequestParam HashMap<String, Object> map) throws Exception {
+		HashMap<String, Object> resultMap = bizMyPageService.editRejectedStore(map);
+		return new Gson().toJson(resultMap);
+	}
 
 }

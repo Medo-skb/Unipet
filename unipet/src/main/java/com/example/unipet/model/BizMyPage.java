@@ -16,6 +16,8 @@ public class BizMyPage {
 	String accHolder;
 	String sAddr;
 	String sFullAddr;
+	String sStatus;
+	String rejReason;
 	
 	// DETAIL
 	String subTitle;

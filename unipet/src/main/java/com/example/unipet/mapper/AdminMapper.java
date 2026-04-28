@@ -62,4 +62,13 @@ public interface AdminMapper {
 	// 커뮤니티 글 파일 삭제
 	public int deleteBoardFile(Map<String, Object> map);
 	
+	// 밴 할건지 선택
+	int updateUserStatusBan(String reportedUserId);
+	
+	// 승인 시 STORE_DETAIL 기본 등록
+	void insertDefaultStoreDetail(HashMap<String, Object> map);
+
+	// 승인 시 STORE_POLICY 기본 등록
+	void insertDefaultStorePolicy(HashMap<String, Object> map);
+	
 }

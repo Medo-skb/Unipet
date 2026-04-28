@@ -42,20 +42,26 @@ public class AdminService {
 	}
 	
 	// 사업자 승인
+	@Transactional
 	public HashMap<String, Object> editBizStatusApr(HashMap<String, Object> map){
-		HashMap<String, Object> resultMap = new HashMap<String, Object>();
-		try {
-			int result = adminMapper.updateBizStatusApr(map);
-			
-			resultMap.put("result", "success");
-			resultMap.put("message", Message.MSG_ADD);
-		} catch (Exception e) {
-			// TODO: handle exception
-			System.out.println(e.getMessage());
-			resultMap.put("result", "fail");
-			resultMap.put("message", Message.MSG_SERVER_ERR);
-		}
-		return resultMap;
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+	    try {
+	        int result = adminMapper.updateBizStatusApr(map);
+
+	        adminMapper.insertDefaultStoreDetail(map);
+	        adminMapper.insertDefaultStorePolicy(map);
+
+	        resultMap.put("result", "success");
+	        resultMap.put("message", Message.MSG_ADD);
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        resultMap.put("result", "fail");
+	        resultMap.put("message", Message.MSG_SERVER_ERR);
+	    }
+
+	    return resultMap;
 	}
 	
 	// 사업자 거부
@@ -122,16 +128,21 @@ public class AdminService {
 	public void approveReport(Map<String, Object> map) {
 
 	    // 1. 신고 상태 승인 처리
-		adminMapper.updateReportStatusApprove(map);
+	    adminMapper.updateReportStatusApprove(map);
 
 	    // 2. 리뷰 파일이 있으면 삭제
 	    int fileCnt = adminMapper.selectReviewFileCount(map);
 	    if (fileCnt > 0) {
-	    	adminMapper.deleteReviewFile(map);
+	        adminMapper.deleteReviewFile(map);
 	    }
 
 	    // 3. 리뷰 삭제
 	    adminMapper.deleteReview(map);
+
+	    // 4. 정지 여부가 Y면 USERS.USER_STATUS = 'BAN'
+	    if ("Y".equals(map.get("banYn"))) {
+	        adminMapper.updateUserStatusBan((String) map.get("reportedUserId"));
+	    }
 	}
 	
 	// 커뮤니티 글 신고 리스트
@@ -178,10 +189,10 @@ public class AdminService {
 	@Transactional
 	public void approveCommunityReport(Map<String, Object> map) {
 
-	    // 1. 신고 상태 승인 처리
+	    // 신고 상태를 ACC로 변경
 	    adminMapper.updateCommunityReportStatusApprove(map);
 
-	    // 2. 글/댓글 실제 삭제
+	    // 신고 대상 글/댓글 삭제
 	    String type = (String) map.get("type");
 
 	    if ("POST".equals(type)) {
@@ -190,8 +201,13 @@ public class AdminService {
 	    } else if ("COMMENT".equals(type)) {
 	        adminMapper.deleteBoardComment(map);
 	    }
+
+	    // 계정 정지 선택 시 USERS.USER_STATUS = BAN
+	    if ("Y".equals(map.get("banYn"))) {
+	        adminMapper.updateUserStatusBan((String) map.get("reportedUserId"));
+	    }
 	}
 	
-
+	
 	
 }
