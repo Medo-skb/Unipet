@@ -24,4 +24,7 @@ public interface UserMapper {
 
     User selectSocialUser(HashMap<String, Object> map);
     int insertSocialUser(HashMap<String, Object> map);
+ // UserMapper.java
+    int updatePhone(HashMap<String, Object> map);
+    
 }

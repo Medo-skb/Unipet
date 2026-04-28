@@ -4,7 +4,6 @@
 
 <head>
     <meta charset="UTF-8">
-    <!-- <link href="/css/user/login.css" rel="stylesheet"> -->
     <link href="/css/user/login2.css" rel="stylesheet">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
@@ -14,121 +13,237 @@
 
 <body>
 
-    <jsp:include page="/WEB-INF/header/header.jsp" />
+<jsp:include page="/WEB-INF/header/header.jsp" />
 
-    <div class="wrap">
-        <h2 class="title">로그인</h2>
+<div class="wrap">
+    <h2 class="title">로그인</h2>
 
-        <div class="tab-box">
-            <button type="button" id="userTab" class="active">일반회원</button>
-            <button type="button" id="bizTab">사업자회원</button>
+    <div class="tab-box">
+        <button type="button" id="userTab" class="active">일반회원</button>
+        <button type="button" id="bizTab">사업자회원</button>
+    </div>
+
+    <div class="input-box">
+        <input type="text" id="userId" placeholder="아이디">
+    </div>
+
+    <div class="input-box">
+        <input type="password" id="pwd" placeholder="비밀번호">
+    </div>
+
+    <div class="btn-box">
+        <button type="button" id="loginBtn">로그인</button>
+    </div>
+
+    <div class="link-box">
+        <a href="/user/find-id.do">아이디 찾기</a>
+        <a href="/user/find-pwd.do">비밀번호 찾기</a>
+        <a href="/user/join.do">회원가입</a>
+    </div>
+
+    <div class="social-box" id="socialBox">
+        <p class="social-title">간편 로그인</p>
+
+        <div class="social-btn-list">
+            <button type="button" class="social-btn kakao" onclick="location.href='/user/kakao/login'">
+                <img src="${pageContext.request.contextPath}/img/user/kakao.png">
+            </button>
+
+            <button type="button" class="social-btn naver" onclick="location.href='/user/naver/login'">
+                <span>N</span>
+            </button>
         </div>
 
-        <div class="input-box">
-            <input type="text" id="userId" placeholder="아이디">
-        </div>
+        <!-- 휴대폰 인증 팝업 -->
+        <div v-if="needPhoneVerify" class="verify-overlay">
+            <div class="verify-box">
+                <h3>휴대폰 인증</h3>
+                <p class="verify-desc">
+                    소셜 로그인 이용을 위해 휴대폰 인증이 필요합니다.
+                </p>
 
-        <div class="input-box">
-            <input type="password" id="pwd" placeholder="비밀번호">
-        </div>
+                <input type="text" v-model="phone" placeholder="01012345678">
+                <button type="button" @click="sendSms">인증번호 발송</button>
 
-        <div class="btn-box">
-            <button type="button" id="loginBtn">로그인</button>
-        </div>
-
-        <div class="link-box">
-            <a href="/user/find-id.do">아이디 찾기</a>
-            <a href="/user/find-pwd.do">비밀번호 찾기</a>
-            <a href="/user/join.do">회원가입</a>
-        </div>
-
-        <div class="social-box" id="socialBox">
-            <p class="social-title">간편 로그인</p>
-
-            <div class="social-btn-list">
-                <button type="button" class="social-btn kakao" onclick="location.href='/user/kakao/login'">
-                    <img src="${pageContext.request.contextPath}/img/user/kakao.png">
-                </button>
-
-                <button type="button" class="social-btn naver" onclick="location.href='/user/naver/login'">
-                    <span>N</span>
-                </button>
+                <div v-if="smsSent">
+                    <input type="text" v-model="code" placeholder="인증번호 입력">
+                    <button type="button" @click="checkSms">인증 확인</button>
+                </div>
             </div>
         </div>
     </div>
+</div>
 
-    <jsp:include page="/WEB-INF/footer/footer.jsp" />
+<jsp:include page="/WEB-INF/footer/footer.jsp" />
 
-    <script>
-        let loginType = "USER";
+<script>
+    let loginType = "USER";
 
-        $("#userTab").on("click", function () {
-            loginType = "USER";
-            $("#userTab").addClass("active");
-            $("#bizTab").removeClass("active");
-            $("#socialBox").css("visibility", "visible");
-        });
+    $("#userTab").on("click", function () {
+        loginType = "USER";
+        $("#userTab").addClass("active");
+        $("#bizTab").removeClass("active");
+        $("#socialBox").css("visibility", "visible");
+    });
 
-        $("#bizTab").on("click", function () {
-            loginType = "BIZ";
-            $("#bizTab").addClass("active");
-            $("#userTab").removeClass("active");
-            $("#socialBox").css("visibility", "hidden");
-        });
+    $("#bizTab").on("click", function () {
+        loginType = "BIZ";
+        $("#bizTab").addClass("active");
+        $("#userTab").removeClass("active");
+        $("#socialBox").css("visibility", "hidden");
+    });
 
-        $("#loginBtn").on("click", function () {
+    $("#loginBtn").on("click", function () {
+        fnLogin();
+    });
+
+    $("#userId, #pwd").on("keyup", function (e) {
+        if (e.key === "Enter") {
             fnLogin();
-        });
-
-        $("#userId, #pwd").on("keyup", function (e) {
-            if (e.key === "Enter") {
-                fnLogin();
-            }
-        });
-
-        function fnLogin() {
-            let userId = $("#userId").val().trim();
-            let pwd = $("#pwd").val().trim();
-
-            if (userId === "") {
-                alert("아이디를 입력해주세요.");
-                $("#userId").focus();
-                return;
-            }
-
-            if (pwd === "") {
-                alert("비밀번호를 입력해주세요.");
-                $("#pwd").focus();
-                return;
-            }
-
-            let url = (loginType === "USER") ? "/user/login.dox" : "/user/loginBiz.dox";
-
-            $.ajax({
-                url: url,
-                type: "POST",
-                data: {
-                    userId: userId,
-                    pwd: pwd
-                },
-                success: function (res) {
-                    console.log("사업자 로그인 응답:", res);
-
-                    let data = (typeof res === "string") ? JSON.parse(res) : res;
-
-                    if (data.result === true || data.result === "success") {
-                        alert(data.message);
-                        location.href = "/main.do";
-                    } else {
-                        alert(data.message || "아이디 또는 비밀번호를 확인해주세요.");
-                    }
-                },
-                error: function () {
-                    alert("로그인 중 오류가 발생했습니다.");
-                }
-            });
         }
-    </script>
-</body>
+    });
 
+    function fnLogin() {
+        let userId = $("#userId").val().trim();
+        let pwd = $("#pwd").val().trim();
+
+        if (userId === "") {
+            alert("아이디를 입력해주세요.");
+            $("#userId").focus();
+            return;
+        }
+
+        if (pwd === "") {
+            alert("비밀번호를 입력해주세요.");
+            $("#pwd").focus();
+            return;
+        }
+
+        let url = (loginType === "USER") ? "/user/login.dox" : "/user/loginBiz.dox";
+
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                userId: userId,
+                pwd: pwd
+            },
+            success: function (res) {
+                console.log("로그인 응답:", res);
+
+                let data = (typeof res === "string") ? JSON.parse(res) : res;
+
+                if (data.result === true || data.result === "success") {
+                    alert(data.message);
+                    location.href = "/main.do";
+                } else {
+                    alert(data.message || "아이디 또는 비밀번호를 확인해주세요.");
+                }
+            },
+            error: function () {
+                alert("로그인 중 오류가 발생했습니다.");
+            }
+        });
+    }
+
+    const app = Vue.createApp({
+        data() {
+            return {
+                phone: "",
+                code: "",
+                smsSent: false,
+                needPhoneVerify: false
+            };
+        },
+        mounted() {
+            this.checkNeedVerify();
+        },
+        methods: {
+            checkNeedVerify() {
+                const self = this;
+
+                $.ajax({
+                    url: "/user/check-need-verify.dox",
+                    type: "POST",
+                    success: function (res) {
+                        let data = (typeof res === "string") ? JSON.parse(res) : res;
+
+                        if (data.needVerify === true) {
+                            self.needPhoneVerify = true;
+                        }
+                    }
+                });
+            },
+
+            sendSms() {
+                const self = this;
+
+                if (!self.phone) {
+                    alert("휴대폰 번호를 입력해주세요.");
+                    return;
+                }
+
+                $.ajax({
+                    url: "/user/sendSms.dox",
+                    type: "POST",
+                    data: {
+                        phone: self.phone
+                    },
+                    success: function (res) {
+                        let data = (typeof res === "string") ? JSON.parse(res) : res;
+
+                        alert(data.message);
+
+                        if (data.result === true) {
+                            self.smsSent = true;
+                        }
+                    }
+                });
+            },
+
+            checkSms() {
+                const self = this;
+
+                if (!self.code) {
+                    alert("인증번호를 입력해주세요.");
+                    return;
+                }
+
+                $.ajax({
+                    url: "/user/checkSms.dox",
+                    type: "POST",
+                    data: {
+                        code: self.code
+                    },
+                    success: function (res) {
+                        let data = (typeof res === "string") ? JSON.parse(res) : res;
+
+                        if (data.result === true) {
+                            $.ajax({
+                                url: "/user/updatePhoneAfterVerify.dox",
+                                type: "POST",
+                                success: function (res2) {
+                                    let data2 = (typeof res2 === "string") ? JSON.parse(res2) : res2;
+
+                                    alert(data2.message || "휴대폰 인증이 완료되었습니다.");
+
+                                    if (data2.result === true) {
+                                        self.needPhoneVerify = false;
+                                        location.href = "/main.do";
+                                    }
+                                }
+                            });
+                        } else {
+                            alert(data.message);
+                        }
+                    }
+                });
+            }
+        }
+    });
+
+    app.mount("#socialBox");
+</script>
+
+</body>
 </html>
