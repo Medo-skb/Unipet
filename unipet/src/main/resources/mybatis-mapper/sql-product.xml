@@ -296,57 +296,5 @@
 		WHERE QNA_NO = #{qnaNo}
 	</delete>
 	
-	<select id="selectRecommendProduct" parameterType="hashmap" resultType="hashmap">
-	    SELECT 
-	        P.PRODUCT_NO,
-	        P.PRODUCT_NAME,
-	        P.PRODUCT_PRICE,
-	        P.STOCK_QTY,
-	        P.PRODUCT_STATUS,
-	        P.BRAND,
-	        AF.FILE_PATH,
-	        AF.FILE_NAME,
-	        AM.A_MAIN_TYPE,
-	        ASUB.A_SUB_TYPE,
-	        ISUB.I_SUB_TYPE,
-	        PET.SPECIES,
-	        PET.BREED,
-	        (
-	            CASE 
-	                WHEN AM.A_MAIN_TYPE = PET.SPECIES THEN 50 ELSE 0 
-	            END
-	            +
-	            CASE 
-	                WHEN ASUB.A_SUB_TYPE = PET.BREED THEN 40 ELSE 0 
-	            END
-	            +
-	            CASE 
-	                WHEN TIMESTAMPDIFF(YEAR, PET.BIRTH, CURDATE()) >= 7 
-	                     AND ISUB.I_SUB_TYPE = '영양제'
-	                THEN 20 ELSE 0 
-	            END
-	            +
-	            CASE 
-	                WHEN P.CDATE >= DATE_SUB(NOW(), INTERVAL 30 DAY)
-	                THEN 5 ELSE 0 
-	            END
-	        ) AS SCORE
-	    FROM PET
-	    JOIN PRODUCT P 
-	        ON P.PRODUCT_STATUS = 'Y'
-	    JOIN PC_ANIMAL_SUB ASUB 
-	        ON P.A_SUB_NO = ASUB.A_SUB_NO
-	    JOIN PC_ANIMAL_MAIN AM 
-	        ON ASUB.A_MAIN_NO = AM.A_MAIN_NO
-	    JOIN PC_ITEM_SUB ISUB 
-	        ON P.I_SUB_NO = ISUB.I_SUB_NO
-	    LEFT JOIN PRODUCT_FILE AF 
-	        ON P.PRODUCT_NO = AF.PRODUCT_NO
-	       AND AF.IS_MAIN = 'Y'
-	    WHERE PET.USER_ID = #{userId}
-	      AND PET.IS_MAIN = 'Y'
-	    ORDER BY SCORE DESC, P.PRODUCT_NO DESC
-	    LIMIT 6
-	</select>
-
+	
 </mapper>

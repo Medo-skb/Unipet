@@ -61,7 +61,5 @@ public interface ProductMapper {
 	public int deleteCart(HashMap<String, Object> map);
 
 	public int selectCartCount(HashMap<String, Object> map);
-	
-	public List<HashMap<String, Object>> selectRecommendProduct(HashMap<String, Object> map);
 
 }
