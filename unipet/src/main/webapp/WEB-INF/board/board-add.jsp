@@ -90,7 +90,8 @@
 						title: "",
 						bContent: "",
 						boardTitle: "게시글 작성",
-						isLocalBoard: false
+						isLocalBoard: false,
+						sessionRole: '<%=session.getAttribute("sessionRole") == null ? "" : session.getAttribute("sessionRole")%>'
 					};
 				},
 				methods: {
@@ -113,14 +114,22 @@
 						}
 					},
 					fnFilterSubTypeList: function () {
-						let self = this;
-						self.filteredSubTypeList = [];
+					    let self = this;
 
-						for (let i = 0; i < self.subTypeList.length; i++) {
-							if (String(self.subTypeList[i].B_MAIN_NO) == String(self.selectedMainNo)) {
-								self.filteredSubTypeList.push(self.subTypeList[i]);
-							}
-						}
+					    console.log("sessionRole:", self.sessionRole);
+
+					    self.filteredSubTypeList = [];
+
+					    for (let i = 0; i < self.subTypeList.length; i++) {
+					        if (String(self.subTypeList[i].B_MAIN_NO) == String(self.selectedMainNo)) {
+
+								if (self.subTypeList[i].B_SUB_NO == 1 && self.sessionRole != "A" && self.sessionRole != "BIZ") {
+								    continue;
+								}
+
+					            self.filteredSubTypeList.push(self.subTypeList[i]);
+					        }
+					    }
 					},
 					fnGetInitData: function () {
 						let self = this;

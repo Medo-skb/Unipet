@@ -216,4 +216,19 @@ public class ProductController {
 		HashMap<String, Object> resultMap = productService.deleteQna(map);
 		return new Gson().toJson(resultMap);
 	}
+	
+	@RequestMapping("/product/recommend.dox")
+	@ResponseBody
+	public String recommend(@RequestParam HashMap<String, Object> map, HttpSession session) throws Exception {
+
+	    HashMap<String, Object> resultMap = new HashMap<>();
+
+	    String userId = (String) session.getAttribute("sessionId");
+	    map.put("userId", userId);
+
+	    resultMap = productService.getRecommendProduct(map);
+
+	    Gson gson = new Gson();
+	    return gson.toJson(resultMap);
+	}
 }

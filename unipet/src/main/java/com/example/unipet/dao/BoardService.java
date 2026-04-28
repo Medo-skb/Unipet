@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.unipet.common.Message;
 import com.example.unipet.mapper.BoardMapper;
 
 import java.io.File;
@@ -18,36 +19,62 @@ public class BoardService {
 	@Autowired
 	BoardMapper boardMapper;
 
-	public HashMap<String, Object> getBoardList(HashMap<String, Object> map) {
-		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+	public HashMap<String, Object> getBoardList(HashMap<String, Object> map){
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
-		int page = map.get("page") == null || map.get("page").equals("") ? 1
-				: Integer.parseInt(map.get("page").toString());
-		int pageSize = map.get("pageSize") == null || map.get("pageSize").equals("") ? 10
-				: Integer.parseInt(map.get("pageSize").toString());
-		int startIndex = (page - 1) * pageSize;
+	    try {
+	        int page = map.get("page") == null || map.get("page").equals("") ? 1
+	                : Integer.parseInt(map.get("page").toString());
 
-		map.put("startIndex", startIndex);
-		map.put("pageSize", pageSize);
+	        int pageSize = map.get("pageSize") == null || map.get("pageSize").equals("") ? 10
+	                : Integer.parseInt(map.get("pageSize").toString());
 
-		List<HashMap<String, Object>> categoryMainList = boardMapper.selectBoardMainTypeList(map);
-		List<HashMap<String, Object>> categorySubList = boardMapper.selectBoardSubTypeList(map);
-		List<HashMap<String, Object>> localList = boardMapper.selectBoardLocalList(map);
-		List<HashMap<String, Object>> list = boardMapper.selectBoardList(map);
-		int count = boardMapper.selectBoardCnt(map);
+	        int count = boardMapper.selectBoardCnt(map);
 
-		resultMap.put("mainTypeList", categoryMainList);
-		resultMap.put("subTypeList", categorySubList);
-		resultMap.put("localList", localList);
-		resultMap.put("list", list);
-		resultMap.put("count", count);
-		resultMap.put("page", page);
-		resultMap.put("pageSize", pageSize);
-		resultMap.put("result", "success");
+	        int firstPageSize = count % pageSize;
+	        if(firstPageSize == 0 && count > 0){
+	            firstPageSize = pageSize;
+	        }
 
-		return resultMap;
+	        int startIndex = 0;
+	        int limitSize = pageSize;
+
+	        if(page == 1){
+	            startIndex = 0;
+	            limitSize = firstPageSize;
+	        } else {
+	            startIndex = firstPageSize + ((page - 2) * pageSize);
+	            limitSize = pageSize;
+	        }
+
+	        map.put("startIndex", startIndex);
+	        map.put("pageSize", limitSize);
+
+	        List<HashMap<String, Object>> list = boardMapper.selectBoardList(map);
+
+	        for(int i=0; i<list.size(); i++){
+	            list.get(i).put("DISPLAY_NO", count - startIndex - i);
+	        }
+
+	        List<HashMap<String, Object>> categoryMainList = boardMapper.selectBoardMainTypeList(map);
+	        List<HashMap<String, Object>> categorySubList = boardMapper.selectBoardSubTypeList(map);
+	        List<HashMap<String, Object>> localList = boardMapper.selectBoardLocalList(map);
+
+	        resultMap.put("list", list);
+	        resultMap.put("count", count);
+	        resultMap.put("mainTypeList", categoryMainList);
+	        resultMap.put("subTypeList", categorySubList);
+	        resultMap.put("localList", localList);
+	        resultMap.put("result", "success");
+
+	    } catch (Exception e) {
+	        System.out.println(e.getMessage());
+	        resultMap.put("result", "fail");
+	        resultMap.put("message", Message.MSG_SERVER_ERR);
+	    }
+
+	    return resultMap;
 	}
-
 	public HashMap<String, Object> getBoardDetail(HashMap<String, Object> map) {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
