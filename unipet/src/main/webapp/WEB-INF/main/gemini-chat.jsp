@@ -59,29 +59,67 @@
                     }
                 ],
                 isLoading: false,
+                currentCategory: null,
+
                 quickButtons: [
-                    "UNIPET",
-                    "예약금",
-                    "환불 규정",
-                    
+                    "예약",
+                    "쇼핑",
+                    "커뮤니티",
+                    "계정"
                 ],
+
                 faqMap: {
-                    "UNIPET": `UNIPET에서 병원, 미용, 위탁기관 예약 서비스를 한번에 간편하게 이용해보세요! 또한 쇼핑을 통해 다양한 반려동물 상품도 만나보실 수 있습니다.`,
-                    "예약금": `<UNIPET 예약금>
-예약금은 서비스 예약 확정을 위해 미리 결제하는 금액입니다. 
-예약금은 총 금액의 10% 입니다.`,
-                    "환불 규정": `<UNIPET 환불 규정>
-방문 3일 전: 예약 결제 금액의 100% 환불
-방문 1일 전 ~ 2일 전: 예약 결제 금액의 50% 환불
-방문 당일 및 노쇼: 환불 불가
-예약 시간보다 15분 이상 늦으실 경우 노쇼로 간주되어 자동 취소될 수 있습니다.`,
+                    "예약": {
+                        "예약 방법": `원하는 업체 상세 페이지에서 날짜와 시간을 선택한 뒤 예약금을 결제하면 예약이 완료됩니다.`,
+
+                        "예약금": `예약금은 서비스 예약 확정을 위해 미리 결제하는 금액입니다.
+총 결제 금액의 약 10%가 예약금으로 부과됩니다.`,
+
+                        "예약 취소": `마이페이지 > 예약 내역에서 예약을 취소할 수 있습니다.
+단, 환불 규정에 따라 환불 금액이 달라질 수 있습니다.`,
+
+                        "환불 규정": `방문 3일 전: 100% 환불
+방문 1~2일 전: 50% 환불
+당일 및 노쇼: 환불 불가
+
+                ※ 예약 시간보다 15분 이상 지각 시 노쇼로 처리될 수 있습니다.`
+                    },
+
+                    "쇼핑": {
+                        "배송 기간": `배송은 결제 완료 후 보통 2~5일 정도 소요됩니다.`,
+
+                        "배송비": `배송비는 상품 또는 판매 조건에 따라 다르게 적용될 수 있습니다.`,
+
+                        "교환/반품": `상품 수령 후 7일 이내 교환/반품 신청이 가능합니다.
+단, 사용 흔적이 있거나 포장이 훼손된 경우 제한될 수 있습니다.`,
+
+                        "주문 취소": `배송 준비 전 상태에서는 마이페이지 > 주문 내역에서 주문 취소가 가능합니다.`
+                    },
+
+                    "커뮤니티": {
+                        "게시글 작성": `로그인 후 커뮤니티 게시판에서 글쓰기 버튼을 눌러 게시글을 작성할 수 있습니다.`,
+
+                        "댓글 삭제": `본인이 작성한 댓글은 댓글 영역의 삭제 버튼을 통해 삭제할 수 있습니다.`,
+
+                        "신고 방법": `게시글 또는 댓글의 신고 버튼을 눌러 사유를 선택하면 신고가 접수됩니다.`,
+
+                        "이용 규칙": `욕설, 광고, 도배, 비방성 게시글은 관리자에 의해 삭제되거나 이용 제한이 발생할 수 있습니다.`
+                    },
+
+                    "계정": {
+                        "비밀번호 변경": `마이페이지 > 내 정보 수정에서 비밀번호를 변경할 수 있습니다.`,
+
+                        "회원 탈퇴": `마이페이지 > 내 정보 수정에서 회원 탈퇴를 신청할 수 있습니다.`,
+
+                        "고객센터": `이용 중 문제가 발생하면 고객센터 또는 1:1 문의를 이용해주세요.`
+                    }
                 },
                 
             };
         },
         methods: {
             sendMessage(customText = null) {
-                const inputText = customText ? customText : this.userInput.trim();
+                const inputText = (customText ?? this.userInput).trim();
 
                 if (inputText === "" || this.isLoading) {
                     return;
@@ -95,12 +133,33 @@
                 this.userInput = "";
                 this.scrollToBottom();
 
-                // 미리 정한 질문이면 바로 답변
+                // 1. 큰 메뉴를 입력하거나 버튼으로 누른 경우
                 if (this.faqMap[inputText]) {
+                    this.currentCategory = inputText;
+
+                    const subMenus = Object.keys(this.faqMap[this.currentCategory]);
+                    const menuText = subMenus.map(menu => `- ` + menu).join(`\n`);
+
                     this.messages.push({
-                        text: this.faqMap[inputText],
+                        text: inputText + ` 관련 메뉴입니다.
+
+` + menuText + `
+
+궁금한 내용을 입력해주세요.`,
                         type: "bot"
                     });
+
+                    this.scrollToBottom();
+                    return;
+                }
+
+                // 2. 큰 메뉴가 선택된 상태에서 세부 질문을 입력한 경우
+                if (this.currentCategory && this.faqMap[this.currentCategory][inputText]) {
+                    this.messages.push({
+                        text: this.faqMap[this.currentCategory][inputText],
+                        type: "bot"
+                    });
+
                     this.scrollToBottom();
                     return;
                 }

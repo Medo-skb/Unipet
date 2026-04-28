@@ -45,6 +45,26 @@ public class MainService {
 		return resultMap;
 	}
     
+ // 소셜 로그인 기본정보 입력 여부 체크
+    public HashMap<String, Object> socialBasicCheck(HashMap<String, Object> map) {
+        HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+        try {
+            Main user = mainMapper.selectSocialBasicCheck(map);
+
+            resultMap.put("result", "success");
+            resultMap.put("needBasicInfo", user != null);
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            resultMap.put("result", "fail");
+            resultMap.put("needBasicInfo", false);
+            resultMap.put("message", Message.MSG_SERVER_ERR);
+        }
+
+        return resultMap;
+    }
+    
     // 통합 검색 업체
 	public HashMap<String, Object> getSearchStoreList(HashMap<String, Object> map){
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();

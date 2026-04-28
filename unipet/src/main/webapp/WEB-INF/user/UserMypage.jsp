@@ -5,19 +5,19 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link href="/css/user/usermypage.css" rel="stylesheet">
         <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
         <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script src="/js/page-change.js"></script>
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/header.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/footer.css">
+        <!-- <link href="/css/user/usermypage.css" rel="stylesheet"> -->
+        <link href="/css/user/usermypage2.css" rel="stylesheet">
         <title>마이페이지</title>
     </head>
 
     <body>
-
-
+        <jsp:include page="/WEB-INF/header/header.jsp" />
 
         <div id="app">
 
@@ -1000,6 +1000,8 @@
                 </div>
             </div>
         </div>
+
+    <jsp:include page="/WEB-INF/footer/footer.jsp" />
 
         <script>
             const app = Vue.createApp({

@@ -33,7 +33,7 @@ public class UserMypageController {
 			return null;
 		}
 
-		return "user/UserMypage";
+		return "user/UserMypage2";
 	}
 
 	@PostMapping("/user/mypage.dox")

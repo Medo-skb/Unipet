@@ -143,6 +143,16 @@
 	    LIMIT 4
 	</select>
 	
+	<select id="selectSocialBasicCheck" parameterType="hashmap" resultType="com.example.unipet.model.Main">
+	    SELECT
+	        USER_ID AS userId,
+	        SOCIALTYPE AS socialType
+	    FROM USERS
+	    WHERE USER_ID = #{userId}
+	      AND SOCIALTYPE IN ('KAKAO', 'NAVER')
+	      AND (PHONE IS NULL OR PHONE = '')
+	</select>
+	
 	<!-- 통합검색 업체 -->
 	<select id="selectSearchStoreList" parameterType="map" resultType="com.example.unipet.model.Main">
 	    SELECT 
