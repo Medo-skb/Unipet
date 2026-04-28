@@ -1,165 +1,166 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.example.unipet.mapper.UserMapper">
 
-    <!-- 사용자 아이디 중복체크 -->
-    <select id="checkUser" parameterType="hashmap" resultType="int">
-        SELECT COUNT(*)
-        FROM unipet.users
-        WHERE USER_ID = #{userId}
-    </select>
-
-    <!-- 사업자 아이디 중복체크 -->
-    <select id="checkStoreUser" parameterType="hashmap" resultType="int">
-        SELECT COUNT(*)
-        FROM unipet.store_user
-        WHERE S_USER_ID = #{userId}
-    </select>
-
-    <!-- 사용자 회원가입 -->
-    <insert id="insertUser" parameterType="hashmap">
-        INSERT INTO unipet.users (
-            USER_ID,
-            USER_PWD,
-            USER_NAME,
-            NICKNAME,
-            PHONE,
-            EMAIL,
-            USER_ADDR,
-            FULL_ADDR,
-            ZIPCODE,
-            ROLE,
-            CDATE
-        ) VALUES (
-            #{userId},
-            #{pwd},
-            #{userName},
-            #{nickname},
-            #{phone},
-            #{email},
-            #{userAddr},
-            #{fullAddr},
-            #{zipcode},
-            'USER',
-            NOW()
-        )
-    </insert>
-
-    <!-- 사업자 회원가입 -->
-    <insert id="insertBizUser" parameterType="hashmap">
-        INSERT INTO unipet.store_user (
-            S_USER_ID,
-            S_USER_PWD,
-            CEO_NAME,
-            BIZ_FILE_NAME,
-            U_STATUS
-        ) VALUES (
-            #{userId},
-            #{pwd},
-            #{userName},
-            #{bizFileName},
-            'PND'
-        )
-    </insert>
-
-    <!-- 사용자 로그인 -->
-    <select id="selectUser" parameterType="hashmap"
-            resultType="com.example.unipet.model.User">
-        SELECT
-            USER_ID AS userId,
-            USER_PWD AS pwd,
-            USER_NAME AS userName,
-            NICKNAME AS nickname,
-            PHONE,
-            EMAIL,
-            USER_ADDR AS userAddr,
-            FULL_ADDR AS fullAddr,
-            ZIPCODE,
-            ROLE
-        FROM unipet.users
-        WHERE USER_ID = #{userId}
-    </select>
-
-    <!-- 사업자 로그인 -->
-	<select id="selectStoreUser" parameterType="hashmap"
-	        resultType="com.example.unipet.model.User">
-	    SELECT
-	        S_USER_ID AS userId,
-	        S_USER_PWD AS pwd,
-	        CEO_NAME AS userName,
-	        U_STATUS AS status,
-	        'BIZ' AS role
-	    FROM unipet.store_user
-	    WHERE S_USER_ID = #{userId}
-	      AND U_STATUS NOT IN ('BAN', 'EXT')
+	<!-- 사용자 아이디 중복체크 -->
+	<select id="checkUser" parameterType="hashmap" resultType="int">
+		SELECT COUNT(*)
+		FROM unipet.users
+		WHERE USER_ID = #{userId}
 	</select>
 
-    <!-- 아이디 찾기 -->
-    <select id="findId" parameterType="hashmap"
-            resultType="com.example.unipet.model.User">
-        SELECT
-            USER_ID AS userId,
-            USER_NAME AS userName
-        FROM unipet.users
-        WHERE USER_NAME = #{userName}
-          AND USER_PWD = #{pwd}
-    </select>
+	<!-- 사업자 아이디 중복체크 -->
+	<select id="checkStoreUser" parameterType="hashmap" resultType="int">
+		SELECT COUNT(*)
+		FROM unipet.store_user
+		WHERE S_USER_ID = #{userId}
+	</select>
 
-    <!-- 비밀번호 재설정 대상 확인 -->
-    <select id="checkUserForReset" parameterType="hashmap"
-            resultType="com.example.unipet.model.User">
-        SELECT
-            USER_ID AS userId,
-            USER_NAME AS userName,
-            PHONE
-        FROM unipet.users
-        WHERE USER_ID = #{userId}
-          AND USER_NAME = #{userName}
-          AND PHONE = #{phone}
-    </select>
+	<!-- 사용자 회원가입 -->
+	<insert id="insertUser" parameterType="hashmap">
+		INSERT INTO unipet.users (
+		USER_ID,
+		USER_PWD,
+		USER_NAME,
+		NICKNAME,
+		PHONE,
+		EMAIL,
+		USER_ADDR,
+		FULL_ADDR,
+		ZIPCODE,
+		ROLE,
+		CDATE
+		) VALUES (
+		#{userId},
+		#{pwd},
+		#{userName},
+		#{nickname},
+		#{phone},
+		#{email},
+		#{userAddr},
+		#{fullAddr},
+		#{zipcode},
+		'USER',
+		NOW()
+		)
+	</insert>
 
-    <!-- 비밀번호 변경 -->
-    <update id="resetPwd" parameterType="hashmap">
-        UPDATE unipet.users
-        SET USER_PWD = #{pwd}
-        WHERE USER_ID = #{userId}
-    </update>
+	<!-- 사업자 회원가입 -->
+	<insert id="insertBizUser" parameterType="hashmap">
+		INSERT INTO unipet.store_user (
+		S_USER_ID,
+		S_USER_PWD,
+		CEO_NAME,
+		BIZ_FILE_NAME,
+		U_STATUS
+		) VALUES (
+		#{userId},
+		#{pwd},
+		#{userName},
+		#{bizFileName},
+		'PND'
+		)
+	</insert>
 
-    <!-- 소셜 로그인 조회 -->
-    <select id="selectSocialUser" parameterType="hashmap"
-            resultType="com.example.unipet.model.User">
-        SELECT
-            USER_ID AS userId,
-            USER_NAME AS userName,
-            NICKNAME AS nickname,
-            EMAIL,
-            SOCIALTYPE AS socialType,
-            ROLE
-        FROM unipet.users
-        WHERE USER_ID = #{userId}
-    </select>
+	<!-- 사용자 로그인 -->
+	<select id="selectUser" parameterType="hashmap"
+		resultType="com.example.unipet.model.User">
+		SELECT
+		USER_ID AS userId,
+		USER_PWD AS pwd,
+		USER_NAME AS userName,
+		NICKNAME AS nickname,
+		PHONE,
+		EMAIL,
+		USER_ADDR AS userAddr,
+		FULL_ADDR AS fullAddr,
+		ZIPCODE,
+		ROLE
+		FROM unipet.users
+		WHERE USER_ID = #{userId}
+	</select>
 
-    <!-- 소셜 회원가입 -->
-    <insert id="insertSocialUser" parameterType="hashmap">
-        INSERT INTO unipet.users (
-            USER_ID,
-            USER_NAME,
-            NICKNAME,
-            EMAIL,
-            SOCIALTYPE,
-            ROLE,
-            CDATE
-        ) VALUES (
-            #{userId},
-            #{userName},
-            #{nickname},
-            #{email},
-            #{socialType},
-            'USER',
-            NOW()
-        )
-    </insert>
+	<!-- 사업자 로그인 -->
+	<select id="selectStoreUser" parameterType="hashmap"
+		resultType="com.example.unipet.model.User">
+		SELECT
+		S_USER_ID AS userId,
+		S_USER_PWD AS pwd,
+		CEO_NAME AS userName,
+		U_STATUS AS status,
+		'BIZ' AS role
+		FROM unipet.store_user
+		WHERE S_USER_ID = #{userId}
+		AND U_STATUS NOT IN ('BAN', 'EXT')
+	</select>
+
+	<!-- 아이디 찾기 -->
+	<select id="findId" parameterType="hashmap"
+		resultType="com.example.unipet.model.User">
+		SELECT
+		USER_ID AS userId,
+		USER_NAME AS userName
+		FROM unipet.users
+		WHERE USER_NAME = #{userName}
+		AND USER_PWD = #{pwd}
+	</select>
+
+
+	<!-- 비밀번호 재설정 대상 확인 -->
+	<select id="checkUserForReset" parameterType="hashmap"
+		resultType="com.example.unipet.model.User">
+		SELECT
+		USER_ID AS userId,
+		USER_NAME AS userName,
+		PHONE
+		FROM unipet.users
+		WHERE USER_ID = #{userId}
+		AND REPLACE(PHONE, '-', '') = REPLACE(#{phone}, '-', '')
+	</select>
+
+	<!-- 비밀번호 변경 -->
+	<update id="resetPwd" parameterType="hashmap">
+		UPDATE unipet.users
+		SET USER_PWD = #{pwd}
+		WHERE USER_ID = #{userId}
+	</update>
+
+	<!-- 소셜 로그인 조회 -->
+	<select id="selectSocialUser" parameterType="hashmap"
+		resultType="com.example.unipet.model.User">
+		SELECT
+		USER_ID AS userId,
+		USER_NAME AS userName,
+		NICKNAME AS nickname,
+		EMAIL,
+		SOCIALTYPE AS socialType,
+		ROLE
+		FROM unipet.users
+		WHERE USER_ID = #{userId}
+	</select>
+
+	<!-- 소셜 회원가입 -->
+	<insert id="insertSocialUser" parameterType="hashmap">
+		INSERT INTO unipet.users (
+		USER_ID,
+		USER_PWD,
+		USER_NAME,
+		NICKNAME,
+		EMAIL,
+		SOCIALTYPE,
+		ROLE,
+		CDATE
+		) VALUES (
+		#{userId},
+		#{userId},
+		#{userName},
+		#{nickname},
+		#{email},
+		#{socialType},
+		'USER',
+		NOW()
+		)
+	</insert>
 
 </mapper>

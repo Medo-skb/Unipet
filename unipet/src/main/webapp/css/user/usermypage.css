@@ -452,6 +452,11 @@
             color: #667085;
             font-weight: 700;
         }
+		.pet-card.active {
+		    border: 2px solid #ff8a3d !important;
+		    background: #fff4ec !important;
+		}
+		
 
         .mini-dashboard {
             display: grid;
@@ -572,6 +577,10 @@
         .status-gray {
             background: #9aa4b2;
         }
+		.status-red {
+		    background: #e74c3c;
+			color:#fff;
+		}
 
         @media (max-width: 1200px) {
             #app {

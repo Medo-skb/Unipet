@@ -10,10 +10,15 @@
         <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script src="/js/page-change.js"></script>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/header.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/footer.css">
         <title>마이페이지</title>
     </head>
 
     <body>
+
+
+
         <div id="app">
 
             <div class="sidebar">
@@ -465,10 +470,13 @@
                                             배송상태 : {{ getDeliStatusText(order.deliStatus || order.DELI_STATUS) }}
                                         </div>
 
+
                                         <div class="btn-box">
-                                            <button class="small-btn" v-if="order && order.productNo && order.orderNo 
-                                                   && (order.deliStatus || order.DELI_STATUS) === 'CMP'
-                                                    && (order.reviewYn || order.REVIEW_YN) !== 'Y'"
+                                            <button class="small-btn btn-red" v-if="canRefundOrder(order)"
+                                                @click="goRefundShop(order)">
+                                                환불
+                                            </button>
+                                            <button class="small-btn" v-if="canWriteReview(order)"
                                                 @click="goReview(order)">
                                                 상품리뷰 작성
                                             </button>
@@ -479,7 +487,6 @@
                             </div>
                         </div>
                     </div>
-
 
 
 
@@ -521,18 +528,24 @@
 
                                             <div class="list-sub">
                                                 상태 :
-                                               
-                                                    <span class="status-badge"
-                                                        :class="getReserveStatusClass(item.rsvStatus || item.RSV_STATUS)">
-                                                        {{ getReservationStatusText(item.rsvStatus || item.RSV_STATUS)
-                                                        }}
-                                                    </span>
-                                                </div>
 
+                                                <span class="status-badge"
+                                                    :class="getReserveStatusClass(item.rsvStatus || item.RSV_STATUS)">
+                                                    {{ getReservationStatusText(item.rsvStatus || item.RSV_STATUS)
+                                                    }}
+                                                </span>
                                             </div>
-                                    
+
+                                        </div>
+
 
                                         <div class="btn-box">
+                                            <button class="small-btn btn-red" v-if="canRefundRsv(item)"
+                                                @click="goRefundRsv(item)">
+                                                예약환불
+                                            </button>
+
+
                                             <button class="small-btn" v-if="(item.rsvStatus || item.RSV_STATUS) === 'FIN'
                                                  && (item.reviewYn || item.REVIEW_YN) !== 'Y'" @click="pageChange('/user/mypage/rsv-review.do', {
                                                 rsvNo: item.rsvNo || item.RSV_NO
@@ -575,13 +588,37 @@
                         </div>
                     </div>
 
+
+
                     <div v-if="currentMenu === 'petMyPage'">
                         <div class="section-box">
+                            <div class="section-box">
+                                <div class="section-title">반려동물 선택</div>
+
+                                <div class="pet-list">
+                                    <div class="pet-card" v-for="pet in petList" :key="'mypage-select-' + pet.petNo"
+                                        :class="{ active: String(selectedPetNo) === String(pet.petNo) }"
+                                        @click="selectPet(pet)">
+
+                                        <div class="pet-thumb">
+                                            <div class="pet-avatar">{{ getPetInitial(pet.petName) }}</div>
+                                        </div>
+
+                                        <div class="pet-body">
+                                            <div class="pet-name">{{ pet.petName }}</div>
+                                            <div class="pet-info">
+                                                {{ pet.species || '' }}
+                                                {{ pet.birthdate ? ' · ' + getPetAge(pet.birthdate) + '살' : '' }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="section-title">건강 기록 조회</div>
                             <div v-if="healthList.length === 0" class="empty-text">건강 기록이 없습니다.</div>
                             <div class="info-card" v-for="item in healthList" :key="'h-' + item.id">
                                 <div class="list-title">{{ item.title }}</div>
-                                <div class="list-sub">기록일 : {{ item.date }}</div>
+                                <div class="list-sub">기록일 : {{ formatDate(item.date) }}</div>
                                 <div class="list-sub">내용 : {{ item.memo }}</div>
                             </div>
                         </div>
@@ -591,8 +628,11 @@
                             <div v-if="vacList.length === 0" class="empty-text">접종 기록이 없습니다.</div>
                             <div class="info-card" v-for="item in vacList" :key="'v-' + item.id">
                                 <div class="list-title">{{ item.name }}</div>
-                                <div class="list-sub">접종일 : {{ item.date }}</div>
-                                <div class="list-sub">다음 접종일 : {{ item.nextDate || '-' }}</div>
+
+                                <div class="list-sub">반려동물 : {{ item.petName }}</div>
+                                <div class="list-sub">접종일 : {{ formatDate(item.date) }}</div>
+                                <div class="list-sub">다음 접종일 : {{ item.nextDate ? formatDate(item.nextDate) : '-' }}
+                                </div>
                                 <div class="list-sub">병원명 : {{ item.hospitalName || '-' }}</div>
                                 <div class="list-sub">비고 : {{ item.memo || '-' }}</div>
                             </div>
@@ -603,12 +643,37 @@
                             <div v-if="weightList.length === 0" class="empty-text">몸무게 기록이 없습니다.</div>
                             <div class="info-card" v-for="item in weightList" :key="'w-main-' + item.id">
                                 <div class="list-title">{{ item.weight }} kg</div>
-                                <div class="list-sub">기록일 : {{ item.date }}</div>
+
+                                <div class="list-sub">반려동물 : {{ item.petName || '-' }}</div>
+                                <div class="list-sub">기록일 : {{ formatDate(item.date) }}</div>
                             </div>
                         </div>
                     </div>
-
                     <div v-if="currentMenu === 'petHealthPage'">
+
+                        <div class="section-box">
+                            <div class="section-title">반려동물 선택</div>
+
+                            <div class="pet-list">
+                                <div class="pet-card" v-for="pet in petList" :key="'health-select-' + pet.petNo"
+                                    :class="{ active: String(selectedPetNo) === String(pet.petNo) }"
+                                    @click="selectPet(pet)">
+
+                                    <div class="pet-thumb">
+                                        <div class="pet-avatar">{{ getPetInitial(pet.petName) }}</div>
+                                    </div>
+
+                                    <div class="pet-body">
+                                        <div class="pet-name">{{ pet.petName || '-' }}</div>
+                                        <div class="pet-info">
+                                            {{ pet.species || '' }}
+                                            {{ pet.birthdate ? ' · ' + getPetAge(pet.birthdate) + '살' : '' }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="section-box">
                             <div class="section-title">건강 기록 등록</div>
                             <div class="row">
@@ -627,99 +692,190 @@
                                 <button @click="saveHealthRecord">등록</button>
                             </div>
                         </div>
-
                         <div class="section-box">
                             <div class="section-title">건강 기록 목록</div>
-                            <div v-if="healthList.length === 0" class="empty-text">건강 기록이 없습니다.</div>
+
+                            <div v-if="healthList.length === 0" class="empty-text">
+                                건강 기록이 없습니다.
+                            </div>
+
                             <div class="info-card" v-for="item in healthList" :key="'health-' + item.id">
                                 <div class="list-title">{{ item.title }}</div>
-                                <div class="list-sub">기록일 : {{ item.date }}</div>
+                                <div class="list-sub">반려동물 : {{ item.petName }}</div>
+                                <div class="list-sub">기록일 : {{ formatDate(item.date) }}</div>
                                 <div class="list-sub">내용 : {{ item.memo }}</div>
                             </div>
                         </div>
                     </div>
 
+
                     <div v-if="currentMenu === 'petVacPage'">
+
+                        <!-- 반려동물 선택 -->
+                        <div class="section-box">
+                            <div class="section-title">반려동물 선택</div>
+
+                            <div class="pet-list">
+                                <div class="pet-card" v-for="pet in petList" :key="'vac-select-' + pet.petNo"
+                                    :class="{ active: String(selectedPetNo) === String(pet.petNo) }"
+                                    @click="selectPet(pet)">
+
+                                    <div class="pet-thumb">
+                                        <div class="pet-avatar">{{ getPetInitial(pet.petName) }}</div>
+                                    </div>
+
+                                    <div class="pet-body">
+                                        <div class="pet-name">{{ pet.petName || '-' }}</div>
+                                        <div class="pet-info">
+                                            {{ pet.species || '' }}
+                                            {{ pet.birthdate ? ' · ' + getPetAge(pet.birthdate) + '살' : '' }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 접종 기록 등록 -->
                         <div class="section-box">
                             <div class="section-title">접종 기록 등록</div>
+
                             <div class="row">
                                 <label>백신명</label>
                                 <input type="text" v-model="vacForm.name">
                             </div>
+
                             <div class="row">
                                 <label>접종일</label>
                                 <input type="date" v-model="vacForm.date">
                             </div>
+
                             <div class="row">
                                 <label>다음 접종일</label>
                                 <input type="date" v-model="vacForm.nextDate">
                             </div>
+
                             <div class="row">
                                 <label>병원명</label>
                                 <input type="text" v-model="vacForm.hospitalName">
                             </div>
+
                             <div class="row">
                                 <label>비고</label>
                                 <textarea v-model="vacForm.memo"></textarea>
                             </div>
+
                             <div class="btn-box">
                                 <button @click="saveVacRecord">등록</button>
                             </div>
                         </div>
 
+                        <!-- 접종 기록 목록 -->
                         <div class="section-box">
                             <div class="section-title">접종 기록 목록</div>
-                            <div v-if="vacList.length === 0" class="empty-text">접종 기록이 없습니다.</div>
+
+                            <div v-if="vacList.length === 0" class="empty-text">
+                                접종 기록이 없습니다.
+                            </div>
+
                             <div class="info-card" v-for="item in vacList" :key="'vac-' + item.id">
                                 <div class="list-title">{{ item.name }}</div>
-                                <div class="list-sub">접종일 : {{ item.date }}</div>
-                                <div class="list-sub">다음 접종일 : {{ item.nextDate || '-' }}</div>
+
+                                <div class="list-sub">반려동물 : {{ item.petName || '-' }}</div>
+                                <div class="list-sub">접종일 : {{formatDate(item.date) }}</div>
+                                <div class="list-sub">다음 접종일 :{{ item.nextDate ? formatDate(item.nextDate) : '-' }}
+                                </div>
                                 <div class="list-sub">병원명 : {{ item.hospitalName || '-' }}</div>
                                 <div class="list-sub">비고 : {{ item.memo || '-' }}</div>
+
                                 <div class="btn-box">
                                     <button class="btn-red" @click="deleteVaccine(item.id)">삭제</button>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
+                    </div>
                     <div v-if="currentMenu === 'petWeightPage'">
+
+                        <!-- ✅ 반려동물 선택 -->
+                        <div class="section-box">
+                            <div class="section-title">반려동물 선택</div>
+
+                            <div class="pet-list">
+                                <div class="pet-card" v-for="pet in petList" :key="'weight-select-' + pet.petNo"
+                                    :class="{ active: String(selectedPetNo) === String(pet.petNo) }"
+                                    @click="selectPet(pet)">
+
+                                    <div class="pet-thumb">
+                                        <div class="pet-avatar">{{ getPetInitial(pet.petName) }}</div>
+                                    </div>
+
+                                    <div class="pet-body">
+                                        <div class="pet-name">{{ pet.petName || '-' }}</div>
+                                        <div class="pet-info">
+                                            {{ pet.species || '' }}
+                                            {{ pet.birthdate ? ' · ' + getPetAge(pet.birthdate) + '살' : '' }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ✅ 몸무게 등록 -->
                         <div class="section-box">
                             <div class="section-title">몸무게 등록</div>
+
                             <div class="row">
                                 <label>몸무게(kg)</label>
                                 <input type="text" v-model="weightForm.weight">
                             </div>
+
                             <div class="row">
                                 <label>기록일</label>
                                 <input type="date" v-model="weightForm.date">
                             </div>
+
                             <div class="row">
                                 <label>비고</label>
                                 <textarea v-model="weightForm.memo"></textarea>
                             </div>
+
                             <div class="btn-box">
                                 <button @click="saveWeightRecord">등록</button>
                             </div>
                         </div>
 
+                        <!-- ✅ 차트 -->
                         <div class="section-box">
-                            <div class="section-title">일자별 몸무게 차트 그래프</div>
+                            <div class="section-title">몸무게 변화 차트</div>
                             <div class="chart-wrap">
                                 <canvas id="weightChart"></canvas>
                             </div>
                         </div>
 
+                        <!-- ✅ 목록 -->
                         <div class="section-box">
                             <div class="section-title">몸무게 기록 목록</div>
-                            <div v-if="weightList.length === 0" class="empty-text">몸무게 기록이 없습니다.</div>
+
+                            <div v-if="weightList.length === 0" class="empty-text">
+                                몸무게 기록이 없습니다.
+                            </div>
+
                             <div class="info-card" v-for="item in weightList" :key="'w-' + item.id">
                                 <div class="list-title">{{ item.weight }} kg</div>
-                                <div class="list-sub">기록일 : {{ item.date }}</div>
+
+                                <div class="list-sub">반려동물 : {{ item.petName || '-' }}</div>
+                                <div class="list-sub">기록일 : {{ formatDate(item.date) }}</div>
                                 <div class="list-sub">비고 : {{ item.memo || '-' }}</div>
                             </div>
                         </div>
+
                     </div>
+
+
+
+
+
+
                     <div v-if="currentMenu === 'couponInfo'">
                         <div class="section-box">
                             <div class="section-title">쿠폰 관리</div>
@@ -1027,6 +1183,39 @@
                         window.pageChange(url, param);
 
                     },
+                    selectPet(pet) {
+                        if (!pet || !pet.petNo) {
+                            alert("반려동물 정보를 찾을 수 없습니다.");
+                            return;
+                        }
+
+                        this.selectedPetNo = String(pet.petNo);
+
+                        this.healthList = [];
+                        this.vacList = [];
+                        this.weightList = [];
+
+                        if (this.currentMenu === "petHealthPage") {
+                            this.loadHealthList();
+                        }
+
+                        if (this.currentMenu === "petVacPage") {
+                            this.loadVaccineList();
+                        }
+
+                        if (this.currentMenu === "petWeightPage") {
+                            this.loadWeightList();
+                        }
+
+                        if (this.currentMenu === "petMyPage") {
+                            this.loadHealthList();
+                            this.loadVaccineList();
+                            this.loadWeightList();
+                        }
+                    },
+
+
+
 
 
                     changeMenu(menu) {
@@ -1062,6 +1251,62 @@
                     goOrderList() {
                         this.currentMenu = "orderList";
                     },
+                    canRefundOrder(order) {
+                        if (!order) return false;
+
+                        const deliStatus = String(order.deliStatus || order.DELI_STATUS || "").trim().toUpperCase();
+                        const payStatus = String(order.payStatus || order.PAY_STATUS || "").trim().toUpperCase();
+
+                        // 배송취소, 배송완료면 환불 버튼 숨김
+                        if (deliStatus === "CAN" || deliStatus === "CANCEL" || deliStatus === "CMP") {
+                            return false;
+                        }
+
+                        // 이미 결제취소 상태면 환불 버튼 숨김
+                        if (payStatus === "CAN" || payStatus === "CANCEL" || payStatus === "FAL") {
+                            return false;
+                        }
+
+                        return true;
+                    },
+
+                    goRefundShop(order) {
+                        if (!order || !order.orderNo) {
+                            alert("환불에 필요한 주문 정보가 없습니다.");
+                            return;
+                        }
+
+                        window.pageChange('/payment/refund-shop.do', {
+                            orderNo: order.orderNo,
+                            productNo: order.productNo,
+                            orderDetailNo: order.orderDetailNo
+                        });
+                    },
+
+                    canRefundRsv(item) {
+                        if (!item) return false;
+
+                        const status = String(item.rsvStatus || item.RSV_STATUS || "")
+                            .trim()
+                            .toUpperCase();
+
+                        // 확정 예약만 환불 버튼 표시
+                        return status === "CNF";
+                    },
+
+                    goRefundRsv(item) {
+                        if (!item || !(item.rsvNo || item.RSV_NO)) {
+                            alert("예약 정보가 없습니다.");
+                            return;
+                        }
+
+                        window.pageChange('/payment/refund-rsv.do', {
+                            rsvNo: item.rsvNo || item.RSV_NO
+                        });
+                    },
+
+
+
                     goReview(order) {
                         if (!order) return;
 
@@ -1091,11 +1336,11 @@
                     },
                     getPayStatusText(status) {
                         if (!status) return "-";
-
+                        status = String(status).trim().toUpperCase();
                         switch (status) {
                             case "RDY": return "준비";
                             case "PAY": return "결제";
-                            case "CAN": return "취소";
+                            case "CANCEL": return "취소";
                             case "FAL": return "실패";
                             default: return status;
                         }
@@ -1120,6 +1365,7 @@
                             case "RDY": return "배송준비";
                             case "SHP": return "배송중";
                             case "CMP": return "배송완료";
+                            case "CAN": return "배송취소";
                             default: return status;
                         }
                     },
@@ -1134,14 +1380,19 @@
                             default: return "status-gray";
                         }
                     },
-                    canWriteOrderReview(group) {
-                        if (!group || !group.items || group.items.length === 0) return false;
+                    canWriteReview(order) {
+                        if (!order) return false;
 
-                        return group.items.some(item => {
-                            return (item.deliStatus || item.DELI_STATUS) === "CMP";
-                        });
+                        const deliStatus = String(order.deliStatus || order.DELI_STATUS || "")
+                            .trim()
+                            .toUpperCase();
+
+                        const reviewYn = String(order.reviewYn || order.REVIEW_YN || "N")
+                            .trim()
+                            .toUpperCase();
+
+                        return deliStatus === "CMP" && reviewYn !== "Y";
                     },
-
 
 
                     openReservationDetail(item) {
@@ -1227,6 +1478,17 @@
                             url: "/user/mypage.dox",
                             type: "POST",
                             success: function (data) {
+                                if (data.result === "loginRequired") {
+                                    alert("로그인 후 이용해주세요.");
+
+                                    setTimeout(() => {
+                                        window.pageChange("/user/login.do");
+                                    }, 200);
+
+                                    return;
+                                }
+
+
                                 if (data.result === "success" && data.userInfo) {
                                     self.user = {
                                         userName: data.userInfo.userName || "",
@@ -1375,8 +1637,9 @@
                                     self.petList = data.petList || [];
                                     const mainPet = self.petList.find(p => p.isMain === "Y");
 
-                                    if (mainPet) self.selectedPetNo = mainPet.petNo;
-                                    else if (self.petList.length > 0) self.selectedPetNo = self.petList[0].petNo;
+                                    if (mainPet) self.selectedPetNo = String(mainPet.petNo);
+                                    else if (self.petList.length > 0) self.selectedPetNo = String(self.petList[0].petNo);
+
                                     else self.selectedPetNo = "";
 
                                     if (self.selectedPetNo) {
@@ -1572,9 +1835,14 @@
                             }
                         });
                     },
-
                     saveHealthRecord() {
                         const self = this;
+
+                        if (!self.selectedPetNo) {
+                            alert("반려동물을 선택해주세요.");
+                            return;
+                        }
+
                         $.ajax({
                             url: "/user/add-health.dox",
                             type: "POST",
@@ -1593,9 +1861,14 @@
                             }
                         });
                     },
-
                     saveVacRecord() {
                         const self = this;
+
+                        if (!self.selectedPetNo) {
+                            alert("반려동물을 선택해주세요.");
+                            return;
+                        }
+
                         $.ajax({
                             url: "/user/add-vaccine.dox",
                             type: "POST",
@@ -1617,23 +1890,20 @@
                         });
                     },
 
-                    deleteVaccine(vacNo) {
-                        const self = this;
-                        if (!confirm("백신 기록을 삭제하시겠습니까?")) return;
 
-                        $.ajax({
-                            url: "/user/delete-vaccine.dox",
-                            type: "POST",
-                            data: { vacNo: vacNo, petNo: self.selectedPetNo },
-                            success: function (data) {
-                                alert(data.message);
-                                if (data.result === "success") self.loadVaccineList();
-                            }
-                        });
-                    },
+
+
+
+
 
                     saveWeightRecord() {
                         const self = this;
+
+                        if (!self.selectedPetNo) {
+                            alert("반려동물을 선택해주세요.");
+                            return;
+                        }
+
                         $.ajax({
                             url: "/user/add-weight.dox",
                             type: "POST",
@@ -1652,7 +1922,6 @@
                             }
                         });
                     },
-
                     drawWeightChart() {
                         const canvas = document.getElementById("weightChart");
                         if (!canvas) return;

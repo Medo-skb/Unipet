@@ -466,13 +466,13 @@ public class UserController {
     public void naverLogin(HttpSession session, HttpServletResponse response) throws IOException {
         String state = Long.toHexString(random.nextLong());
         session.setAttribute("naverState", state);
-
         String url = "https://nid.naver.com/oauth2.0/authorize"
                 + "?response_type=code"
                 + "&client_id=" + URLEncoder.encode(naverClientId, StandardCharsets.UTF_8)
                 + "&redirect_uri=" + URLEncoder.encode(naverRedirectUri, StandardCharsets.UTF_8)
-                + "&state=" + state;
-
+                + "&state=" + state
+                + "&auth_type=reauthenticate";  // 🔥 추가
+      
         response.sendRedirect(url);
     }
 

@@ -1,6 +1,8 @@
 package com.example.unipet.controller;
 
+import java.io.IOException;
 import java.util.HashMap;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.unipet.dao.UserMypageService;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
@@ -20,16 +23,39 @@ public class UserMypageController {
 	private UserMypageService userMypageService;
 
 	@GetMapping("/user/mypage.do")
-	public String mypage() {
+	public String mypage(HttpSession session, HttpServletResponse response) throws IOException {
+
+		// 로그인 안된 경우
+		if (session.getAttribute("sessionId") == null) {
+			response.setContentType("text/html;charset=UTF-8");
+			response.getWriter()
+					.write("<script>" + "alert('로그인 후 이용해주세요.');" + "location.href='/user/login.do';" + "</script>");
+			return null;
+		}
+
 		return "user/UserMypage";
 	}
 
 	@PostMapping("/user/mypage.dox")
 	@ResponseBody
 	public HashMap<String, Object> getMypage(HttpSession session) {
+
+		HashMap<String, Object> result = new HashMap<>();
+
+		Object sessionId = session.getAttribute("sessionId");
+
+		if (sessionId == null) {
+			result.put("result", "loginRequired");
+			return result;
+		}
+
 		HashMap<String, Object> map = new HashMap<>();
-		map.put("userId", session.getAttribute("sessionId"));
-		return userMypageService.getMypageData(map);
+		map.put("userId", sessionId);
+
+		result = userMypageService.getMypageData(map);
+		result.put("result", "success");
+
+		return result;
 	}
 
 	@PostMapping("/user/update-user.dox")
@@ -263,7 +289,7 @@ public class UserMypageController {
 		HashMap<String, Object> result = new HashMap<>();
 
 		Object sessionId = session.getAttribute("sessionId");
-		
+
 		if (sessionId == null) {
 			result.put("result", "fail");
 			result.put("message", "로그인이 필요합니다.");
@@ -298,26 +324,27 @@ public class UserMypageController {
 
 		return userMypageService.getPointUseList(map);
 	}
+
 	@PostMapping("/user/coupon-list.dox")
 	@ResponseBody
 	public HashMap<String, Object> getCouponList(HttpSession session) {
 
-	    HashMap<String, Object> result = new HashMap<>();
+		HashMap<String, Object> result = new HashMap<>();
 
-	    Object sessionId = session.getAttribute("sessionId");
+		Object sessionId = session.getAttribute("sessionId");
 
-	    if (sessionId == null) {
-	        result.put("result", "fail");
-	        result.put("couponList", new java.util.ArrayList<>());
-	        return result;
-	    }
+		if (sessionId == null) {
+			result.put("result", "fail");
+			result.put("couponList", new java.util.ArrayList<>());
+			return result;
+		}
 
-	    HashMap<String, Object> map = new HashMap<>();
-	    map.put("userId", sessionId);
+		HashMap<String, Object> map = new HashMap<>();
+		map.put("userId", sessionId);
 
-	    result.put("couponList", userMypageService.getCouponList(map));
-	    result.put("result", "success");
+		result.put("couponList", userMypageService.getCouponList(map));
+		result.put("result", "success");
 
-	    return result;
-}
+		return result;
+	}
 }
