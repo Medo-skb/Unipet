@@ -1,67 +1,92 @@
-
+/* 전체 배경 */
 body {
     margin: 0;
-    padding: 60px 0;
-    background: #f4f6fb;
-    font-family: Arial, sans-serif;
+    font-family: 'Noto Sans KR', sans-serif;
+    background: #f5f6f8;
 }
 
-#app {
-    width: 520px;
-    margin: 0 auto;
-    background: #f0f4f5;
-    border: 1px solid #3b82f6;
-    border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-    padding: 28px 24px;
+/* 가운데 정렬 */
+.reset-wrap {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-#app::before {
-    content: "새 비밀번호 설정";
-    display: block;
+/* 카드 박스 */
+.reset-box {
+    width: 400px;
+    padding: 42px 36px;
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* 제목 */
+.reset-box .title {
     text-align: center;
-    font-size: 22px;
+    font-size: 24px;
     font-weight: 700;
-    margin-bottom: 24px;
+    margin-bottom: 30px;
+    color: #222;
 }
 
+/* 입력 영역 */
 .row {
-    margin-bottom: 12px;
+    margin-bottom: 18px;
 }
 
 .row label {
     display: block;
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 600;
     margin-bottom: 6px;
+    color: #333;
 }
 
 .row input {
     width: 100%;
-    height: 42px;
-    border: 1px solid #cfd8e3;
-    border-radius: 10px;
+    height: 46px;
     padding: 0 12px;
-    box-sizing: border-box;
+    border: 1px solid #ddd;
+    border-radius: 10px;
     font-size: 14px;
-    background: white;
+    outline: none;
+    box-sizing: border-box;
+    transition: 0.2s;
 }
 
+.row input:focus {
+    border-color: #ff7a2f;
+    box-shadow: 0 0 0 3px rgba(255, 122, 47, 0.15);
+}
+
+/* 버튼 */
 .btn-box {
-    margin-top: 20px;
+    margin-top: 25px;
 }
 
 .btn-box button {
     width: 100%;
     height: 46px;
-    border-radius: 12px;
-    cursor: pointer;
-    font-size: 16px;
+    border: none;
+    border-radius: 10px;
+    background: #ff7a2f;
+    color: #fff;
+    font-size: 15px;
     font-weight: 700;
-    border: 2px solid #8ea8d8;
-    background: #eef4ff;
+    cursor: pointer;
+    transition: 0.2s;
 }
 
 .btn-box button:hover {
-    opacity: 0.9;
+    background: #ff6610;
+}
+
+/* 반응형 */
+@media (max-width: 480px) {
+    .reset-box {
+        width: 90%;
+        padding: 32px 24px;
+    }
 }

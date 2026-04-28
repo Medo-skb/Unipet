@@ -398,13 +398,25 @@
                     <div v-if="currentMenu === 'orderList'">
                         <div class="section-box">
                             <div class="section-title">쇼핑몰 주문 내역</div>
+                            <!-- 정렬 선택 -->
+                            <select v-model="orderSortType">
+                                <option value="latest">최신순</option>
+                                <option value="old">오래된순</option>
+                                <option value="amountHigh">금액 높은순</option>
+                                <option value="amountLow">금액 낮은순</option>
+                                <option value="payStatus">결제상태순</option>
+                                <option value="deliStatus">배송상태순</option>
+
+                            </select>
 
                             <div v-if="groupedOrderList.length === 0" class="empty-text">
                                 주문 내역이 없습니다.
                             </div>
 
-                            <div class="info-card" v-for="group in groupedOrderList" :key="group.orderNo"
+                            <!-- 🔥 주문 리스트 -->
+                            <div class="info-card" v-for="group in pagedOrderList" :key="group.orderNo"
                                 style="margin-bottom:16px;">
+
                                 <div
                                     style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
                                     <div class="list-title">
@@ -416,11 +428,12 @@
                                     </button>
                                 </div>
 
+                                <!-- 상품 리스트 -->
                                 <div v-for="order in group.items"
                                     :key="order.orderDetailNo || order.orderNo + '-' + order.productNo"
                                     class="order-item">
 
-                                    <img class="order-img" :src="order.productImg || '/img/no-image.png'" alt="상품이미지">
+                                    <img class="order-img" :src="order.productImg || '/img/no-image.png'">
 
                                     <div style="flex:1;">
                                         <div class="list-title">{{ order.productName || '-' }}</div>
@@ -428,10 +441,21 @@
                                         <div class="list-sub">금액 : {{ Number(order.price || 0).toLocaleString() }}원
                                         </div>
                                     </div>
+
                                 </div>
                             </div>
+
+                            <!-- 🔥 페이징 (여기 위치 중요) -->
+                            <div class="btn-box" v-if="orderTotalPage > 1">
+                                <button class="small-btn" :disabled="orderPage === 1" @click="orderPage--">이전</button>
+                                <span>{{ orderPage }} / {{ orderTotalPage }}</span>
+                                <button class="small-btn" :disabled="orderPage === orderTotalPage"
+                                    @click="orderPage++">다음</button>
+                            </div>
+
                         </div>
                     </div>
+
 
                     <div v-if="currentMenu === 'orderDetail'">
                         <div class="section-box">
@@ -443,7 +467,14 @@
                             <div class="info-card" style="margin-bottom:18px;">
                                 <div class="list-sub">주문일자 : {{ selectedOrderGroup.orderDate }}</div>
                                 <div class="list-sub">총 상품 수 : {{ selectedOrderGroup.items.length }}건</div>
+                                <div class="btn-box">
+                                    <button class="small-btn btn-red" v-if="canRefundOrderGroup(selectedOrderGroup)"
+                                        @click="goRefundShopGroup(selectedOrderGroup)">
+                                        주문 환불
+                                    </button>
+                                </div>
                             </div>
+
 
                             <div v-if="selectedOrderGroup.items.length === 0" class="empty-text">
                                 주문 상세 내역이 없습니다.
@@ -472,10 +503,6 @@
 
 
                                         <div class="btn-box">
-                                            <button class="small-btn btn-red" v-if="canRefundOrder(order)"
-                                                @click="goRefundShop(order)">
-                                                환불
-                                            </button>
                                             <button class="small-btn" v-if="canWriteReview(order)"
                                                 @click="goReview(order)">
                                                 상품리뷰 작성
@@ -487,78 +514,76 @@
                             </div>
                         </div>
                     </div>
-
-
-
-
                     <div v-if="currentMenu === 'reserveList'">
                         <div class="section-box">
-                            <div class="section-header">
-                                <div class="section-title" style="margin-bottom:0;">예약 내역</div>
-                            </div>
+                            <div class="section-title">예약 내역</div>
+                            <!-- 정렬 선택 -->
+                            <select v-model="rsvSortType">
+                                <option value="latest">최신순</option>
+                                <option value="old">오래된순</option>
+                                <option value="timeAsc">시간 빠른순</option>
+                                <option value="timeDesc">시간 늦은순</option>
+                                <option value="status">예약상태순</option>
+                            </select>
 
                             <div v-if="reservationAllList.length === 0" class="empty-text">
                                 예약 내역이 없습니다.
                             </div>
 
-                            <div v-for="group in groupedReservationList" :key="group.date" style="margin-bottom:20px;">
+                            <!-- 🔥 그룹 반복 -->
+                            <div v-for="group in pagedReservationList" :key="group.date" style="margin-bottom:20px;">
+
+                                <!-- 날짜 -->
                                 <div class="section-title" style="font-size:17px; margin-bottom:10px;">
                                     {{ formatDate(group.date) }}
                                 </div>
 
+                                <!-- 예약 리스트 -->
                                 <div class="info-card" v-for="item in group.items" :key="'all-' + item.rsvNo">
-                                    <div
-                                        style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+
+                                    <div style="display:flex; justify-content:space-between; gap:12px;">
                                         <div style="flex:1;">
                                             <div class="list-title">
-                                                {{ item.rsvStartTime || '-' }} ~ {{ item.rsvEndTime || '-' }}
+                                                {{ item.rsvStartTime }} ~ {{ item.rsvEndTime }}
                                             </div>
 
-                                            <div class="list-sub">
-                                                예약처 : {{ item.storeName || item.STORE_NAME || '-' }}
-                                            </div>
-
-                                            <div class="list-sub">
-                                                반려동물 : {{ item.petName || item.PET_NAME || '-' }}
-                                            </div>
-
-                                            <div class="list-sub">
-                                                요청사항 : {{ item.request || '-' }}
-                                            </div>
+                                            <div class="list-sub">예약처 : {{ item.storeName }}</div>
+                                            <div class="list-sub">반려동물 : {{ item.petName }}</div>
 
                                             <div class="list-sub">
                                                 상태 :
-
                                                 <span class="status-badge"
-                                                    :class="getReserveStatusClass(item.rsvStatus || item.RSV_STATUS)">
-                                                    {{ getReservationStatusText(item.rsvStatus || item.RSV_STATUS)
-                                                    }}
+                                                    :class="getReserveStatusClass(item.rsvStatus)">
+                                                    {{ getReservationStatusText(item.rsvStatus) }}
                                                 </span>
                                             </div>
-
                                         </div>
-
 
                                         <div class="btn-box">
                                             <button class="small-btn btn-red" v-if="canRefundRsv(item)"
                                                 @click="goRefundRsv(item)">
                                                 예약환불
                                             </button>
-
-
-                                            <button class="small-btn" v-if="(item.rsvStatus || item.RSV_STATUS) === 'FIN'
-                                                 && (item.reviewYn || item.REVIEW_YN) !== 'Y'" @click="pageChange('/user/mypage/rsv-review.do', {
-                                                rsvNo: item.rsvNo || item.RSV_NO
-                                            })">
-                                                예약리뷰작성
-                                            </button>
-
                                         </div>
                                     </div>
+
                                 </div>
                             </div>
+
+                            <!-- 🔥 페이징 -->
+                            <div class="btn-box" v-if="rsvTotalPage > 1">
+                                <button class="small-btn" :disabled="rsvPage === 1" @click="rsvPage--">이전</button>
+                                <span>{{ rsvPage }} / {{ rsvTotalPage }}</span>
+                                <button class="small-btn" :disabled="rsvPage === rsvTotalPage"
+                                    @click="rsvPage++">다음</button>
+                            </div>
+
                         </div>
                     </div>
+
+
+
+
 
 
 
@@ -1089,7 +1114,23 @@
                         showPointUseList: false,
 
                         couponTab: "ALL",
-                        couponList: []
+                        couponList: [],
+                        couponList: [],
+
+                        // 주문 페이징
+                        orderPage: 1,
+                        orderPageSize: 10,
+
+                        // 예약 페이징
+                        rsvPage: 1,
+                        rsvPageSize: 10,
+
+                        //  주문 정렬 기준 (latest: 최신순 / old: 오래된순)
+                        orderSortType: "latest",
+
+                        //  예약 정렬 기준
+                        rsvSortType: "latest",
+
 
                     };
                 },
@@ -1115,51 +1156,139 @@
                         return map[this.currentMenu] || "마이페이지";
                     },
 
+
+                    pagedOrderList() {
+                        const start = (this.orderPage - 1) * this.orderPageSize;
+                        const end = start + this.orderPageSize;
+                        return this.groupedOrderList.slice(start, end);
+                    },
+
+                    orderTotalPage() {
+                        return Math.ceil(this.groupedOrderList.length / this.orderPageSize);
+                    },
                     groupedOrderList() {
                         const grouped = {};
 
+                        // 주문번호 기준으로 상품들을 묶음
                         this.orderList.forEach(order => {
                             const orderNo = order.orderNo || "주문번호없음";
                             if (!grouped[orderNo]) grouped[orderNo] = [];
                             grouped[orderNo].push(order);
                         });
 
-                        return Object.keys(grouped)
-                            .map(orderNo => ({
+                        // 주문건 배열로 변환
+                        let result = Object.keys(grouped).map(orderNo => {
+                            const items = grouped[orderNo];
+
+                            return {
                                 orderNo: orderNo,
-                                orderDate: grouped[orderNo][0]?.orderDate || "",
-                                items: grouped[orderNo]
-                            }))
-                            .sort((a, b) => {
-                                if (a.orderDate === b.orderDate) {
-                                    return String(b.orderNo).localeCompare(String(a.orderNo));
-                                }
+                                orderDate: items[0]?.orderDate || "",
+                                items: items,
+
+                                // 주문건 총 금액 계산
+                                totalAmount: items.reduce((sum, item) => {
+                                    return sum + Number(item.price || 0);
+                                }, 0),
+
+                                // 대표 결제상태 / 배송상태
+                                payStatus: items[0]?.payStatus || items[0]?.PAY_STATUS || "",
+                                deliStatus: items[0]?.deliStatus || items[0]?.DELI_STATUS || ""
+                            };
+                        });
+
+                        // 선택한 정렬 기준 적용
+                        result.sort((a, b) => {
+                            if (this.orderSortType === "latest") {
                                 return String(b.orderDate).localeCompare(String(a.orderDate));
-                            });
+                            }
+
+                            if (this.orderSortType === "old") {
+                                return String(a.orderDate).localeCompare(String(b.orderDate));
+                            }
+
+                            if (this.orderSortType === "amountHigh") {
+                                return b.totalAmount - a.totalAmount;
+                            }
+
+                            if (this.orderSortType === "amountLow") {
+                                return a.totalAmount - b.totalAmount;
+                            }
+
+                            if (this.orderSortType === "payStatus") {
+                                return String(a.payStatus).localeCompare(String(b.payStatus));
+                            }
+
+                            if (this.orderSortType === "deliStatus") {
+                                return String(a.deliStatus).localeCompare(String(b.deliStatus));
+                            }
+
+                            return 0;
+                        });
+
+                        return result;
                     },
-
-
                     groupedReservationList() {
                         const grouped = {};
 
+                        // 예약 날짜 기준으로 묶음
                         this.reservationAllList.forEach(item => {
                             const date = item.rsvDate || item.RSV_DATE || item.rsv_date || "날짜 없음";
-
                             if (!grouped[date]) grouped[date] = [];
                             grouped[date].push(item);
                         });
 
-                        return Object.keys(grouped)
-                            .sort((a, b) => String(b).localeCompare(String(a)))
-                            .map(date => ({
-                                date: date,
-                                items: grouped[date].sort((a, b) => {
-                                    const aTime = a.rsvStartTime || a.RSV_START_TIME || "";
-                                    const bTime = b.rsvStartTime || b.RSV_START_TIME || "";
+                        // 날짜 그룹 배열로 변환
+                        let result = Object.keys(grouped).map(date => ({
+                            date: date,
+                            items: grouped[date].sort((a, b) => {
+                                const aTime = a.rsvStartTime || a.RSV_START_TIME || "";
+                                const bTime = b.rsvStartTime || b.RSV_START_TIME || "";
+
+                                // 시간 빠른순
+                                if (this.rsvSortType === "timeAsc") {
                                     return String(aTime).localeCompare(String(bTime));
-                                })
-                            }));
+                                }
+
+                                // 시간 늦은순
+                                if (this.rsvSortType === "timeDesc") {
+                                    return String(bTime).localeCompare(String(aTime));
+                                }
+
+                                // 예약상태순
+                                if (this.rsvSortType === "status") {
+                                    const aStatus = a.rsvStatus || a.RSV_STATUS || "";
+                                    const bStatus = b.rsvStatus || b.RSV_STATUS || "";
+                                    return String(aStatus).localeCompare(String(bStatus));
+                                }
+
+                                // 기본은 시간 빠른순
+                                return String(aTime).localeCompare(String(bTime));
+                            })
+                        }));
+
+                        // 날짜 정렬
+                        result.sort((a, b) => {
+                            if (this.rsvSortType === "old") {
+                                return String(a.date).localeCompare(String(b.date));
+                            }
+
+                            // 기본 최신순
+                            return String(b.date).localeCompare(String(a.date));
+                        });
+
+                        return result;
                     },
+                    pagedReservationList() {
+                        const start = (this.rsvPage - 1) * this.rsvPageSize;
+                        const end = start + this.rsvPageSize;
+                        return this.groupedReservationList.slice(start, end);
+                    },
+
+                    rsvTotalPage() {
+                        return Math.ceil(this.groupedReservationList.length / this.rsvPageSize);
+                    },
+
+
                     recentPostList() {
                         return [...this.myPostList]
                             .sort((a, b) => String(b.cdate || "").localeCompare(String(a.cdate || "")))
@@ -1251,38 +1380,34 @@
                     goOrderList() {
                         this.currentMenu = "orderList";
                     },
-                    canRefundOrder(order) {
-                        if (!order) return false;
+                    canRefundOrderGroup(group) {
+                        if (!group || !group.items || group.items.length === 0) return false;
 
-                        const deliStatus = String(order.deliStatus || order.DELI_STATUS || "").trim().toUpperCase();
-                        const payStatus = String(order.payStatus || order.PAY_STATUS || "").trim().toUpperCase();
+                        return group.items.some(order => {
+                            const deliStatus = String(order.deliStatus || order.DELI_STATUS || "").trim().toUpperCase();
+                            const payStatus = String(order.payStatus || order.PAY_STATUS || "").trim().toUpperCase();
 
-                        // 배송취소, 배송완료면 환불 버튼 숨김
-                        if (deliStatus === "CAN" || deliStatus === "CANCEL" || deliStatus === "CMP") {
-                            return false;
-                        }
+                            if (deliStatus === "CAN" || deliStatus === "CANCEL" || deliStatus === "CMP") {
+                                return false;
+                            }
 
-                        // 이미 결제취소 상태면 환불 버튼 숨김
-                        if (payStatus === "CAN" || payStatus === "CANCEL" || payStatus === "FAL") {
-                            return false;
-                        }
+                            if (payStatus === "CAN" || payStatus === "CANCEL" || payStatus === "FAL") {
+                                return false;
+                            }
 
-                        return true;
+                            return true;
+                        });
                     },
-
-                    goRefundShop(order) {
-                        if (!order || !order.orderNo) {
+                    goRefundShopGroup(group) {
+                        if (!group || !group.orderNo) {
                             alert("환불에 필요한 주문 정보가 없습니다.");
                             return;
                         }
 
                         window.pageChange('/payment/refund-shop.do', {
-                            orderNo: order.orderNo,
-                            productNo: order.productNo,
-                            orderDetailNo: order.orderDetailNo
+                            orderNo: group.orderNo
                         });
                     },
-
                     canRefundRsv(item) {
                         if (!item) return false;
 

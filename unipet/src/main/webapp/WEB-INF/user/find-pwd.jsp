@@ -88,7 +88,8 @@
                     url: "/user/checkUserForReset.dox",
                     type: "POST",
                     data: {
-                        userId: $("#userId").val()
+                        userId: $("#userId").val(),
+                        phone: $("#phone").val()   // 🔥 이거 추가
                     },
                     success: function (res) {
                         const data = JSON.parse(res);

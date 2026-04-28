@@ -210,6 +210,13 @@ public class UserService {
         HashMap<String, Object> result = new HashMap<>();
 
         try {
+        	  String rawPwd = (String) map.get("pwd");
+
+              // 🔥 핵심 (암호화)
+              String encodedPwd = passwordEncoder.encode(rawPwd);
+              map.put("pwd", encodedPwd);
+
+        	
             int count = userMapper.resetPwd(map);
             result.put("result", count > 0);
             result.put("message", count > 0 ? "비밀번호가 변경되었습니다." : "비밀번호 변경에 실패했습니다.");
@@ -245,6 +252,8 @@ public class UserService {
 
         return result;
     }
+    
+    
 
     // 소셜 회원가입
     public HashMap<String, Object> insertSocialUser(HashMap<String, Object> map) {
@@ -259,6 +268,17 @@ public class UserService {
             result.put("result", false);
             result.put("message", "소셜 회원가입 중 오류가 발생했습니다.");
         }
+
+        return result;
+    }
+    
+ // UserService
+    public HashMap<String, Object> updatePhone(HashMap<String, Object> map) {
+        HashMap<String, Object> result = new HashMap<>();
+
+        int count = userMapper.updatePhone(map);
+        result.put("result", count > 0);
+        result.put("message", count > 0 ? "휴대폰 번호가 저장되었습니다." : "휴대폰 번호 저장 실패");
 
         return result;
     }
