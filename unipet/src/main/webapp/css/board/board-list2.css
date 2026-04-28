@@ -297,3 +297,35 @@ th {
 .main-tab-left .tab-btn {
 	min-width: 72px;
 }
+
+.category {
+	display: inline-block;
+	margin-right: 10px;
+	color: #666;
+	font-weight: 600;
+}
+
+.notice-badge {
+	display: inline-block;
+	margin-right: 10px;
+}
+
+.main-badge {
+	display: inline-block;
+	margin-right: 8px;
+}
+
+.title-text {
+	display: inline-block;
+}
+
+.category {
+	display: inline-block;
+	margin-right: 10px;
+	padding: 3px 8px;
+	border-radius: 12px;
+	background-color: #f1f3f5;
+	color: #555;
+	font-size: 12px;
+	font-weight: 600;
+}
