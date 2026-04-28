@@ -1,5 +1,8 @@
 package com.example.unipet.dao;
 
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -567,24 +570,36 @@ public class PaymentService {
 	            resultMap.put("message", "예약 정보를 찾을 수 없습니다.");
 	            return resultMap;
 	        }
-
-	        String tid = (String) info.get("tid");             // 포트원 거래번호
-	        int totalPrice = Integer.parseInt(String.valueOf(info.get("totalPrice"))); // 실제 결제액
-	        String payStatus = (String) info.get("payStatus"); // 결제 상태
 	        
-	        int cancelRequestAmount = Integer.parseInt(String.valueOf(map.get("amount"))); // 환불 요청액
+	        LocalDate rsvDate = ((Date) info.get("rsvDate")).toLocalDate();
+	        LocalDate today = LocalDate.now();
 
+	        long daysDiff = ChronoUnit.DAYS.between(today, rsvDate);
+	        
+	        int totalPrice = Integer.parseInt(String.valueOf(info.get("totalPrice")));
+	        int refundAmount = 0;
+	        String policyMsg = "";
+	        
+	        if (daysDiff >= 3) {
+	            refundAmount = totalPrice; // 100%
+	            policyMsg = "방문 3일 전 전액 환불";
+	        } else if (daysDiff >= 1) {
+	            refundAmount = (int) (totalPrice * 0.5); // 50%
+	            policyMsg = "방문 1~2일 전 50% 환불";
+	        } else {
+	            // 당일 혹은 마이너스(이미 지난 날짜)
+	            resultMap.put("result", "fail");
+	            resultMap.put("message", "방문 당일 및 이후는 정책상 환불이 불가능합니다.");
+	            return resultMap;
+	        }
+	        
+	        String tid = (String) info.get("tid");             // 포트원 거래번호
+	        String payStatus = (String) info.get("payStatus"); // 결제 상태
+	     
 	        // [검증] 이미 환불된 건인지 확인
 	        if ("REF".equals(payStatus) || "CANCEL".equals(payStatus)) {
 	            resultMap.put("result", "fail");
 	            resultMap.put("message", "이미 환불 처리가 완료된 예약입니다.");
-	            return resultMap;
-	        }
-
-	        // [검증] 요청 금액과 실결제 금액이 일치하는지 (전액 환불)
-	        if (totalPrice != cancelRequestAmount) {
-	            resultMap.put("result", "fail");
-	            resultMap.put("message", "환불 요청 금액이 실제 결제 금액과 다릅니다.");
 	            return resultMap;
 	        }
 
@@ -603,10 +618,10 @@ public class PaymentService {
 	        headers.setBearerAuth(accessToken); 
 
 	        Map<String, Object> cancelReq = new HashMap<>();
-	        cancelReq.put("imp_uid", tid);               // 우리 DB의 TID가 포트원의 imp_uid입니다.
-	        cancelReq.put("amount", cancelRequestAmount);
-	        cancelReq.put("checksum", totalPrice);       // 전액 환불 검증용 금액
-	        cancelReq.put("reason", map.get("reason"));
+	        cancelReq.put("imp_uid", tid);               
+	        cancelReq.put("amount", refundAmount);       // ★ 계산된 차등 금액 전달
+	        cancelReq.put("checksum", totalPrice);       // ★ 전액 검증 (현재까지 결제된 총액)
+	        cancelReq.put("reason", map.get("reason") + " (" + policyMsg + ")");
 
 	        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(cancelReq, headers);
 	        ResponseEntity<Map> cancelRes = restTemplate.postForEntity("https://api.iamport.kr/payments/cancel", entity, Map.class);
@@ -619,7 +634,6 @@ public class PaymentService {
 	        }
 
 	        // 4. DB 상태 업데이트
-	        // rsvNo를 명확히 세팅 (map에 들어있겠지만 한 번 더 확인)
 	        map.put("rsvNo", info.get("rsvNo"));
 	        
 	        paymentMapper.updateReservationCancel(map);   // reservation 테이블 상태 -> 'CAN'

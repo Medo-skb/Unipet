@@ -164,8 +164,8 @@
                 });
             },
             fnGoHistory: function() {
-                // let url = this.payFlg == 'SHOP' ? "/myPage/orderList.do" : "/myPage/rsvList.do";
-                // location.href = url;
+                let url = this.payFlg == 'SHOP' ? "/user/mypage.do" : "/user/mypage.do";
+                location.href = url;
             }
             }, // methods
         mounted() {

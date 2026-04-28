@@ -85,7 +85,9 @@
             // 함수(메소드) - (key : function())
             fnGetinfo: function () {
                 let self = this;
-                let param = {};
+                let param = {
+                    userId : self.userId
+                };
                 $.ajax({
                     url: "/payment/info.dox",
                     dataType: "json",
@@ -105,7 +107,6 @@
                 // 빌링키 발급창(카드 등록창) 띄우기
                 tossPayments.requestBillingAuth('카드', {
                     customerKey: self.info.userId, // 토스에서 유저를 식별하는 고유 키
-                    // 인증 성공/실패 시 이동할 Spring Boot 컨트롤러 주소
                     successUrl: window.location.origin + "/payment/toss-success.do", 
                     failUrl: window.location.origin + "/payment/toss-fail.do",
                     // 선택 사항: 결제창에 유저 이메일과 이름을 미리 채워둘 수 있습니다.

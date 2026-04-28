@@ -6,7 +6,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>환불 요청</title>
     <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="/js/page-change.js"></script>
@@ -30,20 +29,14 @@
                             <div class="item-name" style="font-size: 1.3rem; color: #111; margin-bottom: 8px;">
                                 <b>[{{ info.storeName }}]</b> {{ info.menuName }}
                             </div>
-                            
                             <div class="item-detail" style="line-height: 1.6; color: #666;">
                                 예약 일시: <span style="color: #333;"><b>{{ info.rsvDate }}</b> | {{ info.startTime }} ~ {{ info.endTime }}</span><br>
                                 방문 주소: <span style="color: #333;">{{ info.storeAddr }}</span>
                             </div>
-
-                            <div v-if="info.request" class="item-request" style="margin-top: 10px; font-size: 0.9rem; color: #888;">
-                                내 요청사항: "{{ info.request }}"
-                            </div>
                         </div>
                     </div>
-                    
-                    <div class="item-total-price" style="font-size: 1.4rem; color: #FF4D4F; font-weight: bold;">
-                        {{ info.totalPrice?.toLocaleString() }}원
+                    <div class="item-total-price" style="font-size: 1.4rem; color: #333; font-weight: bold;">
+                        결제 금액: {{ info.totalPrice?.toLocaleString() }}원
                     </div>
                 </div>
             </div>
@@ -60,33 +53,39 @@
                         <option value="기타">기타 (직접 입력)</option>
                     </select>
                 </div>
-
                 <div class="input-group" style="margin-top: 20px;" v-if="refundReason === '기타'">
                     <label>상세 내용 <span style="color:#FF4D4F;">(필수)</span></label>
-                    <textarea class="input-field" v-model="refundDetail" 
-                              placeholder="사유를 상세히 적어주세요." 
-                              style="height: 100px; resize: none;"></textarea>
+                    <textarea class="input-field" v-model="refundDetail" placeholder="사유를 상세히 적어주세요." style="height: 100px; resize: none;"></textarea>
                 </div>
             </div>
 
             <div class="pay-section" v-if="info.totalPrice">
-                <div class="section-title">환불 정책 안내</div>
+                <div class="section-title">환불 예정 내용</div>
                 <div class="summary-box">
+                    <div class="policy-msg" :class="refundPolicy.canRefund ? 'text-blue' : 'text-red'">
+                        {{ refundPolicy.message }}
+                    </div>
+
                     <div class="summary-row">
                         <span>환불 예정 금액</span>
                         <span class="text-discount" style="font-weight: bold; font-size: 1.3rem;">
-                            {{ info.totalPrice?.toLocaleString() }}원
+                            {{ refundPolicy.amount?.toLocaleString() }}원
                         </span>
                     </div>
-                    <div class="point-info">
-                        * 예약 당일 취소는 업체 정책에 따라 제한될 수 있습니다.
+                    <div class="point-info" style="margin-top:10px; font-size: 0.85rem; color:#888;">
+                        * 3일 전: 100% / 1~2일 전: 50% / 당일: 환불 불가<br>
+                        * 환불은 기존 결제 수단으로 진행됩니다.
                     </div>
                 </div>
             </div>
 
             <div class="btn-group">
                 <button class="btn-secondary" @click="fnGoBack">돌아가기</button>
-                <button class="btn-primary" @click="fnSubmitReservationRefund">예약 취소하기</button>
+                <button class="btn-primary" 
+                        @click="fnSubmitReservationRefund" 
+                        :disabled="!refundPolicy.canRefund || isProcessing">
+                    {{ isProcessing ? '처리 중...' : (refundPolicy.canRefund ? '예약 취소하기' : '환불 불가') }}
+                </button>
             </div>
         </div>
     </div>
@@ -104,8 +103,80 @@
                 userId : "${sessionId}",
                 info: {},           // 예약 정보
                 refundReason: "",   
-                refundDetail: ""   
+                refundDetail: "",   
+                isProcessing: false // 광클 방지 상태값
             };
+        },
+        computed: {
+            // 날짜 차이에 따른 환불 정책 계산
+            refundPolicy() {
+                // 데이터가 없으면 즉시 리턴
+                if (!this.info || !this.info.rsvDate || !this.info.totalPrice) {
+                    return { amount: 0, rate: 0, message: "예약 정보를 불러오는 중입니다...", canRefund: false };
+                }
+
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                // [날짜 보정 로직]
+                let dateSource = this.info.rsvDate;
+                let rsvDate;
+
+                if (typeof dateSource === 'string') {
+                    // 1. 만약 "5월 15, 2026" 처럼 온다면 표준 포맷으로 변경 시도
+                    // (가장 안전한 방법은 '-' 나 '/' 로 구분된 숫자 형식입니다)
+                    // 아래는 일반적인 DB 날짜 포맷(2026-05-15...)을 안정적으로 파싱합니다.
+                    let cleanDate = dateSource.replace(/년|월/g, '-').replace(/일/g, '').replace(/\s/g, '');
+                    rsvDate = new Date(cleanDate);
+                } else {
+                    // 숫자로 된 타임스탬프인 경우
+                    rsvDate = new Date(dateSource);
+                }
+
+                // 여전히 날짜가 유효하지 않은 경우 최후의 수단 (날짜 문자열 직접 분해)
+                if (isNaN(rsvDate.getTime())) {
+                    // "2026-05-15" 같은 형식을 직접 잘라서 세팅
+                    const parts = String(dateSource).match(/\d+/g);
+                    if (parts && parts.length >= 3) {
+                        rsvDate = new Date(parts[0], parts[1] - 1, parts[2]);
+                    }
+                }
+
+                rsvDate.setHours(0, 0, 0, 0);
+
+                // 다시 한번 체크 후 오류라면 리턴
+                if (isNaN(rsvDate.getTime())) {
+                    console.error("지원되지 않는 날짜 형식입니다:", dateSource);
+                    return { amount: 0, rate: 0, message: "날짜 형식 오류", canRefund: false };
+                }
+
+                // 날짜 차이 계산
+                const diffTime = rsvDate.getTime() - today.getTime();
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                let rate = 0;
+                let message = "";
+                let canRefund = true;
+
+                if (diffDays >= 3) {
+                    rate = 1.0;
+                    message = "방문 3일 전이므로 100% 환불 가능합니다.";
+                } else if (diffDays >= 1) {
+                    rate = 0.5;
+                    message = "방문 1~2일 전이므로 50% 환불 가능합니다.";
+                } else {
+                    rate = 0;
+                    message = "방문 당일 및 이후는 정책상 환불이 불가능합니다.";
+                    canRefund = false;
+                }
+
+                return {
+                    amount: this.info.totalPrice * rate,
+                    rate: rate * 100,
+                    message: message,
+                    canRefund: canRefund
+                };
+            }
         },
         watch: {
             refundReason(newVal) {
@@ -154,6 +225,7 @@
                 const param = {
                     rsvNo: self.rsvNo,
                     payNo: self.info.payNo,
+                    userId: self.userId,
                     amount: self.info.totalPrice, 
                     reason: self.refundReason === '기타' ? "기타: " + self.refundDetail : self.refundReason
                 };
@@ -182,7 +254,7 @@
                     data: { 
                         rsvNo: self.rsvNo,
                         slotNo: self.info.slotNo, // 혹은 info.slotNo (서버 응답 필드명 확인)
-                        userId: self.info.userId   // 상세 정보에서 가져온 아이디를 그대로 전달
+                        userId: self.userId   // 상세 정보에서 가져온 아이디를 그대로 전달
                     },
                     success: function(data) {
                         if (data.result === "success") {

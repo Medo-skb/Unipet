@@ -113,7 +113,7 @@ public class UserService {
         	
             User user = userMapper.selectUser(map);
 
-            if (user != null	) {
+            if (user != null && passwordEncoder.matches(rawPwd, user.getPwd())) {
                 result.put("result", true);
                 result.put("user", user);
                 result.put("message", "로그인 성공");

@@ -53,10 +53,6 @@
             </table>
 
             <div class="amount-box">
-                <div class="row">
-                    <span>총 금액</span>
-                    <span>{{ info.menuPrice }}원</span>
-                </div>
                 <div class="row highlight">
                     <span>선결제 예약금 (10%)</span>
                     <span class="price">{{ deposit }}원</span>
@@ -68,7 +64,7 @@
             </div>
 
             <div class="btn-group">
-                <button class="btn-cancel" onclick="history.back()">취소</button>
+                <button class="btn-cancel" onclick="location.href = '/user/mypage.do'">취소</button>
                 <button class="btn-pay" @click="fnPayment">결제하기</button>
             </div>
         </div>
@@ -107,10 +103,22 @@
                     type: "POST",
                     data : param,
                     success: function (data) {
-                        self.info = data.info;
-                        self.deposit = data.deposit;
-                        self.balance = data.info.menuPrice - data.deposit;
-                        console.log(param);
+                        if (data.info) {
+                            self.info = data.info;
+                            self.deposit = data.deposit;
+                            self.balance = data.info.menuPrice - data.deposit;
+
+                            // rsvStatus가 'WAI'(결제대기/예약대기)가 아니면 이미 처리된 건으로 간주
+                            if (self.info.rsvStatus !== 'WAI') {
+                                alert("잘못된 접근입니다.");
+                                location.href = "/main.do";
+                                return;
+                            }
+                        } else {
+                            // 데이터 자체가 없는 경우 대비
+                            alert("존재하지 않는 예약 정보입니다.");
+                            location.href = "/main.do";
+                        }
                     }
                 });
             },
@@ -174,7 +182,7 @@
                                 alert("결제 실패: " + rsp.error_msg + "\n(실패 내역이 기록되었습니다.)");
                             }
                         } else {
-                            alert("시스템 오류가 발생했습니다.");
+                            alert("결제를 취소하셨거나 실패하였습니다: " + rsp.error_msg);
                         }
                     }
                 });
@@ -189,6 +197,7 @@
                 return; 
             }
             self.fnGetInfo();
+            
         }
     });
 
