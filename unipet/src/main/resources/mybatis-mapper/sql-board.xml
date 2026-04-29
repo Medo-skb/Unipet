@@ -77,6 +77,7 @@
 			B.TITLE AS title,
 			B.B_CONTENT AS bContent,
 			B.USER_ID AS userId,
+			IFNULL(U.NICKNAME, B.USER_ID) AS writerNickname,
 			B.VIEW_COUNT AS viewCount,
 			B.B_STATUS AS bStatus,
 			B.PRIVATE AS privateYn,
@@ -146,6 +147,9 @@
 		LEFT JOIN BOARD_FILE BF 
 			ON BFM.FILE_NO = BF.FILE_NO
 
+		LEFT JOIN USERS U
+			ON B.USER_ID = U.USER_ID
+
 		WHERE 1=1
 
 		<choose>
@@ -213,8 +217,13 @@
 			<when test="sortType == 'view'">
 				B.VIEW_COUNT DESC, B.BOARD_NO DESC
 			</when>
+			<when test="sortType == 'comment'">
+			commentCnt DESC, B.BOARD_NO DESC
+			</when>
 			<otherwise>
 				B.BOARD_NO DESC
+				
+				
 			</otherwise>
 		</choose>
 
@@ -243,11 +252,14 @@
 			C.COMMENT_NO AS commentNo,
 			C.C_CONTENT AS cContent,
 			C.USER_ID AS userId,
+			IFNULL(NULLIF(U.NICKNAME, ''), C.USER_ID) AS writerNickname,
 			C.BOARD_NO AS boardNo,
 			C.PARENT_NO AS parentNo,
 			DATE_FORMAT(C.CREATE_TIME, '%Y-%m-%d %H:%i:%s') AS createTime,
 			DATE_FORMAT(C.UPDATE_TIME, '%Y-%m-%d %H:%i:%s') AS updateTime
 		FROM COMMENT C
+		LEFT JOIN USERS U
+			ON C.USER_ID = U.USER_ID
 		WHERE C.BOARD_NO = #{boardNo}
 		ORDER BY
 			CASE WHEN C.PARENT_NO IS NULL THEN C.COMMENT_NO ELSE C.PARENT_NO END ASC,
@@ -343,6 +355,7 @@
 			B.TITLE AS title,
 			B.B_CONTENT AS bContent,
 			B.USER_ID AS userId,
+			IFNULL(NULLIF(U.NICKNAME, ''), B.USER_ID) AS writerNickname,
 			B.VIEW_COUNT AS viewCount,
 			B.B_STATUS AS bStatus,
 			B.PRIVATE AS privateYn,
@@ -395,7 +408,8 @@
 		INNER JOIN BOARD_TYPE_SUB BTS ON B.B_SUB_NO = BTS.B_SUB_NO
 		INNER JOIN BOARD_TYPE_MAIN BTM ON BTS.B_MAIN_NO = BTM.B_MAIN_NO
 		LEFT JOIN BOARD_TYPE_LOCAL BTL ON B.LOCAL_NO = BTL.LOCAL_NO
-
+		LEFT JOIN USERS U ON B.USER_ID = U.USER_ID
+		
 		WHERE B.BOARD_NO = #{boardNo}
 		AND B.B_STATUS = 'Y'
 	</select>

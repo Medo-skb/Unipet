@@ -5,7 +5,7 @@
 
 <head>
 	<meta charset="UTF-8">
-	<title>장바구니</title>
+	<title>UNIPET</title>
 
 	<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
 	<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
@@ -168,7 +168,7 @@
 
 							} else if (data.result == "login") {
 								alert("로그인이 필요합니다.");
-								pageChange("/user/login.do", {});
+								location.href = "/user/login.do";
 
 							} else {
 								alert(data.message);
@@ -242,7 +242,7 @@
 
 							} else if (data.result == "login") {
 								alert("로그인이 필요합니다.");
-								pageChange("/user/login.do", {});
+								location.href = "/user/login.do";
 
 							} else {
 								alert(data.message);
@@ -287,7 +287,7 @@
 
 							} else if (data.result == "login") {
 								alert("로그인이 필요합니다.");
-								pageChange("/user/login.do", {});
+								location.href = "/user/login.do";
 
 							} else {
 								alert(data.message);
@@ -316,7 +316,7 @@
 
 							} else if (data.result == "login") {
 								alert("로그인이 필요합니다.");
-								pageChange("/user/login.do", {});
+								location.href = "/user/login.do";
 
 							} else {
 								alert(data.message);

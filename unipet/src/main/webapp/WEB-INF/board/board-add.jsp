@@ -4,7 +4,7 @@
 
 <head>
 	<meta charset="UTF-8">
-	<title>게시글 작성</title>
+	<title>UNIPET</title>
 	<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
 	<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 	<script src="/js/page-change.js"></script>
@@ -24,22 +24,22 @@
 			<div class="box">
 				<div class="title">{{boardTitle}}</div>
 
-				<div class="form-row">
-					<div class="label">카테고리</div>
-					<select v-model="bSubNo">
-						<option value="">카테고리 선택</option>
-						<option v-for="item in filteredSubTypeList" :key="item.bSubNo" :value="item.bSubNo">
-							{{item.bSubType}}
-						</option>
-					</select>
-				</div>
-
 				<div class="form-row" v-if="isLocalBoard">
 					<div class="label">지역</div>
 					<select v-model="localNo">
 						<option value="">지역 선택</option>
 						<option v-for="item in localList" :key="item.localNo" :value="item.localNo">
 							{{item.localName}}
+						</option>
+					</select>
+				</div>
+
+				<div class="form-row">
+					<div class="label">카테고리</div>
+					<select v-model="bSubNo">
+						<option value="">카테고리 선택</option>
+						<option v-for="item in filteredSubTypeList" :key="item.bSubNo" :value="item.bSubNo">
+							{{item.bSubType}}
 						</option>
 					</select>
 				</div>
@@ -65,7 +65,18 @@
 
 				<div class="form-row">
 					<div class="label">본문</div>
-					<textarea v-model="bContent" placeholder="내용을 입력하세요"></textarea>
+
+					<div class="textarea-wrap">
+						<textarea 
+							v-model="bContent" 
+							:maxlength="maxContentLength"
+							placeholder="내용을 입력하세요">
+						</textarea>
+
+						<div class="text-count" :class="{danger : bContent.length >= maxContentLength}">
+							{{bContent.length}} / {{maxContentLength}}
+						</div>
+					</div>
 				</div>
 
 				<div class="form-row">
@@ -96,6 +107,7 @@
 					privateYn: "N",
 					title: "",
 					bContent: "",
+					maxContentLength: 2000,
 					boardTitle: "게시글 작성",
 					isLocalBoard: false,
 					sessionRole: '<%=session.getAttribute("sessionRole") == null ? "" : session.getAttribute("sessionRole")%>'
@@ -170,13 +182,28 @@
 				fnAddBoard: function (status) {
 					let self = this;
 
+					if (self.selectedMainNo == "2" && self.localNo == "") {
+						alert("지역을 선택해주세요.");
+						return;
+					}
+
 					if (self.bSubNo == "") {
 						alert("카테고리를 선택해주세요.");
 						return;
 					}
 
-					if (self.selectedMainNo == "2" && self.localNo == "") {
-						alert("지역을 선택해주세요.");
+					if (self.title == "") {
+						alert("제목을 입력해주세요.");
+						return;
+					}
+
+					if (self.bContent == "") {
+						alert("본문을 입력해주세요.");
+						return;
+					}
+
+					if (self.bContent.length > self.maxContentLength) {
+						alert("본문은 " + self.maxContentLength + "자까지 입력할 수 있습니다.");
 						return;
 					}
 
@@ -217,11 +244,11 @@
 								}
 
 							} else if (data.result == "login") {
-								alert("로그인이 필요합니다.");
-								pageChange("/user/login.do", {});
+							    alert("로그인이 필요합니다.");
+							    location.href = "/user/login.do";
 
 							} else {
-								alert(data.message);
+							    alert(data.message);
 							}
 						},
 						error: function (xhr, status, error) {
@@ -266,11 +293,11 @@
 								alert("최근 임시저장 글을 불러왔습니다.");
 
 							} else if (data.result == "login") {
-								alert("로그인이 필요합니다.");
-								pageChange("/user/login.do", {});
+							    alert("로그인이 필요합니다.");
+							    location.href = "/user/login.do";
 
 							} else {
-								alert(data.message);
+							    alert(data.message);
 							}
 						},
 						error: function (xhr, status, error) {

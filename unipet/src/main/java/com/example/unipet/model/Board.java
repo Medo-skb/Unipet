@@ -12,6 +12,7 @@ public class Board {
 	String title;
 	String bContent;
 	String userId;
+	String writerNickname;
 	int viewCount;
 	String bStatus;
 	String privateYn;

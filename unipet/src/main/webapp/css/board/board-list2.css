@@ -47,6 +47,13 @@
 	border-color: var(--main);
 }
 
+.tab-btn.active:hover,
+.sort-btn.active:hover {
+	background: var(--main);
+	color: #fff;
+	border-color: var(--main);
+}
+
 /* 검색 영역 */
 .search-row select,
 .search-row input {
@@ -184,6 +191,12 @@ th {
 
 .pagination button:hover {
 	color: var(--main);
+	border-color: var(--main);
+}
+
+.pagination button.active:hover {
+	background: var(--main);
+	color: #fff;
 	border-color: var(--main);
 }
 
@@ -328,4 +341,55 @@ th {
 	color: #555;
 	font-size: 12px;
 	font-weight: 600;
+}
+
+.local-tab-row {
+	align-items: center;
+}
+
+/* 지역 전체 select 기본 상태 */
+.local-select {
+	height: 40px;
+	border: 1px solid var(--line-soft);
+	background: var(--bg);
+	padding: 0 16px;
+	border-radius: 999px;
+	cursor: pointer;
+	font-weight: 700;
+	color: var(--text-main);
+	outline: none;
+}
+
+/* select hover */
+.local-select:hover {
+	color: var(--main);
+	border-color: var(--main);
+}
+
+/* select focus */
+.local-select:focus {
+	color: var(--main);
+	border-color: var(--main);
+}
+
+/* select 안의 option */
+.local-select option {
+	color: var(--text-main);
+	background: var(--bg);
+	font-weight: 500;
+}
+
+/* 지역을 선택한 상태 */
+.local-select.active {
+	background: var(--main);
+	color: #fff;
+	border-color: var(--main);
+}
+
+/* 지역 선택된 상태에서 hover */
+.local-select.active:hover,
+.local-select.active:focus {
+	background: var(--main);
+	color: #fff;
+	border-color: var(--main);
 }

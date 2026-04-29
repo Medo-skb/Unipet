@@ -111,3 +111,24 @@ textarea {
 	cursor: pointer;
 	font-size: 13px;
 }
+
+.textarea-wrap {
+	width: 100%;
+}
+
+.textarea-wrap textarea {
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.text-count {
+	margin-top: 6px;
+	text-align: right;
+	font-size: 13px;
+	color: #777;
+}
+
+.text-count.danger {
+	color: #e74c3c;
+	font-weight: 700;
+}

@@ -4,7 +4,7 @@
 
 <head>
 	<meta charset="UTF-8">
-	<title>게시글 수정</title>
+	<title>UNIPET</title>
 	<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
 	<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 	<script src="/js/page-change.js"></script>
@@ -28,7 +28,7 @@
 
 	<div id="app">
 		<div class="wrap" v-if="loaded">
-			<form class="box" v-if="board != null" action="/board/update.do" method="post" enctype="multipart/form-data">
+			<form class="box" v-if="board != null" action="/board/update.do" method="post" enctype="multipart/form-data" @submit="fnCheckForm">
 				<input type="hidden" name="boardNo" :value="boardNo">
 				<input type="hidden" name="bStatus" id="bStatus" :value="board.bStatus == 'T' ? 'T' : 'Y'">
 
@@ -85,7 +85,18 @@
 
 				<div class="form-row">
 					<div class="label">본문</div>
-					<textarea v-model="bContent" name="bContent"></textarea>
+
+					<div class="textarea-wrap">
+						<textarea 
+							v-model="bContent" 
+							name="bContent"
+							:maxlength="maxContentLength">
+						</textarea>
+
+						<div class="text-count" :class="{danger : bContent.length >= maxContentLength}">
+							{{bContent.length}} / {{maxContentLength}}
+						</div>
+					</div>
 				</div>
 
 				<div class="form-row">
@@ -134,6 +145,7 @@
 					privateYn: "N",
 					title: "",
 					bContent: "",
+					maxContentLength: 2000,
 					loaded: false
 				};
 			},
@@ -185,7 +197,7 @@
 
 							} else if (data.result == "login") {
 								alert("로그인이 필요합니다.");
-								pageChange("/user/login.do", {});
+								location.href = "/user/login.do";
 
 							} else if (data.result == "deny") {
 								alert(data.message);
@@ -227,7 +239,7 @@
 
 							} else if (data.result == "login") {
 								alert("로그인이 필요합니다.");
-								pageChange("/user/login.do", {});
+								location.href = "/user/login.do";
 
 							} else {
 								alert(data.message);
@@ -264,7 +276,7 @@
 
 							} else if (data.result == "login") {
 								alert("로그인이 필요합니다.");
-								pageChange("/user/login.do", {});
+								location.href = "/user/login.do";
 
 							} else {
 								alert(data.message);
@@ -275,7 +287,39 @@
 
 				fnMoveList() {
 					pageChange("/board/list.do", {});
-				}
+				},
+				
+				fnCheckForm(e) {
+					if (this.bSubNo == "") {
+						alert("소분류를 선택해주세요.");
+						e.preventDefault();
+						return;
+					}
+
+					if (this.isLocalBoard && this.localNo == "") {
+						alert("지역을 선택해주세요.");
+						e.preventDefault();
+						return;
+					}
+
+					if (this.title == "") {
+						alert("제목을 입력해주세요.");
+						e.preventDefault();
+						return;
+					}
+
+					if (this.bContent == "") {
+						alert("본문을 입력해주세요.");
+						e.preventDefault();
+						return;
+					}
+
+					if (this.bContent.length > this.maxContentLength) {
+						alert("본문은 " + this.maxContentLength + "자까지 입력할 수 있습니다.");
+						e.preventDefault();
+						return;
+					}
+				},
 			},
 			mounted() {
 				this.fnGetBoardEditInfo();
