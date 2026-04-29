@@ -362,6 +362,12 @@ public class BoardService {
 				resultMap.put("message", "본문을 입력해주세요.");
 				return resultMap;
 			}
+			
+			if (bContent.length() > 2000) {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "본문은 2000자까지 입력할 수 있습니다.");
+				return resultMap;
+			}
 
 			if (bSubNo.equals("")) {
 				resultMap.put("result", "fail");
@@ -520,6 +526,12 @@ public class BoardService {
 			if (bContent.equals("")) {
 				resultMap.put("result", "fail");
 				resultMap.put("message", "본문을 입력해주세요.");
+				return resultMap;
+			}
+			
+			if (bContent.length() > 2000) {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "본문은 2000자까지 입력할 수 있습니다.");
 				return resultMap;
 			}
 

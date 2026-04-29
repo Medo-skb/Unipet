@@ -16,6 +16,9 @@ import com.google.gson.Gson;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
+import java.io.IOException;
+import jakarta.servlet.http.HttpServletResponse;
+
 @Controller
 public class BoardController {
 
@@ -24,7 +27,13 @@ public class BoardController {
 
 	// 웹브라우저로 접속하는 주소, return은 jsp파일
 	@RequestMapping("/board/list.do")
-	public String list(HttpServletRequest request, @RequestParam HashMap<String, Object> map) throws Exception {
+	public String list(HttpServletRequest request, HttpSession session, HttpServletResponse response, @RequestParam HashMap<String, Object> map) throws Exception {
+
+		String sessionId = (String) session.getAttribute("sessionId");
+
+		if (sessionId == null || sessionId.equals("")) {
+			return alertLogin(response);
+		}
 
 		request.setAttribute("bMainNo", map.get("bMainNo"));
 		request.setAttribute("bSubNo", map.get("bSubNo"));
@@ -39,23 +48,32 @@ public class BoardController {
 
 	// 웹브라우저로 접속하는 주소, return은 jsp파일
 	@RequestMapping("/board/view.do")
-	public String view(HttpServletRequest request, @RequestParam HashMap<String, Object> map) throws Exception {
+	public String view(HttpServletRequest request, HttpSession session, HttpServletResponse response, @RequestParam HashMap<String, Object> map) throws Exception {
+
+		String sessionId = (String) session.getAttribute("sessionId");
+
+		if (sessionId == null || sessionId.equals("")) {
+			return alertLogin(response);
+		}
 
 		request.setAttribute("boardNo", map.get("boardNo"));
 
 		return "/board/board-view";
 	}
 
-	// 웹브라우저로 접속하는 주소, return은 jsp파일
 	@RequestMapping("/board/add.do")
-	public String add(HttpServletRequest request, HttpSession session, @RequestParam HashMap<String, Object> map)
-			throws Exception {
+	public String boardAdd(HttpServletRequest request, HttpSession session, HttpServletResponse response) throws Exception {
 
-		request.setAttribute("bMainNo", map.get("bMainNo"));
+		String sessionId = (String) session.getAttribute("sessionId");
 
+		if (sessionId == null || sessionId.equals("")) {
+			return alertLogin(response);
+		}
+		
+		request.setAttribute("bMainNo", request.getParameter("bMainNo"));
 		return "/board/board-add";
 	}
-
+	
 	// 웹브라우저로 접속하는 주소, return은 jsp파일
 	@RequestMapping("/board/edit.do")
 	public String edit(HttpServletRequest request, @RequestParam HashMap<String, Object> map) throws Exception {
@@ -341,6 +359,17 @@ public class BoardController {
 		resultMap = boardService.readBoardAlarm(map);
 
 		return new Gson().toJson(resultMap);
+	}
+	
+	private String alertLogin(HttpServletResponse response) throws IOException {
+		response.setContentType("text/html; charset=UTF-8");
+		response.getWriter().println("<script>");
+		response.getWriter().println("alert('로그인이 필요합니다.');");
+		response.getWriter().println("location.href='/user/login.do';");
+		response.getWriter().println("</script>");
+		response.getWriter().flush();
+
+		return null;
 	}
 
 }

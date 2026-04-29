@@ -239,3 +239,21 @@
 .reply-btn-row {
 	margin-top: 5px;
 }
+
+.profile-link {
+	color: #111827;
+	font-weight: bold;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.profile-link:hover {
+	color: #2563eb;
+	text-decoration: underline;
+}
+
+.profile-text {
+	color: #111827;
+	font-weight: bold;
+	cursor: default;
+}

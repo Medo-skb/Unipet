@@ -4,7 +4,7 @@
 
 <head>
 	<meta charset="UTF-8">
-	<title>커뮤니티 목록</title>
+	<title>UNIPET</title>
 	<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
 	<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 	<script src="/js/page-change.js"></script>
@@ -72,7 +72,26 @@
 				</div>
 
 				<!-- 지역 카테고리 필터 -->
-				<div class="tab-row" v-if="selectedMainNo == '2'">
+				<div class="tab-row local-tab-row" v-if="selectedMainNo == '2'">
+
+					<select class="local-select" v-model="localNo" @change="fnSelectLocalNo()">
+						<option value="">지역 전체</option>
+						<option value="1">서울</option>
+						<option value="2">인천</option>
+						<option value="3">부산</option>
+						<option value="4">대구</option>
+						<option value="5">광주</option>
+						<option value="6">대전</option>
+						<option value="7">울산</option>
+						<option value="8">세종</option>
+						<option value="9">경기</option>
+						<option value="10">강원</option>
+						<option value="11">충청</option>
+						<option value="12">전라</option>
+						<option value="13">경상</option>
+						<option value="14">제주</option>
+					</select>
+
 					<button class="tab-btn" :class="{active : localCategory == ''}"
 						@click="fnSelectLocalCategory('')">전체</button>
 					<button class="tab-btn" :class="{active : localCategory == 'WALK'}"
@@ -89,26 +108,6 @@
 						@click="fnSelectLocalCategory('CARE')">돌봄</button>
 					<button class="tab-btn" :class="{active : localCategory == 'MARKET'}"
 						@click="fnSelectLocalCategory('MARKET')">중고거래</button>
-				</div>
-
-				<div class="search-row" v-if="selectedMainNo == '2'">
-					<select v-model="localNo" @change="fnSelectLocalNo()">
-						<option value="">전체 지역</option>
-						<option value="1">서울</option>
-						<option value="2">인천</option>
-						<option value="3">부산</option>
-						<option value="4">대구</option>
-						<option value="5">광주</option>
-						<option value="6">대전</option>
-						<option value="7">울산</option>
-						<option value="8">세종</option>
-						<option value="9">경기</option>
-						<option value="10">강원</option>
-						<option value="11">충청</option>
-						<option value="12">전라</option>
-						<option value="13">경상</option>
-						<option value="14">제주</option>
-					</select>
 				</div>
 
 				<!-- 검색 -->
@@ -131,9 +130,11 @@
 						<button class="sort-btn" :class="{active : sortType == 'new'}"
 							@click="fnChangeSort('new')">최신순</button>
 						<button class="sort-btn" :class="{active : sortType == 'like'}"
-							@click="fnChangeSort('like')">인기순</button>
+							@click="fnChangeSort('like')">추천순</button>
 						<button class="sort-btn" :class="{active : sortType == 'view'}"
 							@click="fnChangeSort('view')">조회순</button>
+						<button class="sort-btn" :class="{active : sortType == 'comment'}"
+							@click="fnChangeSort('comment')">댓글순</button>
 					</div>
 
 					<div class="board-btn-wrap">
@@ -186,7 +187,7 @@
 								</div>
 							</td>
 
-							<td>{{item.userId}}</td>
+							<td>{{item.writerNickname ? item.writerNickname : item.userId}}</td>
 							<td>{{item.viewCount}}</td>
 							<td>{{item.likeCnt}}</td>
 							<td>{{item.commentCnt}}</td>
@@ -226,7 +227,8 @@
 					sortType: '<%=request.getAttribute("sortType") == null || request.getAttribute("sortType").equals("") ? "new" : request.getAttribute("sortType")%>',
 					currentPage: Number('<%=request.getAttribute("page") == null || request.getAttribute("page").equals("") ? "1" : request.getAttribute("page")%>'),
 					tempYn: '<%=request.getAttribute("tempYn") == null ? "" : request.getAttribute("tempYn")%>',
-					sessionRole: '<%=session.getAttribute("sessionRole")%>',
+					sessionId: '<%=session.getAttribute("sessionId") == null ? "" : session.getAttribute("sessionId")%>',
+					sessionRole: '<%=session.getAttribute("sessionRole") == null ? "" : session.getAttribute("sessionRole")%>',
 					pageSize: 10,
 					totalCount: 0,
 					integratedCategory: '',
@@ -263,6 +265,10 @@
 							localNo: self.localNo
 						},
 						success: function (data) {
+							console.log("게시글 목록 data ===>", data);
+							console.log("첫 번째 게시글 ===>", data.list[0]);
+								
+								
 							if (data.result == "success") {
 								self.boardList = data.list || [];
 								self.totalCount = data.count || 0;
@@ -314,6 +320,12 @@
 				},
 
 				fnMoveAdd: function () {
+					if (this.sessionId == "") {
+						alert("로그인 후 이용해주세요.");
+						location.href = "/user/login.do";
+						return;
+					}
+
 					if (this.selectedMainNo == "") {
 						alert("통합 또는 지역 게시판을 먼저 선택해주세요.");
 						return;
@@ -323,13 +335,19 @@
 						bMainNo: this.selectedMainNo
 					});
 				},
-
+				
 				fnMoveTempList: function () {
 					this.tempYn = "Y";
 					this.selectedMainNo = "";
 					this.integratedCategory = "";
 					this.localCategory = "";
 					this.localNo = "";
+
+					this.searchType = "";
+					this.keyword = "";
+
+					this.sortType = "new";
+
 					this.currentPage = 1;
 					this.fnGetBoardList();
 				},

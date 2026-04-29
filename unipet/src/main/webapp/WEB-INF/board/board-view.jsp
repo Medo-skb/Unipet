@@ -4,7 +4,7 @@
 
 <head>
 	<meta charset="UTF-8">
-	<title>게시글 상세</title>
+	<title>UNIPET</title>
 	<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
 	<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 	<script src="/js/page-change.js"></script>
@@ -44,8 +44,11 @@
 				<div class="meta">
 					<div>
 						작성자 :
-						<span class="profile-link" @click="fnMoveMypage(board.userId)">
-							{{board.userId}}
+						<a v-if="currentUserId == board.userId" class="profile-link" href="javascript:;" @click="fnMoveMypage()">
+							{{board.writerNickname ? board.writerNickname : board.userId}}
+						</a>
+						<span v-else class="profile-text">
+							{{board.writerNickname ? board.writerNickname : board.userId}}
 						</span>
 					</div>
 					<div>카테고리 : {{board.bMainType}} / {{board.bSubType}}</div>
@@ -102,7 +105,9 @@
 					:class="comment.parentNo == null ? 'comment-item' : 'comment-item reply'">
 
 					<div class="comment-head">
-						<div class="comment-user">{{comment.userId}}</div>
+						<div class="comment-user">
+							{{comment.writerNickname ? comment.writerNickname : comment.userId}}
+						</div>
 						<div>{{comment.createTime}}</div>
 					</div>
 
@@ -213,7 +218,6 @@
 
 							if (data.result == "success") {
 								self.board = data.board;
-								console.log("board.userId =", data.board.userId);
 
 								self.fileList = data.fileList || [];
 								self.likeCnt = data.likeCnt || 0;
@@ -280,7 +284,7 @@
 
 							} else if (data.result == "login") {
 								alert("로그인이 필요합니다.");
-								pageChange("/user/login.do", {});
+								location.href = "/user/login.do";
 
 							} else {
 								alert(data.message);
@@ -396,8 +400,8 @@
 					});
 				},
 
-				fnMoveMypage(userId) {
-					pageChange("/user/mypage.do", {});
+				fnMoveMypage() {
+					location.href = "/user/mypage.do";
 				},
 
 				fnMoveList() {
