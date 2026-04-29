@@ -398,3 +398,40 @@
 .basic-info-modal-btn:hover {
     background: var(--point);
 }
+
+.chatbot-floating-btn {
+    position: fixed;
+    right: 30px;
+    bottom: 30px;
+    z-index: 9999;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 14px 18px;
+    background: var(--main);
+    color: #fff;
+    border-radius: 999px;
+    cursor: pointer;
+    border: none;
+}
+
+.chatbot-icon {
+    font-size: 24px;
+}
+
+.chatbot-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.chatbot-text strong {
+    font-size: 14px;
+}
+
+.chatbot-text span {
+    font-size: 12px;
+    opacity: 0.9;
+}

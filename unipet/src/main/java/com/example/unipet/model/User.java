@@ -15,4 +15,5 @@ public class User {
     private String zipcode;
     private String socialType;
     private String userStatus;
+    private String storeStatus;
 }

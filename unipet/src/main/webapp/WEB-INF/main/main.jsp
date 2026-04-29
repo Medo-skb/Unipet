@@ -264,6 +264,15 @@
             </div>
         </div>
 
+        <!-- 챗봇 플로팅 버튼 -->
+        <div class="chatbot-floating-btn" onclick="location.href='/unipet/chatbot.do'">
+            <div class="chatbot-icon">💬</div>
+            <div class="chatbot-text">
+                <strong>챗봇 상담</strong>
+                <span>궁금한 점을 물어보세요</span>
+            </div>
+        </div>
+
         <jsp:include page="/WEB-INF/footer/footer.jsp" />
 
     </div>

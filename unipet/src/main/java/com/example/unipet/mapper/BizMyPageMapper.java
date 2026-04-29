@@ -19,8 +19,8 @@ public interface BizMyPageMapper {
 	// 하루 예약 건수 차트
 	public List<BizMyPage> selectDailyReservationChartList(HashMap<String, Object> map);
 	
-	// 승인된 업체 조회
-	public BizMyPage selectApprovedStore(HashMap<String, Object> map);
+	// 승인된 업체 리스트 조회
+	public List<BizMyPage> selectApprovedStore(HashMap<String, Object> map);
 	
 	// 폐업 불가 예약 개수 조회
 	public int selectCloseBlockedReservationCount(HashMap<String, Object> map);
@@ -39,6 +39,9 @@ public interface BizMyPageMapper {
 	
 	// 업체 메뉴 리스트
 	public List<BizMyPage> selectBizStoreMenuList(HashMap<String, Object> map);
+	
+	// 업체 메뉴 삭제
+	int deleteBizStoreMenu(HashMap<String, Object> map);
 
 	// 이미지 개수 조회
 	public int selectStoreImageCount(int storeNo);
@@ -72,6 +75,9 @@ public interface BizMyPageMapper {
 	
 	// 업체 메뉴 수정
 	public void updateBizStoreMenu(HashMap<String, Object> map);
+	
+	// 업체 메뉴 추가
+	public void insertBizStoreMenu(HashMap<String, Object> map);
 	
 	// 사업자 내 정보 조회
 	public BizMyPage selectBizUserInfo(HashMap<String, Object> map);

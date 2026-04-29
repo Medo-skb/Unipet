@@ -150,6 +150,7 @@ public class UserController {
 			session.setAttribute("sessionId", user.getUserId());
 			session.setAttribute("sessionName", user.getUserName());
 			session.setAttribute("sessionRole", "BIZ");
+			session.setAttribute("storeStatus", user.getStoreStatus());
 
 			// 소셜 인증 팝업을 안 띄우므로 남아있는 인증 세션 제거
 			session.removeAttribute("needPhoneVerify");

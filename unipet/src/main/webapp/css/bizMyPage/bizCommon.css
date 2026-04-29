@@ -988,6 +988,45 @@ table {
     color: var(--text-main);
 }
 
+/* 업체 메뉴 수정 - 메뉴 추가 버튼 */
+.menu-add-btn {
+    height: 40px;
+    padding: 0 18px;
+    border: 1px solid var(--main);
+    background: #fff;
+    color: var(--main);
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.menu-add-btn:hover {
+    background: rgba(255, 79, 109, 0.08);
+}
+
+.menu-delete-btn {
+    height: 36px;
+    padding: 0 14px;
+    border: 1px solid #ff6b7a;
+    background: #fff;
+    color: #ff4f6d;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    min-width: 60px;
+}
+
+.menu-delete-btn:hover {
+    background: #ff4f6d;
+    border-color: #ff4f6d;
+    color: #fff;
+}
+
 /* @media screen and (max-width: 1024px) {
     .simple-card-list {
         grid-template-columns: 1fr;

@@ -52,7 +52,8 @@ public class WebConfig implements WebMvcConfigurer {
             "/reservation/book.do",
             "/product/view.do",
             "/board/list.do",
-            "/payment/sub.do"
+            "/payment/sub.do",
+            "/board/view.do"
         );
     }
     

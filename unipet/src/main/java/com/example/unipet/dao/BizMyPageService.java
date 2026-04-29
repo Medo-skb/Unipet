@@ -83,14 +83,14 @@ public class BizMyPageService {
 		return resultMap;
 	}
 	
-	// 승인된 업체 조회
+	// 승인된 업체 리스트 조회
 	public HashMap<String, Object> getApprovedStore(HashMap<String, Object> map){
 	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
 	    try {
-	        BizMyPage info = bizMyPageMapper.selectApprovedStore(map);
+	        List<BizMyPage> list = bizMyPageMapper.selectApprovedStore(map);
 
-	        resultMap.put("info", info);
+	        resultMap.put("list", list);
 	        resultMap.put("result", "success");
 	        resultMap.put("message", Message.MSG_SEARCH);
 	    } catch (Exception e) {
@@ -312,12 +312,12 @@ public class BizMyPageService {
 
 		try {
 			// 1. 승인된 업체가 있는지 먼저 확인
-			BizMyPage approvedStore = bizMyPageMapper.selectApprovedStore(map);
+			List<BizMyPage> approvedStoreList = bizMyPageMapper.selectApprovedStore(map);
 
-			if (approvedStore == null) {
-				resultMap.put("result", "fail");
-				resultMap.put("message", "승인된 업체가 없습니다.");
-				return resultMap;
+			if (approvedStoreList == null || approvedStoreList.isEmpty()) {
+			    resultMap.put("result", "fail");
+			    resultMap.put("message", "승인된 업체가 없습니다.");
+			    return resultMap;
 			}
 
 			// 2. 폐업 시도일 때만 예약 상태 체크
@@ -354,10 +354,31 @@ public class BizMyPageService {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
 		try {
-			List<HashMap<String, Object>> menuList = (List<HashMap<String, Object>>) map.get("menuList");
+			List<HashMap<String, Object>> menuList =
+			        (List<HashMap<String, Object>>) map.get("menuList");
 
+			List<Object> deleteMenuNoList =
+			        (List<Object>) map.get("deleteMenuNoList");
+
+			// 삭제할 메뉴 먼저 DELETE
+			if (deleteMenuNoList != null) {
+			    for (Object menuNo : deleteMenuNoList) {
+			        HashMap<String, Object> deleteMap = new HashMap<String, Object>();
+			        deleteMap.put("menuNo", menuNo);
+
+			        bizMyPageMapper.deleteBizStoreMenu(deleteMap);
+			    }
+			}
+
+			// 남아있는 메뉴는 INSERT 또는 UPDATE
 			for (HashMap<String, Object> item : menuList) {
-				bizMyPageMapper.updateBizStoreMenu(item);
+			    Object menuNo = item.get("menuNo");
+
+			    if (menuNo == null || "".equals(String.valueOf(menuNo)) || "0".equals(String.valueOf(menuNo))) {
+			        bizMyPageMapper.insertBizStoreMenu(item);
+			    } else {
+			        bizMyPageMapper.updateBizStoreMenu(item);
+			    }
 			}
 
 			resultMap.put("result", "success");

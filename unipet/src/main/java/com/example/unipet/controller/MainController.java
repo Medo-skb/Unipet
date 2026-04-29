@@ -79,13 +79,16 @@ public class MainController {
     
     // 메인페이지 리스트
     @RequestMapping(value = "/getMainBasicList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
-	@ResponseBody
-	public String getMainBasicList(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
-		HashMap<String, Object> resultMap = new HashMap<String, Object>();
-		resultMap = mainService.getMainBasicList(map);
- 
-		return new Gson().toJson(resultMap);
-	}
+    @ResponseBody
+    public String getMainBasicList(Model model, @RequestParam HashMap<String, Object> map, HttpSession session) throws Exception {
+    	HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+    	map.put("sessionId", session.getAttribute("sessionId"));
+
+    	resultMap = mainService.getMainBasicList(map);
+
+    	return new Gson().toJson(resultMap);
+    }
     
     // 소셜 로그인 기본정보 입력 여부 체크
     @RequestMapping(value = "/main/social-basic-check.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")

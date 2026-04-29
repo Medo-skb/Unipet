@@ -54,16 +54,15 @@
                 userInput: "",
                 messages: [
                     {
-                        text: `안녕하세요. UNIPET 챗봇입니다!
-메뉴 이용이 궁금하다면 아래 버튼을 눌러주세요.`,
+                        text: `안녕하세요. UNIPET 입니다! 어떤것이 궁금하신가요?`,
                         type: "bot"
                     }
                 ],
                 isLoading: false,
-                currentCategory: "AI 상담",
+                currentCategory: "챗봇과 대화하기",
 
                 quickButtons: [
-                    "AI 상담",
+                    "챗봇과 대화하기",
                     "예약",
                     "쇼핑",
                     "커뮤니티",
@@ -149,12 +148,13 @@
                 this.scrollToBottom();
 
                 // 1. 챗봇과 대화하기 메뉴를 누른 경우
-                if (normalizedInput === this.normalizeText("AI 상담")) {
-                    this.currentCategory = "AI 상담";
+                if (normalizedInput === this.normalizeText("챗봇과 대화하기")) {
+                    this.currentCategory = "챗봇과 대화하기";
 
                     this.messages.push({
-                        text: `반려동물에 관한 궁금한 점을 UNIPET 챗봇이 간단하게 알려드려요.
-편하게 질문해보세요!`,
+                        text: `챗봇과 대화하기 모드입니다.
+
+반려동물에 관해 궁금한 내용을 입력해주세요.`,
                         type: "bot"
                     });
 
@@ -204,10 +204,10 @@
                 }
 
                 // 4. 챗봇과 대화하기가 아닌 메뉴에서는 지정된 답변 외 입력 차단
-                if (this.currentCategory !== "AI 상담") {
+                if (this.currentCategory !== "챗봇과 대화하기") {
                     this.messages.push({
                         text: `해당 메뉴는 없습니다.
-UNIPET 챗봇과 대화를 원하신다면 AI 상담를 눌러주세요.`,
+UNIPET 챗봇과 대화를 원하신다면 챗봇과 대화하기를 눌러주세요.`,
                         type: "bot"
                     });
 

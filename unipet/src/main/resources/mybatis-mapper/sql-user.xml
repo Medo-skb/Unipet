@@ -89,15 +89,18 @@
 	<!-- 사업자 로그인 -->
 	<select id="selectStoreUser" parameterType="hashmap"
 		resultType="com.example.unipet.model.User">
-		SELECT
-		S_USER_ID AS userId,
-		S_USER_PWD AS pwd,
-		CEO_NAME AS userName,
-		U_STATUS AS status,
-		'BIZ' AS role
-		FROM unipet.store_user
-		WHERE S_USER_ID = #{userId}
-		AND U_STATUS NOT IN ('BAN', 'EXT')
+		SELECT 
+		    SU.S_USER_ID AS userId,
+		    SU.S_USER_PWD AS pwd,
+		    SU.CEO_NAME AS userName,
+		    SU.U_STATUS AS status,
+		    S.S_STATUS AS storeStatus,
+		    'BIZ' AS role
+		FROM unipet.store_user SU
+		LEFT JOIN unipet.store S 
+		    ON SU.S_USER_ID = S.S_USER_ID
+		WHERE SU.S_USER_ID = #{userId}
+		AND SU.U_STATUS NOT IN ('BAN', 'EXT')
 	</select>
 	<!-- 사업자 아이디 찾기 -->
 	<select id="findBizId" parameterType="hashmap"

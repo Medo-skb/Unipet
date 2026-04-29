@@ -213,7 +213,7 @@
                                                     </div>
                                                     <div class="list-sub">
                                                         상태 :
-                                                        <span class="status-badge"
+                                                        <span class="reserve-status-text"
                                                             :class="getReserveStatusClass(item.rsvStatus || item.RSV_STATUS)">
                                                             {{ getReservationStatusText(item.rsvStatus ||
                                                             item.RSV_STATUS)
@@ -468,14 +468,23 @@
                             <div class="section-box">
                                 <div class="section-title">쇼핑몰 주문 내역</div>
 
+                                <select class="list-filter-select" v-model="orderSortType">
+                                    <option value="latest">최신순</option>
+                                    <option value="old">오래된순</option>
+                                    <option value="amountHigh">금액 높은순</option>
+                                    <option value="amountLow">금액 낮은순</option>
+                                    <option value="payStatus">결제상태순</option>
+                                    <option value="deliStatus">배송상태순</option>
+                                </select>
+
                                 <div v-if="groupedOrderList.length === 0" class="empty-text">
                                     주문 내역이 없습니다.
                                 </div>
 
-                                <div class="info-card" v-for="group in groupedOrderList" :key="group.orderNo"
+                                <div class="info-card" v-for="group in pagedOrderList" :key="group.orderNo"
                                     style="margin-bottom:16px;">
-                                    <div
-                                        style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
                                         <div class="list-title">
                                             주문일자 : {{ (group.orderDate || '').substring(0,16) }}
                                         </div>
@@ -489,16 +498,20 @@
                                         :key="order.orderDetailNo || order.orderNo + '-' + order.productNo"
                                         class="order-item">
 
-                                        <img class="order-img" :src="order.productImg || '/img/no-image.png'"
-                                            alt="상품이미지">
+                                        <img class="order-img" :src="order.productImg || '/img/no-image.png'" alt="상품이미지">
 
                                         <div style="flex:1;">
                                             <div class="list-title">{{ order.productName || '-' }}</div>
                                             <div class="list-sub">수량 : {{ order.qty }}개</div>
-                                            <div class="list-sub">금액 : {{ Number(order.price || 0).toLocaleString() }}원
-                                            </div>
+                                            <div class="list-sub">금액 : {{ Number(order.price || 0).toLocaleString() }}원</div>
                                         </div>
                                     </div>
+                                </div>
+
+                                <div class="btn-box paging-box" v-if="orderTotalPage > 1">
+                                    <button class="small-btn" :disabled="orderPage === 1" @click="orderPage--">이전</button>
+                                    <span>{{ orderPage }} / {{ orderTotalPage }}</span>
+                                    <button class="small-btn" :disabled="orderPage === orderTotalPage" @click="orderPage++">다음</button>
                                 </div>
                             </div>
                         </div>
@@ -568,19 +581,25 @@
                                     <div class="section-title" style="margin-bottom:0;">예약 내역</div>
                                 </div>
 
+                                <select class="list-filter-select" v-model="rsvSortType">
+                                    <option value="latest">최신순</option>
+                                    <option value="old">오래된순</option>
+                                    <option value="timeAsc">시간 빠른순</option>
+                                    <option value="timeDesc">시간 늦은순</option>
+                                    <option value="status">예약상태순</option>
+                                </select>
+
                                 <div v-if="reservationAllList.length === 0" class="empty-text">
                                     예약 내역이 없습니다.
                                 </div>
 
-                                <div v-for="group in groupedReservationList" :key="group.date"
-                                    style="margin-bottom:20px;">
+                                <div v-for="group in pagedReservationList" :key="group.date" style="margin-bottom:20px;">
                                     <div class="section-title" style="font-size:17px; margin-bottom:10px;">
                                         {{ formatDate(group.date) }}
                                     </div>
 
                                     <div class="info-card" v-for="item in group.items" :key="'all-' + item.rsvNo">
-                                        <div
-                                            style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+                                        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
                                             <div style="flex:1;">
                                                 <div class="list-title">
                                                     {{ item.rsvStartTime || '-' }} ~ {{ item.rsvEndTime || '-' }}
@@ -600,34 +619,33 @@
 
                                                 <div class="list-sub">
                                                     상태 :
-
-                                                    <span class="status-badge"
-                                                        :class="getReserveStatusClass(item.rsvStatus || item.RSV_STATUS)">
-                                                        {{ getReservationStatusText(item.rsvStatus || item.RSV_STATUS)
-                                                        }}
+                                                    <span class="reserve-status-text" :class="getReserveStatusClass(item.rsvStatus || item.RSV_STATUS)">
+                                                        {{ getReservationStatusText(item.rsvStatus || item.RSV_STATUS) }}
                                                     </span>
                                                 </div>
-
                                             </div>
 
-
                                             <div class="btn-box">
-                                                <button class="small-btn btn-red" v-if="canRefundRsv(item)"
-                                                    @click="goRefundRsv(item)">
+                                                <button class="small-btn btn-red" v-if="canRefundRsv(item)" @click="goRefundRsv(item)">
                                                     예약환불
                                                 </button>
 
-
-                                                <button class="small-btn" v-if="(item.rsvStatus || item.RSV_STATUS) === 'FIN'
-                                                 && (item.reviewYn || item.REVIEW_YN) !== 'Y'" @click="pageChange('/user/mypage/rsv-review.do', {
-                                                rsvNo: item.rsvNo || item.RSV_NO
-                                            })">
+                                                <button class="small-btn"
+                                                    v-if="(item.rsvStatus || item.RSV_STATUS) === 'FIN' && (item.reviewYn || item.REVIEW_YN) !== 'Y'"
+                                                    @click="pageChange('/user/mypage/rsv-review.do', {
+                                                        rsvNo: item.rsvNo || item.RSV_NO
+                                                    })">
                                                     예약리뷰작성
                                                 </button>
-
                                             </div>
                                         </div>
                                     </div>
+                                </div>
+
+                                <div class="btn-box paging-box" v-if="rsvTotalPage > 1">
+                                    <button class="small-btn" :disabled="rsvPage === 1" @click="rsvPage--">이전</button>
+                                    <span>{{ rsvPage }} / {{ rsvTotalPage }}</span>
+                                    <button class="small-btn" :disabled="rsvPage === rsvTotalPage" @click="rsvPage++">다음</button>
                                 </div>
                             </div>
                         </div>
@@ -667,10 +685,7 @@
                             </div>
                         </div>
 
-
-
                         <div v-if="currentMenu === 'petMyPage'">
-                            <div class="section-box">
                                 <div class="section-box">
                                     <div class="section-title">반려동물 선택</div>
 
@@ -702,7 +717,6 @@
                                     <div class="list-sub">기록일 : {{ formatDate(item.date) }}</div>
                                     <div class="list-sub">내용 : {{ item.memo }}</div>
                                 </div>
-                            </div>
 
                             <div class="section-box">
                                 <div class="section-title">접종 기록 조회</div>
@@ -1182,12 +1196,95 @@
                         showPointUseList: false,
 
                         couponTab: "ALL",
-                        couponList: []
+                        couponList: [],
+
+                        orderSortType: 'latest',
+                        orderPage: 1,
+                        orderPageSize: 5,
+
+                        rsvSortType: 'latest',
+                        rsvPage: 1,
+                        rsvPageSize: 5,
 
                     };
                 },
 
                 computed: {
+                    sortedOrderList() {
+                        let list = [...this.groupedOrderList];
+
+                        if (this.orderSortType === 'latest') {
+                            list.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+                        } else if (this.orderSortType === 'old') {
+                            list.sort((a, b) => new Date(a.orderDate) - new Date(b.orderDate));
+                        } else if (this.orderSortType === 'amountHigh') {
+                            list.sort((a, b) => this.getOrderTotal(b) - this.getOrderTotal(a));
+                        } else if (this.orderSortType === 'amountLow') {
+                            list.sort((a, b) => this.getOrderTotal(a) - this.getOrderTotal(b));
+                        } else if (this.orderSortType === 'payStatus') {
+                            list.sort((a, b) => {
+                                let av = a.items[0]?.payStatus || a.items[0]?.PAY_STATUS || '';
+                                let bv = b.items[0]?.payStatus || b.items[0]?.PAY_STATUS || '';
+                                return av.localeCompare(bv);
+                            });
+                        } else if (this.orderSortType === 'deliStatus') {
+                            list.sort((a, b) => {
+                                let av = a.items[0]?.deliStatus || a.items[0]?.DELI_STATUS || '';
+                                let bv = b.items[0]?.deliStatus || b.items[0]?.DELI_STATUS || '';
+                                return av.localeCompare(bv);
+                            });
+                        }
+
+                        return list;
+                    },
+
+                    pagedOrderList() {
+                        let start = (this.orderPage - 1) * this.orderPageSize;
+                        return this.sortedOrderList.slice(start, start + this.orderPageSize);
+                    },
+
+                    orderTotalPage() {
+                        return Math.ceil(this.sortedOrderList.length / this.orderPageSize);
+                    },
+
+                    sortedReservationList() {
+                        let list = [...this.groupedReservationList];
+
+                        if (this.rsvSortType === 'latest') {
+                            list.sort((a, b) => new Date(b.date) - new Date(a.date));
+                        } else if (this.rsvSortType === 'old') {
+                            list.sort((a, b) => new Date(a.date) - new Date(b.date));
+                        } else if (this.rsvSortType === 'timeAsc') {
+                            list.forEach(group => {
+                                group.items.sort((a, b) => (a.rsvStartTime || '').localeCompare(b.rsvStartTime || ''));
+                            });
+                        } else if (this.rsvSortType === 'timeDesc') {
+                            list.forEach(group => {
+                                group.items.sort((a, b) => (b.rsvStartTime || '').localeCompare(a.rsvStartTime || ''));
+                            });
+                        } else if (this.rsvSortType === 'status') {
+                            list.forEach(group => {
+                                group.items.sort((a, b) => {
+                                    let av = a.rsvStatus || a.RSV_STATUS || '';
+                                    let bv = b.rsvStatus || b.RSV_STATUS || '';
+                                    return av.localeCompare(bv);
+                                });
+                            });
+                        }
+
+                        return list;
+                    },
+
+                    pagedReservationList() {
+                        let start = (this.rsvPage - 1) * this.rsvPageSize;
+                        return this.sortedReservationList.slice(start, start + this.rsvPageSize);
+                    },
+
+                    rsvTotalPage() {
+                        return Math.ceil(this.sortedReservationList.length / this.rsvPageSize);
+                    },
+
+
                     pageTitle() {
                         const map = {
                             userMyPage: "홈",
@@ -1270,7 +1367,25 @@
                     }
                 },
 
+                watch: {
+                    orderSortType() {
+                        this.orderPage = 1;
+                    },
+                    rsvSortType() {
+                        this.rsvPage = 1;
+                    }
+                },
+
                 methods: {
+                    getOrderTotal(group) {
+                        if (!group.items || group.items.length === 0) {
+                            return 0;
+                        }
+
+                        return group.items.reduce((sum, item) => {
+                            return sum + (Number(item.price || 0) * Number(item.qty || 0));
+                        }, 0);
+                    },
 
                     pageChange(url, param) {
                         window.pageChange(url, param);
