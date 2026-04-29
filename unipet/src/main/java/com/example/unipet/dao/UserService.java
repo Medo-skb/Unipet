@@ -41,7 +41,7 @@ public class UserService {
 		HashMap<String, Object> result = new HashMap<>();
 
 		try {
-			int count = userMapper.checkStoreUser(map);
+			int count = userMapper.checkUser(map);
 			result.put("result", true);
 			result.put("count", count);
 			result.put("message", count > 0 ? "이미 사용중인 아이디입니다." : "사용 가능한 아이디입니다.");
@@ -170,7 +170,7 @@ public class UserService {
 
 		try {
 			String rawPwd = (String) map.get("pwd");
-			System.out.println(rawPwd);
+
 			User user = userMapper.selectUser(map);
 
 			if (user != null && passwordEncoder.matches(rawPwd, user.getPwd())) {
@@ -195,19 +195,14 @@ public class UserService {
 		HashMap<String, Object> result = new HashMap<>();
 
 		try {
+			String rawPwd = (String) map.get("pwd");
+			
 			User user = userMapper.selectStoreUser(map);
 
-			if (user != null) {
-				String rawPwd = (String) map.get("pwd");
-
-				if (passwordEncoder.matches(rawPwd, user.getPwd())) {
-					result.put("result", true);
-					result.put("user", user);
-					result.put("message", "사업자 로그인 성공");
-				} else {
-					result.put("result", false);
-					result.put("message", "아이디 또는 비밀번호가 일치하지 않습니다.");
-				}
+			if (user != null && passwordEncoder.matches(rawPwd, user.getPwd())) {
+				result.put("result", true);
+				result.put("user", user);
+				result.put("message", "사업자 로그인 성공");
 			} else {
 				result.put("result", false);
 				result.put("message", "아이디 또는 비밀번호가 일치하지 않습니다.");
@@ -222,28 +217,30 @@ public class UserService {
 	}
 
 	// 사용자 아이디 찾기
-	public HashMap<String, Object> findId(HashMap<String, Object> map) {
-		HashMap<String, Object> result = new HashMap<>();
+	 public HashMap<String, Object> findId(HashMap<String, Object> map) {
+        HashMap<String, Object> result = new HashMap<>();
 
-		try {
-			User user = userMapper.findId(map);
+        try {
+        	String rawPwd = (String) map.get("pwd");
+        	
+            User user = userMapper.findId(map);
 
-			if (user != null) {
-				result.put("result", true);
-				result.put("userId", user.getUserId());
-				result.put("message", "아이디 찾기 성공");
-			} else {
-				result.put("result", false);
-				result.put("message", "일치하는 회원 정보가 없습니다.");
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			result.put("result", false);
-			result.put("message", "아이디 찾기 중 오류가 발생했습니다.");
-		}
+            if (user != null && passwordEncoder.matches(rawPwd, user.getPwd())) {
+                result.put("result", "success");
+                result.put("userId", user.getUserId());
+                result.put("message", "아이디 찾기 성공");
+            } else {
+                result.put("result", "fail");
+                result.put("message", "일치하는 회원 정보가 없습니다.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.put("result", "fail");
+            result.put("message", "아이디 찾기 중 오류가 발생했습니다.");
+        }
 
-		return result;
-	}
+        return result;
+    }
 
 	// 사업자 아이디 찾기
 	public HashMap<String, Object> findBizId(HashMap<String, Object> map) {
