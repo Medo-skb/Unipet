@@ -21,7 +21,7 @@
 	cursor: pointer;
 	font-size: 30px;
 	background: #fff;
-	border: 1px solid var(--line-soft);
+	/* border: 1px solid var(--line-soft); */
 	width: 56px;
 	height: 56px;
 	border-radius: 50%;

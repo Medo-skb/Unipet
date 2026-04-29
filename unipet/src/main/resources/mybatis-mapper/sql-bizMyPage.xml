@@ -322,6 +322,33 @@
 		WHERE MENU_NO = #{menuNo}
 	</update>
 	
+	<!-- 업체 메뉴 추가 -->
+	<insert id="insertBizStoreMenu" parameterType="com.example.unipet.model.BizMyPage">
+	    INSERT INTO STORE_MENU (
+	        STORE_NO,
+	        MENU_NAME,
+	        MENU_CATEGORY,
+	        MENU_INFO,
+	        MENU_PRICE,
+	        REQ_TIME,
+	        M_STATUS
+	    ) VALUES (
+	        #{storeNo},
+	        #{menuName},
+	        #{menuCategory},
+	        #{menuInfo},
+	        #{menuPrice},
+	        #{reqTime},
+	        #{mStatus}
+	    )
+	</insert>
+	
+	<!-- 업체 메뉴 삭제 -->
+	<delete id="deleteBizStoreMenu" parameterType="hashmap">
+	    DELETE FROM STORE_MENU
+	    WHERE MENU_NO = #{menuNo}
+	</delete>
+	
 	<!-- 사업자 내 정보 조회 -->
 	<select id="selectBizUserInfo" parameterType="hashmap" resultType="com.example.unipet.model.BizMyPage">
 		SELECT

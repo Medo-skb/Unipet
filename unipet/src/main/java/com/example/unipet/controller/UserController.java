@@ -170,6 +170,7 @@ public class UserController {
 			session.setAttribute("sessionId", user.getUserId());
 			session.setAttribute("sessionName", user.getUserName());
 			session.setAttribute("sessionRole", "BIZ");
+			session.setAttribute("storeStatus", user.getStoreStatus());
 
 			resultMap.put("message", user.getUserName() + "님 환영합니다 👋");
 		}

@@ -808,6 +808,102 @@ button {
     font-weight: 600;
 }
 
+.list-filter-select {
+    width: 180px;
+    height: 42px;
+    padding: 0 14px;
+    margin-bottom: 18px;
+    border: 1px solid var(--line-soft);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--text-main);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.list-filter-select:focus {
+    outline: none;
+    border-color: var(--main);
+}
+
+.paging-box {
+    justify-content: center;
+    align-items: center;
+    margin-top: 24px;
+}
+
+.paging-box span {
+    min-width: 70px;
+    text-align: center;
+    color: var(--text-main);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.paging-box button:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+.paging-box button:disabled:hover {
+    border-color: var(--line-soft);
+    color: var(--text-main);
+}
+
+.reserve-status-text {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    height: auto !important;
+    min-width: auto !important;
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.reserve-status-text {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    height: auto !important;
+    min-width: auto !important;
+    display: inline !important;
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.reserve-status-text.status-blue {
+    color: #3b82f6;
+}
+
+.reserve-status-text.status-green {
+    color: #2ecc71;
+}
+
+.reserve-status-text.status-red {
+    color: #ff4f6d;
+}
+
+.reserve-status-text.status-orange {
+    color: #ff9800;
+}
+
+.reserve-status-text.status-gray {
+    color: #999;
+}
+
+.section-header .section-title {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.no-border {
+    border: none !important;
+}
+
 @media screen and (max-width: 1280px) {
     .user-page-container {
         width: calc(100% - 40px);

@@ -6,10 +6,11 @@
 
 .box {
 	background: var(--bg);
-	border: 1px solid var(--line-soft);
-	border-radius: 12px;
-	padding: 25px;
-	margin-bottom: 20px;
+	border: none;
+	border-bottom: 1px solid var(--line-soft);
+	border-radius: 0;
+	padding: 25px 0 30px;
+	margin-bottom: 30px;
 }
 
 .title {
@@ -26,6 +27,8 @@
 	color: var(--text-sub);
 	font-size: 14px;
 	margin-bottom: 20px;
+	padding-top: 14px;
+	border-top: 1px solid var(--line-soft);
 }
 
 .content {

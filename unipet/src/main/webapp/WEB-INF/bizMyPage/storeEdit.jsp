@@ -42,7 +42,7 @@
 
                 <section class="biz-content store-edit-page">
                     <div class="content-header">
-                        <h1>업체 정보 수정</h1>
+                        <h1>내 정보 및 업체 정보 수정</h1>
                     </div>
 
                     <div class="content-section">
@@ -458,6 +458,7 @@
                                             <th>가격</th>
                                             <th>소요시간</th>
                                             <th>상태</th>
+                                            <th>삭제</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -465,7 +466,7 @@
                                             <td><input type="text" v-model="item.menuName"></td>
                                             <td><input type="text" v-model="item.menuCategory"></td>
                                             <td><input type="text" v-model="item.menuInfo"></td>
-                                            <td><input type="text" v-model="item.menuPrice"></td>
+                                            <td><input type="number" v-model="item.menuPrice"></td>
                                             <td>
                                                 <select v-model="item.reqTime">
                                                     <option :value="30">30분</option>
@@ -479,9 +480,19 @@
                                                     <option value="N">판매중지</option>
                                                 </select>
                                             </td>
+                                            <td>
+                                                <button type="button" class="menu-delete-btn" @click="fnRemoveMenu(item)">
+                                                    삭제
+                                                </button>
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
+                                <div class="section-btn-area">
+                                    <button type="button" class="menu-add-btn" @click="fnAddMenu">
+                                        메뉴 추가
+                                    </button>
+                                </div>
                             </div>
 
                             <div class="modal-footer">
@@ -628,6 +639,7 @@
                 },
 
                 editMenuList: [],
+                deleteMenuNoList: [],
                 capacityOptions: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
 
                 showMyInfoEditModal: false,
@@ -655,10 +667,10 @@
                     sUserId: "${sessionScope.sessionId}"
                 },
                 success: function(data) {
-                    if (data.result === "success" && data.info) {
-                        self.storeInfo = data.info;
+                if (data.result === "success" && data.list && data.list.length > 0) {
+                    self.storeInfo = data.list[0];
 
-                        if (data.info.sStatus === "GEN" || data.info.sStatus === "AFF") {
+                    if (self.storeInfo.sStatus === "GEN" || self.storeInfo.sStatus === "AFF") {
                             self.hasApprovedStore = true;
                             self.approvedStoreMessage = "";
                             self.fnGetStoreInfo();
@@ -669,13 +681,13 @@
                             self.fileList = [];
                             self.menuList = [];
 
-                            if (data.info.sStatus === "REJ") {
+                            if (self.storeInfo.sStatus === "REJ") {
                                 self.approvedStoreMessage = "사업자 승인이 반려되었습니다.";
 
-                                if (data.info.rejReason) {
-                                    self.approvedStoreMessage += "\n반려 사유: " + data.info.rejReason;
+                                if (self.storeInfo.rejReason) {
+                                    self.approvedStoreMessage += "\n반려 사유: " + self.storeInfo.rejReason;
                                 }
-                            } else if (data.info.sStatus === "PND") {
+                            } else if (self.storeInfo.sStatus === "PND") {
                                 self.approvedStoreMessage = "사업자 승인 대기중입니다.";
                             } else {
                                 self.approvedStoreMessage = "승인된 업체가 없습니다.";
@@ -947,9 +959,12 @@
             fnEditMenu: function() {
                 let self = this;
 
+                self.deleteMenuNoList = [];
+
                 self.editMenuList = self.menuList.map(function(item) {
                     return {
                         menuNo: item.menuNo,
+                        storeNo: self.storeInfo.storeNo,
                         menuName: item.menuName,
                         menuCategory: item.menuCategory,
                         menuInfo: item.menuInfo,
@@ -962,9 +977,38 @@
                 self.showMenuEditModal = true;
             },
 
+            fnRemoveMenu: function(item) {
+                let self = this;
+
+                if (!confirm("이 메뉴를 삭제하시겠습니까?")) {
+                    return;
+                }
+
+                if (item.menuNo && Number(item.menuNo) !== 0) {
+                    self.deleteMenuNoList.push(Number(item.menuNo));
+                }
+
+                self.editMenuList = self.editMenuList.filter(menu => menu !== item);
+            },
+
             fnCloseMenuEditModal: function() {
                 let self = this;
                 self.showMenuEditModal = false;
+            },
+
+            fnAddMenu: function() {
+                let self = this;
+
+                self.editMenuList.push({
+                    menuNo: "",
+                    menuName: "",
+                    menuCategory: "",
+                    menuInfo: "",
+                    menuPrice: "",
+                    reqTime: 30,
+                    mStatus: "Y",
+                    storeNo: self.storeInfo.storeNo
+                });
             },
 
             fnSetMainImage: function(fileNo) {
@@ -1163,6 +1207,13 @@
 
             fnSaveMenuList: function() {
                 let self = this;
+                let sendList = self.editMenuList.map(item => ({
+                    ...item,
+                    menuNo: Number(item.menuNo || 0),
+                    storeNo: Number(item.storeNo || self.storeInfo.storeNo),
+                    menuPrice: Number(item.menuPrice || 0),
+                    reqTime: Number(item.reqTime || 0)
+                }));
 
                 $.ajax({
                     url: "/biz/store/menu/update.dox",
@@ -1170,7 +1221,8 @@
                     dataType: "json",
                     contentType: "application/json",
                     data: JSON.stringify({
-                        menuList: self.editMenuList
+                        menuList: sendList,
+                        deleteMenuNoList: self.deleteMenuNoList
                     }),
                     success: function(data) {
                         if (data.result === "success") {

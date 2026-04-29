@@ -7,7 +7,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>UNIPET</title>
     <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="/js/page-change.js"></script>
@@ -21,21 +21,19 @@
                     <img src="${pageContext.request.contextPath}/img/main/logo.png" alt="로고" class="logo-image">
                 </a>
             </div>
-                <c:if test="${sessionScope.sessionRole ne 'BIZ'}">
-                    <div class="header-center">
-                        <form class="search-form" action="${pageContext.request.contextPath}/main/search.do" method="get">
-                            <input spellcheck="false" autocorrect="off" autocomplete="off"
-                                type="text" name="keyword" class="search-input" placeholder="검색어를 입력하세요">
+                <div class="header-center">
+                    <form class="search-form" action="${pageContext.request.contextPath}/main/search.do" method="get">
+                        <input spellcheck="false" autocorrect="off" autocomplete="off"
+                            type="text" name="keyword" class="search-input" placeholder="검색어를 입력하세요">
 
-                            <button type="submit" class="search-btn" aria-label="검색">
-                                <svg viewBox="0 0 24 24" aria-hidden="true">
-                                    <circle cx="11" cy="11" r="7"></circle>
-                                    <line x1="20" y1="20" x2="16.65" y2="16.65"></line>
-                                </svg>
-                            </button>
-                        </form>
-                    </div>
-                </c:if>
+                        <button type="submit" class="search-btn" aria-label="검색">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <circle cx="11" cy="11" r="7"></circle>
+                                <line x1="20" y1="20" x2="16.65" y2="16.65"></line>
+                            </svg>
+                        </button>
+                    </form>
+                </div>
 
             <div class="header-right">
                 <nav class="main-nav">
@@ -53,6 +51,7 @@
                                     <path d="M15 12H3"></path>
                                     <path d="M21 3v18"></path>
                                 </svg>
+                                <span class="header-icon-text">로그인</span>
                             </a>
                         </c:when>
 
@@ -62,6 +61,7 @@
                                     <circle cx="12" cy="7" r="4"></circle>
                                     <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"></path>
                                 </svg>
+                                <span class="header-icon-text">마이페이지</span>
                             </a>
 
                             <a href="${pageContext.request.contextPath}/cart.do" class="header-icon-link cart-icon-wrap" aria-label="장바구니">
@@ -81,20 +81,50 @@
                                     </span>
                                 </c:if>
 
+                                <span class="header-icon-text">장바구니</span>
                             </a>
 
-                            <a href="${pageContext.request.contextPath}/logout.do" class="logout-btn">로그아웃</a>
+                            <a href="${pageContext.request.contextPath}/logout.do" class="header-icon-link" aria-label="로그아웃">
+                                <svg class="header-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                                    <path d="M10 17l5-5-5-5"></path>
+                                    <path d="M15 12H3"></path>
+                                </svg>
+                                <span class="header-icon-text">로그아웃</span>
+                            </a>
                         </c:when>
 
                         <c:when test="${sessionScope.sessionRole eq 'BIZ'}">
+
+                        <c:if test="${sessionScope.storeStatus eq 'GEN' or sessionScope.storeStatus eq 'AFF'}">
+                            <span class="biz-badge ${sessionScope.storeStatus eq 'AFF' ? 'aff' : ''}">
+                                <c:choose>
+                                    <c:when test="${sessionScope.storeStatus eq 'GEN'}">
+                                        유니펫 회원사
+                                    </c:when>
+                                    <c:when test="${sessionScope.storeStatus eq 'AFF'}">
+                                        유니펫 제휴사
+                                    </c:when>
+                                </c:choose>
+                            </span>
+                        </c:if>
+
                             <a href="${pageContext.request.contextPath}/biz/MyPage.do" class="header-icon-link" aria-label="사업자 마이페이지">
                                 <svg class="header-icon" viewBox="0 0 24 24" aria-hidden="true">
                                     <circle cx="12" cy="7" r="4"></circle>
                                     <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"></path>
                                 </svg>
+                                <span class="header-icon-text">마이페이지</span>
                             </a>
 
-                            <a href="${pageContext.request.contextPath}/logout.do" class="logout-btn">로그아웃</a>
+                            <a href="${pageContext.request.contextPath}/logout.do" class="header-icon-link" aria-label="로그아웃">
+                                <svg class="header-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                                    <path d="M10 17l5-5-5-5"></path>
+                                    <path d="M15 12H3"></path>
+                                </svg>
+                                <span class="header-icon-text">로그아웃</span>
+                            </a>
                         </c:when>
 
                         <c:when test="${sessionScope.sessionRole eq 'ADMIN'}">
@@ -104,10 +134,16 @@
                                     <circle cx="12" cy="7" r="4"></circle>
                                     <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"></path>
                                 </svg>
+                                <span class="header-icon-text">관리자</span>
                             </a>
 
-                            <a href="${pageContext.request.contextPath}/admin/logout.do" class="logout-btn">
-                                로그아웃
+                            <a href="${pageContext.request.contextPath}/admin/logout.do" class="header-icon-link" aria-label="로그아웃">
+                                <svg class="header-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                                    <path d="M10 17l5-5-5-5"></path>
+                                    <path d="M15 12H3"></path>
+                                </svg>
+                                <span class="header-icon-text">로그아웃</span>
                             </a>
 
                         </c:when>
@@ -119,6 +155,7 @@
                                     <path d="M15 12H3"></path>
                                     <path d="M21 3v18"></path>
                                 </svg>
+                                <span class="header-icon-text">로그인</span>
                             </a>
                         </c:otherwise>
                     </c:choose>

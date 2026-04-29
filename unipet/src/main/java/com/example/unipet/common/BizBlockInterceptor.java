@@ -21,7 +21,16 @@ public class BizBlockInterceptor implements HandlerInterceptor {
 
             // 사업자 계정이면 접근 차단
             if ("BIZ".equals(role)) {
-                response.sendRedirect(request.getContextPath() + "/main.do");
+
+                response.setContentType("text/html; charset=UTF-8");
+                response.getWriter().write(
+                    "<script>" +
+                    "alert('사업자는 사용이 불가능한 페이지입니다.');" +
+                    "location.href='" + request.getContextPath() + "/main.do';" +
+                    "</script>"
+                );
+                response.getWriter().flush();
+
                 return false;
             }
         }

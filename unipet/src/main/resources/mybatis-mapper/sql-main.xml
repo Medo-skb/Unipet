@@ -104,10 +104,24 @@
 		LEFT JOIN STORE_FILE sf
 		    ON s.STORE_NO = sf.STORE_NO
 		   AND sf.IS_MAIN = 'Y'
+		LEFT JOIN USERS u
+		    ON u.USER_ID = #{sessionId}
 		WHERE s.S_STATUS != 'EXT'
 		  AND s.S_CATEGORY = #{category}
-		ORDER BY RAND()
-		LIMIT 4
+		ORDER BY
+		    CASE
+		        WHEN #{sessionId} IS NOT NULL
+		         AND #{sessionId} != ''
+		         AND u.USER_ADDR IS NOT NULL
+		         AND u.USER_ADDR != ''
+		         AND s.S_ADDR IS NOT NULL
+		         AND s.S_ADDR != ''
+		         AND LEFT(TRIM(u.USER_ADDR), 2) = LEFT(TRIM(s.S_ADDR), 2)
+		        THEN 0
+		        ELSE 1
+		    END,
+		    RAND()
+		LIMIT 4;
 	</select>
 	
 	<!-- 상품 카테고리 조회 -->
@@ -121,28 +135,38 @@
 	
 	<!-- 카테고리별 랜덤 상품 조회 -->
 	<select id="selectProductByCategoryList" parameterType="hashmap" resultType="com.example.unipet.model.Main">
-	    SELECT
-	        p.PRODUCT_NO AS productNo,
-	        p.PRODUCT_NAME AS productName,
-	        p.PRODUCT_PRICE AS productPrice,
-	        pam.A_MAIN_NO AS aMainNo,
-	        pam.A_MAIN_TYPE AS aMainType,
-	        pf.FILE_PATH AS filePath,
-	        pf.FILE_NAME AS fileName
-	    FROM PRODUCT p
-	    LEFT JOIN PC_ANIMAL_SUB pas
-	        ON pas.A_SUB_NO = p.A_SUB_NO
-	    LEFT JOIN PC_ANIMAL_MAIN pam
-	        ON pam.A_MAIN_NO = pas.A_MAIN_NO
-	    LEFT JOIN PRODUCT_FILE pf
-	        ON p.PRODUCT_NO = pf.PRODUCT_NO
-	       AND pf.IS_MAIN = 'Y'
-	    WHERE pam.A_MAIN_NO = #{aMainNo}
-	      AND p.PRODUCT_STATUS = 'Y'
-	    ORDER BY RAND()
-	    LIMIT 4
+		SELECT
+		    p.PRODUCT_NO AS productNo,
+		    p.PRODUCT_NAME AS productName,
+		    p.PRODUCT_PRICE AS productPrice,
+		    pam.A_MAIN_NO AS aMainNo,
+		    pam.A_MAIN_TYPE AS aMainType,
+		    pf.FILE_PATH AS filePath,
+		    pf.FILE_NAME AS fileName,
+		    IFNULL(od.orderCnt, 0) AS orderCnt
+		FROM PRODUCT p
+		LEFT JOIN PC_ANIMAL_SUB pas
+		    ON pas.A_SUB_NO = p.A_SUB_NO
+		LEFT JOIN PC_ANIMAL_MAIN pam
+		    ON pam.A_MAIN_NO = pas.A_MAIN_NO
+		LEFT JOIN PRODUCT_FILE pf
+		    ON p.PRODUCT_NO = pf.PRODUCT_NO
+		   AND pf.IS_MAIN = 'Y'
+		LEFT JOIN (
+		    SELECT PRODUCT_NO, COUNT(*) AS orderCnt
+		    FROM ORDER_DETAIL
+		    GROUP BY PRODUCT_NO
+		) od
+		    ON p.PRODUCT_NO = od.PRODUCT_NO
+		
+		WHERE pam.A_MAIN_NO = #{aMainNo}
+		  AND p.PRODUCT_STATUS = 'Y'
+		
+		ORDER BY orderCnt DESC   -- 인기순
+		LIMIT 4;
 	</select>
 	
+	<!-- 소셜로그인 기본정보 확인 -->
 	<select id="selectSocialBasicCheck" parameterType="hashmap" resultType="com.example.unipet.model.Main">
 	    SELECT
 	        USER_ID AS userId,
@@ -155,58 +179,46 @@
 	
 	<!-- 통합검색 업체 -->
 	<select id="selectSearchStoreList" parameterType="map" resultType="com.example.unipet.model.Main">
-	    SELECT 
-	        S.STORE_NO AS storeNo,
-	        S.STORE_NAME AS storeName,
-	        S.S_ADDR AS sAddr,
-	        S.S_CATEGORY AS sCategory,
-	        SF.FILE_PATH AS filePath,
-	        SF.FILE_NAME AS fileName,
-	
-	        M.MENU_NAME AS menuName1,
-	        M.MENU_PRICE AS menuPrice1
-	
-	    FROM STORE S
-	    LEFT JOIN STORE_FILE SF
-	        ON S.STORE_NO = SF.STORE_NO
-	       AND SF.IS_MAIN = 'Y'
-	    LEFT JOIN (
-	        SELECT
-	            X.STORE_NO,
-	            X.MENU_NAME,
-	            X.MENU_PRICE,
-	            ROW_NUMBER() OVER (
-	                PARTITION BY X.STORE_NO
-	                ORDER BY X.RESERVE_COUNT DESC, X.MENU_NO ASC
-	            ) AS RN
-	        FROM (
-	            SELECT
-	                SM.STORE_NO,
-	                SM.MENU_NO,
-	                SM.MENU_NAME,
-	                SM.MENU_PRICE,
-	                IFNULL(RC.RESERVE_COUNT, 0) AS RESERVE_COUNT
-	            FROM STORE_MENU SM
-	            LEFT JOIN (
-	                SELECT
-	                    R.MENU_NO,
-	                    COUNT(*) AS RESERVE_COUNT
-	                FROM reservation R
-	                GROUP BY R.MENU_NO
-	            ) RC
-	                ON SM.MENU_NO = RC.MENU_NO
-	        ) X
-	    ) M
-	        ON S.STORE_NO = M.STORE_NO
-	       AND M.RN = 1
-	    WHERE S.S_STATUS != 'EXT'
-	      AND S.S_CATEGORY = #{sCategory}
-	      AND (
-	            S.STORE_NAME LIKE CONCAT('%', #{keyword}, '%')
-	            OR S.S_ADDR LIKE CONCAT('%', #{keyword}, '%')
-	            OR M.MENU_NAME LIKE CONCAT('%', #{keyword}, '%')
-	          )
-	    ORDER BY S.STORE_NAME ASC
+		SELECT 
+		    S.STORE_NO AS storeNo,
+		    S.STORE_NAME AS storeName,
+		    S.S_ADDR AS sAddr,
+		    S.S_CATEGORY AS sCategory,
+		    SF.FILE_PATH AS filePath,
+		    SF.FILE_NAME AS fileName,
+		
+		    M.MENU_NAME AS menuName1,
+		    M.MENU_PRICE AS menuPrice1
+		
+		FROM STORE S
+		LEFT JOIN STORE_FILE SF
+		    ON S.STORE_NO = SF.STORE_NO
+		   AND SF.IS_MAIN = 'Y'
+		
+		LEFT JOIN (
+		    SELECT
+		        X.STORE_NO,
+		        X.MENU_NAME,
+		        X.MENU_PRICE,
+		        ROW_NUMBER() OVER (
+		            PARTITION BY X.STORE_NO
+		            ORDER BY X.MENU_PRICE ASC, X.MENU_NO ASC
+		        ) AS RN
+		    FROM STORE_MENU X
+		    WHERE X.M_STATUS = 'Y'
+		) M
+		    ON S.STORE_NO = M.STORE_NO
+		   AND M.RN = 1
+		
+		WHERE S.S_STATUS != 'EXT'
+		  AND S.S_CATEGORY = #{sCategory}
+		  AND (
+		        S.STORE_NAME LIKE CONCAT('%', #{keyword}, '%')
+		        OR S.S_ADDR LIKE CONCAT('%', #{keyword}, '%')
+		        OR M.MENU_NAME LIKE CONCAT('%', #{keyword}, '%')
+		      )
+		
+		ORDER BY S.STORE_NAME ASC;
 	</select>
 	
 	<!-- 업체 전체 개수 조회 -->
@@ -284,17 +296,19 @@
 	<!-- 통합검색 커뮤니티 -->
 	<select id="selectSearchBoardList" parameterType="hashmap" resultType="com.example.unipet.model.Main">
 		SELECT 
-			B.BOARD_NO AS boardNo,
-			B.TITLE AS title,
-			B.B_CONTENT AS bContent,
-			BTS.B_MAIN_NO AS bMainNo
+		    B.BOARD_NO AS boardNo,
+		    B.TITLE AS title,
+		    B.B_CONTENT AS bContent,
+		    BTS.B_MAIN_NO AS bMainNo
 		FROM BOARD B
 		LEFT JOIN BOARD_TYPE_SUB BTS ON B.B_SUB_NO = BTS.B_SUB_NO
 		WHERE BTS.B_MAIN_NO = #{bMainNo}
+		  AND B.B_STATUS = 'Y'
+		  AND B.PRIVATE = 'N'
 		  AND (
-			B.TITLE LIKE CONCAT('%', #{keyword}, '%')
-			OR B.B_CONTENT LIKE CONCAT('%', #{keyword}, '%')
-		  )
+		        B.TITLE LIKE CONCAT('%', #{keyword}, '%')
+		        OR B.B_CONTENT LIKE CONCAT('%', #{keyword}, '%')
+		      )
 		ORDER BY B.BOARD_NO DESC
 	</select>
 	

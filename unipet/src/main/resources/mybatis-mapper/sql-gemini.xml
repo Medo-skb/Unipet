@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.unipet.mapper.GeminiMapper">
+
+    <select id="selectStoreRecommendList"
+            parameterType="hashmap"
+            resultType="com.example.unipet.model.StoreRecommend">
+
+	    SELECT
+	        S.STORE_NO AS storeNo,
+	        S.STORE_NAME AS storeName,
+	        S.S_STATUS AS sStatus,
+	        S.S_ADDR AS addr,
+	        SD.SUB_TITLE AS subTitle,
+	        SD.S_CONTENTS AS contents,
+	        GROUP_CONCAT(DISTINCT SM.MENU_NAME SEPARATOR ', ') AS menuNames,
+	        MIN(SM.MENU_PRICE) AS minPrice,
+	        IFNULL(ROUND(AVG(R.RATING), 1), 0) AS avgRating,
+	        COUNT(DISTINCT R.REVIEW_NO) AS reviewCount,
+	        GROUP_CONCAT(DISTINCT R.R_CONTENTS SEPARATOR ' / ') AS reviewContents
+	    FROM STORE S
+	    LEFT JOIN STORE_DETAIL SD ON S.STORE_NO = SD.STORE_NO
+	    LEFT JOIN STORE_MENU SM 
+	        ON S.STORE_NO = SM.STORE_NO
+	       AND SM.M_STATUS = 'Y'
+	    LEFT JOIN REVIEW R 
+	        ON S.STORE_NO = R.STORE_NO
+		WHERE S.S_STATUS IN ('GEN', 'AFF')
+		  AND S.IS_OPEN = 'Y'
+	
+	    <if test="keyword != null and keyword != ''">
+	        AND (
+	            S.STORE_NAME LIKE CONCAT('%', #{keyword}, '%')
+	            OR S.S_ADDR LIKE CONCAT('%', #{keyword}, '%')
+	            OR IFNULL(SD.SUB_TITLE, '') LIKE CONCAT('%', #{keyword}, '%')
+	            OR IFNULL(SD.S_CONTENTS, '') LIKE CONCAT('%', #{keyword}, '%')
+	            OR SM.MENU_NAME LIKE CONCAT('%', #{keyword}, '%')
+	            OR IFNULL(SM.MENU_INFO, '') LIKE CONCAT('%', #{keyword}, '%')
+	            OR R.R_CONTENTS LIKE CONCAT('%', #{keyword}, '%')
+	        )
+	    </if>
+	
+	    GROUP BY
+	        S.STORE_NO,
+	        S.STORE_NAME,
+	        S.S_ADDR,
+	        SD.SUB_TITLE,
+	        SD.S_CONTENTS
+	
+		ORDER BY
+		    reviewCount DESC,
+		    avgRating DESC,
+		    minPrice ASC
+	
+	    LIMIT 10
+
+    </select>
+
+</mapper>

@@ -11,8 +11,8 @@
 	<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 	<script src="/js/page-change.js"></script>
 
-	<link rel="stylesheet" href="/css/product/product.css">
-	<link rel="stylesheet" href="/css/product2/product.css">
+	<!-- <link rel="stylesheet" href="/css/product/product.css"> -->
+	<link rel="stylesheet" href="/css/product/product2.css">
 </head>
 
 <body>

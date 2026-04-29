@@ -1,7 +1,5 @@
 @charset "UTF-8";
 
-
-
 button,
 input,
 textarea {
@@ -185,6 +183,32 @@ button {
     width: 46px;
     text-align: center;
     font-weight: 700;
+}
+
+.qty-input {
+    width: 60px;
+    height: 32px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--text-main);
+    outline: none;
+    background: #fff;
+}
+
+.qty-input:focus {
+    border-color: var(--main);
+}
+
+.qty-input::-webkit-outer-spin-button,
+.qty-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.qty-input[type=number] {
+    -moz-appearance: textfield;
 }
 
 .stock-status {
@@ -730,6 +754,8 @@ button {
     gap: 8px;
     margin-top: 10px;
 }
+
+
 
 @media (max-width: 1240px) {
     .wrap {

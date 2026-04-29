@@ -529,7 +529,6 @@
                             <div v-if="reservationAllList.length === 0" class="empty-text">
                                 예약 내역이 없습니다.
                             </div>
-
                             <!-- 🔥 그룹 반복 -->
                             <div v-for="group in pagedReservationList" :key="group.date" style="margin-bottom:20px;">
 
