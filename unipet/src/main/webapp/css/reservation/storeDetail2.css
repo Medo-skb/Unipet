@@ -22,6 +22,17 @@
     margin-bottom: 12px;
 }
 
+.top-wrapper {
+    display: flex;       
+    align-items: center; 
+    gap: 8px;            
+}
+
+.top-wrapper > div:first-child {
+    font-size: 24px;      
+    font-weight: bold;
+}
+
 #top-sub {
     display: flex;
     justify-content: space-between;
@@ -30,6 +41,7 @@
 
 .s-type {
     font-size: 15px;
+    line-height: 28px;
     color: var(--text-sub);
 }
 
