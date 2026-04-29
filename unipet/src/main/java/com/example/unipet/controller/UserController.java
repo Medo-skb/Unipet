@@ -107,16 +107,6 @@ public class UserController {
 		return "redirect:/user/login.do";
 	}
 
-	@GetMapping("/main.do")
-	public String mainPage(HttpSession session) {
-
-		if (session.getAttribute("sessionId") == null) {
-			return "redirect:/user/login.do";
-		}
-
-		return "main/main";
-	}
-
 	@GetMapping("/user/phone-verify.do")
 	public String phoneVerifyPage() {
 		return "user/phone-verify";

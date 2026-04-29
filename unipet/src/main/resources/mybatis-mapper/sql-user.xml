@@ -5,9 +5,11 @@
 
 	<!-- 사용자 아이디 중복체크 -->
 	<select id="checkUser" parameterType="hashmap" resultType="int">
-		SELECT COUNT(*)
-		FROM unipet.users
-		WHERE USER_ID = #{userId}
+	    SELECT (
+	        (SELECT COUNT(*) FROM users WHERE USER_ID = #{userId}) +
+	        (SELECT COUNT(*) FROM tbl_admin WHERE ADMIN_ID = #{userId}) +
+	        (SELECT COUNT(*) FROM store_user WHERE S_USER_ID = #{userId})
+	    ) AS totalCount
 	</select>
 
 	<!-- 사업자 아이디 중복체크 -->
@@ -20,57 +22,69 @@
 	<!-- 사용자 회원가입 -->
 	<insert id="insertUser" parameterType="hashmap">
 		INSERT INTO unipet.users (
-		USER_ID,
-		USER_PWD,
-		USER_NAME,
-		NICKNAME,
-		PHONE,
-		EMAIL,
-		USER_ADDR,
-		FULL_ADDR,
-		ZIPCODE,
-		ROLE,
-		CDATE
+			USER_ID,
+			USER_PWD,
+			USER_NAME,
+			NICKNAME,
+			PHONE,
+			EMAIL,
+			USER_ADDR,
+			FULL_ADDR,
+			ZIPCODE,
+			ROLE,
+			CDATE
 		) VALUES (
-		#{userId},
-		#{pwd},
-		#{userName},
-		#{nickname},
-		#{phone},
-		#{email},
-		#{userAddr},
-		#{fullAddr},
-		#{zipcode},
-		'USER',
-		NOW()
+			#{userId},
+			#{pwd},
+			#{userName},
+			#{nickname},
+			#{phone},
+			#{email},
+			#{userAddr},
+			#{fullAddr},
+			#{zipcode},
+			'USER',
+			NOW()
 		)
 	</insert>
 
 	<!-- 사업자 회원가입 -->
 	<insert id="insertBizUser" parameterType="hashmap">
 		INSERT INTO unipet.store_user (
-		S_USER_ID,
-		S_USER_PWD,
-		CEO_NAME,
-		BIZ_FILE_NAME,
-		U_STATUS
+			S_USER_ID,
+			S_USER_PWD,
+			CEO_NAME,
+			BIZ_FILE_NAME,
+			U_STATUS
 		) VALUES (
 		#{userId},
-		#{pwd},
-		#{userName},
-		#{bizFileName},
-		'PND'
+			#{pwd},
+			#{userName},
+			#{bizFileName},
+			'PND'
 		)
 	</insert>
 
 
 	<!-- 사용자 로그인 -->
 	<select id="selectUser" parameterType="hashmap"
-		resultType="com.example.unipet.model.User"> SELECT USER_ID AS userId,
-		USER_PWD AS pwd, USER_NAME AS userName, NICKNAME AS nickname, PHONE,
-		EMAIL, USER_ADDR AS userAddr, FULL_ADDR AS fullAddr, ZIPCODE, ROLE FROM
-		unipet.users WHERE USER_ID = #{userId} AND
-		(USER_STATUS IS NULL OR USER_STATUS NOT IN ('BAN', 'EXT')) </select>
+		resultType="com.example.unipet.model.User">
+		SELECT
+			USER_ID AS userId,
+			USER_PWD AS pwd,
+			USER_NAME AS userName,
+			NICKNAME AS nickname,
+			PHONE,
+			EMAIL,
+			USER_ADDR AS userAddr,
+			FULL_ADDR AS fullAddr,
+			ZIPCODE,
+			ROLE
+		FROM unipet.users
+		WHERE USER_ID = #{userId} AND
+			  USER_STATUS NOT IN ('BAN', 'EXT')
+	</select>
+
 
 	<!-- 사업자 로그인 -->
 	<select id="selectStoreUser" parameterType="hashmap"
@@ -103,11 +117,10 @@
 		resultType="com.example.unipet.model.User">
 		SELECT
 		USER_ID AS userId,
-		USER_NAME AS userName
+		USER_NAME AS userName,
+		USER_PWD as pwd
 		FROM unipet.users
 		WHERE USER_NAME = #{userName}
-		AND USER_PWD = #{pwd}
-		AND (USER_STATUS IS NULL OR USER_STATUS NOT IN ('BAN', 'EXT'))
 	</select>
 
 	<!-- 비밀번호 재설정 대상 확인 -->
