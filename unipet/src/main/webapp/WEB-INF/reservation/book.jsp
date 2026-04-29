@@ -4,11 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- <link href="/css/reservation/book.css" rel="stylesheet"> -->
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="/js/page-change.js"></script>
-    <title>예약</title>
+    <title>UNIPET</title>
     <link href="/css/reservation/book2.css" rel="stylesheet">
 </head>
 <body>
@@ -102,7 +101,7 @@
                 <div class="price" v-if="selectedMenu"></div>
                 <div class="price">
                     총 예약 결제 금액: 
-                    <strong style="color: #ff4757;">{{ reservationPrice.toLocaleString() }}</strong> 원
+                    <strong class="highlight">{{ reservationPrice.toLocaleString() }}</strong> 원
                     <div><span class="sub-text">** 진료/서비스 금액의 (10%)</span></div>
                 </div>
             </div>
@@ -120,10 +119,6 @@
             <div class="button" @click="fnGoConfirm">예약 & 결제</div>
         </div>
     </div>
-    <jsp:include page="/WEB-INF/footer/footer.jsp" />
-</body>
-    </div>
-
     <jsp:include page="/WEB-INF/footer/footer.jsp" />
 </body>
 
@@ -165,6 +160,7 @@
                     type: "POST",
                     data: { storeNo: self.storeNo },
                     success: function(data) {
+                        console.log(data);
                         self.cutoff = data.info.cutoff;
                         self.buildCalendar();
 
@@ -307,6 +303,7 @@
                     pet: this.selectedPet,
                     menus: [this.selectedMenu],
                     reservationPrice: this.reservationPrice,
+                    totalPrice: this.totalPrice,
                     request: this.requestContent
                 };
 

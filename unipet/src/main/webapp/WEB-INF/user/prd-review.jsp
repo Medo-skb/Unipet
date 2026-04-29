@@ -222,7 +222,11 @@
                 }
             },
             mounted() {
-                // 페이지 진입 시 실행
+                if (!this.userId) {
+                    alert("로그인이 필요한 서비스입니다.");
+                    location.href = "/user/login.do";
+                    return;
+                }
                 this.fnGetDetail();
             }
         }).mount('#app');

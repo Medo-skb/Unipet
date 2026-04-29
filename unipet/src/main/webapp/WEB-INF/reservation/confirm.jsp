@@ -4,11 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="/css/reservation/confirm.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="/js/page-change.js"></script>
-    <title>Confirm</title>
+    <title>UNIPET</title>
     <link href="/css/reservation/confirm2.css" rel="stylesheet">
 </head>
 <body>
@@ -17,7 +16,7 @@
     <div id="app">
         <div id="container">
             <div class="confirm-card">
-                <div>다음과 같이 <span class="highlight">예약</span> 및 <span class="highlight">결제</span>를 진행하겠습니다.</div>
+                <div class="notice">다음과 같이 <span class="highlight">예약</span> 및 <span class="highlight">결제</span>를 진행하겠습니다.</div>
                 <h3 class="card-title">예약 상세정보</h3>
                 
                 <div class="info-list">
@@ -42,16 +41,31 @@
                     </div>
                     
                     <div class="info-item">
-                        <div class="label">예약 결제 금액</div>
+                        <div class="label">총 금액</div>
+                        <div class="value">
+                            <span>{{ info.totalPrice?.toLocaleString() }} 원</span>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="label highlight">선결제 예약금 (10%)</div>
                         <div class="value">
                             <span class="highlight">{{ info.reservationPrice?.toLocaleString() }} 원</span>
                         </div>
                     </div>
-                    
+
                     <div class="info-item">
+                        <div class="label">현장 결제 금액</div>
+                        <div class="value">
+                            <span>{{ balancePrice.toLocaleString() }} 원</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-item align-center"> 
                         <span class="label">요청사항:</span>
                         <div class="value request-box">{{ info.request || '없음' }}</div>
                     </div>
+
                     <div class="notice-area">
                         <div class="notice-header" @click="isNoticeOpen = !isNoticeOpen">
                             <div class="header-left">
@@ -92,6 +106,14 @@
                 isNoticeOpen: false,
                 isSubmitting: false
             };
+        },
+        computed: {
+            // 현장 결제 금액 계산: 총 금액 - 선결제 예약금
+            balancePrice() {
+                const total = this.info.totalPrice || 0;
+                const reserved = this.info.reservationPrice || 0;
+                return total - reserved;
+            }
         },
         methods: {
             fnSubmit() {
@@ -153,6 +175,12 @@
             }
         },
         mounted() {
+            if (!this.userId) {
+                alert("로그인이 필요한 서비스입니다.");
+                location.href = "/user/login.do";
+                return;
+            }
+            
             const savedData = localStorage.getItem("reserveTemp");
             
             if (!savedData) {

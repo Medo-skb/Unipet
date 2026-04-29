@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="/css/reservation/search.css" rel="stylesheet">
-    <title>업체 검색</title>
+    <title>UNIPET</title>
     <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="/js/page-change.js"></script>
@@ -128,6 +128,10 @@
                 };
                 this.map = new kakao.maps.Map(container, options);
 
+                // [핵심 1] 여기서 인포윈도우 객체를 딱 한 번만 생성합니다.
+                // 객체 하나를 계속 재사용해야 기존 것이 자동으로 사라지고 새 것이 뜹니다.
+                this.infowindow = new kakao.maps.InfoWindow({ zIndex: 3 });
+
                 this.map.addControl(new kakao.maps.MapTypeControl(), kakao.maps.ControlPosition.TOPRIGHT);
                 this.map.addControl(new kakao.maps.ZoomControl(), kakao.maps.ControlPosition.RIGHT);
 
@@ -223,83 +227,97 @@
                 this.fnStoreList();
             },
 
-            createMarkers() {
+            createMarkers: function() {
                 const self = this;
-
-                if (this.markers && Array.isArray(this.markers)) {
-                    this.markers.forEach(m => {
-                        if (m) m.setMap(null);
-                    });
+                if (self.markers && self.markers.length > 0) {
+                    self.markers.forEach(marker => marker.setMap(null));
                 }
-                this.markers = []; 
+                self.markers = [];
 
-                if (!this.infowindow) {
-                    this.infowindow = new kakao.maps.InfoWindow({ zIndex: 10 });
-                }
-
-                if (!this.list || this.list.length === 0) {
-                    return;
-                }
-
-                this.list.forEach((item, index) => {
+                // data의 list를 사용
+                self.list.forEach(item => {
                     const lat = parseFloat(item.lat);
                     const lng = parseFloat(item.lng);
+                    if (!lat || !lng) return;
 
-                    if (isNaN(lat) || isNaN(lng)) return;
-
-                    const markerPosition = new kakao.maps.LatLng(lat, lng);
-                    
                     const marker = new kakao.maps.Marker({
-                        position: markerPosition,
+                        position: new kakao.maps.LatLng(lat, lng),
                         map: self.map
                     });
 
-                    marker.listIndex = index;
+                    marker.storeNo = item.storeNo;
+                    self.markers.push(marker);
 
-                    const sName = item.storeName || "이름 없음";
-                    const sAddr = item.sAddr || "주소 없음";
-                    const badge = item.sStatus === 'GEN' ? '<span style="color:#4A90E2; font-size:10px; margin-left:5px; font-weight:bold;">(유니펫 회원사)</span>' : '';
-
-                    const content = 
-                        '<div style="padding:10px; min-width:150px; background:#fff; border:1px solid #4A90E2; border-radius:5px;">' +
-                        '    <div style="font-weight:bold; font-size:14px; color:#000; margin-bottom:5px;">' + sName + badge + '</div>' +
-                        '    <div style="font-size:12px; color:#666; line-height:1.4;">' + sAddr + '</div>' +
-                        '</div>';
-
-                    kakao.maps.event.addListener(marker, 'mouseover', function() {
-                        self.infowindow.setContent(content);
-                        self.infowindow.open(self.map, marker);
+                    // 마커 클릭 시에도 공통 함수 호출
+                    kakao.maps.event.addListener(marker, 'click', function() {
+                        self.displayInfoWindow(marker, item);
                     });
-
-                    kakao.maps.event.addListener(marker, 'mouseout', function() {
-                        self.infowindow.close();
-                    });
-
-                    this.markers.push(marker);
                 });
             },
 
-            selectStore(item, index) {
-                if (!this.infowindow || !this.markers || !this.markers[index]) return;
+            selectStore(item) {
+                const self = this;
+                
+                // storeNo를 기준으로 markers 배열에서 해당 마커를 찾습니다.
+                const targetMarker = self.markers.find(m => m.storeNo === item.storeNo);
 
-                const moveLatLon = new kakao.maps.LatLng(parseFloat(item.lat), parseFloat(item.lng));
-                this.map.panTo(moveLatLon);
+                if (targetMarker) {
+                    const moveLatLon = new kakao.maps.LatLng(parseFloat(item.lat), parseFloat(item.lng));
+                    self.map.panTo(moveLatLon);
 
-                const targetMarker = this.markers[index];
+                    // 공통 함수를 실행하여 마커 위에 띄웁니다.
+                    self.displayInfoWindow(targetMarker, item);
+                }
+            },
 
-                const sName = item.storeName || "이름 없음";
-                const sAddr = item.sAddr || "주소 없음";
-                const badge = item.sStatus === 'GEN' ? '<span style="color:#4A90E2; font-size:10px; margin-left:5px; font-weight:bold;">(유니펫 회원사)</span>' : '';
+            getStoreContent: function(item) {
+                const name = (item.storeName || item.S_NAME || "이름없음").trim();
+                const addr = (item.sAddr || item.S_ADDR || "주소없음").trim();
+                const type = (item.storeType || item.S_TYPE || "").trim();
+                const status = String(item.sStatus || item.S_STATUS || "").toUpperCase();
 
-                const content = 
-                    '<div style="padding:10px; min-width:150px; background:#fff; border:1px solid #4A90E2; border-radius:5px;">' +
-                    '    <div style="font-weight:bold; font-size:14px; color:#000; margin-bottom:5px;">' + sName + badge + '</div>' +
-                    '    <div style="font-size:12px; color:#666; line-height:1.4;">' + sAddr + '</div>' +
-                    '</div>';
+                let parts = [];
+                parts.push('<div style="padding:6px 8px; width:150px; background:#fff; font-family:sans-serif; letter-spacing:-0.5px; border-radius:8px;">');
+                
+                // 첫 줄: 업종(좌) / 회원사(우) - 간격 밀착
+                parts.push('  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">');
+                if(type) {
+                    parts.push('    <span style="font-size:10px; color:#777; background:#f4f4f4; padding:1px 4px; border-radius:3px; font-weight:600;">' + type + '</span>');
+                } else {
+                    parts.push('    <div></div>');
+                }
 
-                this.infowindow.close();
-                this.infowindow.setContent(content);
-                this.infowindow.open(this.map, targetMarker);
+                if(status === 'GEN') {
+                    parts.push('    <span style="font-size:10px; color:#ff4b82; background:#fff; border:1px solid #ffdae9; padding:1px 4px; border-radius:3px; font-weight:700;">유니펫 회원사</span>');
+                }
+                parts.push('  </div>');
+
+                // 업체명: 글자가 길면 말줄임표(...) 처리하여 박스 크기 고정
+                parts.push('  <div style="margin-bottom:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">');
+                parts.push('    <strong style="font-size:15px; color:#111; font-weight:700;">' + name + '</strong>');
+                parts.push('  </div>');
+                
+                // 주소: 폰트를 더 줄이고 줄바꿈 허용 (혹은 필요시 이것도 말줄임 처리)
+                parts.push('  <div style="font-size:11px; color:#888; line-height:1.3; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">');
+                parts.push(     addr);
+                parts.push('  </div>');
+                
+                parts.push('</div>');
+
+                return parts.join('');
+            },
+
+            // 공통 함수: 인포윈도우 표시 전담
+            displayInfoWindow: function(marker, item) {
+                const self = this;
+                if (!self.infowindow) return;
+
+                // 아까 만든 디자인 함수 호출
+                const content = self.getStoreContent(item);
+                
+                // 기존 열려있는 게 있다면 자동으로 닫고 새로운 내용을 채웁니다.
+                self.infowindow.setContent(content);
+                self.infowindow.open(self.map, marker);
             },
 
             fnGoDetail(item) {

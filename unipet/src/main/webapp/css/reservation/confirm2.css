@@ -7,6 +7,11 @@
     box-sizing: border-box;
 }
 
+.notice{
+    font-size: 20px;
+    text-align: center;
+}
+
 .confirm-card {
     background: #fff;
     border-radius: 22px;
@@ -48,6 +53,12 @@
     font-weight: bold;
 }
 
+/* 오직 요청사항(align-center) 항목만 중앙 정렬 적용 */
+.info-item.align-center {
+    display: flex;
+    align-items: center;
+}
+
 .request-box {
     flex: 1;
     border: 1px solid var(--line-soft);
@@ -57,6 +68,9 @@
     background: #fafafa;
     box-sizing: border-box;
     min-height: 42px;
+    
+    display: flex;
+    align-items: center;
 }
 
 /* 안내 영역 */
