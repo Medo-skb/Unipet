@@ -82,18 +82,19 @@ public interface PaymentMapper {
 	// 재고 수량 업데이트
 	public int updateStock(HashMap<String, Object> map);
 	
-	// 1. 환불 전 검증을 위한 결제/주문 정보 조회
+	// 환불 전 검증을 위한 결제/주문 정보 조회
     public HashMap<String, Object> selectPaymentInfo(HashMap<String, Object> map);
     
-    // 2. 주문 테이블(orders) 상태를 '취소'로 변경
+    // 주문 테이블 상태를 취소로 변경
     public int updateOrderCancelStatus(HashMap<String, Object> map);
     
-    // 3. 결제 마스터 테이블(payment_master) 상태를 '취소'로 변경
+    // 결제 테이블 상태를 취소로 변경
     public int updatePaymentStatus(HashMap<String, Object> map);
     
-    // 4. (보너스) 환불 시 상품 재고(product) 샀던 개수만큼 원복
+    // 환불 시 상품 재고 원복
     public int updateStockRestore(HashMap<String, Object> map);
     
+    // 예약 테이블 상태를 취소로 변경
     public int updateReservationCancel(HashMap<String, Object> map);
 	
 }

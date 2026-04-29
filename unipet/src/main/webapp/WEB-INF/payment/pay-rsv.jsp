@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>UNIPET</title>
     <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="/js/page-change.js"></script>
@@ -80,11 +80,12 @@
         data() {
             return {
                 // 변수 - (key : value)
-                rsvNo : "${rsvNo}" || 1,
+                rsvNo : "${rsvNo}",
                 userId : "${sessionId}",
                 info : {},
                 deposit : "",
-                balance : ""
+                balance : "",
+                isPayComplete: false
             };
         },
         methods: {
@@ -112,6 +113,12 @@
                             if (self.info.rsvStatus !== 'WAI') {
                                 alert("잘못된 접근입니다.");
                                 location.href = "/main.do";
+                                return;
+                            }
+                            if (!self.info.phone || self.info.phone.trim() === '') {
+                                alert("본인인증이 필요한 서비스입니다. 인증 페이지로 이동합니다.");
+                                // location.href = "/member/verification.do"; 
+                                location.href = "/main.do"; 
                                 return;
                             }
                         } else {
@@ -175,6 +182,7 @@
                     success: function(data) {
                         if(data.result === "success") {
                             if(status === "PAY") {
+                                self.isPayComplete = true;
                                 alert("예약 및 결제가 완료되었습니다!");
                                 pageChange("/payment/pay-success.do", {rsvNo : param.rsvNo});
                             } else {
@@ -186,19 +194,30 @@
                         }
                     }
                 });
+            },
+            fnLeaveGuard(event) {
+                // 결제가 완료되어 성공 페이지로 이동할 때는 묻지 않습니다.
+                if (this.isPayComplete) return;
+
+                event.preventDefault();
+                event.returnValue = ''; // 크롬에서 이 코드가 있어야 경고창이 뜹니다.
             }
         }, // methods
         mounted() {
             // 처음 시작할 때 실행되는 부분
             let self = this;
             if (!self.rsvNo || self.rsvNo === "null") {
-                alert("잘못된 접근입니다.");
+                alert("잘못된 접근입니다. 메인 페이지로 이동합니다.");
                 location.href = "/main.do";
                 return; 
             }
             self.fnGetInfo();
-            
-        }
+            window.addEventListener('beforeunload', this.fnLeaveGuard);
+        },
+        beforeUnmount() {
+            // 페이지를 떠날 때 리스너 제거 (중요: 메모리 누수 방지)
+            window.removeEventListener('beforeunload', this.fnLeaveGuard);
+        },
     });
 
     app.mount('#app');

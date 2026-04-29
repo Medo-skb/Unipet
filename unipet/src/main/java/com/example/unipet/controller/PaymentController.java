@@ -39,6 +39,8 @@ public class PaymentController {
 	
 	@RequestMapping("/payment/pay-shop.do") 
 	public String shop(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception{
+		HttpSession session = request.getSession();
+		String userId = (String) session.getAttribute("sessionId");
 		return "/payment/pay-shop";
 	}
 	
