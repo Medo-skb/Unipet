@@ -399,7 +399,9 @@
                         <div class="section-box">
                             <div class="section-title">쇼핑몰 주문 내역</div>
                             <!-- 정렬 선택 -->
-                            <select v-model="orderSortType">
+                            <input type="text" v-model="orderKeyword" @input="orderPage = 1" placeholder="상품명 검색">
+
+                            <select v-model="orderSortType" @change="orderPage=1">
                                 <option value="latest">최신순</option>
                                 <option value="old">오래된순</option>
                                 <option value="amountHigh">금액 높은순</option>
@@ -446,12 +448,20 @@
                             </div>
 
                             <!-- 🔥 페이징 (여기 위치 중요) -->
-                            <div class="btn-box" v-if="orderTotalPage > 1">
-                                <button class="small-btn" :disabled="orderPage === 1" @click="orderPage--">이전</button>
-                                <span>{{ orderPage }} / {{ orderTotalPage }}</span>
-                                <button class="small-btn" :disabled="orderPage === orderTotalPage"
-                                    @click="orderPage++">다음</button>
+                            <div class="btn-box paging-box" v-if="orderTotalPage > 1">
+                                <button class="small-btn page-icon-btn" :disabled="orderPage === 1"
+                                    @click="orderPage--">
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </button>
+
+                                <span class="page-text">{{ orderPage }} / {{ orderTotalPage }}</span>
+
+                                <button class="small-btn page-icon-btn" :disabled="orderPage === orderTotalPage"
+                                    @click="orderPage++">
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </button>
                             </div>
+
 
                         </div>
                     </div>
@@ -518,7 +528,9 @@
                         <div class="section-box">
                             <div class="section-title">예약 내역</div>
                             <!-- 정렬 선택 -->
-                            <select v-model="rsvSortType">
+                            <input type="text" v-model="rsvKeyword" @input="rsvPage = 1" placeholder="예약처 / 반려동물 검색">
+
+                            <select v-model="rsvSortType" @change="rsvPage=1">
                                 <option value="latest">최신순</option>
                                 <option value="old">오래된순</option>
                                 <option value="timeAsc">시간 빠른순</option>
@@ -571,12 +583,19 @@
                             </div>
 
                             <!-- 🔥 페이징 -->
-                            <div class="btn-box" v-if="rsvTotalPage > 1">
-                                <button class="small-btn" :disabled="rsvPage === 1" @click="rsvPage--">이전</button>
-                                <span>{{ rsvPage }} / {{ rsvTotalPage }}</span>
-                                <button class="small-btn" :disabled="rsvPage === rsvTotalPage"
-                                    @click="rsvPage++">다음</button>
+                            <div class="btn-box paging-box" v-if="rsvTotalPage > 1">
+                                <button class="small-btn page-icon-btn" :disabled="rsvPage === 1" @click="rsvPage--">
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </button>
+
+                                <span class="page-text">{{ rsvPage }} / {{ rsvTotalPage }}</span>
+
+                                <button class="small-btn page-icon-btn" :disabled="rsvPage === rsvTotalPage"
+                                    @click="rsvPage++">
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </button>
                             </div>
+
 
                         </div>
                     </div>
@@ -1026,7 +1045,7 @@
             </div>
         </div>
 
-    <jsp:include page="/WEB-INF/footer/footer.jsp" />
+        <jsp:include page="/WEB-INF/footer/footer.jsp" />
 
         <script>
             const app = Vue.createApp({
@@ -1132,6 +1151,8 @@
 
                         //  예약 정렬 기준
                         rsvSortType: "latest",
+                        orderKeyword: "",
+                        rsvKeyword: ""
 
 
                     };
@@ -1197,6 +1218,17 @@
                                 deliStatus: items[0]?.deliStatus || items[0]?.DELI_STATUS || ""
                             };
                         });
+                        // 🔥 검색
+                        if (this.orderKeyword.trim() !== "") {
+                            const keyword = this.orderKeyword.trim().toLowerCase();
+
+                            result = result.filter(group => {
+                                return group.items.some(item =>
+                                    String(item.productName || "").toLowerCase().includes(keyword)
+                                );
+                            });
+                        }
+
 
                         // 선택한 정렬 기준 적용
                         result.sort((a, b) => {
@@ -1229,11 +1261,24 @@
 
                         return result;
                     },
+
                     groupedReservationList() {
                         const grouped = {};
+                        let list = this.reservationAllList;
+
+                        // 🔥 검색
+                        if (this.rsvKeyword.trim() !== "") {
+                            const keyword = this.rsvKeyword.trim().toLowerCase();
+
+                            list = list.filter(item => {
+                                return String(item.storeName || "").toLowerCase().includes(keyword)
+                                    || String(item.petName || "").toLowerCase().includes(keyword);
+                            });
+                        }
 
                         // 예약 날짜 기준으로 묶음
-                        this.reservationAllList.forEach(item => {
+                        list.forEach(item => {
+
                             const date = item.rsvDate || item.RSV_DATE || item.rsv_date || "날짜 없음";
                             if (!grouped[date]) grouped[date] = [];
                             grouped[date].push(item);
@@ -1357,11 +1402,20 @@
                             this.loadMyPostList();
                             this.loadMyCommentList();
                         }
-                        if (menu === "reserveList") this.loadReservationAllList();
-                        if (menu === "orderList") this.loadOrderList();
                         if (menu === "petWeightPage") this.loadWeightList();
                         if (menu === "petHealthPage" || menu === "petMyPage") this.loadHealthList();
                         if (menu === "petVacPage" || menu === "petMyPage") this.loadVaccineList();
+                        if (menu === "reserveList") {
+                            this.rsvPage = 1;
+                            this.rsvKeyword = "";
+                            this.loadReservationAllList();
+                        }
+                        if (menu === "orderList") {
+                            this.orderPage = 1;
+                            this.orderKeyword = "";
+                            this.loadOrderList();
+
+                        }
 
                         if (menu === "pointInfo") {
                             this.loadPointInfo();

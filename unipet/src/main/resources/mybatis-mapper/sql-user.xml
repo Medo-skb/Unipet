@@ -63,23 +63,14 @@
 		)
 	</insert>
 
+
 	<!-- 사용자 로그인 -->
 	<select id="selectUser" parameterType="hashmap"
-		resultType="com.example.unipet.model.User">
-		SELECT
-		USER_ID AS userId,
-		USER_PWD AS pwd,
-		USER_NAME AS userName,
-		NICKNAME AS nickname,
-		PHONE,
-		EMAIL,
-		USER_ADDR AS userAddr,
-		FULL_ADDR AS fullAddr,
-		ZIPCODE,
-		ROLE
-		FROM unipet.users
-		WHERE USER_ID = #{userId}
-	</select>
+		resultType="com.example.unipet.model.User"> SELECT USER_ID AS userId,
+		USER_PWD AS pwd, USER_NAME AS userName, NICKNAME AS nickname, PHONE,
+		EMAIL, USER_ADDR AS userAddr, FULL_ADDR AS fullAddr, ZIPCODE, ROLE FROM
+		unipet.users WHERE USER_ID = #{userId} AND
+		(USER_STATUS IS NULL OR USER_STATUS NOT IN ('BAN', 'EXT')) </select>
 
 	<!-- 사업자 로그인 -->
 	<select id="selectStoreUser" parameterType="hashmap"
@@ -94,8 +85,20 @@
 		WHERE S_USER_ID = #{userId}
 		AND U_STATUS NOT IN ('BAN', 'EXT')
 	</select>
+	<!-- 사업자 아이디 찾기 -->
+	<select id="findBizId" parameterType="hashmap"
+		resultType="com.example.unipet.model.User">
+		SELECT
+		S_USER_ID AS userId,
+		CEO_NAME AS userName
+		FROM unipet.store_user
+		WHERE CEO_NAME = #{userName}
+		AND S_USER_PWD = #{pwd}
+		AND U_STATUS NOT IN ('BAN', 'EXT')
+	</select>
 
-	<!-- 아이디 찾기 -->
+
+	<!-- 사용자아이디 찾기 -->
 	<select id="findId" parameterType="hashmap"
 		resultType="com.example.unipet.model.User">
 		SELECT
@@ -104,8 +107,8 @@
 		FROM unipet.users
 		WHERE USER_NAME = #{userName}
 		AND USER_PWD = #{pwd}
+		AND (USER_STATUS IS NULL OR USER_STATUS NOT IN ('BAN', 'EXT'))
 	</select>
-
 
 	<!-- 비밀번호 재설정 대상 확인 -->
 	<select id="checkUserForReset" parameterType="hashmap"
@@ -126,6 +129,7 @@
 		WHERE USER_ID = #{userId}
 	</update>
 
+
 	<!-- 소셜 로그인 조회 -->
 	<select id="selectSocialUser" parameterType="hashmap"
 		resultType="com.example.unipet.model.User">
@@ -133,13 +137,13 @@
 		USER_ID AS userId,
 		USER_NAME AS userName,
 		NICKNAME AS nickname,
-		EMAIL,
+		PHONE AS phone,
+		EMAIL AS email,
 		SOCIALTYPE AS socialType,
-		ROLE
+		ROLE AS role
 		FROM unipet.users
 		WHERE USER_ID = #{userId}
 	</select>
-
 	<!-- 소셜 회원가입 -->
 	<insert id="insertSocialUser" parameterType="hashmap">
 		INSERT INTO unipet.users (
@@ -162,12 +166,83 @@
 		NOW()
 		)
 	</insert>
-	<!-- UserMapper.xml -->
 	<update id="updatePhone" parameterType="hashmap">
-		UPDATE users
+		UPDATE unipet.users
 		SET PHONE = #{phone}
 		WHERE USER_ID = #{userId}
 	</update>
+
+	<!-- 휴대폰 인증번호 저장 -->
+	<insert id="insertPhoneVerify" parameterType="hashmap">
+		INSERT INTO unipet.phone_verify (
+		PHONE,
+		CODE,
+		EXPIRE_TIME
+		) VALUES (
+		#{phone},
+		#{code},
+		DATE_ADD(NOW(), INTERVAL 3 MINUTE)
+		)
+	</insert>
+
+	<!-- 최신 휴대폰 인증번호 조회 -->
+	<select id="selectLatestPhoneVerify" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT
+		VERIFY_NO AS verifyNo,
+		PHONE AS phone,
+		CODE AS code,
+		EXPIRE_TIME AS expireTime,
+		VERIFIED_YN AS verifiedYn
+		FROM unipet.phone_verify
+		WHERE PHONE = #{phone}
+		ORDER BY VERIFY_NO DESC
+		LIMIT 1
+	</select>
+
+	<!-- 휴대폰 인증 완료 처리 -->
+	<update id="updatePhoneVerified" parameterType="hashmap">
+		UPDATE unipet.phone_verify
+		SET VERIFIED_YN = 'Y'
+		WHERE VERIFY_NO = #{verifyNo}
+	</update>
+	<!-- 매장 등록 후 생성된 STORE_NO 조회 -->
+	<select id="selectStoreNoByUserId" parameterType="hashmap" resultType="int">
+		SELECT STORE_NO
+		FROM unipet.store
+		WHERE S_USER_ID = #{userId}
+		ORDER BY STORE_NO DESC
+		LIMIT 1
+	</select>
+	<!-- 매장 정보 저장 -->
+	<insert id="insertStore"> INSERT INTO unipet.store ( S_USER_ID, STORE_NAME,
+		S_CATEGORY, S_ADDR, S_FULL_ADDR, LAT, LNG, S_STATUS, IS_OPEN <!-- 🔥 추가 --> ) VALUES (
+		#{userId}, #{storeName}, #{sCategory}, #{sAddr}, #{sFullAddr}, #{lat},
+		#{lng}, #{sStatus}, 'Y' <!-- 🔥 추가 --> ) </insert>
+
+
+	<!-- 사업자등록증 파일 저장 -->
+	<insert id="insertStoreFile" parameterType="hashmap">
+		INSERT INTO unipet.store_file (
+		STORE_NO,
+		FILE_NAME,
+		ORIGIN_NAME,
+		FILE_PATH,
+		FILE_EXT,
+		FILE_SIZE,
+		IS_MAIN,
+		IS_PROOF
+		) VALUES (
+		#{storeNo},
+		#{fileName},
+		#{originName},
+		#{filePath},
+		#{fileExt},
+		#{fileSize},
+		'N',
+		'Y'
+		)
+	</insert>
 
 
 </mapper>

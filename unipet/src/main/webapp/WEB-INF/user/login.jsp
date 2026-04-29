@@ -53,24 +53,6 @@
                 <span>N</span>
             </button>
         </div>
-
-        <!-- 휴대폰 인증 팝업 -->
-        <div v-if="needPhoneVerify" class="verify-overlay">
-            <div class="verify-box">
-                <h3>휴대폰 인증</h3>
-                <p class="verify-desc">
-                    소셜 로그인 이용을 위해 휴대폰 인증이 필요합니다.
-                </p>
-
-                <input type="text" v-model="phone" placeholder="01012345678">
-                <button type="button" @click="sendSms">인증번호 발송</button>
-
-                <div v-if="smsSent">
-                    <input type="text" v-model="code" placeholder="인증번호 입력">
-                    <button type="button" @click="checkSms">인증 확인</button>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 
@@ -138,6 +120,7 @@
                     location.href = "/main.do";
                 } else {
                     alert(data.message || "아이디 또는 비밀번호를 확인해주세요.");
+                    console.log(pwd)
                 }
             },
             error: function () {
@@ -145,104 +128,6 @@
             }
         });
     }
-
-    const app = Vue.createApp({
-        data() {
-            return {
-                phone: "",
-                code: "",
-                smsSent: false,
-                needPhoneVerify: false
-            };
-        },
-        mounted() {
-            this.checkNeedVerify();
-        },
-        methods: {
-            checkNeedVerify() {
-                const self = this;
-
-                $.ajax({
-                    url: "/user/check-need-verify.dox",
-                    type: "POST",
-                    success: function (res) {
-                        let data = (typeof res === "string") ? JSON.parse(res) : res;
-
-                        if (data.needVerify === true) {
-                            self.needPhoneVerify = true;
-                        }
-                    }
-                });
-            },
-
-            sendSms() {
-                const self = this;
-
-                if (!self.phone) {
-                    alert("휴대폰 번호를 입력해주세요.");
-                    return;
-                }
-
-                $.ajax({
-                    url: "/user/sendSms.dox",
-                    type: "POST",
-                    data: {
-                        phone: self.phone
-                    },
-                    success: function (res) {
-                        let data = (typeof res === "string") ? JSON.parse(res) : res;
-
-                        alert(data.message);
-
-                        if (data.result === true) {
-                            self.smsSent = true;
-                        }
-                    }
-                });
-            },
-
-            checkSms() {
-                const self = this;
-
-                if (!self.code) {
-                    alert("인증번호를 입력해주세요.");
-                    return;
-                }
-
-                $.ajax({
-                    url: "/user/checkSms.dox",
-                    type: "POST",
-                    data: {
-                        code: self.code
-                    },
-                    success: function (res) {
-                        let data = (typeof res === "string") ? JSON.parse(res) : res;
-
-                        if (data.result === true) {
-                            $.ajax({
-                                url: "/user/updatePhoneAfterVerify.dox",
-                                type: "POST",
-                                success: function (res2) {
-                                    let data2 = (typeof res2 === "string") ? JSON.parse(res2) : res2;
-
-                                    alert(data2.message || "휴대폰 인증이 완료되었습니다.");
-
-                                    if (data2.result === true) {
-                                        self.needPhoneVerify = false;
-                                        location.href = "/main.do";
-                                    }
-                                }
-                            });
-                        } else {
-                            alert(data.message);
-                        }
-                    }
-                });
-            }
-        }
-    });
-
-    app.mount("#socialBox");
 </script>
 
 </body>

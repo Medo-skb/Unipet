@@ -356,33 +356,51 @@
 		#{memo}
 		)
 	</insert>
-
-
-	<!-- 내 게시글 목록 -->
+	<!-- 내가 쓴 게시글 -->
 	<select id="selectMyPostList" parameterType="hashmap" resultType="hashmap">
 		SELECT
-		BOARD_NO AS id,
-		TITLE AS title,
-		DATE_FORMAT(CREATE_TIME, '%Y-%m-%d') AS cdate
-		FROM board
-		WHERE USER_ID = #{userId}
-		AND B_STATUS = 'Y'
-		ORDER BY CREATE_TIME DESC
-		LIMIT 10
+		B.BOARD_NO AS id,
+		B.BOARD_NO AS boardNo,
+		B.TITLE AS title,
+		B.B_CONTENT AS content,
+		B.CREATE_TIME AS cdate,
+		CASE B.B_SUB_NO
+		WHEN 1 THEN '자유게시판'
+		WHEN 2 THEN '질문게시판'
+		WHEN 3 THEN '후기게시판'
+		ELSE '커뮤니티'
+		END AS boardName
+		FROM BOARD B
+		WHERE B.USER_ID = #{userId}
+		AND B.B_STATUS = 'Y'
+		ORDER BY B.CREATE_TIME DESC
 	</select>
 
-	<!-- 내 댓글 목록 -->
+	<!-- 내가 쓴 댓글 -->
 	<select id="selectMyCommentList" parameterType="hashmap"
 		resultType="hashmap">
 		SELECT
-		COMMENT_NO AS id,
-		C_CONTENT AS content,
-		DATE_FORMAT(CREATE_TIME, '%Y-%m-%d') AS cdate
-		FROM `comment`
-		WHERE USER_ID = #{userId}
-		ORDER BY CREATE_TIME DESC
-		LIMIT 10
+		C.COMMENT_NO AS id,
+		C.C_CONTENT AS content,
+		C.CREATE_TIME AS cdate,
+		C.BOARD_NO AS boardNo,
+		B.TITLE AS postTitle,
+		CASE B.B_SUB_NO
+		WHEN 1 THEN '자유게시판'
+		WHEN 2 THEN '질문게시판'
+		WHEN 3 THEN '후기게시판'
+		ELSE '커뮤니티'
+		END AS boardName
+		FROM `COMMENT` C
+		JOIN BOARD B
+		ON C.BOARD_NO = B.BOARD_NO
+		WHERE C.USER_ID = #{userId}
+		AND B.B_STATUS = 'Y'
+		ORDER BY C.CREATE_TIME DESC
 	</select>
+
+
+	
 
 	<!-- 구독 정보 조회 -->
 	<select id="selectSubscriptionInfo" parameterType="hashmap"

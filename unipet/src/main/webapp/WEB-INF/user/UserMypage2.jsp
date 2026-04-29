@@ -174,13 +174,17 @@
                                                     </div>
                                                     <div class="pet-btns">
                                                         <div class="pet-main-btn-row">
-                                                            <button v-if="pet.isMain === 'Y'" class="pet-btn main gray" disabled>대표 프로필</button>
-                                                            <button v-else class="pet-btn main" @click="changeMainPet(pet.petNo)">대표 프로필</button>
+                                                            <button v-if="pet.isMain === 'Y'" class="pet-btn main gray"
+                                                                disabled>대표 프로필</button>
+                                                            <button v-else class="pet-btn main"
+                                                                @click="changeMainPet(pet.petNo)">대표 프로필</button>
                                                         </div>
 
                                                         <div class="pet-sub-btn-row">
-                                                            <button class="pet-btn edit" @click="openEditPetModal(pet)">수정</button>
-                                                            <button class="pet-btn delete" @click="deletePet(pet.petNo)">삭제</button>
+                                                            <button class="pet-btn edit"
+                                                                @click="openEditPetModal(pet)">수정</button>
+                                                            <button class="pet-btn delete"
+                                                                @click="deletePet(pet.petNo)">삭제</button>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -240,8 +244,10 @@
                                                      ? group.items[0].productImg 
                                                           : '/img/no-image.png'" alt="상품이미지">
                                                         <div>
-                                                            <div class="list-title">{{ (group.orderDate || '').substring(0, 10) }}</div>
-                                                            <div class="list-sub">{{ (group.orderDate || '').substring(11, 16) }}</div>
+                                                            <div class="list-title">{{ (group.orderDate ||
+                                                                '').substring(0, 10) }}</div>
+                                                            <div class="list-sub">{{ (group.orderDate ||
+                                                                '').substring(11, 16) }}</div>
                                                             <div class="list-sub">
                                                                 {{ group.items[0]?.productName || '-' }}
                                                                 <span v-if="group.items.length > 1">
@@ -313,8 +319,18 @@
                                             <div v-if="myPostList.length === 0" class="empty-text">작성한 게시글이 없습니다.</div>
                                             <div v-for="item in recentPostList.slice(0, 2)" :key="'post-' + item.id"
                                                 class="list-item">
-                                                <div class="list-title">{{ item.title }}</div>
-                                                <div class="list-sub">{{ item.cdate }}</div>
+                                                <div class="list-title">
+                                                    [{{ item.boardName }}] {{ item.title }}
+                                                </div>
+                                                <div class="list-sub">
+                                                    <div class="list-sub">
+                                                        {{ formatDateTime(item.cdate) }}
+                                                    </div>
+
+                                                </div>
+
+
+
                                             </div>
                                         </div>
 
@@ -325,8 +341,11 @@
                                             </div>
                                             <div v-for="item in myCommentList.slice(0, 2)" :key="'comment-' + item.id"
                                                 class="list-item">
-                                                <div class="list-title">{{ item.content }}</div>
-                                                <div class="list-sub">{{ item.cdate }}</div>
+                                                <div class="list-title">
+                                                    [{{ item.boardName }}] {{ item.content }}
+                                                </div>
+                                                <div class="list-sub">{{ formatDateTime(item.cdate)}}</div>
+
                                             </div>
                                         </div>
                                     </div>
@@ -406,8 +425,10 @@
                                 <div v-if="recentPostList.length === 0" class="empty-text">작성한 게시글이 없습니다.</div>
 
                                 <div class="list-item" v-for="item in recentPostList" :key="'post-page-' + item.id">
-                                    <div class="list-title">{{ item.title }}</div>
-                                    <div class="list-sub">{{ item.cdate }}</div>
+                                    <div class="list-title">
+                                        [{{ item.boardName }}] {{ item.title }}
+                                    </div>
+                                    <div class="list-sub">{{ formatDateTime(item.cdate) }}</div>
                                 </div>
                             </div>
 
@@ -417,9 +438,12 @@
                                 <div v-if="myCommentList.length === 0" class="empty-text">작성한 댓글이 없습니다.</div>
 
                                 <div class="list-item" v-for="item in myCommentList" :key="'comment-page-' + item.id">
-                                    <div class="list-title">{{ item.content }}</div>
-                                    <div class="list-sub">{{ item.cdate }}</div>
+                                    <div class="list-title">
+                                        [{{ item.boardName || '커뮤니티' }}] {{ item.content }}
+                                    </div>
+                                    <div class="list-sub">{{ formatDateTime(item.cdate) }}</div>
                                 </div>
+
                             </div>
                         </div>
 
@@ -433,8 +457,10 @@
                                 <div v-if="myPostList.length === 0" class="empty-text">작성한 게시글이 없습니다.</div>
 
                                 <div class="list-item" v-for="item in myPostList" :key="'post-all-' + item.id">
-                                    <div class="list-title">{{ item.title }}</div>
-                                    <div class="list-sub">{{ item.cdate }}</div>
+                                    <div class="list-title">
+                                        [{{ item.boardName }}] {{ item.title }}
+                                    </div>
+                                    <div class="list-sub">{{ formatDateTime(item.cdate) }}</div>
                                 </div>
                             </div>
                         </div>
@@ -629,8 +655,10 @@
                                                 getPetAge(pet.birthdate) + '살' : '' }}</div>
                                             <div class="pet-btns">
                                                 <div class="pet-sub-btn-row">
-                                                    <button class="pet-btn edit" @click="openEditPetModal(pet)">수정</button>
-                                                    <button class="pet-btn delete" @click="deletePet(pet.petNo)">삭제</button>
+                                                    <button class="pet-btn edit"
+                                                        @click="openEditPetModal(pet)">수정</button>
+                                                    <button class="pet-btn delete"
+                                                        @click="deletePet(pet.petNo)">삭제</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -1025,43 +1053,43 @@
                 </main>
             </div>
 
-        <div class="modal-wrap" v-if="showPetModal">
-            <div class="modal-box">
-                <div class="modal-title">{{ petForm.petNo ? '반려동물 프로필 수정' : '반려동물 프로필 추가' }}</div>
+            <div class="modal-wrap" v-if="showPetModal">
+                <div class="modal-box">
+                    <div class="modal-title">{{ petForm.petNo ? '반려동물 프로필 수정' : '반려동물 프로필 추가' }}</div>
 
-                <div class="row"><label>이름</label><input type="text" v-model="petForm.petName"></div>
-                <div class="row"><label>종</label><input type="text" v-model="petForm.species"></div>
-                <div class="row"><label>품종</label><input type="text" v-model="petForm.breed"></div>
-                <div class="row"><label>생년월일</label><input type="date" v-model="petForm.birthdate"></div>
-                <div class="row">
-                    <label>성별</label>
-                    <select v-model="petForm.gender">
-                        <option value="">선택해주세요</option>
-                        <option value="M">수컷</option>
-                        <option value="F">암컷</option>
-                    </select>
-                </div>
+                    <div class="row"><label>이름</label><input type="text" v-model="petForm.petName"></div>
+                    <div class="row"><label>종</label><input type="text" v-model="petForm.species"></div>
+                    <div class="row"><label>품종</label><input type="text" v-model="petForm.breed"></div>
+                    <div class="row"><label>생년월일</label><input type="date" v-model="petForm.birthdate"></div>
+                    <div class="row">
+                        <label>성별</label>
+                        <select v-model="petForm.gender">
+                            <option value="">선택해주세요</option>
+                            <option value="M">수컷</option>
+                            <option value="F">암컷</option>
+                        </select>
+                    </div>
 
-                <div class="modal-btns">
-                    <button type="button" class="btn-cancel" @click="closePetModal">취소</button>
-                    <button type="button" class="btn-save" @click="savePet">저장</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal-wrap" v-if="showPwdModal">
-            <div class="modal-box">
-                <div class="modal-title">비밀번호 변경</div>
-
-                <div class="row"><label>현재 비밀번호</label><input type="password" v-model="pwdForm.pwd"></div>
-                <div class="row"><label>새 비밀번호</label><input type="password" v-model="pwdForm.newPwd"></div>
-
-                <div class="modal-btns">
-                    <button type="button" class="btn-cancel" @click="closePwdModal">취소</button>
-                    <button type="button" class="btn-save" @click="changePassword">변경</button>
+                    <div class="modal-btns">
+                        <button type="button" class="btn-cancel" @click="closePetModal">취소</button>
+                        <button type="button" class="btn-save" @click="savePet">저장</button>
+                    </div>
                 </div>
             </div>
-        </div>
+
+            <div class="modal-wrap" v-if="showPwdModal">
+                <div class="modal-box">
+                    <div class="modal-title">비밀번호 변경</div>
+
+                    <div class="row"><label>현재 비밀번호</label><input type="password" v-model="pwdForm.pwd"></div>
+                    <div class="row"><label>새 비밀번호</label><input type="password" v-model="pwdForm.newPwd"></div>
+
+                    <div class="modal-btns">
+                        <button type="button" class="btn-cancel" @click="closePwdModal">취소</button>
+                        <button type="button" class="btn-save" @click="changePassword">변경</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <jsp:include page="/WEB-INF/footer/footer.jsp" />
@@ -1486,11 +1514,25 @@
 
                         return status;
                     },
+                    formatDateTime(dateStr) {
+                        if (!dateStr) return "-";
+
+                        let str = String(dateStr);
+                        str = str.replace("T", " ");
+
+                        if (str.length >= 16) {
+                            return str.substring(0, 16);
+                        }
+
+                        return str;
+                    },
 
 
 
 
                     formatDate(dateStr) {
+
+
                         if (!dateStr || dateStr === "날짜 없음") return "-";
 
                         if (typeof dateStr === "string" && dateStr.length >= 10) {

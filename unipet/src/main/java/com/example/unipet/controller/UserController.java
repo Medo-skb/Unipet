@@ -107,18 +107,10 @@ public class UserController {
 		return "redirect:/user/login.do";
 	}
 
-	
-
 	@GetMapping("/main.do")
 	public String mainPage(HttpSession session) {
 
-		// 로그인 안 된 경우
 		if (session.getAttribute("sessionId") == null) {
-			return "redirect:/user/login.do";
-		}
-
-		// 휴대폰 인증이 필요한 소셜로그인 사용자는 로그인 페이지로 다시 보냄
-		if ("Y".equals(session.getAttribute("needPhoneVerify"))) {
 			return "redirect:/user/login.do";
 		}
 
@@ -126,13 +118,8 @@ public class UserController {
 	}
 
 	@GetMapping("/user/phone-verify.do")
-	public String phoneVerifyPage(HttpSession session) {
-
-		if (session.getAttribute("sessionId") == null) {
-			return "redirect:/user/login.do";
-		}
-
-		return "user/login";
+	public String phoneVerifyPage() {
+		return "user/phone-verify";
 	}
 
 	// =========================
@@ -149,6 +136,9 @@ public class UserController {
 			session.setAttribute("sessionId", user.getUserId());
 			session.setAttribute("sessionName", user.getUserName());
 			session.setAttribute("sessionRole", "USER");
+
+			// 소셜 인증 팝업을 안 띄우므로 남아있는 인증 세션 제거
+			session.removeAttribute("needPhoneVerify");
 
 			resultMap.put("message", user.getUserName() + "님 환영합니다 👋");
 		}
@@ -171,6 +161,9 @@ public class UserController {
 			session.setAttribute("sessionName", user.getUserName());
 			session.setAttribute("sessionRole", "BIZ");
 
+			// 소셜 인증 팝업을 안 띄우므로 남아있는 인증 세션 제거
+			session.removeAttribute("needPhoneVerify");
+
 			resultMap.put("message", user.getUserName() + "님 환영합니다 👋");
 		}
 
@@ -182,46 +175,23 @@ public class UserController {
 	// =========================
 	@PostMapping("/user/signupUser.dox")
 	@ResponseBody
-	public String signupUser(@RequestParam HashMap<String, Object> map) {
-		HashMap<String, Object> resultMap = userService.insertUser(map);
-		return gson.toJson(resultMap);
-	}
+	public String signupUser(@RequestParam HashMap<String, Object> map, HttpSession session) {
 
-	@PostMapping("/user/updatePhoneAfterVerify.dox")
-	@ResponseBody
-	public String updatePhoneAfterVerify(HttpSession session) {
 		HashMap<String, Object> resultMap = new HashMap<>();
 
-		Object sessionId = session.getAttribute("sessionId");
-		Object smsAuth = session.getAttribute("smsAuth");
-		Object verifiedPhone = session.getAttribute("verifiedPhone");
+		Boolean phoneVerified = (Boolean) session.getAttribute("phoneVerified");
 
-		if (sessionId == null) {
+		if (phoneVerified == null || !phoneVerified) {
 			resultMap.put("result", false);
-			resultMap.put("message", "로그인이 필요합니다.");
+			resultMap.put("message", "휴대폰 인증을 완료해주세요.");
 			return gson.toJson(resultMap);
 		}
 
-		if (smsAuth == null || !(boolean) smsAuth || verifiedPhone == null) {
-			resultMap.put("result", false);
-			resultMap.put("message", "휴대폰 인증 후 이용해주세요.");
-			return gson.toJson(resultMap);
-		}
-
-		HashMap<String, Object> map = new HashMap<>();
-		map.put("userId", sessionId.toString());
-		map.put("phone", verifiedPhone.toString());
-
-		resultMap = userService.updatePhone(map);
+		resultMap = userService.insertUser(map);
 
 		if (Boolean.TRUE.equals(resultMap.get("result"))) {
-			session.removeAttribute("needPhoneVerify");
-			session.removeAttribute("smsAuth");
-			session.removeAttribute("smsCode");
-			session.removeAttribute("smsPhone");
-			session.removeAttribute("verifiedPhone");
-
-			resultMap.put("message", "휴대폰 인증이 완료되었습니다.");
+			session.removeAttribute("phoneVerified");
+			session.removeAttribute("verifyPhone");
 		}
 
 		return gson.toJson(resultMap);
@@ -236,25 +206,32 @@ public class UserController {
 			@RequestParam(value = "bizFile", required = false) MultipartFile bizFile) {
 
 		if (bizFile != null && !bizFile.isEmpty()) {
-			map.put("bizFileName", bizFile.getOriginalFilename());
+
+			String originName = bizFile.getOriginalFilename();
+
+			String fileExt = "";
+			if (originName != null && originName.contains(".")) {
+				fileExt = originName.substring(originName.lastIndexOf(".") + 1).toLowerCase();
+			}
+
+			map.put("bizFileName", originName);
+			map.put("fileName", originName);
+			map.put("originName", originName);
+			map.put("filePath", "/upload");
+			map.put("fileExt", fileExt);
+			map.put("fileSize", bizFile.getSize());
 		}
 
 		HashMap<String, Object> resultMap = userService.insertBizUser(map);
 		return gson.toJson(resultMap);
 	}
 
-	// =========================
-	// 사용자 아이디 중복체크
-	// =========================
 	@PostMapping("/user/check.dox")
 	@ResponseBody
 	public String checkUser(@RequestParam HashMap<String, Object> map) {
 		return gson.toJson(userService.checkUser(map));
 	}
 
-	// =========================
-	// 사업자 아이디 중복체크
-	// =========================
 	@PostMapping("/user/checkBiz.dox")
 	@ResponseBody
 	public String checkBizUser(@RequestParam HashMap<String, Object> map) {
@@ -266,33 +243,23 @@ public class UserController {
 	// =========================
 	@PostMapping("/user/sendSms.dox")
 	@ResponseBody
-	public String sendSms(@RequestParam HashMap<String, Object> map, HttpSession session) {
-		HashMap<String, Object> resultMap = new HashMap<>();
+	public String sendSms(@RequestParam String phone, HttpSession session) {
+		HashMap<String, Object> result = new HashMap<>();
 
-		String phone = map.get("phone") == null ? "" : map.get("phone").toString();
+		String cleanPhone = phone.replace("-", "");
+		String code = String.format("%06d", new java.util.Random().nextInt(1000000));
 
-		if (phone.isBlank()) {
-			resultMap.put("result", false);
-			resultMap.put("message", "휴대폰 번호를 입력해주세요.");
-			return gson.toJson(resultMap);
-		}
+		HashMap<String, Object> map = new HashMap<>();
+		map.put("phone", cleanPhone);
+		map.put("code", code);
 
-		String code = smsService.createCode();
-		boolean sendResult = smsService.sendSms(phone, code);
+		userService.insertPhoneVerify(map);
 
-		if (sendResult) {
-			session.setAttribute("smsCode", code);
-			session.setAttribute("smsPhone", phone);
+		session.setAttribute("verifyPhone", cleanPhone);
 
-			resultMap.put("result", true);
-			resultMap.put("message", "인증번호가 발송되었습니다.");
-
-		} else {
-			resultMap.put("result", false);
-			resultMap.put("message", "SMS 전송 실패");
-		}
-
-		return gson.toJson(resultMap);
+		result.put("result", true);
+		result.put("message", "인증번호가 발송되었습니다. 3분 안에 입력해주세요.");
+		return new Gson().toJson(result);
 	}
 
 	// =========================
@@ -300,50 +267,87 @@ public class UserController {
 	// =========================
 	@PostMapping("/user/checkSms.dox")
 	@ResponseBody
-	public String checkSms(@RequestParam HashMap<String, Object> map, HttpSession session) {
-		HashMap<String, Object> resultMap = new HashMap<>();
+	public String checkSms(@RequestParam String code, HttpSession session) {
+		HashMap<String, Object> result = new HashMap<>();
 
-		String inputCode = map.get("code") == null ? "" : map.get("code").toString().trim();
-		Object sessionCode = session.getAttribute("smsCode");
-		Object sessionPhone = session.getAttribute("smsPhone");
+		String phone = (String) session.getAttribute("verifyPhone");
 
-		if (sessionCode != null && sessionCode.toString().trim().equals(inputCode)) {
-			resultMap.put("result", true);
-			resultMap.put("message", "인증 성공");
-			session.setAttribute("smsAuth", true);
-
-			if (sessionPhone != null) {
-				session.setAttribute("verifiedPhone", sessionPhone.toString());
-			}
-		} else {
-			resultMap.put("result", false);
-			resultMap.put("message", "인증번호가 일치하지 않습니다.");
+		if (phone == null) {
+			result.put("result", false);
+			result.put("message", "인증 요청을 먼저 해주세요.");
+			return new Gson().toJson(result);
 		}
 
-		return gson.toJson(resultMap);
+		HashMap<String, Object> map = new HashMap<>();
+		map.put("phone", phone);
+
+		HashMap<String, Object> verify = userService.selectLatestPhoneVerify(map);
+
+		if (verify == null) {
+			result.put("result", false);
+			result.put("message", "인증 정보가 없습니다.");
+			return new Gson().toJson(result);
+		}
+
+		String dbCode = String.valueOf(verify.get("code"));
+		String verifiedYn = String.valueOf(verify.get("verifiedYn"));
+
+		if ("Y".equals(verifiedYn)) {
+			result.put("result", false);
+			result.put("message", "이미 인증 완료된 번호입니다.");
+			return new Gson().toJson(result);
+		}
+
+		java.sql.Timestamp expireTime = (java.sql.Timestamp) verify.get("expireTime");
+
+		if (expireTime.before(new java.sql.Timestamp(System.currentTimeMillis()))) {
+			result.put("result", false);
+			result.put("message", "인증 시간이 만료되었습니다. 다시 요청해주세요.");
+			return new Gson().toJson(result);
+		}
+
+		if (!dbCode.equals(code)) {
+			result.put("result", false);
+			result.put("message", "인증번호가 일치하지 않습니다.");
+			return new Gson().toJson(result);
+		}
+
+		HashMap<String, Object> updateMap = new HashMap<>();
+		updateMap.put("verifyNo", verify.get("verifyNo"));
+		userService.updatePhoneVerified(updateMap);
+
+		session.setAttribute("phoneVerified", true);
+
+		result.put("result", true);
+		result.put("message", "휴대폰 인증이 완료되었습니다.");
+		return new Gson().toJson(result);
 	}
 
+	// 팝업은 안 띄우지만, login.jsp에서 호출 중이면 오류 방지용으로 false 반환
 	@PostMapping("/user/check-need-verify.dox")
 	@ResponseBody
 	public HashMap<String, Object> checkNeedVerify(HttpSession session) {
-
 		HashMap<String, Object> result = new HashMap<>();
-
-		// 🔥 소셜로그인 후 세션에 넣어둔 값 확인
-		boolean needVerify = "Y".equals(session.getAttribute("needPhoneVerify"));
-
-		result.put("needVerify", needVerify);
-
+		result.put("needVerify", false);
+		session.removeAttribute("needPhoneVerify");
 		return result;
 	}
 
 	// =========================
-	// 아이디 찾기
+	// 사용자아이디 찾기
 	// =========================
 	@PostMapping("/user/findId.dox")
 	@ResponseBody
 	public String findId(@RequestParam HashMap<String, Object> map) {
 		HashMap<String, Object> resultMap = userService.findId(map);
+		return gson.toJson(resultMap);
+	}
+
+	// 사업자 아이디찾기
+	@PostMapping("/user/findBizId.dox")
+	@ResponseBody
+	public String findBizId(@RequestParam HashMap<String, Object> map) {
+		HashMap<String, Object> resultMap = userService.findBizId(map);
 		return gson.toJson(resultMap);
 	}
 
@@ -380,9 +384,6 @@ public class UserController {
 		return gson.toJson(resultMap);
 	}
 
-	// =========================
-	// 새 비밀번호 저장
-	// =========================
 	@PostMapping("/user/resetPwd.dox")
 	@ResponseBody
 	public String resetPwd(@RequestParam HashMap<String, Object> map, HttpSession session) {
@@ -526,11 +527,9 @@ public class UserController {
 		session.setAttribute("sessionId", user.getUserId());
 		session.setAttribute("sessionName", user.getUserName());
 		session.setAttribute("sessionRole", "USER");
-		if (user.getPhone() == null || user.getPhone().trim().equals("")) {
-			session.setAttribute("needPhoneVerify", "Y");
-			response.sendRedirect("/user/phone-verify.do");
-			return;
-		}
+
+		// 팝업 안 띄우므로 인증 세션 제거
+		session.removeAttribute("needPhoneVerify");
 
 		response.sendRedirect("/main.do");
 		return;
@@ -543,10 +542,11 @@ public class UserController {
 	public void naverLogin(HttpSession session, HttpServletResponse response) throws IOException {
 		String state = Long.toHexString(random.nextLong());
 		session.setAttribute("naverState", state);
+
 		String url = "https://nid.naver.com/oauth2.0/authorize" + "?response_type=code" + "&client_id="
 				+ URLEncoder.encode(naverClientId, StandardCharsets.UTF_8) + "&redirect_uri="
 				+ URLEncoder.encode(naverRedirectUri, StandardCharsets.UTF_8) + "&state=" + state
-				+ "&auth_type=reauthenticate"; // 🔥 추가
+				+ "&auth_type=reauthenticate";
 
 		response.sendRedirect(url);
 	}
@@ -613,14 +613,12 @@ public class UserController {
 
 			if (responseObj instanceof Map<?, ?> profile) {
 				Object idObj = profile.get("id");
-				if (idObj != null) {
+				if (idObj != null)
 					socialId = idObj.toString();
-				}
 
 				Object emailObj = profile.get("email");
-				if (emailObj != null) {
+				if (emailObj != null)
 					email = emailObj.toString();
-				}
 
 				Object nameObj = profile.get("name");
 				Object nicknameObj = profile.get("nickname");
@@ -667,16 +665,10 @@ public class UserController {
 		session.setAttribute("sessionName", user.getUserName());
 		session.setAttribute("sessionRole", "USER");
 
-		// 소셜로그인 사용자의 휴대폰 번호가 DB에 없으면 휴대폰 인증 페이지로 이동
-		if (user.getPhone() == null || user.getPhone().trim().equals("")) {
-			session.setAttribute("needPhoneVerify", "Y");
-			response.sendRedirect("/user/phone-verify.do");
-			return;
-		}
+		// 팝업 안 띄우므로 인증 세션 제거
+		session.removeAttribute("needPhoneVerify");
 
-		// 휴대폰 번호가 있으면 메인으로 이동
 		response.sendRedirect("/main.do");
 		return;
-
 	}
 }
