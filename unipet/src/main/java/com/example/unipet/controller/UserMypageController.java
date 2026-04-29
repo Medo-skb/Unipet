@@ -341,8 +341,7 @@ public class UserMypageController {
 		HashMap<String, Object> result = new HashMap<>();
 		Object sessionId = session.getAttribute("sessionId");
 
-		// 세션 확인용 로그
-		System.out.println("포인트 사용내역 sessionId = " + sessionId);
+		
 
 		// 로그인 안 된 경우 빈 사용내역 반환
 		if (sessionId == null) {
