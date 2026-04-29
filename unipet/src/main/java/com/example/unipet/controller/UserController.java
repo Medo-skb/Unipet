@@ -109,21 +109,21 @@ public class UserController {
 
 	
 
-	@GetMapping("/main.do")
-	public String mainPage(HttpSession session) {
-
-		// 로그인 안 된 경우
-		if (session.getAttribute("sessionId") == null) {
-			return "redirect:/user/login.do";
-		}
-
-		// 휴대폰 인증이 필요한 소셜로그인 사용자는 로그인 페이지로 다시 보냄
-		if ("Y".equals(session.getAttribute("needPhoneVerify"))) {
-			return "redirect:/user/login.do";
-		}
-
-		return "main/main";
-	}
+//	@GetMapping("/main.do")
+//	public String mainPage(HttpSession session) {
+//
+//		// 로그인 안 된 경우
+//		if (session.getAttribute("sessionId") == null) {
+//			return "redirect:/user/login.do";
+//		}
+//
+//		// 휴대폰 인증이 필요한 소셜로그인 사용자는 로그인 페이지로 다시 보냄
+//		if ("Y".equals(session.getAttribute("needPhoneVerify"))) {
+//			return "redirect:/user/login.do";
+//		}
+//
+//		return "main/main";
+//	}
 
 	@GetMapping("/user/phone-verify.do")
 	public String phoneVerifyPage(HttpSession session) {

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UNIPET | 주문 및 결제</title>
+    <title>UNIPET</title>
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
@@ -133,7 +133,7 @@
         data() {
             return {
                 userId : "${sessionId}",
-                cartIds : JSON.parse(sessionStorage.getItem("cartNoList")) || [29, 32, 36],
+                cartIds : JSON.parse(sessionStorage.getItem("cartNoList")) || [],
                 // 1.
                 orderList: [],
                 // 2. 입력 폼 데이터 바인딩
@@ -149,6 +149,7 @@
                 userPoint: 0, 
                 usedPoint: 0,
                 isPremium: false,
+                isPayComplete: false,
             };
         },
         watch: {
@@ -277,7 +278,7 @@
                         if (data.result === "success") {
                             self.orderList = data.list; // 서버가 준 리스트를 Vue 변수에 꽂기
                             if (!self.orderList || self.orderList.length == 0) {
-                                alert("결제할 상품 정보가 없습니다. 메인 페이지로 이동합니다.");
+                                alert("잘못된 접근입니다. 메인 페이지로 이동합니다.");
                                 location.href = "/main.do";
                             } 
                         } else {
@@ -287,7 +288,7 @@
                     }
                 });
             },
-            fnInfo: function () {
+            fnGetInfo: function () {
                 let self = this;
                 $.ajax({
                     url: "/payment/info.dox",
@@ -296,7 +297,14 @@
                     data: { userId : self.userId },
                     success: function (data) {
                         self.info = data.info;
-                        console.log(data);
+                        if (!self.info.phone || self.info.phone.trim() === '') {
+                            alert("본인인증이 필요한 서비스입니다. 인증 페이지로 이동합니다.");
+                            // location.href = "/member/verification.do"; 
+                            location.href = "/main.do"; 
+                            return;
+                        }
+                        self.fnGetOrderList();
+                        self.fnGetBenefits();
                     }
                 });
             },
@@ -381,7 +389,7 @@
 
                 const param = {
                     // 1. 사용자 및 상태 정보
-                    userId: self.info.userId,       // 누가 샀나
+                    userId: self.userId,       // 누가 샀나
                     payStatus: payStatus,              // 'PAY' (성공 여부)
                     payFlg: "SHOP",                 // 상점 결제 구분값
 
@@ -414,19 +422,30 @@
                     data: JSON.stringify(param), 
                     success: function(data) {
                         if (data.result === "success") {
+                            self.isPayComplete = true;
                             alert(data.message);
                             pageChange("/payment/pay-success.do", {ordNo : data.ordNo});
                         }
                     }
                 });
+            },
+            fnLeaveGuard(event) {
+                // 결제가 완료되어 성공 페이지로 이동할 때는 묻지 않습니다.
+                if (this.isPayComplete) return;
+
+                event.preventDefault();
+                event.returnValue = ''; // 크롬에서 이 코드가 있어야 경고창이 뜹니다.
             }
         },
         mounted() {
             let self = this;
-            self.fnInfo();
-            self.fnGetOrderList();
-            self.fnGetBenefits();
-        }
+            self.fnGetInfo();
+            window.addEventListener('beforeunload', this.fnLeaveGuard);
+        },
+        beforeUnmount() {
+            // 메모리 누수 방지를 위해 이벤트 제거
+            window.removeEventListener('beforeunload', this.fnLeaveGuard);
+        },
     });
     app.mount('#app');
 </script>

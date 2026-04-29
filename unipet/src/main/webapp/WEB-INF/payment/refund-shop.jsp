@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>환불 요청</title>
+    <title>UNIPET</title>
     <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="/js/page-change.js"></script>
@@ -94,7 +94,7 @@
     const app = Vue.createApp({
         data() {
             return {
-                ordNo: "${ordNo}" || 7, 
+                ordNo: "${ordNo}", 
                 
                 info: {},   // 전체 결제 정보 (totalPrice, payNo 등)
                 list: [],   // 환불할 상품 리스트 목록 배열
@@ -115,7 +115,7 @@
             fnGetInfo: function () {
                 let self = this;
                 $.ajax({
-                    url: "/payment/getOrder.dox", // 만약 getOrder.dox를 같이 쓴다면 바꿔주세요!
+                    url: "/payment/getOrder.dox",
                     dataType: "json",
                     type: "POST",
                     data: { id: self.ordNo }, // 백엔드에서 id로 받으면 id: self.ordNo 로 수정
@@ -125,7 +125,7 @@
                             self.list = data.list || [];
                         } else {
                             alert("주문 정보를 찾을 수 없습니다.");
-                            location.href = "/main.do";
+                            self.fnGoBack();
                         }
                     }
                 });
