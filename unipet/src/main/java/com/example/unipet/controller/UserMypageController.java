@@ -25,12 +25,8 @@ public class UserMypageController {
 		// 세션이 없으면 로그인 페이지로 이동
 		if (session.getAttribute("sessionId") == null) {
 			response.setContentType("text/html;charset=UTF-8");
-			response.getWriter().write(
-				"<script>" +
-				"alert('로그인 후 이용해주세요.');" +
-				"location.href='/user/login.do';" +
-				"</script>"
-			);
+			response.getWriter()
+					.write("<script>" + "alert('로그인 후 이용해주세요.');" + "location.href='/user/login.do';" + "</script>");
 			return null;
 		}
 
@@ -140,10 +136,25 @@ public class UserMypageController {
 	@PostMapping("/user/change-main-pet.dox")
 	@ResponseBody
 	public HashMap<String, Object> changeMainPet(@RequestParam("petNo") int petNo, HttpSession session) {
+
+		HashMap<String, Object> result = new HashMap<>();
 		HashMap<String, Object> map = new HashMap<>();
-		map.put("userId", session.getAttribute("sessionId"));
+
+		String userId = (String) session.getAttribute("sessionId");
+
+		if (userId == null) {
+			result.put("result", "loginRequired");
+			result.put("message", "로그인 필요");
+			return result;
+		}
+
+		map.put("userId", userId);
 		map.put("petNo", petNo);
-		return userMypageService.changeMainPet(map);
+
+		userMypageService.changeMainPet(map);
+
+		result.put("result", "success");
+		return result;
 	}
 
 	// 최근 예약 목록 조회
@@ -279,28 +290,25 @@ public class UserMypageController {
 		map.put("userId", session.getAttribute("sessionId"));
 		return userMypageService.getSubscriptionInfo(map);
 	}
+
 	@PostMapping("/user/update-auto-pay.dox")
 	@ResponseBody
-	public HashMap<String, Object> updateAutoPay(
-	        @RequestParam HashMap<String, Object> map,
-	        HttpSession session) {
+	public HashMap<String, Object> updateAutoPay(@RequestParam HashMap<String, Object> map, HttpSession session) {
 
-	    HashMap<String, Object> result = new HashMap<>();
+		HashMap<String, Object> result = new HashMap<>();
 
-	    String userId = (String) session.getAttribute("sessionId");
+		String userId = (String) session.getAttribute("sessionId");
 
-	    if (userId == null) {
-	        result.put("result", "loginRequired");
-	        result.put("message", "로그인 후 이용해주세요.");
-	        return result;
-	    }
+		if (userId == null) {
+			result.put("result", "loginRequired");
+			result.put("message", "로그인 후 이용해주세요.");
+			return result;
+		}
 
-	    map.put("userId", userId);
+		map.put("userId", userId);
 
-	    return userMypageService.updateAutoPay(map);
+		return userMypageService.updateAutoPay(map);
 	}
-	
-	
 
 	// 내가 쓴 게시글 목록 조회
 	@PostMapping("/user/community-post-list.dox")
@@ -334,26 +342,25 @@ public class UserMypageController {
 
 		return result;
 	}
+
 	@PostMapping("/user/subscription-pay-list.dox")
 	@ResponseBody
 	public HashMap<String, Object> subscriptionPayList(HttpSession session) {
-	    HashMap<String, Object> result = new HashMap<>();
-	    HashMap<String, Object> map = new HashMap<>();
+		HashMap<String, Object> result = new HashMap<>();
+		HashMap<String, Object> map = new HashMap<>();
 
-	    String userId = (String) session.getAttribute("sessionId");
+		String userId = (String) session.getAttribute("sessionId");
 
-	    if (userId == null) {
-	        result.put("result", "loginRequired");
-	        result.put("message", "로그인 후 이용해주세요.");
-	        return result;
-	    }
+		if (userId == null) {
+			result.put("result", "loginRequired");
+			result.put("message", "로그인 후 이용해주세요.");
+			return result;
+		}
 
-	    map.put("userId", userId);
+		map.put("userId", userId);
 
-	    return userMypageService.getSubscriptionPayList(map);
+		return userMypageService.getSubscriptionPayList(map);
 	}
-	
-	
 
 	// 현재 포인트 조회
 	@PostMapping("/user/point-info.dox")
@@ -382,8 +389,6 @@ public class UserMypageController {
 	public HashMap<String, Object> getPointUseList(HttpSession session) {
 		HashMap<String, Object> result = new HashMap<>();
 		Object sessionId = session.getAttribute("sessionId");
-
-		
 
 		// 로그인 안 된 경우 빈 사용내역 반환
 		if (sessionId == null) {

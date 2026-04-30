@@ -66,22 +66,28 @@
                 </div> -->
             </div>
             <div class="row">
-                <div class="inline-box">
-                    <input v-model="smsCode" placeholder="인증번호">
+                <div class="inline-box sms-box">
+                    <div class="input-wrap">
+                        <input v-model="smsCode" placeholder="인증번호">
 
-                    <span v-if="smsRequested" class="timer-text">
-                        {{ timerMsg }}
-                    </span>
+                        <span v-if="smsRequested && !smsChecked" class="timer-text">
+                            {{ timerMsg }}
+                        </span>
+                    </div>
 
                     <button type="button" @click="checkSms" :disabled="smsChecked">
                         확인
                     </button>
                 </div>
 
+                <!-- ⭐ 이 위치 중요 -->
                 <div v-if="smsMsg" class="info-text" :style="{color: smsChecked?'green':'red'}">
                     {{ smsMsg }}
                 </div>
             </div>
+
+
+
 
 
             <div class="row">
@@ -169,7 +175,6 @@
                             }
                         }, "json");
                     },
-
                     sendSms() {
                         if (this.smsChecked) {
                             alert("이미 휴대폰 인증이 완료되었습니다.");
@@ -180,57 +185,59 @@
                             alert("휴대폰 번호를 입력해주세요.");
                             return;
                         }
+
                         const phoneRegex = /^010-?\d{4}-?\d{4}$/;
                         if (!phoneRegex.test(this.phone)) {
                             alert("휴대전화 번호 형식이 올바르지 않습니다.");
                             return;
                         }
-                        $.post("/user/sendSms.dox", { phone: this.phone }, (res) => {
-                            alert(res.message);
 
-                            if (res.result) {
+                        $.post("/user/sendSms.dox", { phone: this.phone }, (res) => {
+                            console.log("SMS 응답:", res);
+
+                            if (res.result === true || res.result === "true" || res.result === "success") {
+                                alert(res.message || "인증번호가 발송되었습니다.");
+
                                 this.smsRequested = true;
                                 this.smsChecked = false;
                                 this.smsCode = "";
 
-                                // 3분 타이머 쓰고 있으면 같이 실행
+                                this.smsTimer = 180;
+                                this.updateTimerMsg();
                                 this.startTimer();
+                            } else {
+                                alert(res.message || "인증번호 발송 실패");
                             }
-                        }, "json");
-
-
-
+                        }, "json").fail(() => {
+                            alert("SMS 요청 실패: /user/sendSms.dox 경로를 확인하세요.");
+                        });
                     },
                     startTimer() {
-                        this.smsTimer = 180;
-
                         if (this.smsInterval) {
                             clearInterval(this.smsInterval);
                         }
 
-                        this.updateTimerMsg();
-
                         this.smsInterval = setInterval(() => {
                             this.smsTimer--;
-
                             this.updateTimerMsg();
 
                             if (this.smsTimer <= 0) {
                                 clearInterval(this.smsInterval);
-                                this.timerMsg = "인증 시간이 만료되었습니다.";
-                                this.smsChecked = false;
+                                this.smsInterval = null;
+                                this.timerMsg = "시간초과";
+                                this.smsRequested = false;
                             }
                         }, 1000);
                     },
-
-                   
-                        updateTimerMsg() {
-                            const min = String(Math.floor(this.smsTimer / 60)).padStart(2, '0');
-                            const sec = String(this.smsTimer % 60).padStart(2, '0');
-
-                          
-                        this.timerMsg = `남은 시간 ${min}:${sec}`;
+                    updateTimerMsg() {
+                        const min = String(Math.floor(this.smsTimer / 60)).padStart(2, "0");
+                        const sec = String(this.smsTimer % 60).padStart(2, "0");
+                        this.timerMsg = `${min}:${sec}`;
                     },
+
+
+
+
                     checkSms() {
                         if (this.smsTimer <= 0) {
                             alert("인증 시간이 만료되었습니다.");

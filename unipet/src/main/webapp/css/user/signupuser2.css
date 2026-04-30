@@ -118,3 +118,36 @@
     width: auto;
     height: auto;
 }
+
+/* ============================= */
+/* ⭐ 타이머 UI (추가 코드) */
+/* 기존 코드 건드리지 말고 그대로 아래에 추가 */
+/* ============================= */
+
+.sms-box {
+    align-items: center;
+}
+
+.sms-box .input-wrap {
+    position: relative;
+    flex: 1;
+}
+
+.sms-box .input-wrap input {
+    width: 100%;
+    padding-right: 125px !important;
+}
+
+.sms-box .timer-text {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 95px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #ff4d4f;
+    white-space: nowrap;
+    text-align: right;
+    pointer-events: none;
+}
