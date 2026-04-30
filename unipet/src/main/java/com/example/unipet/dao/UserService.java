@@ -66,6 +66,20 @@ public class UserService {
 				result.put("message", "이미 사용중인 아이디입니다.");
 				return result;
 			}
+			
+			String phone = (String) map.get("phone");
+	        if (phone != null) {
+	            // 하이픈 등 숫자 이외의 문자 제거
+	            phone = phone.replaceAll("[^0-9]", "");
+	            map.put("phone", phone);
+	        }
+	        
+//	        int phoneCount = userMapper.checkPhone(map); 
+//	        if (phoneCount > 0) {
+//	            result.put("result", false);
+//	            result.put("message", "이미 가입된 휴대폰 번호입니다.");
+//	            return result;
+//	        }
 
 			String rawPwd = (String) map.get("pwd");
 			map.put("pwd", passwordEncoder.encode(rawPwd));
@@ -221,21 +235,19 @@ public class UserService {
         HashMap<String, Object> result = new HashMap<>();
 
         try {
-        	String rawPwd = (String) map.get("pwd");
-        	
             User user = userMapper.findId(map);
 
-            if (user != null && passwordEncoder.matches(rawPwd, user.getPwd())) {
-                result.put("result", "success");
+            if (user != null) {
+                result.put("result", true);
                 result.put("userId", user.getUserId());
-                result.put("message", "아이디 찾기 성공");
+                result.put("message", "아이디를 찾았습니다.");
             } else {
-                result.put("result", "fail");
+                result.put("result", false);
                 result.put("message", "일치하는 회원 정보가 없습니다.");
             }
         } catch (Exception e) {
             e.printStackTrace();
-            result.put("result", "fail");
+            result.put("result", false);
             result.put("message", "아이디 찾기 중 오류가 발생했습니다.");
         }
 
