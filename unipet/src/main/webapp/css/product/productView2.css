@@ -614,11 +614,6 @@ button {
     border-radius: 10px;
 }
 
-.qna-title-row:hover {
-    border-color: var(--line-soft);
-    background: var(--soft-pink-2);
-}
-
 .qna-title-text {
     font-weight: 700;
     font-size: 15px;

@@ -52,5 +52,12 @@ public class Admin {
     String contents;
     String title;
 	    
-
+    // QNA
+    int qnaNo;
+    int productNo;
+    String qnaTitle;
+    String qContents;
+    String isSecret;
+    String ansStatus;
+    String aContents;
 }

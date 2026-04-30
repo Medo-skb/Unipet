@@ -34,6 +34,12 @@
                         @click="fnChangeMenu('storeApprove')">
                         사업자 입점 승인 관리
                     </div>
+                    <div 
+                        class="menu-item"
+                        :class="{ active : currentMenu === 'qnaAnswer' }"
+                        @click="fnChangeMenu('qnaAnswer')">
+                        쇼핑몰 문의 답변 관리
+                    </div>
                 </aside>
 
                 <!-- 오른쪽 내용 -->
@@ -379,6 +385,59 @@
                                 승인 대기 중인 사업자가 없습니다.
                             </div>
                         </template>
+
+                        <template v-if="currentMenu === 'qnaAnswer'">
+                            <h2>쇼핑몰 문의 답변 관리</h2>
+                            <div class="content-desc">답변이 등록되지 않은 상품 문의 목록입니다.</div>
+
+                            <div class="qna-list" v-if="qnaAnswerList.length > 0">
+                                <div class="qna-card" v-for="item in qnaAnswerList" :key="item.qnaNo">
+                                    <table class="report-table">
+                                        <tbody>
+                                            <tr>
+                                                <th>문의번호</th>
+                                                <td>{{ item.qnaNo }}</td>
+                                                <th>상품명</th>
+                                                <td>{{ item.productName }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>문의 제목</th>
+                                                <td colspan="3">{{ item.qnaTitle }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>문의 내용</th>
+                                                <td colspan="3">{{ item.qContents }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>비공개 여부</th>
+                                                <td colspan="3">
+                                                    {{ item.isSecret === 'Y' ? '비공개' : '공개' }}
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>답변 작성</th>
+                                                <td colspan="3">
+                                                    <textarea 
+                                                        class="qna-answer-textarea"
+                                                        v-model="item.aContents"
+                                                        placeholder="답변 내용을 입력하세요."></textarea>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <div class="report-btn-box">
+                                        <button type="button" class="btn-approve" @click="fnSaveQnaAnswer(item)">
+                                            답변 등록
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="empty-box" v-else>
+                                답변 대기 중인 문의가 없습니다.
+                            </div>
+                        </template>
                     </div>
                 </section>
             </div>
@@ -406,7 +465,8 @@
                 bookingReviewReportList: [],
                 productReviewReportList: [],
                 communityPostReportList: [],
-                communityCommentReportList: []
+                communityCommentReportList: [],
+                qnaAnswerList: []
                 
             };
         },
@@ -442,9 +502,63 @@
                     self.fnBizList();
                 }
 
-                if (menuName === "banner") {
-                    self.fnBannerList();
+                if (menuName === "qnaAnswer") {
+                    self.fnQnaAnswerList();
                 }
+            },
+
+            fnQnaAnswerList: function () {
+                let self = this;
+
+                $.ajax({
+                    url: "/admin/qna/list.dox",
+                    type: "POST",
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.result === "success") {
+                            self.qnaAnswerList = data.list || [];
+                        } else {
+                            alert(data.message);
+                        }
+                    },
+                    error: function () {
+                        alert("쇼핑몰 문의 목록 조회 중 오류가 발생했습니다.");
+                    }
+                });
+            },
+
+            fnSaveQnaAnswer: function (item) {
+                let self = this;
+
+                if (!item.aContents || item.aContents.trim() === "") {
+                    alert("답변 내용을 입력하세요.");
+                    return;
+                }
+
+                if (!confirm("해당 문의에 답변을 등록하시겠습니까?")) {
+                    return;
+                }
+
+                $.ajax({
+                    url: "/admin/qna/answer.dox",
+                    type: "POST",
+                    dataType: "json",
+                    data: {
+                        qnaNo: item.qnaNo,
+                        aContents: item.aContents
+                    },
+                    success: function (data) {
+                        if (data.result === "success") {
+                            alert("답변이 등록되었습니다.");
+                            self.fnQnaAnswerList();
+                        } else {
+                            alert(data.message);
+                        }
+                    },
+                    error: function () {
+                        alert("답변 등록 중 오류가 발생했습니다.");
+                    }
+                });
             },
 
             fnChangeReportTab: function(tabName) {
@@ -834,6 +948,10 @@
                     } else if (self.reportTab === "communityComment") {
                         self.fnCommunityCommentReportList();
                     }
+                }
+
+                if (self.currentMenu === "qnaAnswer") {
+                    self.fnQnaAnswerList();
                 }
         }
     });
