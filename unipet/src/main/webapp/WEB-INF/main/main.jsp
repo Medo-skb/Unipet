@@ -130,7 +130,7 @@
 
                 <section class="main-product-section scroll-fade-up">
                     <div class="section-header">
-                        <h2 class="section-title">인기 상품</h2>
+                        <h2 class="section-title">최다 찜 상품</h2>
                     </div>
 
                     <div class="product-card-list">
@@ -162,7 +162,7 @@
                     <div class="recommend-section-block">
 
                         <div class="section-header">
-                            <h2 class="section-title">카테고리별 추천 업체</h2>
+                            <h2 class="section-title">카테고리별 인기 업체</h2>
                         </div>
 
                         <div class="category-tab-wrap">
@@ -217,7 +217,7 @@
 
                 <div class="recommend-section-block scroll-fade-up">
                     <div class="section-header">
-                        <h2 class="section-title">동물별 추천 상품</h2>
+                        <h2 class="section-title">동물별 인기 상품</h2>
                     </div>
 
                     <div class="category-tab-wrap">

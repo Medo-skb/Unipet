@@ -84,7 +84,7 @@
 	    LIMIT 4
 	</select>
 	
-	<!-- 카테고리별 랜덤 업체 조회 -->
+	<!-- 카테고리별 주소 기반 업체 조회 -->
 	<select id="selectStoreByCategoryList" parameterType="hashmap" resultType="com.example.unipet.model.Main">
 		SELECT
 		    s.STORE_NO AS storeNo,
@@ -120,6 +120,13 @@
 		        THEN 0
 		        ELSE 1
 		    END,
+		
+		    (
+		        SELECT COUNT(*)
+		        FROM RESERVATION r
+		        WHERE r.STORE_NO = s.STORE_NO
+		    ) DESC,
+		
 		    RAND()
 		LIMIT 4;
 	</select>

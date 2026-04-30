@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="/css/user/rsv-review.css" rel="stylesheet">
+    <!-- <link href="/css/user/rsv-review.css" rel="stylesheet"> -->
+    <link href="/css/user/rsv-review2.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="/js/page-change.js"></script>
@@ -12,6 +13,9 @@
     
 </head>
 <body>
+    <jsp:include page="/WEB-INF/header/header.jsp" />
+
+
     <div id="app">
         <div id="container">
             <div id="top">
@@ -89,6 +93,8 @@
         </div>
     </div>
 </body>
+
+<jsp:include page="/WEB-INF/footer/footer.jsp" />
 
 <script>
     const app = Vue.createApp({

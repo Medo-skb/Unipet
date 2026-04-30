@@ -23,6 +23,39 @@ public class AdminService {
 		return adminMapper.selectAdminLogin(map);
 	}
 	
+	// 쇼핑몰 문의 미답변 목록
+	public HashMap<String, Object> getQnaAnswerList(HashMap<String, Object> map){
+	    HashMap<String, Object> resultMap = new HashMap<>();
+
+	    try {
+	        List<Admin> list = adminMapper.selectQnaAnswerList(map);
+
+	        resultMap.put("list", list);
+	        resultMap.put("result", "success");
+	    } catch (Exception e) {
+	        System.out.println(e.getMessage());
+	        resultMap.put("result", "fail");
+	    }
+
+	    return resultMap;
+	}
+	
+	// 쇼핑몰 문의 답변 등록
+	public HashMap<String, Object> editQnaAnswer(HashMap<String, Object> map){
+	    HashMap<String, Object> resultMap = new HashMap<>();
+
+	    try {
+	        adminMapper.updateQnaAnswer(map);
+
+	        resultMap.put("result", "success");
+	    } catch (Exception e) {
+	        System.out.println(e.getMessage());
+	        resultMap.put("result", "fail");
+	    }
+
+	    return resultMap;
+	}
+	
 	// 사업자 승인 리스트
 	public HashMap<String, Object> getAdminBiz(HashMap<String, Object> map){
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();

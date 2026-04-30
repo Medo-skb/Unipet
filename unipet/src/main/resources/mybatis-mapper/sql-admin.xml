@@ -12,29 +12,56 @@
 		WHERE ADMIN_ID = #{adminId}
 		AND ADMIN_PWD = #{adminPwd}
 	</select>
+	
+	<!-- 쇼핑몰 문의 미답변 목록 -->
+	<select id="selectQnaAnswerList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        Q.QNA_NO AS qnaNo,
+	        Q.PRODUCT_NO AS productNo,
+	        P.PRODUCT_NAME AS productName,
+	        Q.QNA_TITLE AS qnaTitle,
+	        Q.Q_CONTENTS AS qContents,
+	        Q.IS_SECRET AS isSecret,
+	        Q.ANS_STATUS AS ansStatus
+	    FROM QNA Q
+	    LEFT JOIN PRODUCT P
+	        ON Q.PRODUCT_NO = P.PRODUCT_NO
+	    WHERE Q.ANS_STATUS = 'N'
+	    ORDER BY Q.QNA_NO DESC
+	</select>
+	
+	<!-- 쇼핑몰 문의 답변 등록 -->
+	<update id="updateQnaAnswer" parameterType="hashmap">
+	    UPDATE QNA
+	    SET A_CONTENTS = #{aContents},
+	        ANS_STATUS = 'Y'
+	    WHERE QNA_NO = #{qnaNo}
+	</update>
 
 	<!-- 사업자 승인 리스트 -->
 	<select id="selectAdminBiz" parameterType="hashmap"
 		resultType="com.example.unipet.model.Admin">
-	SELECT
-	S.STORE_NO,
-	SU.S_USER_ID,
-	SU.U_STATUS,
-	S.STORE_NAME,
-	S.S_CATEGORY,
-	S.S_ADDR,
-	S.S_FULL_ADDR,
-	S.S_STATUS,
-	SF.FILE_PATH,
-	SF.FILE_NAME,
-	SF.ORIGIN_NAME
-	FROM STORE S
-	LEFT JOIN STORE_USER SU ON S.S_USER_ID = SU.S_USER_ID
-	LEFT JOIN STORE_FILE SF
-	ON S.STORE_NO = SF.STORE_NO
-	AND SF.IS_PROOF = 'Y'
-	WHERE SU.U_STATUS = 'PND';
+		SELECT
+		S.STORE_NO,
+		SU.S_USER_ID,
+		SU.U_STATUS,
+		S.STORE_NAME,
+		S.S_CATEGORY,
+		S.S_ADDR,
+		S.S_FULL_ADDR,
+		S.S_STATUS,
+		SF.FILE_PATH,
+		SF.FILE_NAME,
+		SF.ORIGIN_NAME
+		FROM STORE S
+		LEFT JOIN STORE_USER SU ON S.S_USER_ID = SU.S_USER_ID
+		LEFT JOIN STORE_FILE SF
+		ON S.STORE_NO = SF.STORE_NO
+		AND SF.IS_PROOF = 'Y'
+		WHERE SU.U_STATUS = 'PND'
+   			AND S.S_STATUS = 'PND';
 	</select>
+	
 	<!-- 사업자 승인 -->
 	<update id="updateBizStatusApr" parameterType="hashmap">
 		UPDATE STORE S

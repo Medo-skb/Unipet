@@ -309,3 +309,33 @@ body {
     border-radius: 12px;
     background: #f8f8f8;
 }
+
+.qna-list {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.qna-card {
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 22px;
+    background: var(--white);
+}
+
+.qna-answer-textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 14px 16px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    resize: vertical;
+    box-sizing: border-box;
+    font-size: 14px;
+    color: var(--text-main);
+    outline: none;
+}
+
+.qna-answer-textarea:focus {
+    border-color: var(--main);
+}

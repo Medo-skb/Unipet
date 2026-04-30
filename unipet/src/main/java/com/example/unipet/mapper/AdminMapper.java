@@ -14,6 +14,12 @@ public interface AdminMapper {
 	// 관리자 로그인
 	public Admin selectAdminLogin(HashMap<String, Object> map);
 	
+	// 쇼핑몰 문의 미답변 목록
+	List<Admin> selectQnaAnswerList(HashMap<String, Object> map);
+
+	// 쇼핑몰 문의 답변 등록
+	int updateQnaAnswer(HashMap<String, Object> map);
+	
 	// 사업자 승인 리스트
 	public List<Admin> selectAdminBiz(HashMap<String, Object> map);
 	

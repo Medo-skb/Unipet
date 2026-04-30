@@ -70,6 +70,24 @@ public class AdminController {
 		return "/admin/adminLogin";
 	}
 	
+	@RequestMapping(value = "/admin/qna/list.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getQnaAnswerList(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+
+	    HashMap<String, Object> resultMap = adminService.getQnaAnswerList(map);
+
+	    return new Gson().toJson(resultMap);
+	}
+	
+	@RequestMapping(value = "/admin/qna/answer.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String editQnaAnswer(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+
+	    HashMap<String, Object> resultMap = adminService.editQnaAnswer(map);
+
+	    return new Gson().toJson(resultMap);
+	}
+	
 	@RequestMapping(value = "/adminBiz.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
 	public String getAdminBiz(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
