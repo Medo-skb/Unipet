@@ -115,7 +115,6 @@
                     type: "POST",
                     data: { storeNo: self.storeNo }, 
                     success: function(data) {
-                        console.log(data);
                         self.storeInfo = data.info;
                         self.storeMenuList = data.menuList;
                         self.storeImgList = data.imgList;
