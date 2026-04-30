@@ -13,13 +13,16 @@
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/footer.css"> -->
         <!-- <link href="/css/user/usermypage.css" rel="stylesheet"> -->
         <link href="/css/user/usermypage2.css" rel="stylesheet">
-        <title>마이페이지</title>
+        <style>
+          [v-cloak] { display: none; }
+        </style>
+        <title>UNIPET - 마이페이지</title>
     </head>
 
     <body>
         <jsp:include page="/WEB-INF/header/header.jsp" />
 
-        <div id="app" class="user-page-wrap">
+        <div id="app" class="user-page-wrap" v-cloak>
 
             <div class="user-page-container">
 
@@ -1321,7 +1324,7 @@
                             petHealthPage: "건강 기록",
                             petVacPage: "접종 기록",
                             petWeightPage: "몸무게 관리",
-                            pointInfo: "포인트 관리"
+                            pointInfo: "포인트 현황"
                         };
                         return map[this.currentMenu] || "홈";
                     },
