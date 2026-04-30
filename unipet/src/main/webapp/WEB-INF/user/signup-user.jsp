@@ -65,21 +65,24 @@
                     휴대전화 번호는 010xxxxxxxx 또는 010-xxxx-xxxx 형식으로 입력해주세요.
                 </div>
             </div>
-
             <div class="row">
                 <div class="inline-box">
                     <input v-model="smsCode" placeholder="인증번호">
-                    <button type="button" @click="checkSms" :disabled="smsChecked">확인</button>
 
+                    <span v-if="smsRequested" class="timer-text">
+                        {{ timerMsg }}
+                    </span>
+
+                    <button type="button" @click="checkSms" :disabled="smsChecked">
+                        확인
+                    </button>
                 </div>
-                <div class="info-text" v-if="timerMsg">
-                    {{ timerMsg }}
-                </div>
+
                 <div v-if="smsMsg" class="info-text" :style="{color: smsChecked?'green':'red'}">
                     {{ smsMsg }}
                 </div>
-
             </div>
+
 
             <div class="row">
                 <div class="inline-box">
@@ -220,9 +223,12 @@
                         }, 1000);
                     },
 
-                    updateTimerMsg() {
-                        const min = String(Math.floor(this.smsTimer / 60)).padStart(2, '0');
-                        const sec = String(this.smsTimer % 60).padStart(2, '0');
+                   
+                        updateTimerMsg() {
+                            const min = String(Math.floor(this.smsTimer / 60)).padStart(2, '0');
+                            const sec = String(this.smsTimer % 60).padStart(2, '0');
+
+                          
                         this.timerMsg = `남은 시간 ${min}:${sec}`;
                     },
                     checkSms() {
