@@ -50,4 +50,6 @@ public interface UserMapper {
 	// 휴대폰번호 조회
 	int checkPhone(HashMap<String, Object> map);
 
+	// 비밀번호 변경용 사용자 조회
+	int selectUserCheckCount(HashMap<String, Object> map);
 }

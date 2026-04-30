@@ -9,6 +9,7 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
     <script src="/js/page-change.js"></script>
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/header.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/footer.css">
     <!-- <link rel="stylesheet" href="${pageContext.request.contextPath}/css/payment/pay-shop.css"> -->
@@ -53,8 +54,20 @@
                 </div>
                 <div class="input-group">
                     <label>배송지 주소</label>
-                    <input type="text" class="input-field" v-model="info.userAddr" placeholder="도로명 주소를 입력해주세요" style="margin-bottom: 8px;">
-                    <input type="text" class="input-field" v-model="info.fullAddr" placeholder="상세주소를 입력해주세요">
+                    <!-- 👇 주소 검색 버튼과 인풋창을 나란히 배치 -->
+                    <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                        <input type="text" class="input-field" v-model="info.userAddr" 
+                            placeholder="우측 버튼을 눌러 주소를 검색해주세요" 
+                            readonly 
+                            @click="fnSearchAddr" 
+                            style="flex: 1; background-color: #f9f9f9; cursor: pointer;">
+                        
+                        <!-- 포인트 쪽에서 썼던 btn-sub 클래스를 재활용해서 버튼 생성 -->
+                        <button type="button" class="btn-sub" style="width: auto; padding: 0 15px;" @click="fnSearchAddr">주소 검색</button>
+                    </div>
+                    
+                    <!-- 👇 상세 주소칸에 id를 부여해서 주소 검색이 끝나면 포커스가 자동으로 오게 만듦 -->
+                    <input type="text" class="input-field" id="detailAddr" v-model="info.fullAddr" placeholder="상세주소를 입력해주세요">
                 </div>
                 <div class="input-group">
                     <label>배송 요청사항 (선택)</label>
@@ -435,7 +448,37 @@
 
                 event.preventDefault();
                 event.returnValue = ''; // 크롬에서 이 코드가 있어야 경고창이 뜹니다.
-            }
+            },
+            fnSearchAddr() {
+                let self = this;
+                
+                new daum.Postcode({
+                    oncomplete: function(data) {
+                        // 도로명 주소 변수
+                        let addr = data.roadAddress; 
+                        let extraAddr = ''; // 참고항목 (동, 건물명 등)
+
+                        // 법정동명이 있을 경우 추가 (법정리는 제외)
+                        if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
+                            extraAddr += data.bname;
+                        }
+                        // 공동주택(아파트 등)일 경우 건물명 추가
+                        if(data.buildingName !== '' && data.apartment === 'Y'){
+                            extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                        }
+                        // 참고항목이 있다면 괄호로 감싸서 주소 뒤에 붙임
+                        if(extraAddr !== ''){
+                            extraAddr = ' (' + extraAddr + ')';
+                        }
+
+                        // 1. Vue의 userAddr 데이터에 최종 조합된 주소를 넣어줌
+                        self.info.userAddr = addr + extraAddr;
+                        
+                        // 2. 주소 입력이 끝나면, 사용자가 바로 타이핑할 수 있게 상세주소 칸으로 커서를 이동시킴
+                        document.getElementById("detailAddr").focus();
+                    }
+                }).open();
+            },
         },
         mounted() {
             let self = this;

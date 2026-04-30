@@ -15,10 +15,13 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
@@ -96,9 +99,18 @@ public class UserController {
 		return "user/find-pwd";
 	}
 
-	@GetMapping("/user/new-pwd.do")
-	public String newPwdPage() {
-		return "user/new-pwd";
+	@RequestMapping(value = "/user/new-pwd.do", method = RequestMethod.GET)
+	public String newPwdPage(HttpSession session, Model model) {
+	    
+	    // 휴대폰 인증을 통과했는지 세션 확인
+	    Object smsAuth = session.getAttribute("smsAuth");
+	    Object resetUserId = session.getAttribute("resetUserId");
+
+	    if (smsAuth == null || !(boolean) smsAuth || resetUserId == null) {
+	        return "redirect:/user/login.do"; 
+	    }
+
+	    return "/user/new-pwd"; 
 	}
 
 	@GetMapping("/logout.do")
@@ -314,6 +326,7 @@ public class UserController {
 		userService.updatePhoneVerified(updateMap);
 
 		session.setAttribute("phoneVerified", true);
+		session.setAttribute("smsAuth", true);
 
 		result.put("result", true);
 		result.put("message", "휴대폰 인증이 완료되었습니다.");
@@ -347,6 +360,28 @@ public class UserController {
 		HashMap<String, Object> resultMap = userService.findBizId(map);
 		return gson.toJson(resultMap);
 	}
+	
+	@RequestMapping(value = "/user/checkUserExist.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+    @ResponseBody
+    public String checkUserExist(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+        HashMap<String, Object> resultMap = new HashMap<String, Object>();
+        
+        // 1. 파라미터 유효성 검사 (프론트에서 넘어온 값이 비어있는지 확인)
+        String userId = (String) map.get("userId");
+        String phone = (String) map.get("phone");
+
+        if (userId == null || userId.trim().isEmpty() || phone == null || phone.trim().isEmpty()) {
+            resultMap.put("result", false);
+            resultMap.put("message", "아이디와 휴대폰 번호를 모두 입력해주세요.");
+            return new Gson().toJson(resultMap);
+        }
+
+        // 2. 서비스객체.함수(map) 호출
+        resultMap = userService.getUserCheck(map);
+ 
+        // 3. Gson을 이용하여 JSON 형태로 리턴
+        return new Gson().toJson(resultMap); 
+    }
 
 	// =========================
 	// 비밀번호 재설정 대상 확인
@@ -357,7 +392,7 @@ public class UserController {
 		HashMap<String, Object> resultMap = new HashMap<>();
 
 		Object smsAuth = session.getAttribute("smsAuth");
-		Object verifiedPhone = session.getAttribute("verifiedPhone");
+		Object phoneVerified = session.getAttribute("phoneVerified");
 
 		if (smsAuth == null || !(boolean) smsAuth) {
 			resultMap.put("result", false);
@@ -365,13 +400,13 @@ public class UserController {
 			return gson.toJson(resultMap);
 		}
 
-		if (verifiedPhone == null) {
+		if (phoneVerified == null) {
 			resultMap.put("result", false);
 			resultMap.put("message", "인증된 휴대폰 정보가 없습니다.");
 			return gson.toJson(resultMap);
 		}
 
-		map.put("phone", verifiedPhone.toString());
+		map.put("phone", phoneVerified.toString());
 		resultMap = userService.checkUserForReset(map);
 
 		if (Boolean.TRUE.equals(resultMap.get("result"))) {
@@ -386,6 +421,14 @@ public class UserController {
 	public String resetPwd(@RequestParam HashMap<String, Object> map, HttpSession session) {
 		HashMap<String, Object> resultMap = new HashMap<>();
 
+		Object smsAuth = session.getAttribute("smsAuth");
+
+		if (smsAuth == null || !(boolean) smsAuth) {
+	        resultMap.put("result", false);
+	        resultMap.put("message", "비정상적인 접근입니다. (휴대폰 인증 누락)");
+	        return gson.toJson(resultMap);
+	    }
+	
 		Object resetUserId = session.getAttribute("resetUserId");
 
 		if (resetUserId == null) {
@@ -398,12 +441,13 @@ public class UserController {
 		resultMap = userService.resetPwd(map);
 
 		if (Boolean.TRUE.equals(resultMap.get("result"))) {
-			session.removeAttribute("resetUserId");
-			session.removeAttribute("smsAuth");
-			session.removeAttribute("smsCode");
-			session.removeAttribute("smsPhone");
-			session.removeAttribute("verifiedPhone");
-		}
+	        session.removeAttribute("resetUserId");
+	        session.removeAttribute("smsAuth");
+	        session.removeAttribute("smsCode"); 
+	        session.removeAttribute("smsPhone");
+	        session.removeAttribute("verifiedPhone");
+	        session.removeAttribute("verifyPhone");
+	    }
 
 		return gson.toJson(resultMap);
 	}

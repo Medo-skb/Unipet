@@ -11,7 +11,7 @@
 }
 
 #app::before {
-    content: "비밀번호 찾기";
+    content: "비밀번호 변경";
     display: block;
     text-align: center;
     font-size: 26px;
@@ -114,6 +114,14 @@
 .btn-box button:hover {
     background: var(--main);
     color: var(--bg);
+}
+
+.help-text {
+    font-size: 12px;
+    color: var(--text-light, #888); /* 변수가 없다면 #888 등 회색 계열 사용 */
+    margin-top: 8px; /* 입력창과의 간격 */
+    margin-bottom: 0;
+    line-height: 1.4;
 }
 
 @media (max-width: 600px) {

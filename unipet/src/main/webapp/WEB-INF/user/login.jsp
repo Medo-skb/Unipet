@@ -36,8 +36,8 @@
     </div>
 
     <div class="link-box">
-        <a href="/user/find-id.do">아이디 찾기</a>
-        <a href="/user/find-pwd.do">비밀번호 찾기</a>
+        <a href="/user/find-id.do" class="find-link">아이디 찾기</a>
+        <a href="/user/find-pwd.do" class="find-link">비밀번호 변경</a>
         <a href="/user/join.do">회원가입</a>
     </div>
 
@@ -66,6 +66,7 @@
         $("#userTab").addClass("active");
         $("#bizTab").removeClass("active");
         $("#socialBox").css("visibility", "visible");
+        $(".find-link").show();
     });
 
     $("#bizTab").on("click", function () {
@@ -73,6 +74,7 @@
         $("#bizTab").addClass("active");
         $("#userTab").removeClass("active");
         $("#socialBox").css("visibility", "hidden");
+        $(".find-link").hide();
     });
 
     $("#loginBtn").on("click", function () {
