@@ -1,6 +1,7 @@
 package com.example.unipet.controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -257,7 +258,6 @@ public class UserMypageController {
 		map.put("userId", session.getAttribute("sessionId"));
 		return userMypageService.getMyReviewList(map);
 	}
-	
 
 	// 리뷰 등록
 	@PostMapping("/user/review/add.dox")
@@ -384,18 +384,16 @@ public class UserMypageController {
 		return userMypageService.getPointInfo(map);
 	}
 
-	// 포인트 사용내역 조회
 	@PostMapping("/user/point-use-list.dox")
 	@ResponseBody
 	public HashMap<String, Object> getPointUseList(HttpSession session) {
+
 		HashMap<String, Object> result = new HashMap<>();
 		Object sessionId = session.getAttribute("sessionId");
 
-		// 로그인 안 된 경우 빈 사용내역 반환
 		if (sessionId == null) {
 			result.put("result", "fail");
-			result.put("message", "로그인이 필요합니다.");
-			result.put("list", java.util.Collections.emptyList());
+			result.put("pointUseList", new ArrayList<>());
 			return result;
 		}
 

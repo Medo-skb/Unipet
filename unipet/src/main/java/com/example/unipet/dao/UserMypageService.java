@@ -400,7 +400,7 @@ public class UserMypageService {
 		List<HashMap<String, Object>> list = userMypageMapper.selectPointUseList(map);
 
 		result.put("result", "success");
-		result.put("list", list);
+		result.put("pointUseList", list);
 
 		return result;
 	}

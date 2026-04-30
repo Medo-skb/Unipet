@@ -223,68 +223,76 @@
 	</select>
 
 	<!-- 주문 목록 조회 -->
-<select id="selectOrderList" parameterType="hashmap" resultType="hashmap">
-    SELECT
-        o.ORD_NO AS orderNo,
-        DATE_FORMAT(o.ORD_DATE, '%Y-%m-%d %H:%i') AS orderDate,
+	<select id="selectOrderList" parameterType="hashmap" resultType="hashmap">
+		SELECT
+		o.ORD_NO AS orderNo,
+		DATE_FORMAT(o.ORD_DATE, '%Y-%m-%d %H:%i') AS orderDate,
 
-        od.ORD_DETAIL_NO AS orderDetailNo,
-        od.PRODUCT_NO AS productNo,
-        p.PRODUCT_NAME AS productName,
+		od.ORD_DETAIL_NO AS orderDetailNo,
+		od.PRODUCT_NO AS productNo,
+		p.PRODUCT_NAME AS productName,
 
-        CONCAT(pf.FILE_PATH, '/', pf.FILE_NAME) AS productImg,
+		CONCAT(pf.FILE_PATH, '/', pf.FILE_NAME) AS productImg,
 
-        od.ORD_QTY AS qty,
-        od.UNIT_PRICE AS price,
+		od.ORD_QTY AS qty,
+		od.UNIT_PRICE AS price,
 
-        o.ORD_STATUS AS payStatus,
-        o.DELI_STATUS AS deliStatus,
+		o.ORD_STATUS AS payStatus,
+		o.DELI_STATUS AS deliStatus,
 
-        CASE
-            WHEN r.REVIEW_NO IS NOT NULL THEN 'Y'
-            ELSE 'N'
-        END AS reviewYn,
+		CASE
+		WHEN r.REVIEW_NO IS NOT NULL THEN 'Y'
+		ELSE 'N'
+		END AS reviewYn,
 
-        <!-- 작성완료 리뷰 보기에서 사용할 리뷰 내용 -->
-        r.R_CONTENTS AS reviewContent,
 
-        <!-- 나중에 별점 표시할 때 사용 가능 -->
-        r.RATING AS reviewRating
+		r.R_CONTENTS AS reviewContent,
 
-    FROM ORDERS o
 
-    JOIN ORDER_DETAIL od
-        ON o.ORD_NO = od.ORD_NO
+		r.RATING AS reviewRating
 
-    JOIN PRODUCT p
-        ON od.PRODUCT_NO = p.PRODUCT_NO
+		FROM ORDERS o
 
-    LEFT JOIN PRODUCT_FILE pf
-        ON od.PRODUCT_NO = pf.PRODUCT_NO
-        AND pf.FILE_NO = (
-            SELECT MIN(pf2.FILE_NO)
-            FROM PRODUCT_FILE pf2
-            WHERE pf2.PRODUCT_NO = od.PRODUCT_NO
-        )
+		JOIN ORDER_DETAIL od
+		ON o.ORD_NO = od.ORD_NO
 
-    LEFT JOIN REVIEW r
-        ON od.ORD_NO = r.ORD_NO
-        AND od.PRODUCT_NO = r.PRODUCT_NO
-        AND r.USER_ID = o.USER_ID
+		JOIN PRODUCT p
+		ON od.PRODUCT_NO = p.PRODUCT_NO
 
-    WHERE o.USER_ID = #{userId}
+		LEFT JOIN PRODUCT_FILE pf
+		ON od.PRODUCT_NO = pf.PRODUCT_NO
+		AND pf.FILE_NO = (
+		SELECT MIN(pf2.FILE_NO)
+		FROM PRODUCT_FILE pf2
+		WHERE pf2.PRODUCT_NO = od.PRODUCT_NO
+		)
 
-    ORDER BY o.ORD_DATE DESC, o.ORD_NO DESC, od.ORD_DETAIL_NO ASC
-</select>
-	
+		LEFT JOIN REVIEW r
+		ON od.ORD_NO = r.ORD_NO
+		AND od.PRODUCT_NO = r.PRODUCT_NO
+		AND r.USER_ID = o.USER_ID
+
+		WHERE o.USER_ID = #{userId}
+
+		ORDER BY o.ORD_DATE DESC, o.ORD_NO DESC, od.ORD_DETAIL_NO ASC
+	</select>
+
 
 	<!-- 체중 목록 조회 -->
 	<select id="selectWeightList" parameterType="hashmap" resultType="hashmap">
-		SELECT w.WEIGHT_NO AS id, w.PET_NO AS petNo, p.PET_NAME AS petName, <!--
-		🔥 이거 추가 -->
-		w.WEIGHT AS weight, DATE_FORMAT(w.CDATE, '%Y-%m-%d') AS date FROM
-		PET_WEIGHT w JOIN PET p ON w.PET_NO = p.PET_NO <!-- 🔥 JOIN 추가 --> WHERE w.PET_NO =
-		#{petNo} ORDER BY w.CDATE ASC, w.WEIGHT_NO ASC </select>
+		SELECT
+		w.WEIGHT_NO AS id,
+		w.PET_NO AS petNo,
+		p.PET_NAME AS petName,
+		w.WEIGHT AS weight,
+		DATE_FORMAT(w.CDATE, '%Y-%m-%d') AS date
+		FROM PET_WEIGHT w
+		JOIN PET p
+		ON w.PET_NO = p.PET_NO
+		WHERE w.PET_NO = #{petNo}
+		ORDER BY w.CDATE ASC, w.WEIGHT_NO ASC
+	</select>
+
 
 	<!-- 체중 등록 -->
 	<insert id="insertWeight" parameterType="hashmap">
@@ -409,7 +417,6 @@
 
 
 	<!-- 구독 정보 조회 -->
-	<!-- 구독 정보 조회 -->
 	<select id="selectSubscriptionInfo" parameterType="hashmap"
 		resultType="hashmap">
 		SELECT
@@ -420,8 +427,10 @@
 		SUB_PRICE AS subPrice,
 
 		CASE
-		WHEN E_DATE >= NOW() THEN '이용중'
-		ELSE '만료'
+		WHEN SUB_STATUS = 'Y' THEN '이용중'
+		WHEN SUB_STATUS = 'N' THEN '해지'
+		WHEN E_DATE &lt; NOW() THEN '만료'
+		ELSE '알수없음'
 		END AS status,
 
 		IS_AUTO AS isAuto,
@@ -430,7 +439,7 @@
 		DATE_FORMAT(N_DATE, '%Y-%m-%d %H:%i:%s') AS nextBillingRaw,
 
 		CASE
-		WHEN DATE_SUB(N_DATE, INTERVAL 1 DAY) >= NOW() THEN 'Y'
+		WHEN DATE_SUB(N_DATE, INTERVAL 1 DAY) &gt;= NOW() THEN 'Y'
 		ELSE 'N'
 		END AS canChangeAuto
 
@@ -439,6 +448,7 @@
 		ORDER BY SUB_NO DESC
 		LIMIT 1
 	</select>
+
 
 	<!-- 자동결제 여부 변경 -->
 	<update id="updateAutoPay" parameterType="hashmap">
@@ -461,14 +471,19 @@
 		SUB_PRICE AS subPrice,
 		SUB_STATUS AS subStatus,
 		IS_AUTO AS isAuto,
+
 		CASE
-		WHEN E_DATE >= NOW() THEN '이용중'
-		ELSE '만료'
+		WHEN SUB_STATUS = 'Y' THEN '이용중'
+		WHEN SUB_STATUS = 'N' THEN '해지'
+		WHEN E_DATE &lt; NOW() THEN '만료'
+		ELSE '알수없음'
 		END AS statusText,
+
 		CASE
 		WHEN IS_AUTO = 'Y' THEN '자동결제'
 		ELSE '수동/해지'
 		END AS autoText
+
 		FROM subscription
 		WHERE USER_ID = #{userId}
 		ORDER BY SUB_NO DESC
@@ -510,26 +525,26 @@
 		WHERE USER_ID = #{userId}
 	</select>
 	<!-- 포인트 사용내역 조회 + 잔액 계산 -->
-<select id="selectPointUseList" parameterType="hashmap" resultType="hashmap">
-    SELECT
-        POINT_NO AS pointNo,
-        USER_ID AS userId,
-        POINT_AMOUNT AS pointAmount,
-        ORD_NO AS ordNo,
-        REVIEW_NO AS reviewNo,
-        DATE_FORMAT(CDATE, '%Y-%m-%d %H:%i') AS cdate,
+	<select id="selectPointUseList" parameterType="hashmap" resultType="hashmap">
+		SELECT
+		POINT_NO AS pointNo,
+		USER_ID AS userId,
+		POINT_AMOUNT AS pointAmount,
+		ORD_NO AS ordNo,
+		REVIEW_NO AS reviewNo,
+		DATE_FORMAT(CDATE, '%Y-%m-%d %H:%i') AS cdate,
 
-        SUM(POINT_AMOUNT) OVER (
-            PARTITION BY USER_ID
-            ORDER BY CDATE ASC, POINT_NO ASC
-        ) AS balance
+		SUM(POINT_AMOUNT) OVER (
+		PARTITION BY USER_ID
+		ORDER BY CDATE ASC, POINT_NO ASC
+		) AS balance
 
-    FROM USER_POINT
-    WHERE USER_ID = #{userId}
-    ORDER BY CDATE DESC, POINT_NO DESC
-</select>
+		FROM USER_POINT
+		WHERE USER_ID = #{userId}
+		ORDER BY CDATE DESC, POINT_NO DESC
+	</select>
 
-	
+
 	<!-- 쿠폰 목록 조회 -->
 	<select id="selectCouponList" parameterType="hashmap" resultType="hashmap">
 		SELECT
