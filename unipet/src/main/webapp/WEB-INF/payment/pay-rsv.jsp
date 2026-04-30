@@ -180,17 +180,20 @@
                     type: "POST",
                     data: param,
                     success: function(data) {
-                        if(data.result === "success") {
-                            if(status === "PAY") {
-                                self.isPayComplete = true;
-                                alert("예약 및 결제가 완료되었습니다!");
-                                pageChange("/payment/pay-success.do", {rsvNo : param.rsvNo});
-                            } else {
-                                // 결제 실패인데 DB 기록은 성공한 경우
-                                alert("결제 실패: " + rsp.error_msg + "\n(실패 내역이 기록되었습니다.)");
-                            }
+                        if (status === "PAY" && data.result === "success") {
+                            self.isPayComplete = true; // 가드 해제
+                            alert("예약 및 결제가 완료되었습니다.");
+                            pageChange("/payment/pay-success.do", { rsvNo: param.rsvNo });
                         } else {
-                            alert("결제를 취소하셨거나 실패하였습니다: " + rsp.error_msg);
+                            self.isPayComplete = true; 
+                            
+                            alert("결제를 취소하거나 실패했습니다. 예약 내역에서 다시 시도해주세요.");
+                            
+                            // 마이페이지 예약 탭 트리거 설정
+                            sessionStorage.setItem("triggerFunction", "openRsvList");
+                            
+                            // 마이페이지로 이동
+                            location.href = "/user/mypage.do";
                         }
                     }
                 });
