@@ -281,7 +281,7 @@
 								alert("댓글이 등록되었습니다.");
 								self.commentContents = "";
 								self.fnGetCommentList();
-
+z
 							} else if (data.result == "login") {
 								alert("로그인이 필요합니다.");
 								location.href = "/user/login.do";

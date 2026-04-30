@@ -179,10 +179,20 @@
 									<span v-if="item.privateYn == 'Y'" class="private-badge">🔒</span>
 									<span v-if="Number(item.likeCnt) >= 5" class="popular-badge">🔥</span>
 
-									<span v-if="selectedMainNo == '' && item.bSubType != '공지사항'" class="main-badge">{{item.bMainType}}</span>
+									<span 
+										v-if="selectedMainNo == '' && item.bSubType != '공지사항'" 
+										class="main-badge">
+										{{item.bMainType}}
+									</span>
+
+									<span 
+										v-if="fnShowLocalBadge(item)" 
+										class="local-badge">
+										{{fnGetLocalName(item)}}
+									</span>
 
 									<span v-if="item.bSubType == '공지사항'" class="notice-badge">📌 공지사항</span>
-									<span v-else class="category">[{{item.bSubType}}]</span>
+									<span v-else class="category">{{item.bSubType}}</span>
 									<span class="title-text">{{item.title}}</span>
 								</div>
 							</td>
@@ -394,6 +404,78 @@
 					this.tempYn = "";
 					this.currentPage = 1;
 					this.fnGetBoardList();
+				},
+				
+				fnIsLocalBoard: function (item) {
+					if (String(item.bMainNo) == "2") {
+						return true;
+					}
+
+					if (item.bMainType == "지역") {
+						return true;
+					}
+
+					if (item.localNo != null && item.localNo != "") {
+						return true;
+					}
+
+					return false;
+				},
+
+				fnGetLocalName: function (item) {
+					if (item.localName != null && item.localName != "") {
+						return item.localName;
+					}
+
+					let localNo = String(item.localNo);
+
+					if (localNo == "1") {
+						return "서울";
+					} else if (localNo == "2") {
+						return "인천";
+					} else if (localNo == "3") {
+						return "부산";
+					} else if (localNo == "4") {
+						return "대구";
+					} else if (localNo == "5") {
+						return "광주";
+					} else if (localNo == "6") {
+						return "대전";
+					} else if (localNo == "7") {
+						return "울산";
+					} else if (localNo == "8") {
+						return "세종";
+					} else if (localNo == "9") {
+						return "경기";
+					} else if (localNo == "10") {
+						return "강원";
+					} else if (localNo == "11") {
+						return "충청";
+					} else if (localNo == "12") {
+						return "전라";
+					} else if (localNo == "13") {
+						return "경상";
+					} else if (localNo == "14") {
+						return "제주";
+					}
+
+					return "지역";
+				},
+				
+				fnShowLocalBadge: function (item) {
+					if (item.bSubType == "공지사항") {
+						return false;
+					}
+
+					if (!this.fnIsLocalBoard(item)) {
+						return false;
+					}
+
+					if (this.selectedMainNo == "2" && this.localNo != "") {
+						return false;
+					}
+
+					return true;
 				},
 
 				fnGetAlarmList: function () {
