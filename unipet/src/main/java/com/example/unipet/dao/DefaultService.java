@@ -33,22 +33,16 @@ public class DefaultService {
 //			int result = defaultMapper.updateXXX(map);
 			
 //			resultMap.put("list", list);
-			resultMap.put("result", "success");
+			resultMap.put("result", true);
 			resultMap.put("message", Message.MSG_ADD);
 		} catch (Exception e) {
 			// TODO: handle exception
 			System.out.println(e.getMessage());
-			resultMap.put("result", "fail");
+			resultMap.put("result", false);
 			resultMap.put("message", Message.MSG_SERVER_ERR);
 		}
 		return resultMap;
 	}
-	
-	
-	
-	
-	
-	
 
 	
 }

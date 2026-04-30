@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.example.unipet.common.Message;
 import com.example.unipet.mapper.UserMapper;
 import com.example.unipet.model.User;
 
@@ -402,4 +403,37 @@ public class UserService {
 	public void updatePhoneVerified(HashMap<String, Object> map) {
 		userMapper.updatePhoneVerified(map);
 	}
+	
+	// 비밀번호 변경용 검색
+	public HashMap<String, Object> getUserCheck(HashMap<String, Object> map) {
+        HashMap<String, Object> resultMap = new HashMap<String, Object>();
+        
+        try {
+            // 1. 휴대폰 번호 정제 (숫자만 남기기)
+            String phone = (String) map.get("phone");
+            if (phone != null) {
+                map.put("phone", phone.replaceAll("[^0-9]", ""));
+            }
+
+            int userCount = userMapper.selectUserCheckCount(map);
+            
+            // 3. 결과 판단
+            if (userCount > 0) {
+                resultMap.put("result", true);
+                resultMap.put("message", "회원 확인 완료");
+            } else {
+                resultMap.put("result", false);
+                resultMap.put("message", "일치하는 회원 정보가 없습니다.");
+            }
+            
+        } catch (Exception e) {
+            // 예외 발생 시 DefaultService 형식과 동일하게 처리
+            System.out.println(e.getMessage());
+            resultMap.put("result", false);
+            resultMap.put("message", Message.MSG_SERVER_ERR);
+        }
+        
+        return resultMap;
+    }
 }
+

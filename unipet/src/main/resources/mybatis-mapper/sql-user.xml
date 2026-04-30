@@ -266,5 +266,11 @@
 		)
 	</insert>
 
+	<select id="selectUserCheckCount" parameterType="hashmap" resultType="int">
+	    SELECT COUNT(*)
+	    FROM unipet.users
+	    WHERE USER_ID = #{userId} 
+	      AND PHONE = #{phone}
+	</select>
 
 </mapper>
