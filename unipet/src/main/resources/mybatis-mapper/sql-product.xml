@@ -84,6 +84,7 @@
 	
 		LEFT JOIN PRODUCT_FILE F
 			ON P.PRODUCT_NO = F.PRODUCT_NO
+			AND F.IS_MAIN = 'Y'
 	
 		LEFT JOIN (
 			SELECT
@@ -178,12 +179,17 @@
 			PRODUCT_NO AS productNo,
 			FILE_PATH AS filePath,
 			FILE_NAME AS fileName,
-			CONCAT(FILE_PATH, FILE_NAME) AS fileUrl,
+			ORIGIN_NAME AS originName,
+			FILE_SIZE AS fileSize,
+			FILE_EXT AS fileExt,
+			IS_DETAIL AS isDetail,
+			IS_MAIN AS isMain,
+			DATE_FORMAT(CDATE, '%Y-%m-%d %H:%i:%s') AS cdate,
 			CONCAT(FILE_PATH, FILE_NAME) AS img
 		FROM PRODUCT_FILE
 		WHERE PRODUCT_NO = #{productNo}
 		AND IS_DETAIL = 'Y'
-		ORDER BY FILE_NO
+		ORDER BY FILE_NO ASC
 	</select>
 
 	<!-- 여러개 검색 -->

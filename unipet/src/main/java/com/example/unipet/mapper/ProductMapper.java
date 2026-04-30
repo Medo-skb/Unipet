@@ -32,6 +32,7 @@ public interface ProductMapper {
 	public List<Product> selectQnaList(HashMap<String, Object> map);
 
 	public List<Product> selectCartList(HashMap<String, Object> map);
+	
 
 	// 한개 리턴 -> selectXXX
 	public Product selectProductView(HashMap<String, Object> map);
