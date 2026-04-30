@@ -160,7 +160,6 @@
                     type: "POST",
                     data: { storeNo: self.storeNo },
                     success: function(data) {
-                        console.log(data);
                         self.cutoff = data.info.cutoff;
                         self.buildCalendar();
 

@@ -55,15 +55,15 @@
 
             <div class="row">
                 <div class="inline-box">
-                    <input v-model="phone" placeholder="휴대폰 번호">
+                    <input v-model="phone" placeholder="휴대폰 번호 ( ' - ' 없이 입력 )">
                     <button type="button" @click="sendSms" :disabled="smsChecked">
                         {{ smsRequested ? '인증재요청' : '인증요청' }}
                     </button>
 
                 </div>
-                <div class="info-text">
+                <!-- <div class="info-text">
                     휴대전화 번호는 010xxxxxxxx 또는 010-xxxx-xxxx 형식으로 입력해주세요.
-                </div>
+                </div> -->
             </div>
 
             <div class="row">

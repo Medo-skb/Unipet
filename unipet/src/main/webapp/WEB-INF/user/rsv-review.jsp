@@ -124,7 +124,6 @@
                     data: params,
                     success: function(data) {
                         // 콘솔 확인 결과: data.info 안에 상세 데이터가 있음
-                        console.log(data);
                         if (data.result === "success") {
                             self.info = data.info;
                         } else {

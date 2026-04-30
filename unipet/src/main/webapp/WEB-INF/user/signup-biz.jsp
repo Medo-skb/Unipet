@@ -54,7 +54,6 @@
             <!-- 사업자등록증 파일 -->
             <div class="row">
                 <input type="file" @change="handleFile" accept=".jpg,.jpeg,.png,.pdf">
-
                 
                 <div class="info-text">
                     사업자등록증 파일은 JPG, PNG, PDF 형식만 업로드 가능합니다. (최대 5MB)
