@@ -187,8 +187,6 @@ public class UserController {
 
 		return gson.toJson(resultMap);
 	}
-	
-	
 
 	// =========================
 	// 사업자 회원가입
@@ -237,6 +235,7 @@ public class UserController {
 	@PostMapping("/user/sendSms.dox")
 	@ResponseBody
 	public String sendSms(@RequestParam String phone, HttpSession session) {
+
 		HashMap<String, Object> result = new HashMap<>();
 
 		String cleanPhone = phone.replace("-", "");
@@ -248,10 +247,15 @@ public class UserController {
 
 		userService.insertPhoneVerify(map);
 
+		// ⭐⭐⭐ 여기 추가 (핵심)
+		smsService.sendSms(cleanPhone, code);
+
 		session.setAttribute("verifyPhone", cleanPhone);
 
 		result.put("result", true);
-		result.put("message", "인증번호가 발송되었습니다. 3분 안에 입력해주세요.");
+		result.put("message", "인증번호가 발송되었습니다.");
+		result.put("code", code);
+
 		return new Gson().toJson(result);
 	}
 
@@ -290,15 +294,15 @@ public class UserController {
 			result.put("message", "이미 인증 완료된 번호입니다.");
 			return new Gson().toJson(result);
 		}
+		java.time.LocalDateTime expireTime = (java.time.LocalDateTime) verify.get("expireTime");
 
-		java.sql.Timestamp expireTime = (java.sql.Timestamp) verify.get("expireTime");
-
-		if (expireTime.before(new java.sql.Timestamp(System.currentTimeMillis()))) {
-			result.put("result", false);
-			result.put("message", "인증 시간이 만료되었습니다. 다시 요청해주세요.");
-			return new Gson().toJson(result);
+		if (expireTime.isBefore(java.time.LocalDateTime.now())) {
+		    result.put("result", false);
+		    result.put("message", "인증 시간이 만료되었습니다. 다시 요청해주세요.");
+		    return new Gson().toJson(result);
 		}
 
+		
 		if (!dbCode.equals(code)) {
 			result.put("result", false);
 			result.put("message", "인증번호가 일치하지 않습니다.");

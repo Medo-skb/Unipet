@@ -14,13 +14,17 @@ button {
     padding: 40px 0 80px;
 }
 
-.user-page-container {
-    width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    gap: 40px;
-    align-items: flex-start;
-}
+
+	.user-page-container {
+	    width: 100%;
+	    max-width: 1200px;
+	    margin: 0 auto;
+	    display: flex;
+	    gap: 40px;
+	    align-items: flex-start;
+	}
+   
+
 
 .user-sidebar {
     width: 240px;
