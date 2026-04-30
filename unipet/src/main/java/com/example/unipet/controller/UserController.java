@@ -247,7 +247,7 @@ public class UserController {
 
 		userService.insertPhoneVerify(map);
 
-		// ⭐⭐⭐ 여기 추가 (핵심)
+		
 		smsService.sendSms(cleanPhone, code);
 
 		session.setAttribute("verifyPhone", cleanPhone);
