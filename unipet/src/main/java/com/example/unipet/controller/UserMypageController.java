@@ -279,6 +279,28 @@ public class UserMypageController {
 		map.put("userId", session.getAttribute("sessionId"));
 		return userMypageService.getSubscriptionInfo(map);
 	}
+	@PostMapping("/user/update-auto-pay.dox")
+	@ResponseBody
+	public HashMap<String, Object> updateAutoPay(
+	        @RequestParam HashMap<String, Object> map,
+	        HttpSession session) {
+
+	    HashMap<String, Object> result = new HashMap<>();
+
+	    String userId = (String) session.getAttribute("sessionId");
+
+	    if (userId == null) {
+	        result.put("result", "loginRequired");
+	        result.put("message", "로그인 후 이용해주세요.");
+	        return result;
+	    }
+
+	    map.put("userId", userId);
+
+	    return userMypageService.updateAutoPay(map);
+	}
+	
+	
 
 	// 내가 쓴 게시글 목록 조회
 	@PostMapping("/user/community-post-list.dox")
@@ -312,6 +334,26 @@ public class UserMypageController {
 
 		return result;
 	}
+	@PostMapping("/user/subscription-pay-list.dox")
+	@ResponseBody
+	public HashMap<String, Object> subscriptionPayList(HttpSession session) {
+	    HashMap<String, Object> result = new HashMap<>();
+	    HashMap<String, Object> map = new HashMap<>();
+
+	    String userId = (String) session.getAttribute("sessionId");
+
+	    if (userId == null) {
+	        result.put("result", "loginRequired");
+	        result.put("message", "로그인 후 이용해주세요.");
+	        return result;
+	    }
+
+	    map.put("userId", userId);
+
+	    return userMypageService.getSubscriptionPayList(map);
+	}
+	
+	
 
 	// 현재 포인트 조회
 	@PostMapping("/user/point-info.dox")

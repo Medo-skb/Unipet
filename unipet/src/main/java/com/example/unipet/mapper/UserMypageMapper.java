@@ -61,7 +61,9 @@ public interface UserMypageMapper {
 	int deleteReview(HashMap<String, Object> map);
 
 	HashMap<String, Object> selectSubscriptionInfo(HashMap<String, Object> map);
-
+	
+	List<HashMap<String, Object>> selectSubscriptionPayList(HashMap<String, Object> map);
+	int updateAutoPay(HashMap<String, Object> map);
 	int cancelSubscription(HashMap<String, Object> map);
 
 	List<HashMap<String, Object>> selectMyPostList(HashMap<String, Object> map);

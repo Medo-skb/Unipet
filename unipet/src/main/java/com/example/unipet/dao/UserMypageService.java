@@ -330,6 +330,22 @@ public class UserMypageService {
 		return result;
 	}
 
+	public HashMap<String, Object> updateAutoPay(HashMap<String, Object> map) {
+		HashMap<String, Object> result = new HashMap<>();
+
+		int num = userMypageMapper.updateAutoPay(map);
+
+		if (num > 0) {
+			result.put("result", "success");
+			result.put("message", "자동결제 여부가 변경되었습니다.");
+		} else {
+			result.put("result", "fail");
+			result.put("message", "다음 결제일 1일 전까지만 자동결제 여부를 변경할 수 있습니다.");
+		}
+
+		return result;
+	}
+
 	public HashMap<String, Object> getMyPostList(HashMap<String, Object> map) {
 		HashMap<String, Object> result = new HashMap<>();
 
@@ -379,16 +395,27 @@ public class UserMypageService {
 	// 포인트 사용내역 조회
 	// =====================
 	public HashMap<String, Object> getPointUseList(HashMap<String, Object> map) {
+		HashMap<String, Object> result = new HashMap<>();
+
+		List<HashMap<String, Object>> list = userMypageMapper.selectPointUseList(map);
+
+		result.put("result", "success");
+		result.put("list", list);
+
+		return result;
+	}
+	public HashMap<String, Object> getSubscriptionPayList(HashMap<String, Object> map) {
 	    HashMap<String, Object> result = new HashMap<>();
 
-	    List<HashMap<String, Object>> list = userMypageMapper.selectPointUseList(map);
-
 	    result.put("result", "success");
-	    result.put("list", list);
+	    result.put("payList", userMypageMapper.selectSubscriptionPayList(map));
 
 	    return result;
 	}
-	public List<HashMap<String, Object>> getCouponList(HashMap<String, Object> map){
-	    return userMypageMapper.selectCouponList(map);
+	
+	
+
+	public List<HashMap<String, Object>> getCouponList(HashMap<String, Object> map) {
+		return userMypageMapper.selectCouponList(map);
 	}
 }

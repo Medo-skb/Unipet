@@ -400,8 +400,7 @@
 	</select>
 
 
-	
-
+	<!-- 구독 정보 조회 -->
 	<!-- 구독 정보 조회 -->
 	<select id="selectSubscriptionInfo" parameterType="hashmap"
 		resultType="hashmap">
@@ -411,18 +410,62 @@
 		DATE_FORMAT(S_DATE, '%Y-%m-%d') AS startDate,
 		DATE_FORMAT(E_DATE, '%Y-%m-%d') AS endDate,
 		SUB_PRICE AS subPrice,
+
 		CASE
-		WHEN SUB_STATUS = 'Y' THEN '이용중'
-		ELSE '미이용'
+		WHEN E_DATE >= NOW() THEN '이용중'
+		ELSE '만료'
 		END AS status,
+
 		IS_AUTO AS isAuto,
 		METHOD_NO AS methodNo,
-		DATE_FORMAT(N_DATE, '%Y-%m-%d') AS nextBillingDate
+		DATE_FORMAT(N_DATE, '%Y-%m-%d') AS nextBillingDate,
+		DATE_FORMAT(N_DATE, '%Y-%m-%d %H:%i:%s') AS nextBillingRaw,
+
+		CASE
+		WHEN DATE_SUB(N_DATE, INTERVAL 1 DAY) >= NOW() THEN 'Y'
+		ELSE 'N'
+		END AS canChangeAuto
+
 		FROM subscription
 		WHERE USER_ID = #{userId}
 		ORDER BY SUB_NO DESC
 		LIMIT 1
 	</select>
+
+	<!-- 자동결제 여부 변경 -->
+	<update id="updateAutoPay" parameterType="hashmap">
+		UPDATE subscription
+		SET IS_AUTO = #{isAuto}
+		WHERE USER_ID = #{userId}
+		AND SUB_NO = #{subNo}
+		AND DATE_SUB(N_DATE, INTERVAL 1 DAY) >= NOW()
+	</update>
+	<!-- 구독 결제내역 조회 -->
+	<select id="selectSubscriptionPayList" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT
+		SUB_NO AS subNo,
+		USER_ID AS userId,
+		METHOD_NO AS methodNo,
+		DATE_FORMAT(S_DATE, '%Y-%m-%d %H:%i') AS startDate,
+		DATE_FORMAT(E_DATE, '%Y-%m-%d %H:%i') AS endDate,
+		DATE_FORMAT(N_DATE, '%Y-%m-%d %H:%i') AS nextBillingDate,
+		SUB_PRICE AS subPrice,
+		SUB_STATUS AS subStatus,
+		IS_AUTO AS isAuto,
+		CASE
+		WHEN E_DATE >= NOW() THEN '이용중'
+		ELSE '만료'
+		END AS statusText,
+		CASE
+		WHEN IS_AUTO = 'Y' THEN '자동결제'
+		ELSE '수동/해지'
+		END AS autoText
+		FROM subscription
+		WHERE USER_ID = #{userId}
+		ORDER BY SUB_NO DESC
+	</select>
+
 
 	<!-- 구독해지 -->
 	<update id="cancelSubscription" parameterType="hashmap">

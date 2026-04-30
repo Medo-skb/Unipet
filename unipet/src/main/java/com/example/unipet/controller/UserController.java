@@ -187,6 +187,8 @@ public class UserController {
 
 		return gson.toJson(resultMap);
 	}
+	
+	
 
 	// =========================
 	// 사업자 회원가입
