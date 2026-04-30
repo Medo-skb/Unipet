@@ -111,10 +111,23 @@
 					maxContentLength: 2000,
 					boardTitle: "게시글 작성",
 					isLocalBoard: false,
+					sessionId: '<%=session.getAttribute("sessionId") == null ? "" : session.getAttribute("sessionId")%>',
 					sessionRole: '<%=session.getAttribute("sessionRole") == null ? "" : session.getAttribute("sessionRole")%>'
 				};
 			},
 			methods: {
+				fnIsAdmin: function () {
+					if (this.sessionRole == "A") {
+						return true;
+					}
+
+					if (this.sessionId == "admin") {
+						return true;
+					}
+
+					return false;
+				},
+				
 				fnSetBoardInfo: function () {
 					let self = this;
 
@@ -144,7 +157,7 @@
 					for (let i = 0; i < self.subTypeList.length; i++) {
 						if (String(self.subTypeList[i].bMainNo) == String(self.selectedMainNo)) {
 
-							if (self.subTypeList[i].bSubNo == 1 && self.sessionRole != "A" && self.sessionRole != "BIZ") {
+							if (self.subTypeList[i].bSubNo == 1 && !self.fnIsAdmin() && self.sessionRole != "BIZ") {
 								continue;
 							}
 

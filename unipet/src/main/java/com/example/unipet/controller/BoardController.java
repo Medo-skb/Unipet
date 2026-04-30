@@ -137,15 +137,17 @@ public class BoardController {
 	public String getBoardDetail(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
 
 		String sessionId = session.getAttribute("sessionId") == null ? "" : (String) session.getAttribute("sessionId");
+		String sessionRole = session.getAttribute("sessionRole") == null ? "" : (String) session.getAttribute("sessionRole");
 
 		map.put("sessionId", sessionId);
+		map.put("sessionRole", sessionRole);
 
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 		resultMap = boardService.getBoardDetail(map);
 
 		return new Gson().toJson(resultMap);
 	}
-
+	
 	// ajax가 호출하는 주소
 	@RequestMapping(value = "/board/comment/list.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody

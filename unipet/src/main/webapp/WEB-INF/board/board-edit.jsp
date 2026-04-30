@@ -81,7 +81,19 @@
 
 				<div class="form-row">
 					<div class="label">제목</div>
-					<input type="text" v-model="title" name="title">
+
+					<div class="input-wrap">
+						<input 
+							type="text" 
+							v-model="title" 
+							name="title"
+							:maxlength="maxTitleLength"
+						>
+
+						<div class="input-count" :class="{danger : title.length >= maxTitleLength}">
+							{{title.length}} / {{maxTitleLength}}
+						</div>
+					</div>
 				</div>
 
 				<div class="form-row">
@@ -146,6 +158,7 @@
 					privateYn: "N",
 					title: "",
 					bContent: "",
+					maxTitleLength: 100,
 					maxContentLength: 2000,
 					loaded: false
 				};
@@ -305,6 +318,12 @@
 
 					if (this.title == "") {
 						alert("제목을 입력해주세요.");
+						e.preventDefault();
+						return;
+					}
+
+					if (this.title.length > this.maxTitleLength) {
+						alert("제목은 " + this.maxTitleLength + "자까지 입력할 수 있습니다.");
 						e.preventDefault();
 						return;
 					}
