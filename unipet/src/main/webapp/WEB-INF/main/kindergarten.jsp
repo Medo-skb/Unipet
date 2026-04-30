@@ -112,7 +112,6 @@
                     type: "POST",
                     data: param,
                     success: function (data) {
-                        console.log("유치원 업체 응답:", data);
                         self.storeList = data.list;
                     }
                 });

@@ -282,12 +282,11 @@ body {
     text-align: left;
     padding: 14px 16px;
     border-bottom: 1px solid var(--line);
-    border-right: 1px solid var(--line);
     font-size: 14px;
     font-weight: 700;
 }
 
-.report-table td:nth-child(2) {
+.report-table th:first-child {
     border-right: 1px solid var(--line);
 }
 
