@@ -66,7 +66,7 @@
 			CONCAT(F.FILE_PATH, F.FILE_NAME) AS img,
 	
 			IFNULL(R.avgRating, 0) AS avgRating,
-			IFNULL(R.reviewCnt, 0) AS reviewCnt
+			IFNULL(R.reviewCnt, 0) AS reviewCount
 	
 		FROM PRODUCT P
 	
@@ -193,21 +193,40 @@
 	</select>
 
 	<!-- 여러개 검색 -->
-	<select id="selectReviewList" parameterType="hashmap" resultType="com.example.unipet.model.Product">
+	<select id="selectReviewList" parameterType="hashmap" resultType="hashmap">
 		SELECT
-			REVIEW_NO AS reviewNo,
-			PRODUCT_NO AS productNo,
-			USER_ID AS userId,
-			RATING AS rating,
-			R_CONTENTS AS contents,
-			R_CONTENTS AS reviewContents,
-			DATE_FORMAT(CDATE, '%Y-%m-%d %H:%i:%s') AS cdate,
-			DATE_FORMAT(CDATE, '%Y-%m-%d %H:%i:%s') AS reviewCdate
-		FROM REVIEW
-		WHERE PRODUCT_NO = #{productNo}
-		ORDER BY REVIEW_NO DESC
+			R.REVIEW_NO AS reviewNo,
+			R.PRODUCT_NO AS productNo,
+			R.USER_ID AS userId,
+			IFNULL(NULLIF(U.NICKNAME, ''), R.USER_ID) AS writerNickname,
+			R.R_CONTENTS AS reviewContents,
+			R.RATING AS rating,
+			DATE_FORMAT(R.CDATE, '%Y-%m-%d') AS reviewCdate,
+	
+			P.PRODUCT_NAME AS productName,
+			P.PRODUCT_PRICE AS productPrice,
+	
+			(
+				SELECT CONCAT(PF.FILE_PATH, PF.FILE_NAME)
+				FROM PRODUCT_FILE PF
+				WHERE PF.PRODUCT_NO = P.PRODUCT_NO
+				AND PF.IS_MAIN = 'Y'
+				ORDER BY PF.FILE_NO ASC
+				LIMIT 1
+			) AS img
+	
+		FROM `REVIEW` R
+	
+		INNER JOIN PRODUCT P
+			ON R.PRODUCT_NO = P.PRODUCT_NO
+	
+		LEFT JOIN USERS U
+			ON R.USER_ID = U.USER_ID
+	
+		WHERE R.PRODUCT_NO = #{productNo}
+	
+		ORDER BY R.REVIEW_NO DESC
 	</select>
-
 	<!-- 여러개 검색 -->
 	<select id="selectQnaList" parameterType="hashmap" resultType="com.example.unipet.model.Product">
 		SELECT
@@ -454,5 +473,34 @@
 		WHERE USER_ID = #{userId}
 		AND PRODUCT_NO = #{productNo}
 	</update>
+	
 
+	<!-- 한개 검색 : 리뷰 신고 중복 확인 -->
+	<select id="selectReviewReportCheck" parameterType="hashmap" resultType="com.example.unipet.model.Product">
+		SELECT
+			REVIEW_NO AS reviewNo
+		FROM REVIEW_REPORT
+		WHERE REVIEW_NO = #{reviewNo}
+		LIMIT 1
+	</select>
+	
+	<!-- 리뷰 신고 등록 -->
+	<insert id="insertReviewReport" parameterType="hashmap">
+		INSERT INTO REVIEW_REPORT
+		(
+			REVIEW_NO,
+			REPORTER_ID,
+			REPORT_REASON,
+			REP_STATUS,
+			CDATE
+		)
+		VALUES
+		(
+			#{reviewNo},
+			#{reporterId},
+			#{reportReason},
+			'WAI',
+			NOW()
+		)
+	</insert>
 </mapper>

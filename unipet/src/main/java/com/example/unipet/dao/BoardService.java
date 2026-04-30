@@ -283,6 +283,12 @@ public class BoardService {
 				resultMap.put("message", "로그인이 필요합니다.");
 				return resultMap;
 			}
+			
+			if ("admin".equals(sessionId)) {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "관리자 계정은 신고할 수 없습니다.");
+				return resultMap;
+			}
 
 			if (map.get("reportReason") == null || map.get("reportReason").equals("")) {
 				resultMap.put("result", "fail");
@@ -292,8 +298,17 @@ public class BoardService {
 
 			map.put("reporterId", sessionId);
 
-			if (map.get("commentNo") == null || "".equals(map.get("commentNo"))) {
+			String commentNo = map.get("commentNo") == null ? "" : map.get("commentNo").toString();
+
+			if (commentNo.equals("")) {
+				// 게시글 신고
 				map.put("commentNo", null);
+
+			} else {
+				// 댓글 신고
+				// DB UNIQUE 때문에 댓글 신고할 때는 boardNo를 null로 넣는다.
+				// 댓글 번호만으로 어떤 댓글인지 알 수 있음
+				map.put("boardNo", null);
 			}
 
 			int cnt = boardMapper.insertBoardReport(map);
@@ -309,7 +324,7 @@ public class BoardService {
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 			resultMap.put("result", "fail");
-			resultMap.put("message", "이미 신고한 대상입니다.");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
 		}
 
 		return resultMap;
