@@ -133,7 +133,7 @@
         data() {
             return {
                 userId : "${sessionId}",
-                cartIds : JSON.parse(sessionStorage.getItem("cartNoList")) || [],
+                cartIds : JSON.parse(sessionStorage.getItem("cartNoList")),
                 // 1.
                 orderList: [],
                 // 2. 입력 폼 데이터 바인딩
@@ -439,6 +439,11 @@
         },
         mounted() {
             let self = this;
+            if (!self.userId || self.userId === "") {
+                alert("로그인이 필요한 서비스입니다.");
+                location.href = "/user/login.do";
+                return;
+            }
             self.fnGetInfo();
             window.addEventListener('beforeunload', this.fnLeaveGuard);
         },

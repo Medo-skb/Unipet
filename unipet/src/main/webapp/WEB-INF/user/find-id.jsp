@@ -13,17 +13,18 @@
 </head>
 
 <body>
+
    <jsp:include page="/WEB-INF/header/header.jsp" />
 
     <div id="app">
         <div class="row">
-            <label for="userName">이름</label>
-            <input type="text" id="userName" v-model="userName" placeholder="이름을 입력해주세요">
+            <label>이름</label>
+            <input type="text" v-model="userName" placeholder="이름을 입력해주세요">
         </div>
 
         <div class="row">
-            <label for="pwd">비밀번호</label>
-            <input type="password" id="pwd" v-model="pwd" placeholder="비밀번호를 입력해주세요">
+            <label>휴대폰 번호</label>
+            <input type="text" v-model="phone" placeholder="010-0000-0000">
         </div>
 
         <div class="btn-box">
@@ -32,9 +33,8 @@
             </button>
         </div>
     </div>
-</div>
 
-<jsp:include page="/WEB-INF/footer/footer.jsp" />
+    <jsp:include page="/WEB-INF/footer/footer.jsp" />
 
 </body>
 </html>
@@ -45,7 +45,7 @@
             return {
                 // 변수 - (key : value)
                 userName: "",
-                pwd: "",
+                phone: "",
                 isProcessing: false
             };
         },
@@ -56,14 +56,16 @@
 
                 // 유효성 검사
                 if (!self.userName.trim()) { alert("이름을 입력해주세요."); return; }
-                if (!self.pwd.trim()) { alert("비밀번호를 입력해주세요."); return; }
+                if (!self.phone.trim()) { alert("휴대폰 번호를 입력해주세요."); return; }
 
                 // 광클 방지 시작
                 self.isProcessing = true;
 
+                const cleanPhone = self.phone.replace(/[^0-9]/g, "");
+
                 let param = {
                     userName: self.userName,
-                    pwd: self.pwd
+                    phone: cleanPhone
                 };  
 
                 $.ajax({
@@ -73,7 +75,7 @@
                     data: param,
                     success: function (data) {
 
-                        if (data.result === "success") {
+                        if (data.result) {
                             alert("찾으시는 아이디는 [" + data.userId + "] 입니다.");
                         } else {
                             alert(data.message || "일치하는 정보가 없습니다.");

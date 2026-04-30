@@ -11,8 +11,6 @@ public interface UserMapper {
 
 	int checkUser(HashMap<String, Object> map);
 
-	int checkStoreUser(HashMap<String, Object> map);
-
 	int insertUser(HashMap<String, Object> map);
 
 	int insertBizUser(HashMap<String, Object> map);
@@ -48,5 +46,8 @@ public interface UserMapper {
 	int insertStoreFile(HashMap<String, Object> map);
 	// 매장 정보 저장
 	int insertStore(HashMap<String, Object> map);
+	
+	// 휴대폰번호 조회
+	int checkPhone(HashMap<String, Object> map);
 
 }

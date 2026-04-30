@@ -12,11 +12,17 @@
 	    ) AS totalCount
 	</select>
 
-	<!-- 사업자 아이디 중복체크 -->
-	<select id="checkStoreUser" parameterType="hashmap" resultType="int">
-		SELECT COUNT(*)
-		FROM unipet.store_user
-		WHERE S_USER_ID = #{userId}
+	<!-- 휴대폰 중복체크 -->
+	<select id="checkPhone" parameterType="hashmap" resultType="int">
+	    SELECT COUNT(*)
+	    FROM (
+	        SELECT PHONE FROM unipet.users
+	        UNION ALL
+	        SELECT PHONE FROM unipet.admin
+	        UNION ALL
+	        SELECT PHONE FROM unipet.store_user
+	    ) AS all_phones
+	    WHERE PHONE = #{phone}
 	</select>
 
 	<!-- 사용자 회원가입 -->
@@ -102,6 +108,7 @@
 		WHERE SU.S_USER_ID = #{userId}
 		AND SU.U_STATUS NOT IN ('BAN', 'EXT')
 	</select>
+	
 	<!-- 사업자 아이디 찾기 -->
 	<select id="findBizId" parameterType="hashmap"
 		resultType="com.example.unipet.model.User">
@@ -116,14 +123,13 @@
 
 
 	<!-- 사용자아이디 찾기 -->
-	<select id="findId" parameterType="hashmap"
-		resultType="com.example.unipet.model.User">
+	<select id="findId" parameterType="hashmap" resultType="com.example.unipet.model.User">
 		SELECT
-		USER_ID AS userId,
-		USER_NAME AS userName,
-		USER_PWD as pwd
-		FROM unipet.users
-		WHERE USER_NAME = #{userName}
+	        USER_ID AS userId,
+	        USER_NAME AS userName
+	    FROM unipet.users
+	    WHERE USER_NAME = #{userName}
+	      AND PHONE = #{phone}  LIMIT 1
 	</select>
 
 	<!-- 비밀번호 재설정 대상 확인 -->
