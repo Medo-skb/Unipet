@@ -260,3 +260,35 @@
 	font-weight: bold;
 	cursor: default;
 }
+
+/* 댓글/답글 textarea 글자수 카운트 */
+.comment-textarea-wrap {
+	position: relative;
+	width: 100%;
+}
+
+.comment-textarea-wrap textarea {
+	width: 100%;
+	box-sizing: border-box;
+	resize: vertical;
+	padding: 12px 12px 38px 12px;
+}
+
+.comment-text-count {
+	position: absolute;
+	right: 14px;
+	bottom: 10px;
+
+	font-size: 13px;
+	color: #777;
+	background-color: rgba(255, 255, 255, 0.9);
+	padding: 3px 6px;
+	border-radius: 6px;
+
+	pointer-events: none;
+}
+
+.comment-text-count.danger {
+	color: #e74c3c;
+	font-weight: bold;
+}

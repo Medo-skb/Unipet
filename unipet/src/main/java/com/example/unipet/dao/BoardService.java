@@ -91,10 +91,13 @@ public class BoardService {
 			}
 
 			String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
+			String sessionRole = map.get("sessionRole") == null ? "" : map.get("sessionRole").toString();
 			String writerId = info.getUserId() == null ? "" : info.getUserId();
 			String privateYn = info.getPrivateYn() == null ? "N" : info.getPrivateYn();
 
-			if ("Y".equals(privateYn) && !sessionId.equals(writerId)) {
+			boolean isAdmin = "A".equals(sessionRole) || "admin".equals(sessionId);
+
+			if ("Y".equals(privateYn) && !isAdmin && !sessionId.equals(writerId)) {
 				resultMap.put("result", "private");
 				resultMap.put("message", "비공개 게시글입니다.");
 				return resultMap;
