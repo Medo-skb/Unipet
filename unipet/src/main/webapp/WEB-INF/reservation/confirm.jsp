@@ -104,7 +104,8 @@
             return {
                 info: {},
                 isNoticeOpen: false,
-                isSubmitting: false
+                isSubmitting: false,
+                userId: '${sessionScope.sessionId}',
             };
         },
         computed: {
