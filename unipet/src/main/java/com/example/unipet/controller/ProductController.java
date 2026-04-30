@@ -205,5 +205,20 @@ public class ProductController {
 
 		return new Gson().toJson(resultMap);
 	}
+	
+	@RequestMapping(value = "/review/report.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String reviewReport(@RequestParam HashMap<String, Object> map, HttpSession session) throws Exception {
+		String sessionId = session.getAttribute("sessionId") == null ? "" : (String) session.getAttribute("sessionId");
+		String sessionRole = session.getAttribute("sessionRole") == null ? "" : (String) session.getAttribute("sessionRole");
+
+		map.put("sessionId", sessionId);
+		map.put("sessionRole", sessionRole);
+
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+		resultMap = productService.reportReview(map);
+
+		return new Gson().toJson(resultMap);
+	}
 
 }

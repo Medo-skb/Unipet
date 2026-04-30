@@ -145,6 +145,13 @@ button {
     margin: 22px 0;
 }
 
+.total-price {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 10px;
+}
+
 .delivery-box {
     border: 1px solid var(--line-soft);
     border-radius: 12px;
@@ -299,6 +306,10 @@ button {
     color: #fff;
 }
 
+/* ============================= */
+/* 상세 설명 */
+/* ============================= */
+
 .detail-desc-top {
     border: 1px solid var(--line-soft);
     border-radius: 16px;
@@ -371,6 +382,12 @@ button {
     padding-top: 4px;
 }
 
+.detail-desc-text {
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--text-sub);
+}
+
 .detail-img-list {
     display: flex;
     flex-direction: column;
@@ -393,6 +410,10 @@ button {
     font-size: 14px;
 }
 
+/* ============================= */
+/* 상품평 */
+/* ============================= */
+
 .review-top {
     display: flex;
     justify-content: space-between;
@@ -408,55 +429,93 @@ button {
     color: var(--text-main);
 }
 
-.review-item,
-.qna-item {
+.review-item {
     border-top: 1px solid var(--line);
     padding: 18px 0;
 }
 
-.review-item:first-child,
-.qna-item:first-child {
+.review-item:first-child {
     border-top: none;
     padding-top: 0;
 }
 
-.review-head,
-.qna-head {
+.review-head {
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     font-size: 14px;
 }
 
-.review-user,
-.qna-user {
+.review-user-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.review-user {
     font-weight: 700;
     color: var(--text-main);
 }
 
-.review-date,
-.qna-date {
+.review-date {
     color: var(--text-light);
+    font-size: 13px;
 }
 
 .review-rating {
-    color: var(--main);
-    font-weight: 700;
-    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-bottom: 12px;
 }
 
 .star-filled {
-    color: var(--main);
+    color: #ffb400;
+    font-size: 18px;
 }
 
-.review-contents,
-.qna-contents,
-.answer-box {
-    line-height: 1.7;
-    font-size: 14px;
-    white-space: pre-line;
-    color: var(--text-sub);
+.star-empty {
+    color: #dddddd;
+    font-size: 18px;
 }
+
+.review-score {
+    margin-left: 6px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #555555;
+}
+
+.review-contents {
+    padding: 14px 16px;
+    border-radius: 12px;
+    background-color: #fafafa;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #333333;
+    white-space: pre-wrap;
+}
+
+.review-report-btn {
+    border: 1px solid #ff6b6b;
+    background-color: #ffffff;
+    color: #ff4d4d;
+    border-radius: 999px;
+    padding: 5px 12px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.review-report-btn:hover {
+    background-color: #ff6b6b;
+    color: #ffffff;
+}
+
+/* ============================= */
+/* 상품 문의 */
+/* ============================= */
 
 .qna-write-box {
     border: 1px solid var(--line-soft);
@@ -567,6 +626,16 @@ button {
     margin-top: 10px;
 }
 
+.qna-item {
+    border-top: 1px solid var(--line);
+    padding: 18px 0;
+}
+
+.qna-item:first-child {
+    border-top: none;
+    padding-top: 0;
+}
+
 .qna-top-row {
     display: flex;
     justify-content: space-between;
@@ -583,6 +652,11 @@ button {
 .qna-head-right {
     color: var(--text-light);
     font-size: 13px;
+}
+
+.qna-user {
+    font-weight: 700;
+    color: var(--text-main);
 }
 
 .qna-type-badge {
@@ -662,6 +736,13 @@ button {
     border-radius: 0 0 10px 10px;
 }
 
+.qna-contents {
+    line-height: 1.7;
+    font-size: 14px;
+    white-space: pre-line;
+    color: var(--text-sub);
+}
+
 .qna-secret-lock {
     padding: 16px;
     background: #fafafa;
@@ -676,6 +757,10 @@ button {
     background: var(--soft-pink-2);
     border: 1px solid var(--line-soft);
     border-radius: 10px;
+    line-height: 1.7;
+    font-size: 14px;
+    white-space: pre-line;
+    color: var(--text-sub);
 }
 
 .answer-title {
@@ -815,6 +900,10 @@ button {
     z-index: 10 !important;
 }
 
+/* ============================= */
+/* 반응형 */
+/* ============================= */
+
 @media (max-width: 1240px) {
     .wrap {
         width: calc(100% - 40px);
@@ -854,7 +943,7 @@ button {
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0,0,0,0.5);
+        background: rgba(0, 0, 0, 0.5);
         display: flex;
         justify-content: center;
         align-items: center;
@@ -871,20 +960,4 @@ button {
         margin: 10px;
         padding: 10px 20px;
     }
-	
-	.review-report-btn {
-		border: 1px solid #d9534f;
-		background: #fff;
-		color: #d9534f;
-		padding: 4px 10px;
-		border-radius: 6px;
-		cursor: pointer;
-		font-size: 13px;
-		margin-left: 10px;
-	}
-
-	.review-report-btn:hover {
-		background: #d9534f;
-		color: #fff;
-	}
 }

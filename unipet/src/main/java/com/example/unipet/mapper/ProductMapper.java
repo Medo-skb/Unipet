@@ -46,6 +46,11 @@ public interface ProductMapper {
 	public Product selectCartOne(HashMap<String, Object> map);
 
 	public int selectCartCount(HashMap<String, Object> map);
+	
+	public Product selectReviewReportCheck(HashMap<String, Object> map);
+
+	// 리뷰 신고 등록
+	public int insertReviewReport(HashMap<String, Object> map);
 
 	// 삭제
 	public int deleteQna(HashMap<String, Object> map);

@@ -182,28 +182,38 @@
 				</div>
 
 				<div v-else>
-					<div class="review-item" v-for="review in reviewList" :key="review.reviewNo">
-						<div class="review-head">
-							<span class="review-user">
-								{{review.writerNickname ? review.writerNickname : review.userId}}
-							</span>
+					<div v-else>
+						<div class="review-item" v-for="review in reviewList" :key="review.reviewNo">
 
-							<span class="review-date">{{review.reviewCdate}}</span>
+							<div class="review-head">
+								<div class="review-user-area">
+									<span class="review-user">
+										{{review.writerNickname ? review.writerNickname : review.userId}}
+									</span>
 
-							<button 
-								v-if="fnIsAdmin()"
-								type="button"
-								class="review-report-btn"
-								@click="fnReviewReport(review)">
-								신고
-							</button>
+									<span class="review-date">{{review.reviewCdate}}</span>
+								</div>
+
+								<button 
+									v-if="fnIsAdmin()"
+									type="button"
+									class="review-report-btn"
+									@click="fnReviewReport(review)">
+									신고
+								</button>
+							</div>
+
+							<div class="review-rating">
+								<span v-for="n in Number(review.rating || 0)" :key="'star-' + n" class="star-filled">★</span>
+								<span v-for="n in 5 - Number(review.rating || 0)" :key="'empty-star-' + n" class="star-empty">★</span>
+								<span class="review-score">{{review.rating}}점</span>
+							</div>
+
+							<div class="review-contents">
+								{{review.reviewContents}}
+							</div>
+
 						</div>
-
-						<div class="review-rating">
-							<span v-for="n in review.rating" :key="'star-' + n" class="star-filled">★</span>
-						</div>
-
-						<div class="review-contents">{{review.reviewContents}}</div>
 					</div>
 				</div>
 			</div>

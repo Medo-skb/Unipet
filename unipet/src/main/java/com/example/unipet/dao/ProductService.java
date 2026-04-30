@@ -436,5 +436,62 @@ public class ProductService {
 
 		return resultMap;
 	}
+	
+	// 리뷰 신고 등록
+	public HashMap<String, Object> reportReview(HashMap<String, Object> map) {
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+		try {
+			String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
+			String sessionRole = map.get("sessionRole") == null ? "" : map.get("sessionRole").toString();
+
+			if (sessionId.equals("")) {
+				resultMap.put("result", "login");
+				resultMap.put("message", "로그인이 필요합니다.");
+				return resultMap;
+			}
+
+			boolean isAdmin = "A".equals(sessionRole) || "admin".equals(sessionId);
+
+			if (!isAdmin) {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "관리자만 신고 처리할 수 있습니다.");
+				return resultMap;
+			}
+
+			if (map.get("reviewNo") == null || map.get("reviewNo").equals("")) {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "리뷰 번호가 없습니다.");
+				return resultMap;
+			}
+
+			Product check = productMapper.selectReviewReportCheck(map);
+
+			if (check != null) {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "이미 신고 처리된 리뷰입니다.");
+				return resultMap;
+			}
+
+			map.put("reporterId", sessionId);
+
+			int num = productMapper.insertReviewReport(map);
+
+			if (num > 0) {
+				resultMap.put("result", "success");
+				resultMap.put("message", "리뷰가 신고 처리되었습니다.");
+			} else {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "리뷰 신고 처리에 실패했습니다.");
+			}
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			resultMap.put("result", "fail");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
+		}
+
+		return resultMap;
+	}
 
 }
