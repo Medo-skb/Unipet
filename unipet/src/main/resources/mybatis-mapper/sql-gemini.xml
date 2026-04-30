@@ -31,17 +31,26 @@
 		WHERE S.S_STATUS IN ('GEN', 'AFF')
 		  AND S.IS_OPEN = 'Y'
 	
-	    <if test="keyword != null and keyword != ''">
-	        AND (
-	            S.STORE_NAME LIKE CONCAT('%', #{keyword}, '%')
-	            OR S.S_ADDR LIKE CONCAT('%', #{keyword}, '%')
-	            OR IFNULL(SD.SUB_TITLE, '') LIKE CONCAT('%', #{keyword}, '%')
-	            OR IFNULL(SD.S_CONTENTS, '') LIKE CONCAT('%', #{keyword}, '%')
-	            OR SM.MENU_NAME LIKE CONCAT('%', #{keyword}, '%')
-	            OR IFNULL(SM.MENU_INFO, '') LIKE CONCAT('%', #{keyword}, '%')
-	            OR R.R_CONTENTS LIKE CONCAT('%', #{keyword}, '%')
-	        )
-	    </if>
+		<if test="locationKeyword != null and locationKeyword != ''">
+		    AND S.S_ADDR LIKE CONCAT('%', #{locationKeyword}, '%')
+		</if>
+		
+		<if test="serviceKeyword != null and serviceKeyword != ''">
+		    AND (
+		        SM.MENU_NAME LIKE CONCAT('%', #{serviceKeyword}, '%')
+		        OR IFNULL(SM.MENU_INFO, '') LIKE CONCAT('%', #{serviceKeyword}, '%')
+		        OR IFNULL(SD.SUB_TITLE, '') LIKE CONCAT('%', #{serviceKeyword}, '%')
+		        OR IFNULL(SD.S_CONTENTS, '') LIKE CONCAT('%', #{serviceKeyword}, '%')
+		    )
+		</if>
+		
+		<if test="animalKeyword != null and animalKeyword != ''">
+		    AND (
+		        SM.MENU_NAME LIKE CONCAT('%', #{animalKeyword}, '%')
+		        OR IFNULL(SM.MENU_INFO, '') LIKE CONCAT('%', #{animalKeyword}, '%')
+		        OR IFNULL(SD.S_CONTENTS, '') LIKE CONCAT('%', #{animalKeyword}, '%')
+		    )
+		</if>
 	
 	    GROUP BY
 	        S.STORE_NO,

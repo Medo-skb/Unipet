@@ -287,6 +287,10 @@ body {
     font-weight: 700;
 }
 
+.report-table td:nth-child(2) {
+    border-right: 1px solid var(--line);
+}
+
 .report-table td {
     padding: 14px 16px;
     border-bottom: 1px solid var(--line);
@@ -338,4 +342,12 @@ body {
 
 .qna-answer-textarea:focus {
     border-color: var(--main);
+}
+
+.link-text {
+    cursor: pointer;
+}
+
+.link-text:hover {
+    text-decoration: underline;
 }

@@ -395,11 +395,29 @@
                                     <table class="report-table">
                                         <tbody>
                                             <tr>
-                                                <th>문의번호</th>
-                                                <td>{{ item.qnaNo }}</td>
                                                 <th>상품명</th>
-                                                <td>{{ item.productName }}</td>
+                                                <td colspan="3">
+                                                    <span class="link-text" @click="fnGoProductDetail(item.productNo)">
+                                                        {{ item.productName }}
+                                                    </span>
+                                                </td>
                                             </tr>
+
+                                            <tr>
+                                                <th>문의자</th>
+                                                <td>
+                                                    {{ item.userName }}
+                                                    <span v-if="item.nickname">({{ item.nickname }})</span>
+                                                </td>
+                                                <th>문의자 ID</th>
+                                                <td>{{ item.userId }}</td>
+                                            </tr>
+
+                                            <tr>
+                                                <th>문의 날짜</th>
+                                                <td colspan="3">{{ item.cdate }}</td>
+                                            </tr>
+
                                             <tr>
                                                 <th>문의 제목</th>
                                                 <td colspan="3">{{ item.qnaTitle }}</td>
@@ -427,6 +445,10 @@
                                     </table>
 
                                     <div class="report-btn-box">
+                                        <button type="button" class="btn-reject" @click="fnDeleteQna(item)">
+                                            문의 삭제
+                                        </button>
+
                                         <button type="button" class="btn-approve" @click="fnSaveQnaAnswer(item)">
                                             답변 등록
                                         </button>
@@ -559,6 +581,38 @@
                         alert("답변 등록 중 오류가 발생했습니다.");
                     }
                 });
+            },
+
+            fnDeleteQna: function (item) {
+                let self = this;
+
+                if (!confirm("해당 문의를 삭제하시겠습니까?")) {
+                    return;
+                }
+
+                $.ajax({
+                    url: "/admin/qna/delete.dox",
+                    type: "POST",
+                    dataType: "json",
+                    data: {
+                        qnaNo: item.qnaNo
+                    },
+                    success: function (data) {
+                        if (data.result === "success") {
+                            alert("문의가 삭제되었습니다.");
+                            self.fnQnaAnswerList();
+                        } else {
+                            alert("문의 삭제에 실패했습니다.");
+                        }
+                    },
+                    error: function () {
+                        alert("문의 삭제 중 오류가 발생했습니다.");
+                    }
+                });
+            },
+
+            fnGoProductDetail: function(productNo) {
+                location.href = "/product/view.do?productNo=" + productNo;
             },
 
             fnChangeReportTab: function(tabName) {

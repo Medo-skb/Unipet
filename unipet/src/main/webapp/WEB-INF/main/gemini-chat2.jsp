@@ -59,14 +59,13 @@
                     }
                 ],
                 isLoading: false,
-                currentCategory: "챗봇과 대화하기",
+                currentCategory: "AI 상담",
 
                 quickButtons: [
-                    "챗봇과 대화하기",
+                    "AI 상담",
                     "예약",
                     "쇼핑",
                     "커뮤니티",
-                    "계정"
                 ],
 
                 faqMap: {
@@ -113,15 +112,6 @@
                         "이용 규칙": `욕설, 광고, 도배, 비방성 게시글은 관리자에 의해 삭제되거나 이용이 제한될 수 있습니다.`
                     },
 
-                    "계정": {
-                        "비밀번호 변경": `일반 회원은 마이페이지 > 홈에서 ‘회원정보 수정’을 통해 비밀번호를 변경할 수 있습니다.
-사업자는 마이페이지 > 내 정보 및 업체 정보 수정에서 ‘수정하기’ 버튼을 통해 변경할 수 있습니다.`,
-
-                        "회원 탈퇴": `일반 회원은 마이페이지 > 홈에서 회원 탈퇴를 진행할 수 있습니다.
-사업자의 경우 모든 예약을 완료한 후 마이페이지 > 내 정보 및 업체 정보 수정에서 탈퇴가 가능합니다.`,
-
-                        "고객센터": `이용 중 문제가 발생한 경우 고객센터 문의를 이용해 주세요.`
-                    }
                 },
                 
             };
@@ -147,12 +137,12 @@
                 this.userInput = "";
                 this.scrollToBottom();
 
-                // 1. 챗봇과 대화하기 메뉴를 누른 경우
-                if (normalizedInput === this.normalizeText("챗봇과 대화하기")) {
-                    this.currentCategory = "챗봇과 대화하기";
+                // 1. AI 상담 메뉴를 누른 경우
+                if (normalizedInput === this.normalizeText("AI 상담")) {
+                    this.currentCategory = "AI 상담";
 
                     this.messages.push({
-                        text: `챗봇과 대화하기 모드입니다.
+                        text: `AI 상담 모드입니다.
 
 반려동물에 관해 궁금한 내용을 입력해주세요.`,
                         type: "bot"
@@ -203,11 +193,11 @@
                     }
                 }
 
-                // 4. 챗봇과 대화하기가 아닌 메뉴에서는 지정된 답변 외 입력 차단
-                if (this.currentCategory !== "챗봇과 대화하기") {
+                // 4. AI 상담가 아닌 메뉴에서는 지정된 답변 외 입력 차단
+                if (this.currentCategory !== "AI 상담") {
                     this.messages.push({
                         text: `해당 메뉴는 없습니다.
-UNIPET 챗봇과 대화를 원하신다면 챗봇과 대화하기를 눌러주세요.`,
+UNIPET 챗봇과 대화를 원하신다면 AI 상담를 눌러주세요.`,
                         type: "bot"
                     });
 
@@ -215,7 +205,7 @@ UNIPET 챗봇과 대화를 원하신다면 챗봇과 대화하기를 눌러주�
                     return;
                 }
 
-                // 5. 챗봇과 대화하기 모드일 때만 Gemini 호출
+                // 5. AI 상담 모드일 때만 Gemini 호출
                 this.isLoading = true;
 
                 this.messages.push({

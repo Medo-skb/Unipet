@@ -16,11 +16,9 @@
     <footer class="site-footer">
         <div class="footer-inner">
             <div class="footer-top">
-                <a href="#" class="footer-menu">UNIPET소개</a>
-                <a href="#" class="footer-menu">이용약관</a>
-                <a href="#" class="footer-menu">개인정보처리방침</a>
-                <a href="#" class="footer-menu">고객센터</a>
-                <a href="#" class="footer-menu">자주 묻는 질문</a>
+                <a href="${pageContext.request.contextPath}/main/about.do" class="footer-menu">UNIPET소개</a>
+                <a href="${pageContext.request.contextPath}/main/terms.do" class="footer-menu">이용약관</a>
+                <a href="${pageContext.request.contextPath}/main/privacy.do" class="footer-menu">개인정보처리방침</a>
             </div>
         </div>
 

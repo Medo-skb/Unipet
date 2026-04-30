@@ -19,7 +19,7 @@
 
         <div class="chat-box" ref="chatBox">
             <div v-for="msg in messages" :class="['message', msg.type]">
-                {{ msg.text }}
+                <span v-html="msg.text"></span>
             </div>
         </div>
 
@@ -67,7 +67,6 @@
                     "예약",
                     "쇼핑",
                     "커뮤니티",
-                    "계정"
                 ],
 
                 faqMap: {
@@ -113,16 +112,6 @@
 
                         "이용 규칙": `욕설, 광고, 도배, 비방성 게시글은 관리자에 의해 삭제되거나 이용이 제한될 수 있습니다.`
                     },
-
-                    "계정": {
-                        "비밀번호 변경": `일반 회원은 마이페이지 > 홈에서 ‘회원정보 수정’을 통해 비밀번호를 변경할 수 있습니다.
-사업자는 마이페이지 > 내 정보 및 업체 정보 수정에서 ‘수정하기’ 버튼을 통해 변경할 수 있습니다.`,
-
-                        "회원 탈퇴": `일반 회원은 마이페이지 > 홈에서 회원 탈퇴를 진행할 수 있습니다.
-사업자의 경우 모든 예약을 완료한 후 마이페이지 > 내 정보 및 업체 정보 수정에서 탈퇴가 가능합니다.`,
-
-                        "고객센터": `이용 중 문제가 발생한 경우 고객센터 문의를 이용해 주세요.`
-                    }
                 },
                 
             };
@@ -232,8 +221,15 @@ UNIPET 챗봇과 대화를 원하신다면 AI 상담를 눌러주세요.`,
                     success: (response) => {
                         this.removeLoadingMessage();
 
+                        let formatted = response.replace(/\n/g, "<br>");
+
+                        formatted = formatted.replace(
+                            /업체번호:\s*(\d+)/g,
+                            '<a class="store-link" href="/reservation/store-detail.do?storeNo=$1" target="_blank" rel="noopener noreferrer">상세보기</a>'
+                        );
+
                         this.messages.push({
-                            text: response,
+                            text: formatted,
                             type: "bot"
                         });
 
