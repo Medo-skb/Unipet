@@ -206,6 +206,10 @@
                                 <div class="info-label">브레이크 종료</div>
                                 <div class="info-value">{{storeInfo.breakEnd}}</div>
                             </div>
+                            <div class="info-row">
+                                <div class="info-label">예약 단위</div>
+                                <div class="info-value">{{storeInfo.slot}}분</div>
+                            </div>
                             <!-- <div class="info-row">
                                 <div class="info-label">휴무일</div>
                                 <div class="info-value">{{storeInfo.offDay}}</div>
@@ -234,7 +238,7 @@
                                     <th>메뉴 카테고리</th>
                                     <th>설명</th>
                                     <th>가격</th>
-                                    <th>소요시간</th>
+                                    <!-- <th>소요시간</th> -->
                                     <th>상태</th>
                                 </tr>
                             </thead>
@@ -247,7 +251,7 @@
                                     <td>{{item.menuCategory}}</td>
                                     <td>{{item.menuInfo}}</td>
                                     <td>{{item.menuPrice}}</td>
-                                    <td>{{item.reqTime}}분</td>
+                                    <!-- <td>{{item.reqTime}}분</td> -->
                                     <td>{{item.mStatusName ? item.mStatusName : (item.mStatus === 'Y' ? '판매중' : '판매중지')}}</td>
                                 </tr>
                             </tbody>
@@ -422,6 +426,15 @@
                                     <input type="time" v-model="editStoreInfo.breakEnd" ref="breakEndInput" @click="fnOpenTimePicker('breakEndInput')">
                                 </div>
 
+                                <div class="form-row">
+                                    <label>예약 단위</label>
+                                    <select v-model="editStoreInfo.slot">
+                                        <option :value="30">30분</option>
+                                        <option :value="60">60분</option>
+                                    </select>
+                                    <div class="input-guide-text">예약 단위는 고객이 예약할 수 있는 시간 간격입니다.</div>
+                                </div>
+
                                 <!-- <div class="form-row">
                                     <label>휴무일</label>
                                     <input type="text" v-model="editStoreInfo.offDay">
@@ -456,7 +469,7 @@
                                             <th>메뉴 카테고리</th>
                                             <th>설명</th>
                                             <th>가격</th>
-                                            <th>소요시간</th>
+                                            <!-- <th>소요시간</th> -->
                                             <th>상태</th>
                                             <th>삭제</th>
                                         </tr>
@@ -467,13 +480,13 @@
                                             <td><input type="text" v-model="item.menuCategory"></td>
                                             <td><input type="text" v-model="item.menuInfo"></td>
                                             <td><input type="number" v-model="item.menuPrice"></td>
-                                            <td>
+                                            <!-- <td>
                                                 <select v-model="item.reqTime">
                                                     <option :value="30">30분</option>
                                                     <option :value="60">60분</option>
                                                     <option :value="90">90분</option>
                                                 </select>
-                                            </td>
+                                            </td> -->
                                             <td>
                                                 <select v-model="item.mStatus">
                                                     <option value="Y">판매중</option>
@@ -601,6 +614,7 @@
                     closeTime: "",
                     breakStart: "",
                     breakEnd: "",
+                    slot: "",
                     offDay: "",
                     refundPolicy: "",
                     sStatus: "",
@@ -633,6 +647,7 @@
                     openTime: "",
                     closeTime: "",
                     breakStart: "",
+                    slot: "",
                     breakEnd: "",
                     offDay: "",
                     refundPolicy: ""
@@ -944,6 +959,7 @@
                     closeTime: self.storeInfo.closeTime,
                     breakStart: self.storeInfo.breakStart,
                     breakEnd: self.storeInfo.breakEnd,
+                    slot: self.storeInfo.slot || 30,
                     offDay: self.storeInfo.offDay,
                     refundPolicy: self.storeInfo.refundPolicy
                 };
@@ -1155,31 +1171,37 @@
             fnSaveStoreInfo: function() {
                 let self = this;
 
-                if (!self.editStoreInfo.cutoff || self.editStoreInfo.cutoff < 1 || self.editStoreInfo.cutoff > 72) {
-                    alert("예약 마감 시간은 1~72 사이의 숫자만 입력할 수 있습니다.");
-                    return;
-                }
+            if (!self.editStoreInfo.cutoff || self.editStoreInfo.cutoff < 1 || self.editStoreInfo.cutoff > 72) {
+                alert("예약 마감 시간은 1~72 사이의 숫자만 입력할 수 있습니다.");
+                return;
+            }
 
-                let param = {
-                    storeNo: self.editStoreInfo.storeNo,
-                    isOpen: self.editStoreInfo.isOpen,
-                    accName: self.editStoreInfo.accName,
-                    accNo: self.editStoreInfo.accNo,
-                    accHolder: self.editStoreInfo.accHolder,
-                    sAddr: self.editStoreInfo.sAddr,
-                    sFullAddr: self.editStoreInfo.sFullAddr,
-                    subTitle: self.editStoreInfo.subTitle,
-                    sContents: self.editStoreInfo.sContents,
-                    capacity: self.editStoreInfo.capacity,
-                    openTime: self.editStoreInfo.openTime,
-                    closeTime: self.editStoreInfo.closeTime,
-                    breakStart: self.editStoreInfo.breakStart,
-                    breakEnd: self.editStoreInfo.breakEnd,
-                    offDay: self.editStoreInfo.offDay,
-                    refundPolicy: self.editStoreInfo.refundPolicy,
-                    lat: self.editStoreInfo.lat || null,
-                    lng: self.editStoreInfo.lng || null
-                };
+            if (Number(self.editStoreInfo.slot) !== 30 && Number(self.editStoreInfo.slot) !== 60) {
+                alert("예약 단위는 30분 또는 60분만 선택할 수 있습니다.");
+                return;
+            }
+
+            let param = {
+                storeNo: self.editStoreInfo.storeNo,
+                isOpen: self.editStoreInfo.isOpen,
+                accName: self.editStoreInfo.accName,
+                accNo: self.editStoreInfo.accNo,
+                accHolder: self.editStoreInfo.accHolder,
+                sAddr: self.editStoreInfo.sAddr,
+                sFullAddr: self.editStoreInfo.sFullAddr,
+                subTitle: self.editStoreInfo.subTitle,
+                sContents: self.editStoreInfo.sContents,
+                capacity: self.editStoreInfo.capacity,
+                openTime: self.editStoreInfo.openTime,
+                closeTime: self.editStoreInfo.closeTime,
+                breakStart: self.editStoreInfo.breakStart,
+                breakEnd: self.editStoreInfo.breakEnd,
+                slot: Number(self.editStoreInfo.slot),
+                offDay: self.editStoreInfo.offDay,
+                refundPolicy: self.editStoreInfo.refundPolicy,
+                lat: self.editStoreInfo.lat || null,
+                lng: self.editStoreInfo.lng || null
+            };
 
                 let saveUrl = self.storeInfo.sStatus === "REJ"
                     ? "/biz/store/reapply.dox"
