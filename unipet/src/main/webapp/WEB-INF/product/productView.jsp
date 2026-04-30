@@ -221,8 +221,31 @@
 						</div>
 					</div>
 
-					<input type="text" v-model="qnaForm.title" placeholder="문의 제목을 입력하세요">
-					<textarea v-model="qnaForm.contents" placeholder="문의 내용을 입력하세요"></textarea>
+					<div class="qna-title-wrap">
+						<input 
+							type="text"
+							class="qna-title-input"
+							v-model="qnaForm.title"
+							:maxlength="qnaTitleMax"
+							placeholder="문의 제목을 입력하세요"
+						>
+						<div class="qna-title-count">
+							{{qnaForm.title.length}} / {{qnaTitleMax}}
+						</div>
+					</div>
+
+					<div class="qna-textarea-wrap">
+						<textarea
+							class="qna-contents-textarea"
+							v-model="qnaForm.contents"
+							:maxlength="qnaContentsMax"
+							placeholder="문의 내용을 입력하세요"
+						></textarea>
+						<div class="qna-contents-count">
+							{{qnaForm.contents.length}} / {{qnaContentsMax}}
+						</div>
+					</div>
+
 					<button type="button" class="qna-write-btn" @click="fnAddQna()">문의 등록</button>
 				</div>
 
@@ -235,7 +258,9 @@
 						<div class="qna-item" v-for="qna in qnaList" :key="qna.qnaNo">
 							<div class="qna-top-row">
 								<div class="qna-head-left">
-									<span class="qna-user">{{qna.userId}}</span>
+									<span class="qna-user">
+										{{qna.writerNickname ? qna.writerNickname : qna.userId}}
+									</span>
 									<span class="qna-type-badge secret" v-if="qna.privateYn == 'Y'">비밀문의</span>
 									<span class="qna-type-badge open" v-else>공개문의</span>
 								</div>
@@ -319,6 +344,8 @@
 					qnaList: [],
 					cartCount: 0,
 					tab: "detail",
+					qnaTitleMax: 50,
+					qnaContentsMax: 500,
 					qnaForm: {
 						title: "",
 						contents: "",
@@ -401,6 +428,13 @@
 						success: function (data) {
 							if (data.result == "success") {
 								self.qnaList = data.list || [];
+								
+								console.log("qnaList ===>", self.qnaList);
+
+								if (self.qnaList.length > 0) {
+									console.log("userId ===>", self.qnaList[0].userId);
+									console.log("writerNickname ===>", self.qnaList[0].writerNickname);
+								}
 
 								for (let i = 0; i < self.qnaList.length; i++) {
 									self.qnaList[i].open = false;
@@ -555,6 +589,16 @@
 						return;
 					}
 
+					if (self.qnaForm.title.length > self.qnaTitleMax) {
+						alert("문의 제목은 " + self.qnaTitleMax + "자 이하로 입력해주세요.");
+						return;
+					}
+
+					if (self.qnaForm.contents.length > self.qnaContentsMax) {
+						alert("문의 내용은 " + self.qnaContentsMax + "자 이하로 입력해주세요.");
+						return;
+					}
+
 					let param = {
 						productNo: self.productNo,
 						title: self.qnaForm.title,
@@ -647,8 +691,11 @@
 						data: param,
 						success: function (data) {
 							if (data.result == "success") {
-								alert("장바구니에 담았습니다.");
 								self.fnGetCartCount();
+
+								if (confirm("장바구니에 담았습니다. 장바구니로 이동하시겠습니까?")) {
+									pageChange("/cart.do", {});
+								}
 
 							} else if (data.result == "login") {
 								alert("로그인이 필요합니다.");

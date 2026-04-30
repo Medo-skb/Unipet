@@ -112,10 +112,12 @@
 					<div class="search-box">
 						<input type="text" v-model="keyword" placeholder="상품명 검색" @keyup.enter="fnGetProductList()">
 
-						<select v-model="sort">
+						<select v-model="sort" @change="fnGetProductList()">
 							<option value="">최신순</option>
 							<option value="priceAsc">가격 낮은순</option>
 							<option value="priceDesc">가격 높은순</option>
+							<option value="reviewDesc">리뷰 많은순</option>
+							<option value="ratingDesc">평점 높은순</option>
 						</select>
 
 						<button type="button" @click="fnGetProductList()">검색</button>
@@ -140,6 +142,17 @@
 								<div class="product-info">브랜드 : {{item.brand == null ? '-' : item.brand}}</div>
 								<div class="product-info">동물 : {{item.aSubType}}</div>
 								<div class="product-info">상품 : {{item.iSubType}}</div>
+
+								<div class="product-review-row" v-if="fnGetReviewCnt(item) > 0">
+									<span class="product-star">★</span>
+									<span>{{fnFormatRating(item.avgRating)}}점</span>
+									<span class="product-review-count">리뷰 {{fnGetReviewCnt(item)}}개</span>
+								</div>
+
+								<div class="product-review-row no-review" v-else>
+									아직 리뷰 없음
+								</div>
+
 								<div class="product-price">{{fnFormatPrice(item.productPrice)}}원</div>
 							</div>
 						</div>
@@ -339,6 +352,20 @@
 
 			fnFormatPrice: function (price) {
 				return Number(price).toLocaleString();
+			},
+			
+			fnFormatRating: function (rating) {
+				if (rating == null || rating == "") {
+					return "0.0";
+				}
+				return Number(rating).toFixed(1);
+			},
+
+			fnGetReviewCnt: function (item) {
+				if (item.reviewCnt == null || item.reviewCnt == "") {
+					return 0;
+				}
+				return Number(item.reviewCnt);
 			},
 
 			fnMoveMain: function () {

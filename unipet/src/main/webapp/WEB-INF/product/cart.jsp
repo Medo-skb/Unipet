@@ -416,11 +416,25 @@
 						success: function (data) {
 							if (data.result == "success") {
 								self.cartCount = data.cartCount;
+
+								let count = Number(data.cartCount);
+
+								let badges = document.querySelectorAll(
+									".cart-badge, .cart-count, .cartCnt, .cart-num, .cart-alarm, .cart-count-badge, #cartCount"
+								);
+
+								for (let i = 0; i < badges.length; i++) {
+									if (count > 0) {
+										badges[i].innerText = count;
+									} else {
+										badges[i].innerText = "";
+									}
+								}
 							}
 						}
 					});
 				},
-
+				
 				fnMoveProduct: function () {
 					pageChange("/product.do", {});
 				},
