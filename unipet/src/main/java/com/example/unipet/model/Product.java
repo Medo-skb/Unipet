@@ -37,10 +37,11 @@ public class Product {
 	String fileUrl;
 	String img;
 
-	// ===== 리뷰 =====
+	// ===== 리뷰 / 작성자 =====
 	int reviewNo;
 	String userId;
 	String userName;
+	String writerNickname;
 	int rating;
 	String contents;
 	String reviewContents;
