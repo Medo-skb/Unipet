@@ -504,7 +504,8 @@
 		    R.CDATE AS reviewDate,
 		    RF.FILE_PATH AS filePath,
 		    RF.FILE_NAME AS fileName,
-		    RR.REP_STATUS AS repStatus
+		    RR.REP_STATUS AS repStatus,
+		    R.RSV_NO AS rsvNo
 		FROM REVIEW R
 		LEFT JOIN USERS U ON R.USER_ID = U.USER_ID
 		LEFT JOIN RESERVATION RE ON R.RSV_NO = RE.RSV_NO

@@ -15,19 +15,30 @@
 	
 	<!-- 쇼핑몰 문의 미답변 목록 -->
 	<select id="selectQnaAnswerList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
-	    SELECT
-	        Q.QNA_NO AS qnaNo,
-	        Q.PRODUCT_NO AS productNo,
-	        P.PRODUCT_NAME AS productName,
-	        Q.QNA_TITLE AS qnaTitle,
-	        Q.Q_CONTENTS AS qContents,
-	        Q.IS_SECRET AS isSecret,
-	        Q.ANS_STATUS AS ansStatus
-	    FROM QNA Q
-	    LEFT JOIN PRODUCT P
-	        ON Q.PRODUCT_NO = P.PRODUCT_NO
-	    WHERE Q.ANS_STATUS = 'N'
-	    ORDER BY Q.QNA_NO DESC
+		SELECT
+		    Q.QNA_NO AS qnaNo,
+		    Q.PRODUCT_NO AS productNo,
+		    P.PRODUCT_NAME AS productName,
+		    Q.QNA_TITLE AS qnaTitle,
+		    Q.Q_CONTENTS AS qContents,
+		    Q.IS_SECRET AS isSecret,
+		    Q.ANS_STATUS AS ansStatus,
+		
+		    Q.USER_ID AS userId,
+		    Q.CDATE AS cdate,
+		
+		    U.USER_NAME AS userName,
+		    U.NICKNAME AS nickname
+		
+		FROM QNA Q
+		LEFT JOIN PRODUCT P
+		    ON Q.PRODUCT_NO = P.PRODUCT_NO
+		
+		LEFT JOIN USERS U
+		    ON Q.USER_ID = U.USER_ID
+		
+		WHERE Q.ANS_STATUS = 'N'
+		ORDER BY Q.QNA_NO DESC
 	</select>
 	
 	<!-- 쇼핑몰 문의 답변 등록 -->
@@ -37,6 +48,12 @@
 	        ANS_STATUS = 'Y'
 	    WHERE QNA_NO = #{qnaNo}
 	</update>
+	
+	<!-- 쇼핑몰 문의 삭제 -->
+	<delete id="deleteQna" parameterType="hashmap">
+	    DELETE FROM QNA
+	    WHERE QNA_NO = #{qnaNo}
+	</delete>
 
 	<!-- 사업자 승인 리스트 -->
 	<select id="selectAdminBiz" parameterType="hashmap"

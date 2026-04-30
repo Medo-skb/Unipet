@@ -4,7 +4,6 @@
     background: var(--bg);
     border: 1px solid var(--line-soft);
     border-radius: 12px;
-    overflow: hidden;
 }
 
 /* 헤더 */
@@ -29,12 +28,15 @@
 
 /* 메시지 공통 */
 .message {
-    max-width: 75%;
+    max-width: 95%;
     padding: 10px 14px;
     border-radius: 10px;
-    word-break: break-word;
+    word-break: break-all;
+    overflow-wrap: anywhere;
     white-space: pre-wrap;
     font-size: 14px;
+    line-height: 1.6;
+    overflow: visible;
 }
 
 /* 사용자 */
@@ -50,6 +52,8 @@
     background: #fff;
     border: 1px solid var(--line-soft);
     color: var(--text-main);
+    width: fit-content;
+    max-width: 95%;
 }
 
 /* 입력 영역 */

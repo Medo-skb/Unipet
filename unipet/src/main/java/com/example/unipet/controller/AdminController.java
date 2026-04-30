@@ -88,6 +88,15 @@ public class AdminController {
 	    return new Gson().toJson(resultMap);
 	}
 	
+	@RequestMapping(value = "/admin/qna/delete.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String removeQna(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+
+	    HashMap<String, Object> resultMap = adminService.removeQna(map);
+
+	    return new Gson().toJson(resultMap);
+	}
+	
 	@RequestMapping(value = "/adminBiz.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
 	public String getAdminBiz(Model model, @RequestParam HashMap<String, Object> map) throws Exception {

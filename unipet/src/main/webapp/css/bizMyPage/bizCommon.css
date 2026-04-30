@@ -557,10 +557,6 @@ table {
     transition: transform 0.2s ease;
 }
 
-.review-item:hover {
-    transform: translateY(-4px);
-}
-
 .review-top {
     display: flex;
     justify-content: space-between;

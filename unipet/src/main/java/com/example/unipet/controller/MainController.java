@@ -28,9 +28,28 @@ public class MainController {
 		return "main/main";
 	}
     
+    // 유치원 보내주개 배너
     @RequestMapping("/main/kindergarten.do")
 	public String kindergarten(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception {
 		return "main/kindergarten";
+	}
+    
+    // 이용 약관
+    @RequestMapping("/main/terms.do")
+	public String terms(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+		return "main/terms";
+	}
+    
+    // 개인정보 처리방침
+    @RequestMapping("/main/privacy.do")
+	public String privacy(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+		return "main/privacy";
+	}
+    
+    // 회사소개
+    @RequestMapping("/main/about.do")
+	public String about(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+		return "main/about";
 	}
     
     // 메인 통합 검색

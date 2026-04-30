@@ -21,7 +21,7 @@
             <div class="biz-page-container">
 
                 <aside class="biz-sidebar">
-                    <div class="sidebar-title">나의 업체관리</div>
+                    <div class="sidebar-title">사업자 마이페이지</div>
 
                     <ul class="sidebar-menu">
                         <li class="menu-item">
@@ -99,7 +99,7 @@
                             <div class="review-item" v-for="item in reviewList" :key="item.reviewNo">
                                 <div class="review-top">
                                     <div class="review-writer">
-                                        {{item.userName}} ({{item.nickname}})
+                                        예약번호 {{item.rsvNo}} | {{item.userName}} ({{item.nickname}})
                                     </div>
                                     <div class="review-score">
                                         {{'★'.repeat(item.rating)}}{{'☆'.repeat(5 - item.rating)}}

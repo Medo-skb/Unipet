@@ -56,6 +56,22 @@ public class AdminService {
 	    return resultMap;
 	}
 	
+	// 쇼핑몰 문의 삭제
+	public HashMap<String, Object> removeQna(HashMap<String, Object> map){
+	    HashMap<String, Object> resultMap = new HashMap<>();
+
+	    try {
+	        adminMapper.deleteQna(map);
+
+	        resultMap.put("result", "success");
+	    } catch (Exception e) {
+	        System.out.println(e.getMessage());
+	        resultMap.put("result", "fail");
+	    }
+
+	    return resultMap;
+	}
+	
 	// 사업자 승인 리스트
 	public HashMap<String, Object> getAdminBiz(HashMap<String, Object> map){
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();

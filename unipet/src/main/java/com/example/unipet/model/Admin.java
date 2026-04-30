@@ -60,4 +60,9 @@ public class Admin {
     String isSecret;
     String ansStatus;
     String aContents;
+
+    // 유저 정보
+    String userName;
+    String nickname;
+    String cdate;
 }
