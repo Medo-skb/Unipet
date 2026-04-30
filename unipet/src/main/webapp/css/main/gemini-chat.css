@@ -6,7 +6,6 @@
     border-radius: 12px;
 }
 
-/* 헤더 */
 .chat-header {
     padding: 16px;
     background: var(--main);
@@ -16,7 +15,6 @@
     text-align: center;
 }
 
-/* 채팅 영역 */
 .chat-box {
     height: 600px;
     overflow-y: auto;
@@ -26,7 +24,6 @@
     gap: 10px;
 }
 
-/* 메시지 공통 */
 .message {
     max-width: 95%;
     padding: 10px 14px;
@@ -39,14 +36,12 @@
     overflow: visible;
 }
 
-/* 사용자 */
 .user {
     align-self: flex-end;
     background: var(--main);
     color: #fff;
 }
 
-/* 챗봇 */
 .bot {
     align-self: flex-start;
     background: #fff;
@@ -56,7 +51,6 @@
     max-width: 95%;
 }
 
-/* 입력 영역 */
 .chat-input {
     display: flex;
     gap: 10px;
@@ -65,7 +59,6 @@
     border-top: 1px solid var(--line-soft);
 }
 
-/* textarea */
 .chat-input textarea {
     flex: 1;
     height: 44px;
@@ -77,12 +70,10 @@
     font-size: 14px;
 }
 
-/* focus 효과 */
 .chat-input textarea:focus {
     border-color: var(--main);
 }
 
-/* 전송 버튼 */
 .chat-input button {
     width: 80px;
     border: none;
@@ -93,12 +84,10 @@
     font-size: 14px;
 }
 
-/* hover */
 .chat-input button:hover {
     opacity: 0.9;
 }
 
-/* 퀵 버튼 영역 */
 .quick-button-wrap {
     display: flex;
     flex-wrap: wrap;
@@ -107,7 +96,6 @@
     border-top: none;
 }
 
-/* 퀵 버튼 */
 .quick-button {
     padding: 8px 12px;
     border: 1px solid var(--line-soft);
@@ -118,13 +106,28 @@
     color: #fff;
 }
 
-/* hover */
 .quick-button:hover {
     opacity: 0.9;
 }
 
-/* disabled */
 .quick-button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+.store-link-btn {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 7px 13px;
+    border: 1px solid var(--main);
+    border-radius: 999px;
+    color: var(--main);
+    background: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.store-link-btn:hover {
+    background: var(--sub);
 }

@@ -214,7 +214,6 @@
                         type: "POST",
                         data: param,
                         success: function (data) {
-                            console.log("daily chart data:", data);
 
                             if (data.result === "success") {
                                 self.dailyChartList = data.list;
