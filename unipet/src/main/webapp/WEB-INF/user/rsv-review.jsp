@@ -222,7 +222,7 @@
             
                         if (data.result === "success") {
                             alert("리뷰가 등록되었습니다.");
-                            sessionStorage.setItem("triggerFunction", "openRsvList"); // 메모 남기기
+                            sessionStorage.setItem("triggerFunction", "openRsvList");
                             location.href = "/user/mypage.do";  
                         }
                     }
