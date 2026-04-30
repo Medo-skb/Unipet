@@ -93,7 +93,18 @@
 				<div class="comment-title">댓글 {{commentList.length}}개</div>
 
 				<div class="comment-write">
-					<textarea v-model="commentContents" placeholder="댓글을 입력하세요"></textarea>
+					<div class="comment-textarea-wrap">
+						<textarea 
+							v-model="commentContents" 
+							placeholder="댓글을 입력하세요"
+							:maxlength="maxCommentLength">
+						</textarea>
+
+						<div class="comment-text-count" :class="{danger : commentContents.length >= maxCommentLength}">
+							{{commentContents.length}} / {{maxCommentLength}}
+						</div>
+					</div>
+
 					<div class="btn-wrap">
 						<button type="button" class="like-btn" @click="fnAddComment()">댓글 등록</button>
 					</div>
@@ -112,7 +123,18 @@
 					</div>
 
 					<div v-if="comment.editMode">
-						<textarea v-model="comment.editContents" class="comment-edit-textarea"></textarea>
+						<div class="comment-textarea-wrap">
+							<textarea 
+								v-model="comment.editContents" 
+								class="comment-edit-textarea"
+								:maxlength="maxCommentLength">
+							</textarea>
+
+							<div class="comment-text-count" :class="{danger : comment.editContents.length >= maxCommentLength}">
+								{{comment.editContents.length}} / {{maxCommentLength}}
+							</div>
+						</div>
+
 						<div class="btn-row" style="margin-top:10px;">
 							<button type="button" class="like-btn" @click="fnUpdateComment(comment)">저장</button>
 							<button type="button" class="report-btn" @click="fnCancelEditComment(comment)">취소</button>
@@ -143,7 +165,18 @@
 						</div>
 
 						<div v-if="replyTargetNo == comment.commentNo" class="reply-write-box">
-							<textarea v-model="replyContents" class="reply-textarea"></textarea>
+							<div class="comment-textarea-wrap">
+								<textarea 
+									v-model="replyContents" 
+									class="reply-textarea"
+									:maxlength="maxCommentLength"
+									placeholder="답글을 입력하세요">
+								</textarea>
+
+								<div class="comment-text-count" :class="{danger : replyContents.length >= maxCommentLength}">
+									{{replyContents.length}} / {{maxCommentLength}}
+								</div>
+							</div>
 
 							<div class="btn-row reply-btn-row">
 								<button type="button" class="like-btn" @click="fnAddReply(comment.commentNo)">
@@ -199,10 +232,23 @@
 					reportReason: "",
 					replyTargetNo: null,
 					replyContents: "",
-					reportCommentNo: ""
+					reportCommentNo: "",
+					maxCommentLength: 500
 				};
 			},
 			methods: {
+				fnIsAdmin: function () {
+					if (this.currentUserRole == "A") {
+						return true;
+					}
+
+					if (this.currentUserId == "admin") {
+						return true;
+					}
+
+					return false;
+				},
+				
 				fnGetBoardDetail() {
 					let self = this;
 
@@ -267,6 +313,11 @@
 						return;
 					}
 
+					if (self.commentContents.length > self.maxCommentLength) {
+						alert("댓글은 " + self.maxCommentLength + "자까지 입력할 수 있습니다.");
+						return;
+					}
+
 					$.ajax({
 						url: "/board/comment/add.dox",
 						type: "POST",
@@ -281,7 +332,7 @@
 								alert("댓글이 등록되었습니다.");
 								self.commentContents = "";
 								self.fnGetCommentList();
-z
+
 							} else if (data.result == "login") {
 								alert("로그인이 필요합니다.");
 								location.href = "/user/login.do";
@@ -292,7 +343,7 @@ z
 						}
 					});
 				},
-
+				
 				fnMoveEdit() {
 					pageChange("/board/edit.do", {
 						boardNo: this.boardNo
@@ -354,7 +405,7 @@ z
 				},
 
 				fnCanManageBoard() {
-					if (this.currentUserRole == "A") {
+					if (this.fnIsAdmin()) {
 						return true;
 					}
 
@@ -440,7 +491,7 @@ z
 				},
 
 				fnCanManageComment(comment) {
-					if (this.currentUserRole == "A") {
+					if (this.fnIsAdmin()) {
 						return true;
 					}
 
@@ -466,6 +517,11 @@ z
 
 					if (comment.editContents == "") {
 						alert("댓글 내용을 입력해주세요.");
+						return;
+					}
+
+					if (comment.editContents.length > self.maxCommentLength) {
+						alert("댓글은 " + self.maxCommentLength + "자까지 입력할 수 있습니다.");
 						return;
 					}
 
@@ -539,6 +595,11 @@ z
 
 					if (self.replyContents == "") {
 						alert("답글 내용을 입력해주세요.");
+						return;
+					}
+
+					if (self.replyContents.length > self.maxCommentLength) {
+						alert("답글은 " + self.maxCommentLength + "자까지 입력할 수 있습니다.");
 						return;
 					}
 

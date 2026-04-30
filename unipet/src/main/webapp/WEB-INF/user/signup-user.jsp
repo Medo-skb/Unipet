@@ -56,29 +56,39 @@
             <div class="row">
                 <div class="inline-box">
                     <input v-model="phone" placeholder="휴대폰 번호 ( ' - ' 없이 입력 )">
-                    <button type="button" @click="sendSms" :disabled="smsChecked">
+                    <button type="button" 
+                            @click="sendSms" 
+                            :disabled="smsChecked"
+                            :class="{'btn-disabled': smsChecked}">
                         {{ smsRequested ? '인증재요청' : '인증요청' }}
                     </button>
-
                 </div>
                 <!-- <div class="info-text">
                     휴대전화 번호는 010xxxxxxxx 또는 010-xxxx-xxxx 형식으로 입력해주세요.
                 </div> -->
             </div>
+
             <div class="row">
-                <div class="inline-box sms-box">
-                    <div class="input-wrap">
-                        <input v-model="smsCode" placeholder="인증번호">
+            <div class="inline-box sms-box">
+                <div class="input-wrap">
+                    <!-- [수정] 타이머가 끝나거나 인증이 완료되면 입력창 비활성화 -->
+                    <input v-model="smsCode" placeholder="인증번호" :disabled="smsChecked || (!timerActive && smsRequested)">
 
-                        <span v-if="smsRequested && !smsChecked" class="timer-text">
-                            {{ timerMsg }}
-                        </span>
-                    </div>
-
-                    <button type="button" @click="checkSms" :disabled="smsChecked">
-                        확인
-                    </button>
+                    <!-- [수정] 타이머 활성화 여부에 따라 시간초과 텍스트 및 색상 변경 -->
+                    <span v-if="smsRequested && !smsChecked" class="timer-text" :style="{color: timerActive ? '' : 'red'}">
+                        {{ timerActive ? timerMsg : '시간초과' }}
+                    </span>
                 </div>
+
+                <!-- [수정] 인증 요청 전이거나, 타이머가 끝났거나, 인증 완료되면 버튼 비활성화 -->
+                <button type="button" 
+                        class="side-btn" 
+                        @click="checkSms" 
+                        :disabled="!timerActive || smsChecked"
+                        :class="{'btn-disabled': !timerActive || smsChecked}">
+                    확인
+                </button>
+            </div>
 
                 <!-- ⭐ 이 위치 중요 -->
                 <div v-if="smsMsg" class="info-text" :style="{color: smsChecked?'green':'red'}">
@@ -148,6 +158,7 @@
                         timerMsg: "",
                         smsRequested: false,
 
+                        timerActive: false
                     }
                 },
 
@@ -203,6 +214,8 @@
                                 this.smsCode = "";
 
                                 this.smsTimer = 180;
+                                this.timerActive = true;
+                                
                                 this.updateTimerMsg();
                                 this.startTimer();
                             } else {
@@ -225,22 +238,23 @@
                                 clearInterval(this.smsInterval);
                                 this.smsInterval = null;
                                 this.timerMsg = "시간초과";
-                                this.smsRequested = false;
+
+                                this.timerActive = false;
                             }
                         }, 1000);
                     },
                     updateTimerMsg() {
                         const min = String(Math.floor(this.smsTimer / 60)).padStart(2, "0");
                         const sec = String(this.smsTimer % 60).padStart(2, "0");
-                        this.timerMsg = `${min}:${sec}`;
+                        this.timerMsg = min + ":" + sec;
                     },
 
 
 
 
                     checkSms() {
-                        if (this.smsTimer <= 0) {
-                            alert("인증 시간이 만료되었습니다.");
+                        if (!this.timerActive) {
+                            alert("인증 시간이 만료되었거나 발송되지 않았습니다.");
                             return;
                         }
 
@@ -256,7 +270,7 @@
                                 clearInterval(this.smsInterval);
                                 this.smsInterval = null;
                                 this.timerMsg = "인증 완료";
-                                this.smsRequested = false;
+                                this.timerActive = false;
                                 this.smsChecked = true;
                             }
 

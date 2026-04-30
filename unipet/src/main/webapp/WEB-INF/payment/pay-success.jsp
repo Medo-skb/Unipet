@@ -158,14 +158,19 @@
                         if(data.result === 'success') {
                             self.info = data.info;
                             self.list = data.list;
-                            console.log(data);
                         }
                     }
                 });
             },
             fnGoHistory: function() {
-                let url = this.payFlg == 'SHOP' ? "/user/mypage.do" : "/user/mypage.do";
-                location.href = url;
+                if (this.payFlg === 'SHOP') {
+                    sessionStorage.setItem("triggerFunction", "openOrdList");
+                } else if (this.payFlg === 'RSV') {
+                    sessionStorage.setItem("triggerFunction", "openRsvList");
+                }
+
+                // 2. 세션 스토리지에 값을 담은 후 마이페이지로 이동합니다.
+                location.href = "/user/mypage.do";
             }
             }, // methods
         mounted() {

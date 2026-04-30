@@ -169,7 +169,7 @@ public class PaymentService {
 	            // 2. 최종 결제 내역 저장
 	            paymentMapper.insertPayment(map);
 	            resultMap.put("result", "success");
-	            resultMap.put("message", "결제 및 서비스 등록이 완료되었습니다.");
+	            resultMap.put("message", "결제가 완료되었습니다.");
 	        } else {
 	            // 결제 실패 시 내역만 저장 (실패 로그용)
 	            paymentMapper.insertPayment(map);

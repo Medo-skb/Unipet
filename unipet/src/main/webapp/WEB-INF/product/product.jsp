@@ -134,7 +134,7 @@
 							<div class="product-image-box">
 								<img v-if="item.img != null && item.img != ''" :src="item.img" class="product-image">
 
-								<img v-else src="/img/no-image.png" class="product-image">
+								<img v-else src="/img/product/no-image.png" class="product-image">
 							</div>
 
 							<div class="product-card-body">
@@ -150,7 +150,7 @@
 								</div>
 
 								<div class="product-review-row no-review" v-else>
-									아직 리뷰 없음
+									리뷰 없음
 								</div>
 
 								<div class="product-price">{{fnFormatPrice(item.productPrice)}}원</div>
@@ -362,10 +362,10 @@
 			},
 
 			fnGetReviewCnt: function (item) {
-				if (item.reviewCnt == null || item.reviewCnt == "") {
+				if (item.reviewCount == null || item.reviewCount == "") {
 					return 0;
 				}
-				return Number(item.reviewCnt);
+				return Number(item.reviewCount);
 			},
 
 			fnMoveMain: function () {

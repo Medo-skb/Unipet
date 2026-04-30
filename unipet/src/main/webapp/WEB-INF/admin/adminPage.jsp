@@ -886,7 +886,6 @@
                     type: "POST",
                     dataType: "json",
                     success: function (data) {
-                        console.log("댓글 신고 데이터", data);
                         if (data.result === "success") {
                             self.communityCommentReportList = data.list || [];
                         } else {

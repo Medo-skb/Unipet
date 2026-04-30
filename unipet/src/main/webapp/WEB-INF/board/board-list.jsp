@@ -174,7 +174,7 @@
 								<span v-else>{{item.displayNo}}</span>
 							</td>
 
-							<td class="title-cell" @click="fnMoveView(item.boardNo)">
+							<td class="title-cell" @click="fnMoveView(item)">
 								<div class="title-wrap">
 									<span v-if="item.privateYn == 'Y'" class="private-badge">🔒</span>
 									<span v-if="Number(item.likeCnt) >= 5" class="popular-badge">🔥</span>
@@ -193,7 +193,13 @@
 
 									<span v-if="item.bSubType == '공지사항'" class="notice-badge">📌 공지사항</span>
 									<span v-else class="category">{{item.bSubType}}</span>
-									<span class="title-text">{{item.title}}</span>
+									<span class="title-text" v-if="fnCanReadBoard(item)">
+										{{item.title}}
+									</span>
+
+									<span class="title-text" v-else>
+										비공개 게시글입니다.
+									</span>
 								</div>
 							</td>
 
@@ -255,6 +261,34 @@
 				}
 			},
 			methods: {
+				fnIsAdmin: function () {
+					if (this.sessionRole == "A") {
+						return true;
+					}
+
+					if (this.sessionId == "admin") {
+						return true;
+					}
+
+					return false;
+				},
+
+				fnCanReadBoard: function (item) {
+					if (item.privateYn != "Y") {
+						return true;
+					}
+
+					if (this.fnIsAdmin()) {
+						return true;
+					}
+
+					if (this.sessionId != "" && this.sessionId == item.userId) {
+						return true;
+					}
+
+					return false;
+				},
+				
 				fnGetBoardList: function () {
 					let self = this;
 
@@ -317,14 +351,19 @@
 					this.fnGetBoardList();
 				},
 
-				fnMoveView: function (boardNo) {
+				fnMoveView: function (item) {
+					if (!this.fnCanReadBoard(item)) {
+						alert("비공개 게시글입니다. 작성자와 관리자만 확인할 수 있습니다.");
+						return;
+					}
+
 					if (this.tempYn == "Y") {
 						pageChange("/board/edit.do", {
-							boardNo: boardNo
+							boardNo: item.boardNo
 						});
 					} else {
 						pageChange("/board/view.do", {
-							boardNo: boardNo
+							boardNo: item.boardNo
 						});
 					}
 				},

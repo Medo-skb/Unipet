@@ -223,52 +223,60 @@
 	</select>
 
 	<!-- 주문 목록 조회 -->
-	<select id="selectOrderList" parameterType="hashmap" resultType="hashmap">
-		SELECT
-		o.ORD_NO AS orderNo,
-		DATE_FORMAT(o.ORD_DATE, '%Y-%m-%d %H:%i') AS orderDate,
+<select id="selectOrderList" parameterType="hashmap" resultType="hashmap">
+    SELECT
+        o.ORD_NO AS orderNo,
+        DATE_FORMAT(o.ORD_DATE, '%Y-%m-%d %H:%i') AS orderDate,
 
-		od.ORD_DETAIL_NO AS orderDetailNo,
-		od.PRODUCT_NO AS productNo,
-		p.PRODUCT_NAME AS productName,
+        od.ORD_DETAIL_NO AS orderDetailNo,
+        od.PRODUCT_NO AS productNo,
+        p.PRODUCT_NAME AS productName,
 
-		CONCAT(pf.FILE_PATH, '/', pf.FILE_NAME) AS productImg,
+        CONCAT(pf.FILE_PATH, '/', pf.FILE_NAME) AS productImg,
 
-		od.ORD_QTY AS qty,
-		od.UNIT_PRICE AS price,
+        od.ORD_QTY AS qty,
+        od.UNIT_PRICE AS price,
 
-		o.ORD_STATUS AS payStatus,
-		o.DELI_STATUS AS deliStatus,
+        o.ORD_STATUS AS payStatus,
+        o.DELI_STATUS AS deliStatus,
 
-		CASE
-		WHEN r.REVIEW_NO IS NOT NULL THEN 'Y'
-		ELSE 'N'
-		END AS reviewYn
+        CASE
+            WHEN r.REVIEW_NO IS NOT NULL THEN 'Y'
+            ELSE 'N'
+        END AS reviewYn,
 
-		FROM ORDERS o
+        <!-- 작성완료 리뷰 보기에서 사용할 리뷰 내용 -->
+        r.R_CONTENTS AS reviewContent,
 
-		JOIN ORDER_DETAIL od
-		ON o.ORD_NO = od.ORD_NO
+        <!-- 나중에 별점 표시할 때 사용 가능 -->
+        r.RATING AS reviewRating
 
-		JOIN PRODUCT p
-		ON od.PRODUCT_NO = p.PRODUCT_NO
+    FROM ORDERS o
 
-		LEFT JOIN PRODUCT_FILE pf
-		ON od.PRODUCT_NO = pf.PRODUCT_NO
-		AND pf.FILE_NO = (
-		SELECT MIN(pf2.FILE_NO)
-		FROM PRODUCT_FILE pf2
-		WHERE pf2.PRODUCT_NO = od.PRODUCT_NO
-		)
+    JOIN ORDER_DETAIL od
+        ON o.ORD_NO = od.ORD_NO
 
-		LEFT JOIN REVIEW r
-		ON od.ORD_NO = r.ORD_NO
-		AND od.PRODUCT_NO = r.PRODUCT_NO
+    JOIN PRODUCT p
+        ON od.PRODUCT_NO = p.PRODUCT_NO
 
-		WHERE o.USER_ID = #{userId}
+    LEFT JOIN PRODUCT_FILE pf
+        ON od.PRODUCT_NO = pf.PRODUCT_NO
+        AND pf.FILE_NO = (
+            SELECT MIN(pf2.FILE_NO)
+            FROM PRODUCT_FILE pf2
+            WHERE pf2.PRODUCT_NO = od.PRODUCT_NO
+        )
 
-		ORDER BY o.ORD_DATE DESC, o.ORD_NO DESC, od.ORD_DETAIL_NO ASC
-	</select>
+    LEFT JOIN REVIEW r
+        ON od.ORD_NO = r.ORD_NO
+        AND od.PRODUCT_NO = r.PRODUCT_NO
+        AND r.USER_ID = o.USER_ID
+
+    WHERE o.USER_ID = #{userId}
+
+    ORDER BY o.ORD_DATE DESC, o.ORD_NO DESC, od.ORD_DETAIL_NO ASC
+</select>
+	
 
 	<!-- 체중 목록 조회 -->
 	<select id="selectWeightList" parameterType="hashmap" resultType="hashmap">
@@ -501,21 +509,27 @@
 		FROM USER_POINT
 		WHERE USER_ID = #{userId}
 	</select>
+	<!-- 포인트 사용내역 조회 + 잔액 계산 -->
+<select id="selectPointUseList" parameterType="hashmap" resultType="hashmap">
+    SELECT
+        POINT_NO AS pointNo,
+        USER_ID AS userId,
+        POINT_AMOUNT AS pointAmount,
+        ORD_NO AS ordNo,
+        REVIEW_NO AS reviewNo,
+        DATE_FORMAT(CDATE, '%Y-%m-%d %H:%i') AS cdate,
 
-	<!-- 포인트 사용내역 조회 -->
-	<select id="selectPointUseList" parameterType="hashmap" resultType="hashmap">
-		SELECT
-		POINT_NO AS pointNo,
-		USER_ID AS userId,
-		POINT_AMOUNT AS pointAmount,
-		ORD_NO AS ordNo,
-		REVIEW_NO AS reviewNo,
-		DATE_FORMAT(CDATE, '%Y-%m-%d %H:%i') AS cdate
-		FROM USER_POINT
-		WHERE USER_ID = #{userId}
-		ORDER BY CDATE DESC
-	</select>
+        SUM(POINT_AMOUNT) OVER (
+            PARTITION BY USER_ID
+            ORDER BY CDATE ASC, POINT_NO ASC
+        ) AS balance
 
+    FROM USER_POINT
+    WHERE USER_ID = #{userId}
+    ORDER BY CDATE DESC, POINT_NO DESC
+</select>
+
+	
 	<!-- 쿠폰 목록 조회 -->
 	<select id="selectCouponList" parameterType="hashmap" resultType="hashmap">
 		SELECT

@@ -18,8 +18,7 @@
         <div class="chat-header">UNIPET 챗봇</div>
 
         <div class="chat-box" ref="chatBox">
-            <div v-for="msg in messages" :class="['message', msg.type]">
-                {{ msg.text }}
+            <div v-for="msg in messages" :class="['message', msg.type]" v-html="formatMessage(msg.text)">
             </div>
         </div>
 
@@ -119,6 +118,14 @@
         methods: {
             normalizeText(text) {
                 return text.replace(/\s/g, "");
+            },
+
+            formatMessage(text) {
+                if (!text) {
+                    return "";
+                }
+
+                return text.replaceAll("상세보기", "<span class='store-link-btn'>업체 바로가기</span>");
             },
 
             sendMessage(customText = null) {

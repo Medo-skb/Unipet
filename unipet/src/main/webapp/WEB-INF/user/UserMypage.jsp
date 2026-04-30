@@ -1460,7 +1460,7 @@
                         }
 
                         window.pageChange('/payment/refund-shop.do', {
-                            orderNo: group.orderNo
+                            ordNo: group.orderNo
                         });
                     },
                     canRefundRsv(item) {

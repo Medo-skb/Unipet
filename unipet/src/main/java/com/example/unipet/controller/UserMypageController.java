@@ -257,6 +257,7 @@ public class UserMypageController {
 		map.put("userId", session.getAttribute("sessionId"));
 		return userMypageService.getMyReviewList(map);
 	}
+	
 
 	// 리뷰 등록
 	@PostMapping("/user/review/add.dox")

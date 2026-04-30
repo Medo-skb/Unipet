@@ -871,4 +871,20 @@ button {
         margin: 10px;
         padding: 10px 20px;
     }
+	
+	.review-report-btn {
+		border: 1px solid #d9534f;
+		background: #fff;
+		color: #d9534f;
+		padding: 4px 10px;
+		border-radius: 6px;
+		cursor: pointer;
+		font-size: 13px;
+		margin-left: 10px;
+	}
+
+	.review-report-btn:hover {
+		background: #d9534f;
+		color: #fff;
+	}
 }

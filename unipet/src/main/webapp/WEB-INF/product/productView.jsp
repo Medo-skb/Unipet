@@ -184,8 +184,19 @@
 				<div v-else>
 					<div class="review-item" v-for="review in reviewList" :key="review.reviewNo">
 						<div class="review-head">
-							<span class="review-user">{{review.userId}}</span>
+							<span class="review-user">
+								{{review.writerNickname ? review.writerNickname : review.userId}}
+							</span>
+
 							<span class="review-date">{{review.reviewCdate}}</span>
+
+							<button 
+								v-if="fnIsAdmin()"
+								type="button"
+								class="review-report-btn"
+								@click="fnReviewReport(review)">
+								신고
+							</button>
 						</div>
 
 						<div class="review-rating">
@@ -270,7 +281,14 @@
 							<div class="qna-title-row" @click="fnToggleQna(qna)">
 								<div class="qna-title-text">
 									<span v-if="qna.privateYn == 'Y'">🔒</span>
-									{{qna.qnaTitle}}
+
+									<span v-if="fnCanReadQna(qna)">
+										{{qna.qnaTitle}}
+									</span>
+
+									<span v-else>
+										비밀문의입니다.
+									</span>
 								</div>
 
 								<div class="qna-title-right">
@@ -457,7 +475,7 @@
 						return true;
 					}
 
-					if (this.currentUserRole == "A" || this.currentUserRole == "BIZ") {
+					if (this.fnIsAdmin()) {
 						return true;
 					}
 
@@ -467,9 +485,9 @@
 
 					return false;
 				},
-
+				
 				fnCanManageQna: function (qna) {
-					if (this.currentUserRole == "A" || this.currentUserRole == "BIZ") {
+					if (this.fnIsAdmin()) {
 						return true;
 					}
 
@@ -631,6 +649,46 @@
 						}
 					});
 				},
+				fnReviewReport: function (review) {
+					let self = this;
+
+					if (!self.fnIsAdmin()) {
+						alert("관리자만 신고 처리할 수 있습니다.");
+						return;
+					}
+
+					if (!confirm("이 리뷰를 신고 처리하시겠습니까?")) {
+						return;
+					}
+
+					let param = {
+						reviewNo: review.reviewNo,
+						productNo: self.productNo,
+						userId: review.userId
+					};
+
+					$.ajax({
+						url: "/review/report.dox",
+						dataType: "json",
+						type: "POST",
+						data: param,
+						success: function (data) {
+							if (data.result == "success") {
+								alert("리뷰가 신고 처리되었습니다.");
+								self.fnGetReviewList();
+							} else if (data.result == "login") {
+								alert("로그인이 필요합니다.");
+								location.href = "/user/login.do";
+							} else {
+								alert(data.message == null ? "리뷰 신고 처리 실패" : data.message);
+							}
+						},
+						error: function () {
+							alert("리뷰 신고 처리 중 오류가 발생했습니다.");
+						}
+					});
+				},
+		
 
 				fnChangeMainImage: function (img) {
 					this.mainImage = img;
@@ -823,10 +881,23 @@
 					}
 
 					return Number(this.product.productPrice) * Number(this.qty);
-				}
+				},
+				
+				fnIsAdmin: function () {
+					if (this.currentUserRole == "A") {
+						return true;
+					}
+
+					if (this.currentUserId == "admin") {
+						return true;
+					}
+
+					return false;
+				},
 			},
 			mounted() {
 				let self = this;
+	
 				self.fnGetProductView();
 				self.fnGetReviewList();
 				self.fnGetQnaList();

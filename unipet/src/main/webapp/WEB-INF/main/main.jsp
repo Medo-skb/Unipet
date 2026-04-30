@@ -328,7 +328,6 @@
                         }
                     },
                     error: function () {
-                        console.log("소셜 기본정보 체크 오류");
                     }
                 });
             },
@@ -351,10 +350,6 @@
                         self.fnInitAnimalCategory();
                     },
                     error: function (xhr, status, error) {
-                    console.log("ajax 오류");
-                    console.log(xhr.responseText);
-                    console.log(status);
-                    console.log(error);
                 }
                 });
             },
@@ -384,8 +379,6 @@
                         self.isCategoryStoreLoaded = true;
                     },
                     error: function (xhr, status, error) {
-                        console.log("카테고리 업체 조회 오류");
-                        console.log(xhr.responseText);
                         self.isCategoryStoreLoaded = true;
                     }
                 });
@@ -427,8 +420,6 @@
                         self.isAnimalProductLoaded = true;
                     },
                     error: function (xhr, status, error) {
-                        console.log("동물 카테고리별 추천 상품 조회 오류");
-                        console.log(xhr.responseText);
                         self.productCategoryList = [];
                         self.isAnimalProductLoaded = true;
                     }
