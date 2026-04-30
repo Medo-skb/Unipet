@@ -72,7 +72,7 @@
                         </li>
 
                         <li class="menu-item" :class="{active: currentMenu==='couponInfo'}">
-                            <button type="button" @click="changeMenu('couponInfo')">쿠폰관리</button>
+                            <button type="button" @click="changeMenu('couponInfo')">쿠폰</button>
                         </li>
                     </ul>
                 </aside>
@@ -979,25 +979,27 @@
                                                 }}원
                                             </div>
 
-                                            <div class="list-sub">
-                                                유효기간 :
-                                                {{ coupon.startDate || coupon.START_DATE || '-' }}
-                                                ~
-                                                {{ coupon.endDate || coupon.END_DATE || '-' }}
-                                            </div>
+                                        <div class="list-sub">
+                                            금액 :
+                                            {{ Number(coupon.discountAmt || coupon.DISCOUNT_AMT ||
+                                            0).toLocaleString()
+                                            }}원
                                         </div>
 
-                                        <span class="status-badge" :class="getCouponStatusClass(coupon)">
-                                            {{ getCouponStatusText(coupon) }}
-                                        </span>
+                                        <div class="list-sub">
+                                            유효기간 :
+                                            {{ formatDateTime(coupon.startDate || coupon.START_DATE) }}
+                                            ~
+                                            {{ formatDateTime(coupon.endDate || coupon.END_DATE) }}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div v-if="currentMenu === 'pointInfo'">
-                            <div class="section-box">
-                                <div class="section-title">포인트 관리</div>
+                    <div v-if="currentMenu === 'pointInfo'">
+                        <div class="section-box">
+                            <div class="section-title">포인트 현황</div>
 
                                 <div class="info-card">
                                     <div class="list-title">현재 보유 포인트</div>
@@ -2439,6 +2441,7 @@
                             type: "POST",
                             dataType: "json",
                             success: function (res) {
+                                console.log(res)
                                 if (res.result === true || res.result === "success") {
                                     self.couponList = res.couponList || res.list || [];
                                 } else {

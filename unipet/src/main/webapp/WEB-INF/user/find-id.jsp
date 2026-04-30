@@ -24,7 +24,7 @@
 
         <div class="row">
             <label>휴대폰 번호</label>
-            <input type="text" v-model="phone" placeholder="010-0000-0000">
+            <input type="text" v-model="phone" placeholder="휴대폰 번호 ( ' - ' 없이 입력 )">
         </div>
 
         <div class="btn-box">

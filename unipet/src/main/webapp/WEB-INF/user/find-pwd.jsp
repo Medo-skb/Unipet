@@ -28,7 +28,7 @@
             <label for="phone">휴대폰 번호</label>
             <div class="input-group">
                 <!-- [수정] 인증 완료 시 입력창 비활성화 -->
-                <input type="text" v-model="phone" placeholder="휴대폰 번호를 입력해주세요" :disabled="isSmsVerified">
+                <input type="text" v-model="phone" placeholder="휴대폰 번호를 입력해주세요 ( ' - ' 없이 입력 )" :disabled="isSmsVerified">
                 <button type="button" class="side-btn" 
                         @click="fnSendSms" 
                         :disabled="isSmsVerified"
@@ -36,7 +36,7 @@
                     {{ isSmsSent ? '인증번호 재발송' : '인증번호 발송' }}
                 </button>
             </div>
-            <p class="help-text">* 번호는 010-0000-0000과 같은 형식으로 입력해주십시오.</p>
+            <!-- <p class="help-text">* 번호는 010-0000-0000과 같은 형식으로 입력해주십시오.</p> -->
         </div>
 
         <!-- 3. 인증번호 입력 + 확인 버튼 -->
@@ -64,7 +64,7 @@
                     :class="{'btn-disabled': !isSmsVerified}" 
                     :disabled="!isSmsVerified"
                     @click="fnCheckUserForReset">
-                비밀번호 재설정 이동
+                비밀번호 변경 이동
             </button>
         </div>
     </div>
