@@ -127,7 +127,7 @@
                         <span>{{ finalPrice.toLocaleString() }}원</span>
                     </div>
                     <div>
-                        * 최소 결제금액은 1,000원입니다.
+                        * 포인트/쿠폰 사용 시 최소 결제금액은 1,000원입니다.
                     </div>
                 </div>
                 <button class="btn-submit" @click="fnPay">결제하기</button>

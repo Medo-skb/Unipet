@@ -253,28 +253,40 @@
 
 
                     checkSms() {
-                        if (!this.timerActive) {
+                        let self = this; // Vue 인스턴스 범위를 명확히 함
+
+                        if (!self.timerActive) {
                             alert("인증 시간이 만료되었거나 발송되지 않았습니다.");
                             return;
                         }
 
-                        if (!this.smsCode) {
+                        if (!self.smsCode) {
                             alert("인증번호를 입력해주세요.");
                             return;
                         }
 
-                        $.post("/user/checkSms.dox", { code: this.smsCode }, (res) => {
-                            this.smsChecked = res.result;
-                            this.smsMsg = res.message;
-                            if (res.result) {
-                                clearInterval(this.smsInterval);
-                                this.smsInterval = null;
-                                this.timerMsg = "인증 완료";
-                                this.timerActive = false;
-                                this.smsChecked = true;
+                        $.post("/user/checkSms.dox", { code: self.smsCode }, function(res) {
+                            const isSuccess = (res.result === true || res.result === "true" || res.result === "success");
+
+                            if (isSuccess) {
+                                // [핵심] 이 두 값이 변해야 HTML의 :disabled가 작동함
+                                self.smsChecked = true;    // 재발송 버튼 차단
+                                self.timerActive = false;  // 확인 버튼 차단 및 입력창 차단
+                                
+                                self.timerMsg = "인증 완료";
+                                self.smsMsg = res.message || "인증에 성공했습니다.";
+
+                                // 타이머 인터벌 제거
+                                if (self.smsInterval) {
+                                    clearInterval(self.smsInterval);
+                                    self.smsInterval = null;
+                                }
+                                alert("휴대폰 인증이 완료되었습니다.");
+                            } else {
+                                self.smsChecked = false;
+                                self.smsMsg = res.message || "인증번호가 일치하지 않습니다.";
+                                alert(self.smsMsg);
                             }
-
-
                         }, "json");
                     },
 
