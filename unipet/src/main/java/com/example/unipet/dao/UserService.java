@@ -184,11 +184,26 @@ public class UserService {
 		HashMap<String, Object> result = new HashMap<>();
 
 		try {
-			String rawPwd = (String) map.get("pwd");
-
 			User user = userMapper.selectUser(map);
 
-			if (user != null && passwordEncoder.matches(rawPwd, user.getPwd())) {
+	        if (user == null) {
+	            result.put("result", false);
+	            result.put("message", "존재하지 않는 아이디입니다.");
+	            return result;
+	        }
+
+	        if ("BAN".equals(user.getUserStatus())) {
+	            result.put("result", false);
+	            result.put("message", "정지된 사용자입니다. 고객센터에 문의하세요.");
+	            return result;
+	        } else if ("EXT".equals(user.getUserStatus())) {
+	            result.put("result", false);
+	            result.put("message", "탈퇴한 사용자입니다.");
+	            return result;
+	        }
+			
+			String rawPwd = (String) map.get("pwd");
+			if (passwordEncoder.matches(rawPwd, user.getPwd())) {
 				result.put("result", true);
 				result.put("user", user);
 				result.put("message", "로그인 성공");

@@ -1403,7 +1403,7 @@
                         }
 
                         window.pageChange('/payment/refund-shop.do', {
-                            orderNo: order.orderNo,
+                            ordNo: order.orderNo,
                             productNo: order.productNo,
                             orderDetailNo: order.orderDetailNo
                         });

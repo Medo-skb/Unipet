@@ -85,10 +85,10 @@
 			USER_ADDR AS userAddr,
 			FULL_ADDR AS fullAddr,
 			ZIPCODE,
-			ROLE
+			ROLE,
+			USER_STATUS AS userStatus
 		FROM unipet.users
-		WHERE USER_ID = #{userId} AND
-			  USER_STATUS NOT IN ('BAN', 'EXT')
+		WHERE USER_ID = #{userId}
 	</select>
 
 
