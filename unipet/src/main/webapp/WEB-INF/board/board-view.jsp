@@ -344,7 +344,7 @@
 								self.fnGetCommentList();
 
 							} else if (data.result == "login") {
-								alert("로그인이 필요합니다.");
+								alert("로그인이 필요한 서비스입니다.");
 								location.href = "/user/login.do";
 
 							} else {
@@ -380,7 +380,7 @@
 								pageChange("/board/list.do", {});
 
 							} else if (data.result == "login") {
-								alert("로그인이 필요합니다.");
+								alert("로그인이 필요한 서비스입니다.");
 								pageChange("/user/login.do", {});
 
 							} else {
@@ -407,7 +407,7 @@
 								self.myLike = data.myLike;
 
 							} else if (data.result == "login") {
-								alert("로그인이 필요합니다.");
+								alert("로그인이 필요한 서비스입니다.");
 								pageChange("/user/login.do", {});
 							}
 						}
@@ -451,7 +451,7 @@
 								self.reportCommentNo = "";
 
 							} else if (data.result == "login") {
-								alert("로그인이 필요합니다.");
+								alert("로그인이 필요한 서비스입니다.");
 								pageChange("/user/login.do", {});
 
 							} else {
@@ -549,7 +549,7 @@
 								self.fnGetCommentList();
 
 							} else if (data.result == "login") {
-								alert("로그인이 필요합니다.");
+								alert("로그인이 필요한 서비스입니다.");
 								pageChange("/user/login.do", {});
 
 							} else {
@@ -579,7 +579,7 @@
 								self.fnGetCommentList();
 
 							} else if (data.result == "login") {
-								alert("로그인이 필요합니다.");
+								alert("로그인이 필요한 서비스입니다.");
 								pageChange("/user/login.do", {});
 
 							} else {
@@ -630,7 +630,7 @@
 								self.fnGetCommentList();
 
 							} else if (data.result == "login") {
-								alert("로그인이 필요합니다.");
+								alert("로그인이 필요한 서비스입니다.");
 								pageChange("/user/login.do", {});
 
 							} else {

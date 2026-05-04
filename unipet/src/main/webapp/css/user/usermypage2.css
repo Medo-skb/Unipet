@@ -443,7 +443,14 @@ button {
     margin-top: 4px;
 }
 
-.mini-dashboard,
+.mini-dashboard {
+    display: grid;
+    /* ✅ 1:1 비율을 깨고 왼쪽(예약)을 1.5배 더 넓게 설정합니다 */
+    grid-template-columns: 1.5fr 1fr; 
+    gap: 18px;
+}
+
+/* 아래 .mini-action-grid는 그대로 1:1을 유지하고 싶다면 분리하는 것이 좋습니다 */
 .mini-action-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -929,4 +936,65 @@ button {
     .grid-2 {
         grid-template-columns: 1fr;
     }
+}
+
+/* ✅ 1. Grid 적용: 방을 3개로 확실하게 쪼갭니다 (비율 3.5 : 4.5 : 2) */
+.main-reserve-item {
+    display: grid;
+    grid-template-columns: 3.5fr 4.5fr 2fr; 
+    align-items: center;
+    gap: 10px;
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+}
+
+/* ✅ 2. 1번 방 (업체명): 말줄임표 강력 적용 */
+.main-reserve-item .grid-store-name {
+    min-width: 0; /* 그리드 밖으로 튀어나가는 현상 완벽 차단 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: bold;
+    font-size: 15px;
+}
+
+/* ✅ 3. 2번 방 (날짜/시간): 중앙 정렬 및 폰트 크기 강제 */
+.main-reserve-item .grid-res-date {
+    min-width: 0;
+    text-align: center;
+}
+.main-reserve-item .grid-res-date .date-text {
+    font-weight: bold;
+    font-size: 15px;
+    color: #333;
+}
+.main-reserve-item .grid-res-date .time-text {
+    margin-top: 4px;
+    font-size: 13px;
+    color: #777;
+}
+
+/* ✅ 4. 3번 방 (상태): 우측 정렬 */
+.main-reserve-item .grid-res-status {
+    min-width: 0;
+    text-align: right;
+    font-size: 14px;
+    white-space: nowrap; /* 상태 글자 쪼개짐 방지 */
+    padding-right: 15px;
+}
+
+.list-item .post-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 6px;
+    cursor: pointer; /* 마우스 커서를 손가락 모양으로 변경 */
+    display: inline-block; /* 클릭 영역을 텍스트 크기에 맞춤 */
+    transition: color 0.2s; /* 부드러운 색상 변화 */
+}
+
+/* 마우스를 올렸을 때 시각적 효과 */
+.list-item .post-title:hover {
+    color: var(--main); /* 메인 컬러로 변경 (기존 CSS 변수 활용) */
+    text-decoration: underline; /* 밑줄 추가 */
 }

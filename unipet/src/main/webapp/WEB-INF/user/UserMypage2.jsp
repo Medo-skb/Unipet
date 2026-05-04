@@ -9,6 +9,7 @@
         <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script src="/js/page-change.js"></script>
+        <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
         <!-- <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/header.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/footer.css"> -->
         <!-- <link href="/css/user/usermypage.css" rel="stylesheet"> -->
@@ -127,15 +128,21 @@
                                                         v-model="user.email"></div>
                                                 <div class="row"><label>전화번호</label><input type="text"
                                                         v-model="user.phone"></div>
-                                                <div class="row"><label>우편번호</label><input type="text"
-                                                        v-model="user.zipcode"></div>
-                                                <div class="row"><label>주소</label><input type="text"
-                                                        v-model="user.userAddr"></div>
                                             </div>
-
+                                            <div class="row">
+                                                <label>우편번호</label>
+                                                <div style="display:flex; gap:10px;">
+                                                    <input type="text" v-model="user.zipcode" readonly placeholder="우편번호 찾기를 이용해주세요">
+                                                    <button type="button" class="small-btn" @click="fnOpenAddressSearch">주소 변경</button>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <label>주소</label>
+                                                <input type="text" v-model="user.userAddr" readonly>
+                                            </div>
                                             <div class="row">
                                                 <label>상세주소</label>
-                                                <input type="text" v-model="user.fullAddr">
+                                                <input type="text" v-model="user.fullAddr" id="detailAddress" placeholder="상세주소를 입력해주세요">
                                             </div>
 
                                             <div class="btn-box">
@@ -179,11 +186,6 @@
                                             </div>
                                         </div>
                                     </div>
-
-                                    <div class="pet-add-card" @click="fnOpenAddPetModal">
-                                        <div class="pet-add-plus">+</div>
-                                        <div>프로필 추가</div>
-                                    </div>
                                 </div>
                                 <div class="dash-right">
 
@@ -202,7 +204,7 @@
 
                                             <div v-for="item in recentPostList.slice(0, 2)" :key="'post-' + item.id"
                                                 class="list-item">
-                                                <div class="list-title">
+                                                <div class="post-title" @click="fnGoPostDetail(item.id)">
                                                     [{{ item.boardName }}] {{ item.title }}
                                                 </div>
                                                 <div class="list-sub">
@@ -274,15 +276,13 @@
                                             <div v-if="reservationList.length === 0" class="empty-text">
                                                 예약 내역이 없습니다.
                                             </div>
-
-                                            <div class="main-reserve-item" v-for="item in reservationList.slice(0, 2)"
-                                                :key="item.rsvNo">
-
+                                            <div class="main-reserve-item" v-for="item in reservationList.slice(0, 2)" :key="item.rsvNo">
+                                                <!-- 업체명 -->
                                                 <div class="list-title">
                                                     {{ item.storeName || item.STORE_NAME || '업체명 없음' }}
                                                 </div>
 
-
+                                                <!-- 날짜/시간 -->
                                                 <div>
                                                     <div class="list-title">{{ item.rsvDate || '-' }}</div>
                                                     <div class="list-sub">
@@ -290,12 +290,11 @@
                                                     </div>
                                                 </div>
 
+                                                <!-- 상태 -->
                                                 <div class="list-sub">
                                                     상태 :
-                                                    <span class="reserve-status-text"
-                                                        :class="fnGetReserveStatusClass(item.rsvStatus || item.RSV_STATUS)">
-                                                        {{ fnGetReservationStatusText(item.rsvStatus || item.RSV_STATUS)
-                                                        }}
+                                                    <span class="reserve-status-text" :class="fnGetReserveStatusClass(item.rsvStatus || item.RSV_STATUS)">
+                                                        {{ fnGetReservationStatusText(item.rsvStatus || item.RSV_STATUS) }}
                                                     </span>
                                                 </div>
                                             </div>
@@ -318,8 +317,8 @@
                                             :key="group.orderNo">
                                             <div style="display:flex; gap:10px; align-items:center;">
                                                 <img class="order-img" :src="group.items && group.items.length > 0 && group.items[0].productImg
-                                ? group.items[0].productImg
-                                : '/img/no-image.png'" alt="상품이미지">
+                                                                                ? group.items[0].productImg
+                                                                                : '/img/no-image.png'" alt="상품이미지">
 
                                                 <div>
                                                     <div class="list-title">{{ (group.orderDate || '').substring(0, 10)
@@ -355,36 +354,48 @@
                             <div class="section-box">
                                 <div class="section-title">구독 관리</div>
 
-                                <div class="info-card">
-                                    <div class="list-title">{{ subscriptionInfo.planName || '구독 정보 없음' }}</div>
-                                    <div class="list-sub">상태 : {{ fnGetSubStatusText(subscriptionInfo.status)}}</div>
-                                    <div class="list-sub">다음 결제일 : {{ subscriptionInfo.nextBillingDate || '-' }}</div>
-                                    <div class="list-sub">
-                                        자동결제 : {{ subscriptionInfo.isAuto === 'Y' ? '사용중' : '미사용' }}
+                                <div v-if="subscriptionInfo && subscriptionInfo.status === '이용중'">
+                                    
+                                    <div class="info-card">
+                                        <div class="list-title">{{ subscriptionInfo.planName }}</div>
+                                        <div class="list-sub">상태 : {{ fnGetSubStatusText(subscriptionInfo.status) }}</div>
+                                        <div class="list-sub">다음 결제일 : {{ subscriptionInfo.nextBillingDate || '-' }}</div>
+                                        <div class="list-sub">
+                                            자동결제 : {{ subscriptionInfo.isAuto === 'Y' ? '사용중' : '미사용' }}
+                                        </div>
                                     </div>
+
+                                    <div class="btn-box">
+                                        <button class="small-btn" v-if="subscriptionInfo.status === '이용중'" @click="fnUpdateAutoPay">
+                                            자동결제 {{ subscriptionInfo.isAuto === 'Y' ? '해지' : '설정' }}
+                                        </button>
+
+                                        <button class="small-btn btn-red" v-if="subscriptionInfo.status === '이용중'" @click="fnCancelSubscription">
+                                            구독 해지
+                                        </button>
+
+                                        <button class="small-btn" @click="fnToggleSubscriptionPayList">
+                                            {{ showSubscriptionPayList ? '결제내역 닫기' : '결제내역 보기' }}
+                                        </button>
+                                    </div>
+
+                                    <div class="list-sub" v-if="subscriptionInfo.canChangeAuto !== 'Y'">
+                                        자동결제 변경은 다음 결제일 1일 전까지만 가능합니다.
+                                    </div>
+                                    
+                                </div>
+                                <!-- ✅ 구독 중인 경우 끝 -->
+
+                                <!-- ✅ 2. 미구독 상태인 경우 (v-else를 사용하여 위의 조건이 아닐 때 보여줌) -->
+                                <div v-else class="empty-text" style="text-align: center; padding: 40px 0;">
+                                    <p style="margin-bottom: 20px; color: #666;">현재 이용 중인 프리미엄 구독 상품이 없습니다.</p>
+                                    <!-- 필요하다면 아래처럼 구독 페이지로 이동하는 버튼을 추가해 동선을 유도할 수 있습니다 -->
+                                    <button class="small-btn" @click=fnGoToSubPage>프리미엄 구독</button>
                                 </div>
 
-                                <div class="btn-box">
-                                    <button class="small-btn" v-if="subscriptionInfo.status === '이용중'"
-                                        @click="fnUpdateAutoPay">
-                                        자동결제 {{ subscriptionInfo.isAuto === 'Y' ? '해지' : '설정' }}
-                                    </button>
-
-                                    <button class="small-btn btn-red" v-if="subscriptionInfo.status === '이용중'"
-                                        @click="fnCancelSubscription">
-                                        구독 해지
-                                    </button>
-
-                                    <button class="small-btn" @click="fnToggleSubscriptionPayList">
-                                        {{ showSubscriptionPayList ? '결제내역 닫기' : '결제내역 보기' }}
-                                    </button>
-                                </div>
-
-                                <div class="list-sub" v-if="subscriptionInfo.canChangeAuto !== 'Y'">
-                                    자동결제 변경은 다음 결제일 1일 전까지만 가능합니다.
-                                </div>
                             </div>
 
+                            <!-- ✅ 결제 내역 영역 (이 부분은 기존과 동일하게 유지) -->
                             <div class="section-box" v-if="showSubscriptionPayList">
                                 <div class="section-title">구독 결제내역</div>
 
@@ -415,7 +426,7 @@
                                 <div v-if="recentPostList.length === 0" class="empty-text">작성한 게시글이 없습니다.</div>
 
                                 <div class="list-item" v-for="item in recentPostList" :key="'post-page-' + item.id">
-                                    <div class="list-title">
+                                    <div class="post-title" @click="fnGoPostDetail(item.id)">
                                         [{{ item.boardName }}] {{ item.title }}
                                     </div>
                                     <div class="list-sub">{{ fnFormatDateTime(item.cdate) }}</div>
@@ -429,7 +440,7 @@
 
                                 <div class="list-item" v-for="item in myCommentList" :key="'comment-page-' + item.id">
                                     <div class="list-title">
-                                        [{{ item.boardName || '커뮤니티' }}] {{ item.content }}
+                                        [{{ item.boardName }}] {{ item.content }}
                                     </div>
                                     <div class="list-sub">{{ fnFormatDateTime(item.cdate) }}</div>
                                 </div>
@@ -441,19 +452,20 @@
                             <div class="section-box">
                                 <div class="section-header">
                                     <div class="section-title" style="margin-bottom:0;">내 전체 게시글</div>
-                                    <button class="small-btn" @click="fnChangeMenu('communityPage')">커뮤니티로</button>
+                                    <button class="small-btn" @click="fnChangeMenu('communityPage')">돌아가기</button>
                                 </div>
 
                                 <div v-if="myPostList.length === 0" class="empty-text">작성한 게시글이 없습니다.</div>
 
                                 <div class="list-item" v-for="item in myPostList" :key="'post-all-' + item.id">
-                                    <div class="list-title">
+                                    <div class="post-title" @click="fnGoPostDetail(item.id)">
                                         [{{ item.boardName }}] {{ item.title }}
                                     </div>
                                     <div class="list-sub">{{ fnFormatDateTime(item.cdate) }}</div>
                                 </div>
                             </div>
                         </div>
+
                         <div v-if="currentMenu === 'orderList'">
                             <div class="section-box">
                                 <div class="section-title">쇼핑몰 주문 내역</div>
@@ -1970,11 +1982,27 @@
                                 if (data.result === "success" && data.subscriptionInfo) {
                                     self.subscriptionInfo = data.subscriptionInfo;
                                 } else {
-                                    self.subscriptionInfo = {};
+                                    self.subscriptionInfo = {
+                                        planName: "",
+                                        nextBillingDate: "",
+                                        status: "",
+                                        isAuto: "",
+                                        subPrice: "",
+                                        subNo: "",
+                                        canChangeAuto: ""
+                                    };
                                 }
                             },
                             error: function () {
-                                self.subscriptionInfo = {};
+                                self.subscriptionInfo = {
+                                    planName: "",
+                                    nextBillingDate: "",
+                                    status: "",
+                                    isAuto: "",
+                                    subPrice: "",
+                                    subNo: "",
+                                    canChangeAuto: ""
+                                };
                             }
                         });
                     },
@@ -2080,7 +2108,13 @@
                     // 회원 탈퇴 처리
 
                     fnDeleteUser: function () {
-                        if (!confirm("정말 탈퇴하시겠습니까?")) return;
+                        // 단순 confirm 대신 prompt를 사용하여 직접 타이핑하게 만들어 실수 방지
+                        const confirmText = prompt("회원 탈퇴를 진행하시려면 창에 '탈퇴 확인' 이라고 정확히 입력해주세요.");
+                        
+                        if (confirmText !== "탈퇴 확인") {
+                            alert("입력한 문구가 일치하지 않아 탈퇴가 취소되었습니다.");
+                            return;
+                        }
 
                         $.ajax({
                             url: "/user/delete-user.dox",
@@ -2186,8 +2220,6 @@
                     // 반려동물 수정 모달 열기
 
                     fnOpenEditPetModal: function (pet) {
-                        console.log("수정 클릭됨", pet);
-
                         this.petForm = {
                             petNo: pet.petNo || "",
                             petName: pet.petName || "",
@@ -2210,6 +2242,30 @@
 
                     fnSavePet: function () {
                         const self = this;
+
+                        // --- 필수 데이터 입력 검증 시작 ---
+                        if (!self.petForm.petName || self.petForm.petName.trim() === "") {
+                            alert("반려동물의 이름을 입력해주세요.");
+                            return; // 함수 실행 중단 (서버로 안 보냄)
+                        }
+                        if (!self.petForm.species || self.petForm.species.trim() === "") {
+                            alert("반려동물의 종(강아지, 고양이 등)을 입력해주세요.");
+                            return;
+                        }
+                        if (!self.petForm.breed || self.petForm.breed.trim() === "") {
+                            alert("반려동물의 품종을 입력해주세요.");
+                            return;
+                        }
+                        if (!self.petForm.birthdate) {
+                            alert("반려동물의 생년월일을 선택해주세요.");
+                            return;
+                        }
+                        if (!self.petForm.gender) {
+                            alert("반려동물의 성별을 선택해주세요.");
+                            return;
+                        }
+                        // --- 검증 완료 ---
+
                         const url = self.petForm.petNo ? "/user/update-pet.dox" : "/user/add-pet.dox";
 
                         $.ajax({
@@ -2567,8 +2623,6 @@
                             type: "POST",
                             dataType: "json",
                             success: function (res) {
-                                console.log("포인트 사용내역 응답:", res);
-
                                 if (res.result === "success" || res.result === true) {
                                     self.pointUseList =
                                         res.pointUseList ||
@@ -2603,7 +2657,6 @@
                             type: "POST",
                             dataType: "json",
                             success: function (res) {
-                                console.log(res)
                                 if (res.result === true || res.result === "success") {
                                     self.couponList = res.couponList || res.list || [];
                                 } else {
@@ -2680,7 +2733,39 @@
                         if (pet.species === '어류') return '/img/user/pet/fish.png';
 
                         return '/img/user/pet/etc.png';
-                    }
+                    },
+                    fnOpenAddressSearch: function() {
+                        const self = this;
+                        new daum.Postcode({
+                            oncomplete: function(data) {
+                                // 팝업에서 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
+                                // 도로명 주소의 노출 규칙에 따라 주소를 표시한다.
+                                let addr = ''; // 주소 변수
+
+                                //사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
+                                if (data.userSelectedType === 'R') { // 사용자가 도로명 주소를 선택했을 경우
+                                    addr = data.roadAddress;
+                                } else { // 사용자가 지번 주소를 선택했을 경우(J)
+                                    addr = data.jibunAddress;
+                                }
+
+                                // 우편번호와 주소 정보를 Vue 변수에 대입한다.
+                                self.user.zipcode = data.zonecode;
+                                self.user.userAddr = addr;
+                                
+                                // 상세주소 칸을 비우고 커서를 이동시킨다.
+                                self.user.fullAddr = '';
+                                document.getElementById("detailAddress").focus();
+                            }
+                        }).open();
+                    },
+                    fnGoToSubPage: function() {
+                        location.href = "/payment/sub.do";
+                    },
+                    fnGoPostDetail: function(id) {
+                        if (!id) return; // ID가 없으면 중단
+                        pageChange("/board/view.do", { boardNo: id });
+                    },
                 },
 
                 // 화면 최초 로딩 시 실행

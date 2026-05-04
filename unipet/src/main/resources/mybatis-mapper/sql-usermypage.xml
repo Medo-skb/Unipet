@@ -418,35 +418,36 @@
 
 
 	<!-- 구독 정보 조회 -->
-	<!-- 구독 정보 조회 -->
-	<select id="selectSubscriptionInfo" parameterType="hashmap"
-		resultType="hashmap">
-		SELECT
-		SUB_NO AS subNo,
-		'프리미엄 구독' AS planName,
-		DATE_FORMAT(S_DATE, '%Y-%m-%d') AS startDate,
-		DATE_FORMAT(E_DATE, '%Y-%m-%d') AS endDate,
-		SUB_PRICE AS subPrice,
+	<select id="selectSubscriptionInfo" parameterType="hashmap" resultType="hashmap">
+    SELECT
+        SUB_NO AS subNo,
+        '프리미엄 구독' AS planName,
+        DATE_FORMAT(S_DATE, '%Y-%m-%d') AS startDate,
+        DATE_FORMAT(E_DATE, '%Y-%m-%d') AS endDate,
+        SUB_PRICE AS subPrice,
 
-		CASE
-		WHEN E_DATE >= NOW() THEN '이용중'
-		ELSE '만료'
-		END AS status,
+        <!-- ✅ 1. 상태 판별 로직 수정: 날짜와 DB의 상태 코드를 모두 확인합니다. -->
+        <!-- 주의: SUB_STATUS = 'Y' 부분은 실제 DB에서 사용하는 정상 상태 코드로 변경해주세요 (예: '1', 'A' 등) -->
+        CASE
+            WHEN E_DATE >= NOW() AND SUB_STATUS = 'Y' THEN '이용중'
+            ELSE '만료'
+        END AS status,
 
-		IS_AUTO AS isAuto,
-		METHOD_NO AS methodNo,
-		DATE_FORMAT(N_DATE, '%Y-%m-%d') AS nextBillingDate,
-		DATE_FORMAT(N_DATE, '%Y-%m-%d %H:%i:%s') AS nextBillingRaw,
+        IS_AUTO AS isAuto,
+        METHOD_NO AS methodNo,
+        DATE_FORMAT(N_DATE, '%Y-%m-%d') AS nextBillingDate,
+        DATE_FORMAT(N_DATE, '%Y-%m-%d %H:%i:%s') AS nextBillingRaw,
 
-		CASE
-		WHEN DATE_SUB(N_DATE, INTERVAL 1 DAY) >= NOW() THEN 'Y'
-		ELSE 'N'
-		END AS canChangeAuto
+        <!-- ✅ 2. 다음 결제일 기준 자동결제 변경 가능 여부도 상태 코드와 연계하는 것이 안전합니다. -->
+        CASE
+            WHEN DATE_SUB(N_DATE, INTERVAL 1 DAY) >= NOW() AND SUB_STATUS = 'Y' AND IS_AUTO = 'Y' THEN 'Y'
+            ELSE 'N'
+        END AS canChangeAuto
 
-		FROM subscription
-		WHERE USER_ID = #{userId}
-		ORDER BY SUB_NO DESC
-		LIMIT 1
+	    FROM subscription
+	    WHERE USER_ID = #{userId}
+	    ORDER BY SUB_NO DESC
+	    LIMIT 1
 	</select>
 
 	<!-- 자동결제 여부 변경 -->
