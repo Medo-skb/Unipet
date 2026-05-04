@@ -1075,6 +1075,7 @@
                             <option value="">선택해주세요</option>
                             <option value="M">수컷</option>
                             <option value="F">암컷</option>
+                            <option value="N">중성화</option>
                         </select>
                     </div>
 
