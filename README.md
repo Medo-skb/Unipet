@@ -180,7 +180,7 @@ Unipet/
 │   │   ├── java/com/example/unipet/
 │   │   │   ├── common/                 	# 공통 설정 및 유틸리티
 │   │   │   ├── config/                   	# 보안 및 환경 설정
-│   │   │   ├── controller/            	# 컨트롤러 (웹 요청 처리)
+│   │   │   ├── controller/            	   # 컨트롤러 (웹 요청 처리)
 │   │   │   ├── dao/                      	# 서비스 (로직)
 │   │   │   ├── mapper/                   	# MyBatis 매퍼 인터페이스
 │   │   │   ├── model/                    	# DB 테이블과 매핑되는 DTO/VO
