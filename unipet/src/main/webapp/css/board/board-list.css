@@ -2,6 +2,7 @@
 	width: 1200px;
 	margin: 0 auto;
 	padding: 30px 0;
+	min-height: calc(100vh - 260px);
 }
 
 .box {
@@ -280,7 +281,7 @@ th {
 	position: absolute;
 	right: 30px;
 	top: 25px;
-	z-index: 1000;
+	z-index: 10;
 }
 
 /* 알림 카운트 */
