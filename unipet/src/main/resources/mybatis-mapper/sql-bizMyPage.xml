@@ -166,7 +166,8 @@
 		    SP.BREAK_START,
 		    SP.BREAK_END,
 		    SP.OFF_DAY,
-		    SP.REFUND_POLICY
+		    SP.REFUND_POLICY,
+		    SP.SLOT
 		FROM STORE S
 		INNER JOIN STORE_USER SU
 		    ON S.S_USER_ID = SU.S_USER_ID
@@ -304,6 +305,7 @@
 			CLOSE_TIME = #{closeTime},
 			BREAK_START = #{breakStart},
 			BREAK_END = #{breakEnd},
+			SLOT = #{slot},
 			<!-- OFF_DAY = #{offDay},-->
 			REFUND_POLICY = #{refundPolicy}
 		WHERE STORE_NO = #{storeNo}

@@ -56,7 +56,7 @@
                 <input type="file" @change="handleFile" accept=".jpg,.jpeg,.png,.pdf">
                 
                 <div class="info-text">
-                    사업자등록증 파일은 JPG, PNG, PDF 형식만 업로드 가능합니다. (최대 5MB)
+                    사업자등록증을 업로드해 주세요. 파일은 JPG, PNG, PDF 형식만 업로드 가능합니다. (최대 5MB)
                 </div>
             </div>
 
@@ -72,7 +72,7 @@
                     <option value="">매장분류 선택</option>
                     <option value="HOS">병원</option>
                     <option value="SAL">미용</option>
-                    <option value="B">위탁시설</option>
+                    <option value="BRD">위탁시설</option>
                 </select>
             </div>
 

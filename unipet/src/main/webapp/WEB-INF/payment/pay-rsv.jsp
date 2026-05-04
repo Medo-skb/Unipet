@@ -64,7 +64,7 @@
             </div>
 
             <div class="btn-group">
-                <button class="btn-cancel" onclick="location.href = '/user/mypage.do'">취소</button>
+                <button class="btn-cancel" @click="fnCancel">취소</button>
                 <button class="btn-pay" @click="fnPayment">결제하기</button>
             </div>
         </div>
@@ -191,8 +191,6 @@
                             
                             // 마이페이지 예약 탭 트리거 설정
                             sessionStorage.setItem("triggerFunction", "openRsvList");
-                            
-                            // 마이페이지로 이동
                             location.href = "/user/mypage.do";
                         }
                     }
@@ -204,6 +202,10 @@
 
                 event.preventDefault();
                 event.returnValue = ''; // 크롬에서 이 코드가 있어야 경고창이 뜹니다.
+            },
+            fnCancel: function(){
+                sessionStorage.setItem("triggerFunction", "openRsvList");
+                location.href = "/user/mypage.do";
             }
         }, // methods
         mounted() {

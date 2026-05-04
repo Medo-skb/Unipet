@@ -33,7 +33,7 @@ public class BizMyPage {
 	String breakEnd;
 	String offDay;
 	String refundPolicy;
-
+	
 	// STORE_FILE
 	int fileNo;
 	String filePath;

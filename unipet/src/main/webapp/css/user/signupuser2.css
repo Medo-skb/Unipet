@@ -119,6 +119,16 @@
     height: auto;
 }
 
+button:disabled, 
+.btn-disabled {
+    background-color: #cccccc !important; /* 회색으로 변경 */
+    color: #666666 !important;           /* 글자색 흐리게 */
+    cursor: not-allowed !important;      /* 금지 표시 커서 */
+    border: 1px solid #bbbbbb !important;
+    opacity: 0.7;                        /* 살짝 투명하게 */
+    pointer-events: none !important;     /* 마우스 클릭 이벤트를 물리적으로 무시 */
+}
+
 /* ============================= */
 /* ⭐ 타이머 UI (추가 코드) */
 /* 기존 코드 건드리지 말고 그대로 아래에 추가 */

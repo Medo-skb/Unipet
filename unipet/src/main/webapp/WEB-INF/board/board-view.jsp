@@ -75,7 +75,13 @@
 						{{myLike == 'Y' ? '추천취소' : '추천'}} ({{likeCnt}})
 					</button>
 
-					<button type="button" class="report-btn" @click="fnOpenReportModal()">신고</button>
+					<button 
+						type="button" 
+						class="report-btn" 
+						v-if="!fnIsAdmin()"
+						@click="fnOpenReportModal()">
+						신고
+					</button>
 
 					<button type="button" class="report-btn" v-if="fnCanManageBoard()" @click="fnMoveEdit()">
 						수정
@@ -149,7 +155,11 @@
 								답글
 							</button>
 
-							<button type="button" class="report-btn" @click="fnOpenCommentReportModal(comment.commentNo)">
+							<button 
+								type="button" 
+								class="report-btn" 
+								v-if="!fnIsAdmin()"
+								@click="fnOpenCommentReportModal(comment.commentNo)">
 								신고
 							</button>
 

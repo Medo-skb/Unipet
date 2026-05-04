@@ -14,9 +14,7 @@
         <!-- <link href="/css/user/usermypage.css" rel="stylesheet"> -->
         <link href="/css/user/usermypage2.css" rel="stylesheet">
         <style>
-            [v-cloak] {
-                display: none;
-            }
+          [v-cloak] { display: none; }
         </style>
         <title>UNIPET - 마이페이지</title>
     </head>

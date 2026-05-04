@@ -206,6 +206,29 @@ textarea.input-field {
     opacity: 1;
 }
 
+.item-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: 1;
+    min-width: 0;
+}
+
+.item-img {
+    width: 90px;
+    height: 90px;
+    border-radius: 12px;
+    border: 1px solid var(--line-soft);
+    background: var(--image-soft);
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.item-info {
+    flex: 1;
+    min-width: 0;
+}
+
 @media (max-width: 768px) {
     .pay-container {
         width: calc(100% - 32px);
