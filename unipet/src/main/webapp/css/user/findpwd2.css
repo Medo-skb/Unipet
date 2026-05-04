@@ -108,3 +108,80 @@
         padding: 34px 20px 30px;
     }
 }
+
+/* =========================================
+   [오차 교정 및 절대 방어] 1. 입력창 & 버튼 가로 길이 완벽 맞춤
+========================================= */
+.row .input-group {
+    display: flex !important;
+    gap: 10px !important;
+    width: 100% !important;
+}
+
+/* 감싸고 있는 div가 무조건 남은 공간을 전부 집어삼키도록 강제 */
+.row .input-group > div {
+    position: relative !important;
+    flex: 1 1 auto !important;
+    width: 100% !important;
+}
+
+/* div 안쪽에 있는 input 자체도 부모 크기에 맞춰 100% 강제 */
+.row .input-group > input,
+.row .input-group > div > input {
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* =========================================
+   [누락 복구] 2. 우측 인증 버튼 디자인 및 크기 고정
+========================================= */
+.side-btn {
+    width: 130px !important;
+    height: 46px !important;
+    flex-shrink: 0 !important;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 700;
+    border: 1px solid var(--main, #ff475a); /* 빨간 테두리 복구 */
+    background: transparent;
+    color: var(--main, #ff475a); /* 빨간 글씨 복구 */
+    transition: background 0.2s, color 0.2s;
+}
+
+.side-btn:hover:not(:disabled) {
+    background: var(--main, #ff475a);
+    color: var(--bg, #ffffff);
+}
+
+/* =========================================
+   [핵심 원인 해결] 3. 빠져있던 타이머 텍스트 위치 고정
+========================================= */
+.timer-text {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%); /* 정확히 상하 중앙 정렬 */
+    font-size: 14px;
+    color: #ff475a;
+    font-weight: 600;
+    pointer-events: none; /* 클릭 방해 금지 */
+}
+
+/* =========================================
+   [오차 교정] 4. 맨 아래 비활성화(회색) 버튼 & 인풋창 색상 통일
+========================================= */
+.btn-box button:disabled, 
+.btn-disabled {
+    background-color: #f4f4f4 !important;
+    border: 1px solid #e0e0e0 !important;
+    color: #aaaaaa !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+}
+
+input:disabled {
+    background-color: #fbfbfb !important;
+    border: 1px solid #ececec !important;
+    color: #999999 !important;
+}

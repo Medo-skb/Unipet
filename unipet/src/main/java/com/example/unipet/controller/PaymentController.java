@@ -50,17 +50,24 @@ public class PaymentController {
 		HttpSession session = request.getSession();
 	    String userId = (String) session.getAttribute("sessionId");
 		request.setAttribute("totalprice", map.get("totalprice"));
+		
+		response.setContentType("text/html; charset=UTF-8");
+        PrintWriter out = response.getWriter();
+        
 	    if (userId == null) {
-	        return "redirect:/user/login.do"; // 로그인 안 했으면 로그인부터!
+	    	out.println("<script>");
+	        out.println("alert('로그인이 필요한 서비스입니다.');");
+	        out.println("location.href='/user/login.do';");
+	        out.println("</script>");
+	        
+	        out.flush();
+	        return null; 
 	    }
+	    
 	    int isSubscribed = paymentService.getSubStatus(userId); 
 	    
 	    if (isSubscribed > 0) {
-	        // 인코딩 설정 (한글 깨짐 방지)
-	        response.setContentType("text/html; charset=UTF-8");
-	        PrintWriter out = response.getWriter();
-	        
-	        // 자바스크립트 직접 실행
+	    	// 자바스크립트 직접 실행
 	        out.println("<script>");
 	        out.println("alert('이미 프리미엄 멤버십을 이용 중입니다.');");
 	        out.println("location.href='/main.do';");

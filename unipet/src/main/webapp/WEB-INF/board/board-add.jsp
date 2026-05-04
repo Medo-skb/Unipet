@@ -258,7 +258,7 @@
 								}
 
 							} else if (data.result == "login") {
-							    alert("로그인이 필요합니다.");
+							    alert("로그인이 필요한 서비스입니다.");
 							    location.href = "/user/login.do";
 
 							} else {
@@ -307,7 +307,7 @@
 								alert("최근 임시저장 글을 불러왔습니다.");
 
 							} else if (data.result == "login") {
-							    alert("로그인이 필요합니다.");
+							    alert("로그인이 필요한 서비스입니다.");
 							    location.href = "/user/login.do";
 
 							} else {

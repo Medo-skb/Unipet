@@ -22,7 +22,10 @@
             <title>사용자 회원가입</title>
             <div class="row">
                 <div class="inline-box">
-                    <input v-model="userId" maxlength="20" placeholder="아이디 (20자 이하)" @input="resetIdCheck">
+                    <input v-model="userId" 
+                        maxlength="20" 
+                        placeholder="아이디 (영문 소문자, 숫자)" 
+                        @input="handleIdInput">
                     <button type="button" @click="checkId">중복확인</button>
                 </div>
                 <div v-if="idMsg" class="info-text" :style="{color:idChecked?'green':'red'}">
@@ -31,7 +34,7 @@
             </div>
 
             <div class="row">
-                <input type="password" v-model="pwd" maxlength="20" placeholder="비밀번호">
+                <input type="password" v-model="pwd" maxlength="20" placeholder="비밀번호 (8~20자)">
             </div>
 
             <div class="row">
@@ -42,7 +45,9 @@
             </div>
 
             <div class="row">
-                <input v-model="email" placeholder="이메일">
+                <input v-model="email" 
+                    placeholder="이메일" 
+                    @input="handleEmailInput">
             </div>
 
             <div class="row">
@@ -168,9 +173,18 @@
                         this.idMsg = "";
                     },
 
+                    // 1. 아이디 중복확인 시 정규식 검사 추가
                     checkId() {
                         if (!this.userId) {
                             alert("아이디를 입력해주세요.");
+                            return;
+                        }
+
+                        // ⭐ 아이디 정규식: 영문 소문자만 1글자 이상
+                        // (만약 숫자도 섞게 하고 싶다면 /^[a-z0-9]+$/ 로 변경하세요)
+                        const idRegex = /^[a-z0-9]+$/;
+                        if (!idRegex.test(this.userId.trim())) {
+                            alert("아이디는 영문 소문자, 숫자만 사용할 수 있습니다. (특수문자, 한글 불가)");
                             return;
                         }
 
@@ -289,9 +303,25 @@
                             }
                         }, "json");
                     },
+                    handleIdInput(e) {
+                        // 영문 소문자와 숫자만 허용하는 정규식 (그 외 모든 문자는 삭제)
+                        // 만약 대문자도 허용하려면 a-z를 a-zA-Z로 바꾸세요.
+                        const originalValue = e.target.value;
+                        const cleanedValue = originalValue.replace(/[^a-z0-9]/g, '');
+                        
+                        this.userId = cleanedValue;
+                        this.resetIdCheck(); // 아이디가 바뀌면 중복확인 상태 초기화
+                    },
 
-
-
+                    // 이메일 입력 실시간 제어
+                    handleEmailInput(e) {
+                        // 이메일에 허용되는 문자(영문, 숫자, 특수기호 . _ - @) 외에는 삭제
+                        // 한글 입력 시 즉시 제거됨
+                        const originalValue = e.target.value;
+                        const cleanedValue = originalValue.replace(/[ㄱ-ㅎㅏ-ㅣ가-힣]/g, '');
+                        
+                        this.email = cleanedValue;
+                    },
 
                     openPostcode() {
                         new daum.Postcode({
@@ -303,8 +333,16 @@
                     },
 
                     signup() {
-                        if (!this.userId || !this.pwd || !this.userName) {
-                            alert("아이디, 비밀번호, 이름은 필수입니다.");
+                        // [검사 1] 빈 값 체크
+                        if (!this.userId || !this.pwd || !this.userName || !this.email) {
+                            alert("아이디, 비밀번호, 이름, 이메일은 필수입니다.");
+                            return;
+                        }
+
+                        // [검사 2] 아이디 영문 소문자 체크 (혹시 중복확인 후 다시 바꿨을까봐 한 번 더 체크)
+                        const idRegex = /^[a-z]+$/;
+                        if (!idRegex.test(this.userId.trim())) {
+                            alert("아이디는 영문 소문자만 사용할 수 있습니다.");
                             return;
                         }
 
@@ -313,11 +351,26 @@
                             return;
                         }
 
+                        // [검사 3] 비밀번호 길이 및 일치 체크 (8 ~ 30자리)
+                        if (this.pwd.length < 8 || this.pwd.length > 20) {
+                            alert("비밀번호는 최소 8자리, 최대 20자리로 입력해주세요.");
+                            return;
+                        }
+
                         if (this.pwd !== this.pwdCheck) {
                             alert("비밀번호가 일치하지 않습니다.");
                             return;
                         }
 
+                        // [검사 4] 이메일 형식 및 한글 차단 체크
+                        // 영문/숫자/기호 + @ + 영문/숫자/기호 + . + 영문자 2글자 이상
+                        const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                        if (!emailRegex.test(this.email.trim())) {
+                            alert("올바른 이메일 형식이 아닙니다. (예: unipet@example.com, 한글 입력 불가)");
+                            return;
+                        }
+
+                        // [검사 5] 휴대폰 인증 체크
                         if (!this.phone) {
                             alert("휴대폰 번호를 입력해주세요.");
                             return;
@@ -328,13 +381,14 @@
                             return;
                         }
 
+                        // 모든 검사 통과 시 서버로 데이터 전송
                         $.post("/user/signupUser.dox", {
                             userId: this.userId.trim(),
                             pwd: this.pwd,
                             userName: this.userName,
                             nickname: this.nickname,
                             phone: this.phone,
-                            email: this.email,
+                            email: this.email.trim(), // 이메일도 공백 제거해서 보내는 것이 좋습니다
                             userAddr: this.userAddr,
                             fullAddr: this.fullAddr,
                             zipcode: this.zipcode

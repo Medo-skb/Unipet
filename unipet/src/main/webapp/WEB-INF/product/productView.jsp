@@ -553,7 +553,7 @@
 								alert("문의가 수정되었습니다.");
 								self.fnGetQnaList();
 							} else if (data.result == "login") {
-								alert("로그인이 필요합니다.");
+								alert("로그인이 필요한 서비스입니다.");
 								location.href = "/user/login.do";
 							} else {
 								alert(data.message == null ? "문의 수정 실패" : data.message);
@@ -586,7 +586,7 @@
 								alert("문의가 삭제되었습니다.");
 								self.fnGetQnaList();
 							} else if (data.result == "login") {
-								alert("로그인이 필요합니다.");
+								alert("로그인이 필요한 서비스입니다.");
 								location.href = "/user/login.do";
 							} else {
 								alert(data.message == null ? "문의 삭제 실패" : data.message);
@@ -602,7 +602,7 @@
 					let self = this;
 
 					if (self.currentUserId == "") {
-						alert("로그인이 필요합니다.");
+						alert("로그인이 필요한 서비스입니다.");
 						location.href = "/user/login.do";
 						return;
 					}
@@ -648,7 +648,7 @@
 								self.fnGetQnaList();
 								self.tab = "qna";
 							} else if (data.result == "login") {
-								alert("로그인이 필요합니다.");
+								alert("로그인이 필요한 서비스입니다.");
 								location.href = "/user/login.do";
 							} else {
 								alert(data.message == null ? "문의 등록 실패" : data.message);
@@ -687,7 +687,7 @@
 								alert("리뷰가 신고 처리되었습니다.");
 								self.fnGetReviewList();
 							} else if (data.result == "login") {
-								alert("로그인이 필요합니다.");
+								alert("로그인이 필요한 서비스입니다.");
 								location.href = "/user/login.do";
 							} else {
 								alert(data.message == null ? "리뷰 신고 처리 실패" : data.message);
@@ -766,7 +766,7 @@
 								}
 
 							} else if (data.result == "login") {
-								alert("로그인이 필요합니다.");
+								alert("로그인이 필요한 서비스입니다.");
 								location.href = "/user/login.do";
 
 							} else {
@@ -804,7 +804,7 @@
 								pageChange("/payment/pay-shop.do", {});
 
 							} else if (data.result == "login") {
-								alert("로그인이 필요합니다.");
+								alert("로그인이 필요한 서비스입니다.");
 								location.href = "/user/login.do";
 
 							} else {
