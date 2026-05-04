@@ -17,7 +17,7 @@
 ## 🗓 프로젝트 기간 (4/9 ~ 4/30 16일간)
 
 - **4/9 ~ 4/14 (4일)** : 기획 및 설계 (테이블, 기능, 정책, 화면)  
-- **4/15 ~ 4/28 (10일)** : 기능 개발  
+- **4/15 ~ 4/28 (10일)** : 기능 개발 및 단위테스트  
 - **4/29 ~ 4/30 (2일)** : 통합 테스트 및 디버깅
 
 ---
@@ -167,6 +167,7 @@
 | 📝 회의록 | [회의록 보기](https://drive.google.com/drive/folders/1d1CxrihnG_TbVloRdNIfcGgQ-Lkdas0k?usp=drive_link) |
 | 🏗 설계 자료 | [설계 보기](https://drive.google.com/drive/folders/17cAWy-taTVDPN2uJo4NCYHvQSAF1TFwI?usp=drive_link) |
 | 📚 공통 문서 | [공통 문서 보기](https://drive.google.com/drive/folders/1k4MLxfWRZGS_JbnkDp5hF_ht_NbGSbwh?usp=drive_link) |
+| 🛠 수정 내역 | [수정 로그 보기](https://drive.google.com/drive/folders/1cya6UYHxQlYqgekYmhSyMF3aRj55SYAP)
 
 ---
 
