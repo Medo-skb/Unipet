@@ -33,7 +33,7 @@
 
 | 이름 | GitHub 프로필 | 이메일 |
 |------|----------------|---------------|
-| 김현동 | [Medo-skb](https://github.com/Medo-skb) | [kiryto0912@gmail.com]() |
+| 김현동 | [Medo-skb](https://github.com/Medo-skb) | kiryto0912@gmail.com |
 | 장석재 | [Seokjae-Jang-git](https://github.com/Seokjae-Jang-git) | [] |
 | 이다빈 | [dabinah9526-ship-it](https://github.com/dabinah9526-ship-it) | [] |
 | 김예림 | [4288-yerim](https://github.com/4288-yerim) | [] |
