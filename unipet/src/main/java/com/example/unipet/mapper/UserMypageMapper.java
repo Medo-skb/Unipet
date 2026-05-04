@@ -77,4 +77,7 @@ public interface UserMypageMapper {
 	List<HashMap<String, Object>> selectPointUseList(HashMap<String, Object> map);
 
 	List<HashMap<String, Object>> selectCouponList(HashMap<String, Object> map);
+	// 주문 취소
+	int updateOrderRefund(HashMap<String, Object> map);
+	
 }

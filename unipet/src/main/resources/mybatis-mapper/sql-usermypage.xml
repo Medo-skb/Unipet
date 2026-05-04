@@ -595,5 +595,15 @@
     WHERE uc.USER_ID = #{userId}
     ORDER BY uc.EXP_DATE ASC
 </select>
+<update id="updateOrderRefund">
+    UPDATE ORDERS
+    SET 
+        ORD_STATUS = 'CAN',
+        DELI_STATUS = 'CAN'
+    WHERE ORD_NO = #{ordNo}
+</update>
+
+
+
 
 </mapper>
