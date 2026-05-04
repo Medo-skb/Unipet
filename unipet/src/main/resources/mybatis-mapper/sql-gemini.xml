@@ -55,24 +55,26 @@
 		        OR IFNULL(SD.S_CONTENTS, '') LIKE CONCAT('%', #{animalKeyword}, '%')
 		    )
 		</if>
-		
+	
+		GROUP BY
+		    S.STORE_NO,
+		    S.STORE_NAME,
+		    S.S_ADDR,
+		    SD.SUB_TITLE,
+		    SD.S_CONTENTS
+		    
+		HAVING COUNT(DISTINCT R.REVIEW_NO) >= 3
+
 		<if test="interestKeyword != null and interestKeyword != ''">
-		    AND (
-		        IFNULL(R.R_CONTENTS, '') LIKE CONCAT('%', #{interestKeyword}, '%')
-		        OR IFNULL(SM.MENU_NAME, '') LIKE CONCAT('%', #{interestKeyword}, '%')
-		        OR IFNULL(SM.MENU_INFO, '') LIKE CONCAT('%', #{interestKeyword}, '%')
-		        OR IFNULL(SD.SUB_TITLE, '') LIKE CONCAT('%', #{interestKeyword}, '%')
-		        OR IFNULL(SD.S_CONTENTS, '') LIKE CONCAT('%', #{interestKeyword}, '%')
-		    )
+		    AND SUM(
+		        CASE 
+		            WHEN IFNULL(R.R_CONTENTS, '') LIKE CONCAT('%', #{interestKeyword}, '%') 
+		            THEN 1 
+		            ELSE 0 
+		        END
+		    ) > 0
 		</if>
-	
-	    GROUP BY
-	        S.STORE_NO,
-	        S.STORE_NAME,
-	        S.S_ADDR,
-	        SD.SUB_TITLE,
-	        SD.S_CONTENTS
-	
+		
 		ORDER BY
 		    reviewCount DESC,
 		    avgRating DESC,

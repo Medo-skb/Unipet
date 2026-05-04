@@ -204,40 +204,140 @@ public class GeminiService {
         StringBuilder reason = new StringBuilder();
 
         String interestKeyword = extractInterestKeyword(prompt);
-        String matchedReview = extractMatchedReview(store.getReviewContents(), interestKeyword);
-
-        if (interestKeyword != null && !interestKeyword.isEmpty() && matchedReview != null && !matchedReview.isEmpty()) {
-            reason.append("이용자 리뷰에서 ")
-                  .append(interestKeyword)
-                  .append("와 관련된 내용이 확인되어 추천드립니다. ");
-
-            reason.append("참고 리뷰: ")
-                  .append(matchedReview)
-                  .append(" ");
-        } else {
-            String positiveReview = extractPositiveReview(store.getReviewContents());
-
-            if (positiveReview != null && !positiveReview.isEmpty()) {
-                reason.append("이용자 리뷰에서 긍정적인 평가가 확인되어 추천드립니다. ");
-                reason.append("참고 리뷰: ").append(positiveReview).append(" ");
-            }
-        }
 
         if (store.getMenuNames() != null && !store.getMenuNames().isEmpty()) {
             reason.append("등록된 메뉴에 ")
                   .append(store.getMenuNames())
-                  .append(" 등이 있습니다. ");
+                  .append(" 등이 있어 요청하신 서비스와 관련성이 높습니다. ");
         }
 
-        if (store.getReviewCount() > 0) {
-            reason.append("평점 ")
-                  .append(store.getAvgRating() == null ? "0" : store.getAvgRating())
-                  .append("점, 리뷰 ")
-                  .append(store.getReviewCount())
-                  .append("개가 등록되어 있습니다.");
+        String reviewSummary = makeReviewSummaryByGemini(
+            store.getReviewContents(),
+            interestKeyword
+        );
+
+        if (reviewSummary != null && !reviewSummary.isEmpty()) {
+            reason.append(reviewSummary);
         }
 
         return reason.toString();
+    }
+    
+    private String makeReviewSummaryByGemini(String reviewContents, String interestKeyword) {
+
+        if (reviewContents == null || reviewContents.trim().isEmpty()) {
+            return "아직 리뷰 내용은 부족하지만, 등록된 업체 정보를 기준으로 추천드립니다.";
+        }
+
+        String cleanReviews = reviewContents
+                .replaceAll("\\s+", " ")
+                .trim();
+
+        if (cleanReviews.length() > 1000) {
+            cleanReviews = cleanReviews.substring(0, 1000);
+        }
+
+        String keywordText = "";
+
+        if (interestKeyword != null && !interestKeyword.isEmpty()) {
+        	keywordText = interestKeyword + " 관련 리뷰가 반드시 포함되도록 요약하고, 왜 이 업체를 추천하는지 그 이유를 명확하게 설명해줘.";
+        } else {
+            keywordText = "전체 리뷰에서 긍정적인 내용을 중심으로 요약해줘.";
+        }
+
+        String startRule = "";
+
+        if (interestKeyword != null && !interestKeyword.isEmpty()) {
+            startRule = "- 반드시 \"이용자 리뷰에서 " + interestKeyword + " 관련 내용이 확인되어 추천드립니다.\"로 시작한다.";
+        } else {
+        	startRule = "";
+        }
+
+        String summaryPrompt = """
+        	    아래는 반려동물 업체 리뷰 목록이다.
+
+        	    규칙:
+        	    - 리뷰 원문을 그대로 복사하지 않는다.
+        	    - 리뷰 내용을 바탕으로 긍정적인 평가를 자연스럽게 요약한다.
+        	    - 부정적인 리뷰는 추천 근거로 사용하지 않는다.
+        	    - 한 문장으로만 작성한다.
+        	    - 반드시 "~~~라는 리뷰가 있어서 추천드립니다." 형태로 끝낸다.
+        	    - 문장은 반드시 자연스럽게 이어지도록 작성한다.
+        	    - "참고 리뷰"라는 표현은 절대 사용하지 않는다.
+        	    - 평점, 리뷰 개수는 말하지 않는다.
+        	    - 없는 내용을 지어내지 않는다.
+
+        	    요약 기준:
+        	    """ + keywordText + """
+
+        	    리뷰 목록:
+        	    """ + cleanReviews;
+
+        String summary = callGemini(summaryPrompt);
+
+        if (summary == null || summary.trim().isEmpty()) {
+            return "";
+        }
+
+        return summary.trim();
+    }
+    
+    private String makeReviewSummary(String review, String keyword) {
+
+        if (keyword == null || keyword.isEmpty()) {
+            return "관련 리뷰를 바탕으로 서비스 이용 경험이 확인되었습니다.";
+        }
+
+        if (keyword.equals("안과")) {
+            return "눈 관련 진료 경험에 대한 리뷰가 확인되어 안과 진료를 찾는 보호자에게 참고하기 좋습니다.";
+        }
+
+        if (keyword.equals("피부")) {
+            return "피부 증상이나 관리와 관련된 리뷰가 확인되어 피부 진료를 찾는 보호자에게 참고하기 좋습니다.";
+        }
+
+        if (keyword.equals("치과")) {
+            return "치아 관리나 구강 관련 리뷰가 확인되어 치과 진료를 찾는 보호자에게 참고하기 좋습니다.";
+        }
+
+        if (keyword.equals("관절")) {
+            return "다리나 관절 관련 진료 경험 리뷰가 확인되어 관절 진료를 찾는 보호자에게 참고하기 좋습니다.";
+        }
+
+        if (keyword.equals("건강검진")) {
+            return "검진이나 검사 관련 리뷰가 확인되어 건강검진을 원하는 보호자에게 참고하기 좋습니다.";
+        }
+
+        if (keyword.equals("응급")) {
+            return "응급 상황에서 방문한 리뷰가 확인되어 급한 상황에 참고할 수 있는 병원입니다.";
+        }
+
+        return keyword + " 관련 리뷰가 확인되어 요청하신 조건과 관련성이 높습니다.";
+    }
+    
+    private String makePositiveReviewSummary(String review) {
+
+        if (review == null || review.trim().isEmpty()) {
+            return "이용자 리뷰를 바탕으로 서비스 이용 경험이 확인되어 추천드립니다.";
+        }
+
+        if (review.contains("친절") || review.contains("따뜻")) {
+            return "이용자 리뷰에서 친절한 응대에 대한 긍정적인 평가가 확인되어 추천드립니다.";
+        }
+
+        if (review.contains("좋") || review.contains("만족") || review.contains("최고")) {
+            return "이용자 리뷰에서 만족도가 높은 평가가 확인되어 추천드립니다.";
+        }
+
+        if (review.contains("꼼꼼") || review.contains("정확") || review.contains("잘")) {
+            return "이용자 리뷰에서 꼼꼼한 서비스에 대한 평가가 확인되어 추천드립니다.";
+        }
+
+        if (review.contains("재방문")) {
+            return "이용자 리뷰에서 재방문 의사가 확인되어 추천드립니다.";
+        }
+
+        return "이용자 리뷰에서 긍정적인 이용 경험이 확인되어 추천드립니다.";
     }
     
     private String extractInterestKeyword(String prompt) {
@@ -568,4 +668,5 @@ public class GeminiService {
 
         return requestCount.get() >= 100; // 하루 100번 제한
     }
+
 }

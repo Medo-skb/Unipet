@@ -124,8 +124,7 @@
                 if (!text) {
                     return "";
                 }
-
-            if (text.includes("상세보기|")) {
+            if (text.includes("추천 이유:") && text.includes("상세보기|")) {
                 return this.formatStoreRecommend(text);
             }
 
@@ -172,7 +171,7 @@
 
                         if (storeNo !== "") {
                             html += "<div>";
-                            html += "<span class='store-link-btn' onclick=\"location.href='/reservation/store-detail.do?storeNo=" + storeNo + "'\">";
+                            html += "<span class='store-link-btn' onclick=\"window.open('/reservation/store-detail.do?storeNo=" + storeNo + "', '_blank')\">";
                             html += "업체 바로가기";
                             html += "</span>";
                             html += "</div>";
@@ -329,7 +328,7 @@ UNIPET 챗봇과 대화를 원하신다면 AI 상담를 눌러주세요.`,
         }
     });
 
-    app.mount("#app");
+app.mount("#app");
 </script>
 </body>
 </html>
