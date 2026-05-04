@@ -8,9 +8,7 @@
 	<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
 	<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 	<script src="/js/page-change.js"></script>
-
-	<!-- <link rel="stylesheet" href="/css/board/board-list.css"> -->
-	<link rel="stylesheet" href="/css/board/board-list2.css">
+	<link rel="stylesheet" href="/css/board/board-list.css">
 </head>
 
 <body>

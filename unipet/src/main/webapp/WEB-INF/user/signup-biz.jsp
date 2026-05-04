@@ -8,7 +8,7 @@
     <title>UNIPET</title>
 
         <!-- <link href="/css/user/signupbiz.css" rel="stylesheet"> -->
-        <link href="/css/user/signupbiz2.css" rel="stylesheet">
+        <link href="/css/user/signupbiz.css" rel="stylesheet">
         <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
         <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
         <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>

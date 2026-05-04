@@ -1,199 +1,260 @@
-/* refund.css */
-
-/* 기본 설정 */
-body { 
-    background-color: #f8f9fa; 
-    margin: 0; 
-    padding: 0; 
-    font-family: 'Pretendard', sans-serif; 
-    color: #333; 
+#app {
+    min-height: 650px;
+    background: var(--bg);
 }
 
-/* 레이아웃 컨테이너 */
-.pay-container { 
-    max-width: 800px; 
-    margin: 60px auto; 
-    padding: 0 20px; 
-    animation: fadeIn 0.6s ease-out; 
+.pay-container {
+    width: 820px;
+    margin: 70px auto 90px;
 }
 
-/* 헤더 */
-.pay-header { 
-    font-size: 28px; 
-    font-weight: 800; 
-    text-align: center; 
-    margin-bottom: 40px; 
-    color: #333; 
+.pay-header {
+    margin-bottom: 28px;
+    padding-bottom: 18px;
+    border-bottom: 2px solid var(--text-main);
+    color: var(--text-main);
+    font-size: 28px;
+    font-weight: 800;
 }
 
-/* 섹션 공통 (흰색 카드) */
-.pay-section { 
-    background: #fff; 
-    border-radius: 20px; 
-    padding: 30px; 
-    margin-bottom: 25px; 
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+.pay-section {
+    margin-bottom: 22px;
+    padding: 26px 28px;
+    border: 1px solid var(--line-soft);
+    border-radius: 14px;
+    background: #fff;
 }
 
-/* 섹션 타이틀 (파란색 세로 바) */
-.section-title { 
-    font-size: 19px; 
-    font-weight: 700; 
-    margin-bottom: 25px; 
-    display: flex; 
-    align-items: center; 
-    color: #444; 
-}
-.section-title::before { 
-    content: ""; 
-    width: 5px; 
-    height: 20px; 
-    background-color: #3BB1E5; 
-    margin-right: 12px; 
-    border-radius: 10px; 
+.section-title {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    color: var(--text-main);
+    font-size: 18px;
+    font-weight: 800;
 }
 
-/* 상품 카드 영역 */
-.item-card { 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    padding: 10px 0; 
-}
-.item-content { 
-    display: flex; 
-    align-items: center; 
-    gap: 20px; 
-}
-.item-img { 
-    width: 80px; 
-    height: 80px; 
-    border-radius: 15px; 
-    object-fit: cover; 
-    border: 1px solid #f1f1f1; 
-    background-color: #f9fbfd; 
-}
-.item-name { 
-    font-weight: 700; 
-    font-size: 17px; 
-    color: #333; 
-    margin-bottom: 5px; 
-}
-.item-detail { 
-    color: #888; 
-    font-size: 14px; 
-}
-.item-detail b { 
-    color: #555; 
-    font-weight: 600; 
-}
-.item-total-price { 
-    font-weight: 800; 
-    font-size: 18px; 
-    color: #3BB1E5; 
+.section-title::before {
+    content: "";
+    width: 4px;
+    height: 18px;
+    margin-right: 10px;
+    border-radius: 999px;
+    background: var(--main);
 }
 
-/* 입력 폼 스타일 */
-.input-group { 
-    margin-bottom: 15px; 
-    text-align: left; 
+.item-card {
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    align-items: flex-start;
 }
-.input-group label { 
-    display: block; 
-    font-size: 14px; 
-    font-weight: 600; 
-    margin-bottom: 10px; 
-    color: #666; 
+
+.item-content {
+    flex: 1;
 }
-.input-field { 
-    width: 100%; 
-    padding: 14px 20px; 
-    border: 1px solid #e1e1e1; 
-    border-radius: 30px; 
-    box-sizing: border-box; 
-    font-size: 15px; 
+
+.item-name {
+    color: var(--text-main) !important;
+    font-size: 20px !important;
+    font-weight: 800;
+    line-height: 1.4;
+}
+
+.item-detail {
+    color: var(--text-sub) !important;
+    font-size: 15px;
+    line-height: 1.7 !important;
+}
+
+.item-detail span {
+    color: var(--text-main) !important;
+}
+
+.item-total-price {
+    min-width: 180px;
+    color: var(--main) !important;
+    font-size: 18px !important;
+    font-weight: 900 !important;
+    text-align: right;
+}
+
+.input-group {
+    margin-bottom: 16px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 10px;
+    color: var(--text-main);
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.input-field {
+    width: 100%;
+    min-height: 48px;
+    padding: 0 16px;
+    border: 1px solid var(--line-soft);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--text-main);
+    font-size: 15px;
     font-family: inherit;
-    transition: all 0.3s; 
-    background-color: #fff;
-}
-.input-field:focus { 
-    border-color: #3BB1E5; 
-    outline: none; 
-    box-shadow: 0 0 8px rgba(59, 177, 229, 0.2); 
+    box-sizing: border-box;
+    outline: none;
 }
 
-/* 요약 박스 */
-.summary-box { 
-    background: #f9fbfd; 
-    padding: 25px; 
-    border-radius: 15px; 
-    text-align: left; 
-}
-.summary-row { 
-    display: flex; 
-    justify-content: space-between; 
-    margin-bottom: 12px; 
-    color: #666; 
-    font-size: 15px; 
-}
-.text-discount { 
-    color: #FF4D4F; 
-    font-weight: 800; 
-    font-size: 17px; 
-}
-.point-info { 
-    font-size: 13px; 
-    color: #888; 
-    margin-top: 15px; 
-    padding-top: 15px; 
-    border-top: 1px dashed #e1e1e1; 
-}
-.point-info b { 
-    color: #3BB1E5; 
+textarea.input-field {
+    padding: 14px 16px;
+    line-height: 1.6;
 }
 
-/* 버튼 그룹 */
-.btn-group { 
-    display: flex; 
-    gap: 15px; 
-    margin-top: 20px; 
-    margin-bottom: 60px;
-}
-.btn-primary { 
-    flex: 2; 
-    padding: 18px; 
-    background: #3BB1E5; 
-    color: white; 
-    border: none; 
-    border-radius: 40px; 
-    font-size: 17px; 
-    font-weight: 700; 
-    cursor: pointer; 
-    transition: all 0.3s; 
-    box-shadow: 0 8px 20px rgba(59, 177, 229, 0.3); 
-}
-.btn-primary:hover { 
-    background: #2a9cd1; 
-    transform: translateY(-2px); 
-}
-.btn-secondary { 
-    flex: 1; 
-    padding: 18px; 
-    background: #666; 
-    color: white; 
-    border: none; 
-    border-radius: 30px; 
-    font-size: 16px; 
-    font-weight: 600; 
-    cursor: pointer; 
-    transition: background 0.3s; 
-}
-.btn-secondary:hover { 
-    background: #555; 
+.input-field:focus {
+    border-color: var(--main);
 }
 
-/* 애니메이션 */
-@keyframes fadeIn { 
-    from { opacity: 0; transform: translateY(20px); } 
-    to { opacity: 1; transform: translateY(0); } 
+.summary-box {
+    padding: 22px 24px;
+    border: 1px solid var(--line-soft);
+    border-radius: 12px;
+    background: var(--image-soft);
+}
+
+.policy-msg {
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px dashed var(--line-soft);
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.text-blue {
+    color: var(--main);
+}
+
+.text-red {
+    color: #e5484d;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--text-main);
+    font-size: 16px;
+}
+
+.text-discount {
+    color: var(--main) !important;
+    font-size: 22px !important;
+    font-weight: 900 !important;
+}
+
+.point-info {
+    margin-top: 14px !important;
+    padding-top: 14px;
+    border-top: 1px dashed var(--line-soft);
+    color: var(--text-sub) !important;
+    font-size: 14px !important;
+    line-height: 1.7;
+}
+
+.btn-group {
+    display: flex;
+    gap: 12px;
+    margin-top: 28px;
+}
+
+.btn-group button {
+    height: 52px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, border-color 0.2s, opacity 0.2s;
+}
+
+.btn-secondary {
+    flex: 1;
+    border: 1px solid var(--line-soft);
+    background: #fff;
+    color: var(--text-sub);
+}
+
+.btn-secondary:hover {
+    background: var(--image-soft);
+    color: var(--text-main);
+}
+
+.btn-primary {
+    flex: 2;
+    border: 1px solid var(--main);
+    background: var(--main);
+    color: #fff;
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+}
+
+.btn-primary:disabled {
+    border-color: #ddd;
+    background: #ddd;
+    color: #999;
+    cursor: not-allowed;
+    opacity: 1;
+}
+
+.item-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: 1;
+    min-width: 0;
+}
+
+.item-img {
+    width: 90px;
+    height: 90px;
+    border-radius: 12px;
+    border: 1px solid var(--line-soft);
+    background: var(--image-soft);
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+@media (max-width: 768px) {
+    .pay-container {
+        width: calc(100% - 32px);
+        margin: 40px auto 70px;
+    }
+
+    .pay-section {
+        padding: 22px 18px;
+    }
+
+    .item-card {
+        flex-direction: column;
+    }
+
+    .item-total-price {
+        width: 100%;
+        text-align: left;
+    }
+
+    .btn-group {
+        flex-direction: column;
+    }
+
+    .btn-secondary,
+    .btn-primary {
+        flex: none;
+        width: 100%;
+    }
 }

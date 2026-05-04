@@ -1,71 +1,91 @@
-body {
-    margin: 0;
-    padding: 60px 0;
-    background: #f4f6fb;
-    font-family: Arial, sans-serif;
-}
+@charset "UTF-8";
 
 #app {
-    width: 420px;
-    margin: 0 auto;
-    background: #f0f4f5;
-    border: 1px solid hsl(205, 89%, 51%);
-    border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-    padding: 28px 24px 24px;
+    width: 520px;
+    margin: 160px auto 200px;
+    background: var(--box-bg);
+    border: 1px solid var(--line-soft);
+    border-radius: 22px;
+    padding: 42px 36px 38px;
     text-align: center;
+    box-sizing: border-box;
 }
 
 #app::before {
     content: "회원가입 유형 선택";
     display: block;
-    font-size: 22px;
+    font-size: 26px;
     font-weight: 700;
-    color: #222;
-    margin-bottom: 24px;
+    color: var(--text-main);
+    margin-bottom: 26px;
 }
 
-button {
-    width: 170px;
+#app::after {
+    content: "가입하실 유형을 선택해주세요";
+    display: block;
+    font-size: 15px;
+    color: var(--text-sub);
+    margin-top: 30px;
+    margin-bottom: 3px;
+}
+
+#app > button {
+    width: 200px;
     height: 180px;
-    border-radius: 12px;
+    border-radius: 18px;
     cursor: pointer;
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 700;
     line-height: 1.4;
-    transition: all 0.2s ease;
-    margin: 0 7px;
+    margin: 0 8px;
     vertical-align: top;
+    background: var(--bg);
+    color: var(--text-main);
+    border: 1px solid var(--line-soft);
+    transition: background 0.1s, border-color 0.1s, transform 0.1s;
 }
 
-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+#app > button:hover {
+    transform: translateY(-4px);
+    border-color: var(--main);
+}
+
+#app > button:first-of-type::before {
+    content: "👤";
+    display: block;
+    font-size: 38px;
+    margin-bottom: 16px;
+}
+
+#app > button:last-of-type::before {
+    content: "🏪";
+    display: block;
+    font-size: 38px;
+    margin-bottom: 16px;
 }
 
 button:first-of-type {
-    border: 2px solid #8ea8d8;
-    background: #eef4ff;
-    color: #2b2b2b;
+    border: 1px solid var(--line-soft);
 }
 
 button:last-of-type {
-    border: 1px solid #dfd7cf;
-    background: #f7f2ed;
-    color: #2b2b2b;
+    border: 1px solid var(--line-soft);
 }
 
-table, tr, td, th {
-    border: 1px solid black;
-    border-collapse: collapse;
-    padding: 5px 10px;
-    text-align: center;
-}
+@media (max-width: 600px) {
+    #app {
+        width: calc(100% - 32px);
+        margin-top: 80px;
+        padding: 34px 20px 30px;
+    }
 
-th {
-    background-color: beige;
-}
+    button {
+        width: 100%;
+        height: 140px;
+        margin: 0 0 14px;
+    }
 
-tr:nth-child(even) {
-    background-color: azure;
+    button:last-of-type {
+        margin-bottom: 0;
+    }
 }

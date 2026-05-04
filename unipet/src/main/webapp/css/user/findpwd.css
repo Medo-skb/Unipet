@@ -11,7 +11,7 @@
 }
 
 #app::before {
-    content: "비밀번호 변경";
+    content: "비밀번호 찾기";
     display: block;
     text-align: center;
     font-size: 26px;
@@ -54,44 +54,29 @@
     outline: none;
 }
 
-.input-group {
+.inline-btn {
     display: flex;
-    gap: 10px; /* 기존 inline-btn의 gap 유지 */
-    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
 }
 
-/* 2. 그룹 내 입력창 설정 */
-.input-group input {
-    flex: 1; /* 남은 공간을 모두 차지 */
-    width: auto; /* flex 환경에서 width: 100% 충돌 방지 */
-}
-
-/* 3. 입력창 옆 버튼 (인증번호 발송/확인 전용) */
-.side-btn {
-    width: 120px; /* 버튼의 고정 너비 */
-    height: 46px; /* 기존 input 높이와 일치 */
-    border-radius: 12px; /* input과 동일한 곡률 */
+.inline-btn button {
+    flex: 1;
+    height: 46px;
+    border-radius: 14px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 700;
     border: 1px solid var(--main);
     background: transparent;
     color: var(--main);
     transition: background 0.1s, color 0.1s;
-    white-space: nowrap; /* 글자 줄바꿈 방지 */
+    margin-top: 14px;
 }
 
-.side-btn:hover {
+.inline-btn button:hover {
     background: var(--main);
     color: var(--bg);
-}
-
-/* 4. 비활성화 상태 스타일 (재설정 이동 버튼용) */
-.btn-disabled {
-    background: var(--line-soft) !important;
-    border-color: var(--line-soft) !important;
-    color: var(--text-light) !important;
-    cursor: not-allowed !important;
 }
 
 .btn-box {
@@ -116,18 +101,87 @@
     color: var(--bg);
 }
 
-.help-text {
-    font-size: 12px;
-    color: var(--text-light, #888); /* 변수가 없다면 #888 등 회색 계열 사용 */
-    margin-top: 8px; /* 입력창과의 간격 */
-    margin-bottom: 0;
-    line-height: 1.4;
-}
-
 @media (max-width: 600px) {
     #app {
         width: calc(100% - 32px);
         margin: 80px auto 120px;
         padding: 34px 20px 30px;
     }
+}
+
+/* =========================================
+   [오차 교정 및 절대 방어] 1. 입력창 & 버튼 가로 길이 완벽 맞춤
+========================================= */
+.row .input-group {
+    display: flex !important;
+    gap: 10px !important;
+    width: 100% !important;
+}
+
+/* 감싸고 있는 div가 무조건 남은 공간을 전부 집어삼키도록 강제 */
+.row .input-group > div {
+    position: relative !important;
+    flex: 1 1 auto !important;
+    width: 100% !important;
+}
+
+/* div 안쪽에 있는 input 자체도 부모 크기에 맞춰 100% 강제 */
+.row .input-group > input,
+.row .input-group > div > input {
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* =========================================
+   [누락 복구] 2. 우측 인증 버튼 디자인 및 크기 고정
+========================================= */
+.side-btn {
+    width: 130px !important;
+    height: 46px !important;
+    flex-shrink: 0 !important;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 700;
+    border: 1px solid var(--main, #ff475a); /* 빨간 테두리 복구 */
+    background: transparent;
+    color: var(--main, #ff475a); /* 빨간 글씨 복구 */
+    transition: background 0.2s, color 0.2s;
+}
+
+.side-btn:hover:not(:disabled) {
+    background: var(--main, #ff475a);
+    color: var(--bg, #ffffff);
+}
+
+/* =========================================
+   [핵심 원인 해결] 3. 빠져있던 타이머 텍스트 위치 고정
+========================================= */
+.timer-text {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%); /* 정확히 상하 중앙 정렬 */
+    font-size: 14px;
+    color: #ff475a;
+    font-weight: 600;
+    pointer-events: none; /* 클릭 방해 금지 */
+}
+
+/* =========================================
+   [오차 교정] 4. 맨 아래 비활성화(회색) 버튼 & 인풋창 색상 통일
+========================================= */
+.btn-box button:disabled, 
+.btn-disabled {
+    background-color: #f4f4f4 !important;
+    border: 1px solid #e0e0e0 !important;
+    color: #aaaaaa !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+}
+
+input:disabled {
+    background-color: #fbfbfb !important;
+    border: 1px solid #ececec !important;
+    color: #999999 !important;
 }

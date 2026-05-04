@@ -1,44 +1,51 @@
-
-body {
-    margin: 0;
-    padding: 60px 0;
-    background: #f4f6fb;
-    font-family: Arial, sans-serif;
-}
+@charset "UTF-8";
 
 #app {
     width: 520px;
-    margin: 0 auto;
-    background: #f0f4f5;
-    border: 1px solid #3b82f6;
-    border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-    padding: 28px 24px;
+    margin: 120px auto 120px;
+    background: var(--box-bg);
+    border: 1px solid var(--line-soft);
+    border-radius: 22px;
+    padding: 40px 36px;
+    box-sizing: border-box;
 }
 
 #app::before {
     content: "사업자 회원가입";
     display: block;
     text-align: center;
-    font-size: 22px;
+    font-size: 26px;
     font-weight: 700;
-    margin-bottom: 24px;
+    margin-bottom: 28px;
+    color: var(--text-main);
 }
 
 .row {
-    margin-bottom: 12px;
+    margin-bottom: 14px;
 }
 
 .row input,
 .row select {
     width: 100%;
-    height: 42px;
-    border: 1px solid #cfd8e3;
-    border-radius: 10px;
-    padding: 0 12px;
+    height: 46px;
+    border: 1px solid var(--line-soft);
+    border-radius: 12px;
+    padding: 0 14px;
     box-sizing: border-box;
     font-size: 14px;
-    background: white;
+    background: var(--bg);
+    color: var(--text-main);
+    transition: 0.1s;
+}
+
+.row input::placeholder {
+    color: var(--text-light);
+}
+
+.row input:focus,
+.row select:focus {
+    border-color: var(--main);
+    outline: none;
 }
 
 .inline-box {
@@ -51,36 +58,46 @@ body {
 }
 
 .inline-box button {
-    width: 120px;
-    height: 42px;
-    border-radius: 10px;
-    border: 1px solid #8ea8d8;
-    background: #eef4ff;
+    width: 110px;
+    height: 46px;
+    border-radius: 12px;
+    border: 1px solid var(--main);
+    background: transparent;
     font-weight: 700;
     cursor: pointer;
+    color: var(--main);
+    transition: 0.1s;
+}
+
+.inline-box button:hover {
+    background: var(--main);
+    color: var(--bg);
 }
 
 .info-text {
     font-size: 12px;
-    margin-top: 5px;
+    margin-top: 6px;
+    color: var(--text-sub);
 }
 
 .btn-box {
-    margin-top: 20px;
+    margin-top: 26px;
 }
 
 .btn-box button {
     width: 100%;
-    height: 46px;
-    border-radius: 12px;
+    height: 50px;
+    border-radius: 14px;
     cursor: pointer;
     font-size: 16px;
     font-weight: 700;
-    border: 2px solid #8ea8d8;
-    background: #eef4ff;
+    border: 1px solid var(--main);
+    background: transparent;
+    color: var(--main);
+    transition: 0.1s;
 }
 
-.btn-box button:hover,
-.inline-box button:hover {
-    opacity: 0.9;
+.btn-box button:hover {
+    background: var(--main);
+    color: var(--bg);
 }

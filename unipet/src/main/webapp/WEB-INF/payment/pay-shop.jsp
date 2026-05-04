@@ -12,8 +12,7 @@
     <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/header.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/footer.css">
-    <!-- <link rel="stylesheet" href="${pageContext.request.contextPath}/css/payment/pay-shop.css"> -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/payment/pay-shop2.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/payment/pay-shop.css">
 </head>
 <body>
 

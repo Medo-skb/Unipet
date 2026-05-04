@@ -31,7 +31,7 @@ public class UserMypageController {
 			return null;
 		}
 
-		return "user/UserMypage2";
+		return "user/UserMypage";
 	}
 
 	// 마이페이지 기본 정보 조회

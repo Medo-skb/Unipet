@@ -1,87 +1,201 @@
+@charset "UTF-8";
 
-            body {
-                font-family: Arial, sans-serif;
-                background: #f7f7f7;
-            }
+.wrap {
+    width: 400px;
+    margin: 120px auto 120px;
+    background: var(--box-bg);
+    padding: 36px 30px;
+    border-radius: 18px;
+    border: 1px solid var(--line-soft);
+    box-sizing: border-box;
+}
 
-            .wrap {
-                width: 400px;
-                margin: 80px auto;
-                background: white;
-                padding: 30px;
-                border-radius: 10px;
-            }
+.title {
+    text-align: center;
+    margin-bottom: 24px;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-main);
+}
 
-            .title {
-                text-align: center;
-                margin-bottom: 20px;
-            }
+.tab-box {
+    display: flex;
+    margin-bottom: 18px;
+}
 
-            .tab-box {
-                display: flex;
-                margin-bottom: 15px;
-            }
+.tab-box button {
+    flex: 1;
+    height: 42px;
+    border: 1px solid var(--line);
+    background: transparent;
+    cursor: pointer;
+    color: var(--text-sub);
+    font-weight: 600;
+    transition: background 0.1s, color 0.1s, border-color 0.1s;
+}
 
-            .tab-box button {
-                flex: 1;
-                height: 40px;
-                border: 1px solid #ddd;
-                background: #fff;
-                cursor: pointer;
-            }
+.tab-box button.active {
+    border-color: var(--main);
+    background: var(--main);
+    color: var(--bg);
+}
 
-            .tab-box button.active {
-                background: #4CAF50;
-                color: white;
-            }
+.input-box {
+    margin-bottom: 12px;
+}
 
-            .input-box {
-                margin-bottom: 10px;
-            }
+.input-box input {
+    width: 100%;
+    height: 44px;
+    padding: 0 12px;
+    border: 1px solid var(--line-soft);
+    border-radius: 10px;
+    box-sizing: border-box;
+    background: var(--bg);
+    color: var(--text-main);
+    transition: border-color 0.1s;
+}
 
-            .input-box input {
-                width: 100%;
-                height: 40px;
-                padding: 0 10px;
-            }
+.input-box input::placeholder {
+    color: var(--text-light);
+}
 
-            .btn-box button {
-                width: 100%;
-                height: 45px;
-                background: #4CAF50;
-                color: white;
-                border: none;
-                cursor: pointer;
-            }
+.input-box input:focus {
+    border-color: var(--main);
+    outline: none;
+}
 
-            .link-box {
-                text-align: center;
-                margin-top: 15px;
-            }
+.btn-box {
+    margin-top: 18px;
+}
 
-            .link-box a {
-                margin: 0 6px;
-            }
+.btn-box button {
+    width: 100%;
+    height: 46px;
+    border: 1px solid var(--main);
+    border-radius: 12px;
+    background: transparent;
+    color: var(--main);
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.1s, color 0.1s;
+}
 
-            .social-box {
-                margin-top: 20px;
-                text-align: center;
-            }
+.btn-box button:hover {
+    background: var(--main);
+    color: var(--bg);
+}
 
-            .social-box button {
-                width: 100%;
-                height: 42px;
-                margin-bottom: 8px;
-                border: none;
-                cursor: pointer;
-            }
+.link-box {
+    text-align: center;
+    margin-top: 16px;
+}
 
-            .kakao {
-                background: #FEE500;
-            }
+.link-box a {
+    margin: 0 6px;
+    font-size: 13px;
+    color: var(--text-sub);
+    text-decoration: none;
+}
 
-            .naver {
-                background: #03C75A;
-                color: white;
-            }
-       
+.link-box a:hover {
+    color: var(--main);
+}
+
+.social-box {
+    margin-top: 26px;
+    text-align: center;
+}
+
+.social-title {
+    margin: 0 0 16px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-sub);
+}
+
+.social-btn-list {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+}
+
+.social-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    font-weight: 800;
+    transition: transform 0.1s, border-color 0.1s;
+}
+
+.social-btn:hover {
+    border: none;
+}
+
+.social-btn.kakao {
+    background: transparent;
+}
+
+.social-btn.naver {
+    background: #03c75a;
+    color: #ffffff;
+
+}
+
+.social-btn img {
+    width: 50px;
+    height: 50px;
+}
+.verify-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.verify-box {
+    width: 360px;
+    background: #fff;
+    border-radius: 18px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    text-align: center;
+}
+
+.verify-box h3 {
+    margin-bottom: 20px;
+}
+
+.verify-box input {
+    width: 100%;
+    height: 44px;
+    margin-bottom: 10px;
+    padding: 0 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.verify-box button {
+    width: 100%;
+    height: 44px;
+    border: none;
+    border-radius: 8px;
+    background: #2f80ed;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
