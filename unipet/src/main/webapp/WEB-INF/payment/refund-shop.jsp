@@ -125,7 +125,7 @@
                             self.list = data.list || [];
                         } else {
                             alert("주문 정보를 찾을 수 없습니다.");
-                            // self.fnGoBack();
+                            location.href = "/main.do";
                         }
                     }
                 });
