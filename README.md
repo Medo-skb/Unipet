@@ -170,34 +170,34 @@
 
 ---
 
-# 📂 Project Structure
+# 📂 프로젝트 구조도
 
 ```
 Unipet/
 ├── pom.xml                               	# Maven 라이브러리 및 빌드 설정
 ├── src/
 │   ├── main/
-│   │   ├── java/com/example/unipet/[cite: 1]
-│   │   │   ├── common/                 	# 공통 설정 및 유틸리티[cite: 1]
-│   │   │   ├── config/                   	# 보안 및 환경 설정[cite: 1]
-│   │   │   ├── controller/            	# 컨트롤러 (웹 요청 처리)[cite: 1]
-│   │   │   ├── dao/                      	# 비즈니스 로직 처리[cite: 1]
-│   │   │   ├── mapper/                   	# MyBatis 매퍼 인터페이스[cite: 1]
-│   │   │   ├── model/                    	# DB 테이블과 매핑되는 DTO/VO[cite: 1]
-│   │   │   └── scheduler/                	# 예약 및 구독 자동 처리를 위한 스케줄러[cite: 1]
+│   │   ├── java/com/example/unipet/
+│   │   │   ├── common/                 	  # 공통 설정 및 유틸리티
+│   │   │   ├── config/                   	# 보안 및 환경 설정
+│   │   │   ├── controller/            	   # 컨트롤러 (웹 요청 처리)
+│   │   │   ├── dao/                      	# 비즈니스 로직 처리
+│   │   │   ├── mapper/                   	# MyBatis 매퍼 인터페이스
+│   │   │   ├── model/                    	# DB 테이블과 매핑되는 DTO/VO
+│   │   │   └── scheduler/                	# 예약 및 구독 자동 처리를 위한 스케줄러
 │   │   │
-│   │   ├── resources/[cite: 1]
-│   │   │   ├── application.properties    	# DB 연동 및 프로젝트 전역 설정[cite: 1]
-│   │   │   └── mybatis-mapper/           	# SQL 쿼리 XML 파일[cite: 1]
+│   │   ├── resources/
+│   │   │   ├── application.properties    	# DB 연동 및 프로젝트 전역 설정
+│   │   │   └── mybatis-mapper/           	# SQL 쿼리 XML 파일
 │   │   │
-│   │   └── webapp/[cite: 1]
-│   │       ├── css/ / img/ / js/          	# 정적 리소스 관리[cite: 1]
-│   │       └── WEB-INF/[cite: 1]
-│   │           ├── default.jsp           	# 공통 레이아웃 템플릿[cite: 1]
-│   │           ├── main/                 	# 메인 및 Gemini 챗봇 화면[cite: 1]
-│   │           ├── user/ / bizMyPage/    	# 유저 및 사업자 전용 페이지[cite: 1]
-│   │           ├── product/ / payment/    	# 쇼핑몰 및 결제 시스템[cite: 1]
-│   │           ├── reservation/          	# 예약 시스템 관련 화면[cite: 1]
-│   │           └── board/                	# 커뮤니티 게시판[cite: 1]
-│   └── test/                             	# 단위 테스트 코드[cite: 1]
+│   │   └── webapp/
+│   │       ├── css/ / img/ / js/          # 정적 리소스 관리
+│   │       └── WEB-INF/
+│   │           ├── default.jsp           	# 공통 레이아웃 템플릿
+│   │           ├── main/                 	# 메인 및 Gemini 챗봇 화면
+│   │           ├── user/ / bizMyPage/    	# 유저 및 사업자 전용 페이지
+│   │           ├── product/ / payment/    # 쇼핑몰 및 결제 시스템
+│   │           ├── reservation/          	# 예약 시스템 관련 화면
+│   │           └── board/                	# 커뮤니티 게시판
+│   └── test/                             	# 단위 테스트 코드
 ```
