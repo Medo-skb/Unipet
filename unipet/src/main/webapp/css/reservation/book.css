@@ -1,73 +1,83 @@
-#container{
-    width: 600px;
-    border: 1px solid black;
-    margin: 0px auto;
-    padding: 20px;
+@charset "UTF-8";
+
+#container {
+    width: 800px;
+    margin: 40px auto 80px;
+    padding: 34px;
     box-sizing: border-box;
+    background: #fff;
+    border: 1px solid var(--line-soft);
+    border-radius: 22px;
+}
+
+.store-name{
+    font-weight: 700;
+    font-size: 18px;
+    color: #aaa;
 }
 
 .title{
-    font-weight: bold;
-    size: 15px;
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--text-main);
+    margin-bottom: 12px;
 }
 
 #datetime-area {
     width: 100%;
-    max-width: 800px;
+    margin: 0 auto 34px;
+    text-align: center;
+}
+
+/* 캘린더 + 시간 */
+.cal-slot {
+    display: grid;
+    grid-template-columns: 300px 300px;
+    justify-content: center;
+    align-items: start;
+    gap: 24px;
+    width: fit-content;
     margin: 0 auto;
 }
 
-.cal-slot {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    max-width: 650px;
-    margin: 10px 0;
-    align-items: stretch; 
-}
-
+/* 캘린더 */
 #calendar-area {
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    border: 1px solid var(--line-soft);
+    border-radius: 18px;
     background: #fff;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
+    overflow: hidden;
 }
 
 .calendar-header {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 10px;
-    gap: 15px;
-    font-size: 0.9rem;
-    font-weight: bold;
-    border-bottom: 1px solid #eee;
+    padding: 14px;
+    gap: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border-bottom: 1px solid var(--line-soft);
 }
 
 .calendar-header button {
     border: none;
     background: none;
     cursor: pointer;
-    font-size: 0.7rem;
+    font-size: 16px;
 }
 
 .calendar-main {
-    display: grid !important;
-    grid-template-columns: repeat(7, 1fr) !important;
-    width: 100%;
-    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
 }
 
 .day-header {
     text-align: center;
-    padding: 8px 0;
-    font-size: 0.75rem;
-    color: #999;
+    padding: 10px 0;
+    font-size: 13px;
+    color: var(--text-sub);
     background-color: #fafafa;
-    box-sizing: border-box; 
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--line-soft);
 }
 
 .day-cell {
@@ -76,10 +86,9 @@
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    font-size: 0.8rem;
-    box-sizing: border-box;
-    border-bottom: 1px solid #f9f9f9;
-    border-right: 1px solid #f9f9f9;
+    font-size: 14px;
+    border-bottom: 1px solid #f3f3f3;
+    border-right: 1px solid #f3f3f3;
 }
 
 .day-header:nth-child(7n),
@@ -88,247 +97,223 @@
 }
 
 .day-cell.selected span {
-    background-color: #3b82f6;
+    background-color: var(--main);
     color: #fff;
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     display: flex;
     justify-content: center;
     align-items: center;
     border-radius: 50%;
+}
+
+.day-cell.today {
+    color: var(--main);
     font-weight: bold;
 }
 
-.day-cell.empty {
-    cursor: default;
-    background: none !important;
-}
-
-.day-cell.today { color: #3b82f6; font-weight: bold; }
-
 .day-cell.disabled {
-    background-color: #f5f5f5 !important;
-    color: #ccc !important;
-    cursor: not-allowed !important;
-    pointer-events: none;
+    background-color: #f8f8f8;
+    color: #ccc;
+    cursor: not-allowed;
 }
 
-.day-cell:not(.disabled):not(.empty) {
-    cursor: pointer;
+.day-cell:not(.disabled):hover {
+    background-color: #fff1f3;
 }
 
-.day-cell:not(.disabled):not(.empty):hover {
-    background-color: #e3f2fd;
-}
-
+/* 시간 슬롯 */
 #time-slot-area {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+    gap: 10px;
     height: 320px;
     overflow-y: auto;
-    padding-right: 5px;
-}
-
-#time-slot-area::-webkit-scrollbar {
-    width: 6px;
-}
-#time-slot-area::-webkit-scrollbar-thumb {
-    background-color: #e5e7eb;
-    border-radius: 5px;
-}
-#time-slot-area::-webkit-scrollbar-track {
-    background-color: transparent;
 }
 
 .time-btn {
-    box-shadow: none !important;
-    border: 1px solid #3b82f6;
+    border: 1px solid var(--main);
     background-color: #fff;
-    color: #3b82f6;
-    padding: 10px 0;
-    border-radius: 5px;
-    font-size: 0.85rem;
+    color: var(--main);
+    padding: 12px 0;
+    border-radius: 12px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    text-align: center;
 }
 
 .time-btn:hover:not(:disabled) {
-    background-color: #eff6ff;
-}
-
-.time-btn:active:not(:disabled) {
-    background-color: #3b82f6;
-    color: #fff;
-    transform: none;
+    background-color: #fff1f3;
 }
 
 .time-btn.selected {
-    background-color: #ff9f43;
-    color: white;
-    border-color: #ff9f43;
+    background-color: var(--main);
+    color: #fff;
 }
 
-.time-btn:disabled, .time-btn.booked {
-    background-color: #f2f2f2;
+.time-btn:disabled {
+    background-color: #f3f3f3;
     color: #ccc;
     border-color: #eee;
     cursor: not-allowed;
-    position: relative;
 }
 
+/* 반려동물 */
 #pet-area{
-    margin: 10px 0px;
+    margin-bottom: 34px;
 }
 
 .pet-list-container {
     display: flex;
-    gap: 15px;
+    gap: 16px;
     flex-wrap: wrap;
-    margin-top: 10px;
 }
 
 .pet-card {
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 15px;
-    width: 200px;
+    border: 1px solid var(--line-soft);
+    border-radius: 18px;
+    padding: 16px;
+    width: 220px;
     cursor: pointer;
     background-color: #fff;
     transition: all 0.2s ease;
 }
 
 .pet-card:hover {
-    border-color: #aaa;
-    transform: translateY(-2px);
+    transform: translateY(-4px);
 }
 
 .pet-card.selected {
-    border: 2px solid #ff9f43;
-    background-color: #fffaf5;
+    border: 2px solid var(--main);
+    background-color: #fff1f3;
 }
 
 .pet-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
     margin-bottom: 10px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 5px;
 }
 
 .pet-name {
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #333;
+    font-size: 16px;
+    font-weight: 700;
 }
 
 .pet-main {
-    font-size: 0.8rem;
-    background: #ffefdf;
-    color: #ff9f43;
-    padding: 2px 6px;
-    border-radius: 5px;
+    font-size: 12px;
+    background: #ffe4ea;
+    color: var(--main);
+    padding: 2px 8px;
+    border-radius: 999px;
 }
 
 .pet-info p {
-    margin: 5px 0;
-    font-size: 0.9rem;
-    color: #666;
+    margin: 4px 0;
+    font-size: 13px;
+    color: var(--text-sub);
 }
 
+/* 메뉴 */
 #menu-area {
-    margin: 10px 0px;
-    background-color: #fff;
-    border-radius: 5px;
+    margin-bottom: 34px;
 }
 
 .menus {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 10px;
+    gap: 12px;
 }
 
 .menu-item {
-    display: flex;
-    align-items: center;
-    border: 1px solid #eee;
-    border-radius: 20px;
-    padding: 8px 15px;
-    background-color: #f9f9f9;
+    border: 1px solid var(--line-soft);
+    border-radius: 999px;
+    padding: 10px 16px;
+    background-color: #fff;
     transition: all 0.2s;
 }
 
 .menu-item:hover {
-    border-color: #ff9f43;
-    background-color: #fffcf9;
-}
-
-.menu-item label {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    width: 100%;
-}
-
-.menu-item input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    margin-right: 12px;
-    accent-color: #ff9f43;
-    cursor: pointer;
+    border-color: var(--main);
+    background-color: #fff1f3;
 }
 
 .menu-name {
-    font-size: 0.95rem;
-    color: #333;
+    font-size: 14px;
     font-weight: 500;
 }
 
 .menu-price {
-    font-size: 0.9rem;
-    color: #ff9f43;
-    font-weight: bold;
+    font-size: 14px;
+    color: var(--main);
+    font-weight: 700;
 }
 
-.menu-item label {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    white-space: nowrap;
-}
-
-.menu-item-selected {
-    border-color: #ff9f43;
-    background-color: #fff4e8;
-}
-
+/* 가격 */
 .price{
-    margin: 10px 0px;
+    margin: 16px 0;
+    font-size: 16px;
+}
+
+.highlight{
+    color: #ff4757;
 }
 
 .sub-text{
     font-size: 13px;
+    color: #aaa;
 }
 
+.textarea-wrapper {
+    position: relative; /* 자식인 char-count의 기준점이 됨 */
+    /* width: 100%; */
+}
+
+/* 요청사항 */
 textarea{
     width: 100%;
-    height: 40px;
-    margin: 10px 0px;
+    height: 80px;
+    margin-top: 10px;
+    border: 1px solid var(--line-soft);
+    border-radius: 12px;
+    padding: 10px;
+    resize: none;
+    box-sizing: border-box;
 }
 
+/* 요청사항 글자수 카운트 */
+.char-count {
+    position: absolute;
+    right: 15px;      /* 오른쪽에서 15px 띄움 */
+    bottom: 15px;     /* 아래에서 15px 띄움 (안쪽처럼 보임) */
+    font-size: 13px;
+    color: #adb5bd;   /* 너무 튀지 않는 연한 회색 */
+    pointer-events: none; /* 클릭 이벤트가 텍스트박스로 전달되게 함 */
+}
+
+/* 버튼 */
 .button{
-    border: 1px solid #3b82f6;
-    background-color:#3b82f6;
+    background-color: var(--main);
     color:#fff;
-    border-radius: 5px;
-    width: 100px;
-    height: 30px;
-    line-height: 30px;
+    border-radius: 999px;
+    width: 200px;
+    height: 44px;
+    line-height: 44px;
     text-align: center;
-    margin: 0px auto;
+    margin: 30px auto 0;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.button:hover{
+    opacity: 0.9;
+}
+
+.menu-item.selected {
+    border: 2px solid var(--main);
+    background-color: #fff1f3;
+}
+
+.menu-item.selected .menu-name,
+.menu-item.selected .menu-price {
+    font-weight: 700;
 }

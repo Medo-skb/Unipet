@@ -10,9 +10,7 @@
 	<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
 	<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 	<script src="/js/page-change.js"></script>
-
-	<!-- <link rel="stylesheet" href="/css/product/product.css"> -->
-	<link rel="stylesheet" href="/css/product/product2.css">
+	<link rel="stylesheet" href="/css/product/product.css">
 </head>
 
 <body>

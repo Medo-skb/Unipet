@@ -4,8 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="/css/user/findid2.css" rel="stylesheet">
-    <!-- 비밀번호 찾기와 동일한 UI 배치를 위해 필요한 경우 findpwd.css를 함께 불러오거나 findid2.css에 스타일을 맞춥니다. -->
+    <link href="/css/user/findid.css" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/header.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/footer.css">
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>

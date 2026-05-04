@@ -12,7 +12,7 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=2198e0ed2782e12a610e46213693750e&libraries=services"></script>
     <title>UNIPET</title>
-    <link href="/css/reservation/storeDetail2.css" rel="stylesheet">
+    <link href="/css/reservation/storeDetail.css" rel="stylesheet">
     
 </head>
 <body>

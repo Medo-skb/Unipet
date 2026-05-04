@@ -10,7 +10,7 @@
     <script src="/js/page-change.js"></script>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/header.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/footer.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/user/findpwd2.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/user/findpwd.css">
 </head>
 <body>
     <jsp:include page="/WEB-INF/header/header.jsp" />

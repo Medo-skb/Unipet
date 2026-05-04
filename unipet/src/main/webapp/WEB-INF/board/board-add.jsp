@@ -10,7 +10,7 @@
 	<script src="/js/page-change.js"></script>
 
 	<!-- <link rel="stylesheet" href="/css/board/board-add.css"> -->
-	 <link rel="stylesheet" href="/css/board/board-add2.css">
+	 <link rel="stylesheet" href="/css/board/board-add.css">
 </head>
 
 <body>

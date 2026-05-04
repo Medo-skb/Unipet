@@ -8,7 +8,7 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="/js/page-change.js"></script>
     <title>UNIPET</title>
-    <link href="/css/reservation/book2.css" rel="stylesheet">
+    <link href="/css/reservation/book.css" rel="stylesheet">
 </head>
 <body>
     <jsp:include page="/WEB-INF/header/header.jsp" />

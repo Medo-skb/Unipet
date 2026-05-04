@@ -12,8 +12,7 @@
     <title>UNIPET</title>
     <!-- <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/header.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/footer.css"> -->
-    <!-- <link rel="stylesheet" href="${pageContext.request.contextPath}/css/payment/refund.css"> -->
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/payment/refund2.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/payment/refund.css">
 </head>
 <body>
 
