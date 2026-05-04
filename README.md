@@ -172,6 +172,7 @@
 
 # 📂 Project Structure
 
+```
 Unipet/
 ├── pom.xml                               	# Maven 라이브러리 및 빌드 설정
 ├── src/
@@ -199,3 +200,4 @@ Unipet/
 │   │           ├── reservation/          	# 예약 시스템 관련 화면[cite: 1]
 │   │           └── board/                	# 커뮤니티 게시판[cite: 1]
 │   └── test/                             	# 단위 테스트 코드[cite: 1]
+```
