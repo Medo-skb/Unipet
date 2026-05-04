@@ -426,4 +426,25 @@ public class UserMypageController {
 
 		return result;
 	}
+	
+	// 환불 완료 후 주문/배송 상태 변경
+	@PostMapping("/user/update-order-refund.dox")
+	@ResponseBody
+	public HashMap<String, Object> updateOrderRefund(@RequestParam HashMap<String, Object> map, HttpSession session) {
+
+	    Object sessionId = session.getAttribute("sessionId");
+
+	    if (sessionId == null) {
+	        HashMap<String, Object> result = new HashMap<>();
+	        result.put("result", "loginRequired");
+	        result.put("message", "로그인 후 이용해주세요.");
+	        return result;
+	    }
+
+	    map.put("userId", sessionId);
+
+	    return userMypageService.updateOrderRefund(map);
+	}
+
+	
 }

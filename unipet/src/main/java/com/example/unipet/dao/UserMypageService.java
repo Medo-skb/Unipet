@@ -175,6 +175,17 @@ public class UserMypageService {
 
 		return result;
 	}
+	// 환불 완료 후 주문/배송 상태 변경
+	public HashMap<String, Object> updateOrderRefund(HashMap<String, Object> map) {
+	    HashMap<String, Object> result = new HashMap<>();
+
+	    int cnt = userMypageMapper.updateOrderRefund(map);
+
+	    result.put("result", cnt > 0 ? "success" : "fail");
+	    result.put("message", cnt > 0 ? "환불 상태가 반영되었습니다." : "환불 상태 변경 실패");
+
+	    return result;
+	}
 
 	public HashMap<String, Object> getWeightList(HashMap<String, Object> map) {
 		HashMap<String, Object> result = new HashMap<>();
@@ -404,6 +415,8 @@ public class UserMypageService {
 
 		return result;
 	}
+	
+
 	public HashMap<String, Object> getSubscriptionPayList(HashMap<String, Object> map) {
 	    HashMap<String, Object> result = new HashMap<>();
 
