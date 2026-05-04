@@ -178,26 +178,33 @@ Unipet/
 ├── src/
 │   ├── main/
 │   │   ├── java/com/example/unipet/
-│   │   │   ├── common/                 	  # 공통 설정 및 유틸리티
+│   │   │   ├── common/                 	# 공통 설정 및 유틸리티
 │   │   │   ├── config/                   	# 보안 및 환경 설정
-│   │   │   ├── controller/            	   # 컨트롤러 (웹 요청 처리)
-│   │   │   ├── dao/                      	# 비즈니스 로직 처리
+│   │   │   ├── controller/            	# 컨트롤러 (웹 요청 처리)
+│   │   │   ├── dao/                      	# 서비스 (로직)
 │   │   │   ├── mapper/                   	# MyBatis 매퍼 인터페이스
 │   │   │   ├── model/                    	# DB 테이블과 매핑되는 DTO/VO
-│   │   │   └── scheduler/                	# 예약 및 구독 자동 처리를 위한 스케줄러
+│   │   │   └── scheduler/                	# 예약, 구독 관련 스케줄러
 │   │   │
 │   │   ├── resources/
-│   │   │   ├── application.properties    	# DB 연동 및 프로젝트 전역 설정
-│   │   │   └── mybatis-mapper/           	# SQL 쿼리 XML 파일
+│   │   │   ├── application.properties    	# DB 연동 및 스프링 부트 전역 설정 파일
+│   │   │   └── mybatis-mapper/           	# SQL 쿼리가 작성된 XML 파일 (sql-*.xml)
 │   │   │
-│   │   └── webapp/
-│   │       ├── css/ / img/ / js/          # 정적 리소스 관리
-│   │       └── WEB-INF/
-│   │           ├── default.jsp           	# 공통 레이아웃 템플릿
-│   │           ├── main/                 	# 메인 및 Gemini 챗봇 화면
-│   │           ├── user/ / bizMyPage/    	# 유저 및 사업자 전용 페이지
-│   │           ├── product/ / payment/    # 쇼핑몰 및 결제 시스템
-│   │           ├── reservation/          	# 예약 시스템 관련 화면
-│   │           └── board/                	# 커뮤니티 게시판
-│   └── test/                             	# 단위 테스트 코드
+│   │   └── webapp/                    
+│   │       ├── css/                      	# 전역 CSS 파일
+│   │       ├── img/                      	# 각종 이미지 리소스
+│   │       ├── js/                       	# 전역 및 메인 페이지 스크립트 (main.js 등)
+│   │       └── WEB-INF/                  
+│   │           ├── default.jsp           	# 기본 레이아웃 템플릿
+│   │           ├── header/               	# 헤더 JSP
+│   │           ├── footer/               	# 푸터 JSP
+│   │           ├── main/                 	# 메인 화면 및 Gemini 챗봇 화면
+│   │           ├── user/                 	# 일반 유저 기능 (회원가입, 로그인, 마이페이지, 리뷰)
+│   │           ├── bizMyPage/            	# 비즈니스 유저 마이페이지 
+│   │           ├── admin/                	# 관리자 전용 페이지
+│   │           ├── product/              	# 쇼핑몰 상품 상세 및 장바구니
+│   │           ├── payment/              	# 예약 및 쇼핑 결제, 환불 화면
+│   │           ├── reservation/          	# 예약 검색, 진행 및 완료 화면
+│   │           └── board/                	# 커뮤니티 게시판 (목록, 글쓰기, 상세보기)
+│   └── test/                             	# 테스트 코드 영역
 ```
