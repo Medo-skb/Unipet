@@ -27,10 +27,10 @@
 | 이름 | GitHub 프로필 | 이메일 |
 |------|----------------|---------------|
 | 김현동 | [Medo-skb](https://github.com/Medo-skb) | [kiryto0912@gmail.com](mailto:kiryto0912@gmail.com) |
-| 장석재 | [Seokjae-Jang-git](https://github.com/Seokjae-Jang-git) |  |
-| 이다빈 | [dabinah9526-ship-it](https://github.com/dabinah9526-ship-it) |  |
-| 김예림 | [4288-yerim](https://github.com/4288-yerim) |  |
-| 성기필 | [SeongGiPil](https://github.com/SeongGiPil) |  |
+| 장석재 | [Seokjae-Jang-git](https://github.com/Seokjae-Jang-git) | [tjrwowkd@gmail.com](mailto:tjrwowkd@gmail.com) |
+| 이다빈 | [dabinah9526-ship-it](https://github.com/dabinah9526-ship-it) | [dabinah9526@gmail.com](mailto:dabinah9526@gmail.com) |
+| 김예림 | [4288-yerim](https://github.com/4288-yerim) | [yryr4288@gmail.com](mailto:yryr4288@gmail.com) |
+| 성기필 | [SeongGiPil](https://github.com/SeongGiPil) | [rlvf1234@naver.com](mailto:rlvf1234@naver.com) |
 
 ---
 
@@ -55,15 +55,15 @@
 
 [팀원별 페이지 시연 영상]
 
- <!-- [▶박새별](https://drive.google.com/file/d/1KYe6_MAVMIwSILGeuixbDFpA81i0jkD0/view?usp=drive_link) -->
+ [▶김현동]()
   
- <!-- [▶김정철](https://drive.google.com/file/d/1owCZxth38De0PlNbQWZyuNjqD76NlTDK/view?usp=drive_link) -->
+ [▶장석재]()
   
- <!-- [▶조연주](https://drive.google.com/file/d/1kFrRd876UF55wYAXayrs3kqn787k4w3F/view?usp=drive_link) -->
+ [▶이다빈]()
   
- <!-- [▶유승호](https://drive.google.com/file/d/1nE4d4DQLzHeSaB9VKoJkx036C8usRpve/view?usp=drive_link) -->
+ [▶김예림]()
   
- <!-- [▶이주원](https://drive.google.com/file/d/1WbIq-TAMugFVCtj2JI1knkPa4TBFruqE/view?usp=drive_link) -->
+ [▶성기필]()
 
 ---
 
@@ -170,7 +170,7 @@
 
 ---
 
-# 📂 프로젝트 구조도
+## 📂 프로젝트 구조도
 
 ```
 Unipet/
