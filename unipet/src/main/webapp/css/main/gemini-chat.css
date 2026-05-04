@@ -128,10 +128,6 @@
     cursor: pointer;
 }
 
-.store-link-btn:hover {
-    background: var(--sub);
-}
-
 .store-recommend-item {
     width: 100%;
     padding: 12px 0;
@@ -166,4 +162,18 @@
 .store-link-btn {
     margin-top: 6px;
     margin-bottom: 6px;
+}
+
+.reserve-time-btn {
+    display: inline-block;
+    margin-top: 8px;
+    margin-left: 6px;
+    padding: 7px 13px;
+    border: 1px solid var(--main);
+    border-radius: 999px;
+    color: var(--main);
+    background: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
 }

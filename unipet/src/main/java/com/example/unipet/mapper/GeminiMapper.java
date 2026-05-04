@@ -10,4 +10,5 @@ import com.example.unipet.model.StoreRecommend;
 @Mapper
 public interface GeminiMapper {
     List<StoreRecommend> selectStoreRecommendList(HashMap<String, Object> map);
+    
 }
