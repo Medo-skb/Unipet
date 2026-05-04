@@ -93,7 +93,7 @@ public class MainController {
     // 챗봇
     @RequestMapping("/unipet/chatbot.do")
 	public String gemini(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception {
-		return "main/gemini-chat";
+		return "main/gemini-chat2";
 	}
     
     // 메인페이지 리스트

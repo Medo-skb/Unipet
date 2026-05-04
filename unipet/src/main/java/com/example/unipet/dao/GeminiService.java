@@ -3,6 +3,7 @@ package com.example.unipet.dao;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -15,7 +16,6 @@ import com.example.unipet.mapper.GeminiMapper;
 import com.example.unipet.model.ChatRequest;
 import com.example.unipet.model.ChatResponse;
 import com.example.unipet.model.StoreRecommend;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class GeminiService {
@@ -48,8 +48,8 @@ public class GeminiService {
             return fixedAnswer;
         }
 
-        // "추천" + "지역" 같이 있을 때만 추천 실행
-        if (isStoreRecommendPrompt(prompt) && hasLocation(prompt)) {
+        // 추천 의도가 있으면 지역이 없어도 추천 실행
+        if (isStoreRecommendPrompt(prompt)) {
             return getStoreRecommendAnswer(prompt);
         }
 
@@ -97,7 +97,16 @@ public class GeminiService {
         String text = prompt.replaceAll("\\s", "");
 
         return text.contains("추천")
+                || text.contains("추천해")
+                || text.contains("부탁")
+                || text.contains("어디가좋")
+                || text.contains("어디가괜찮")
+                || text.contains("괜찮은곳")
+                || text.contains("좋은곳")
+                || text.contains("찾아줘")
+                || text.contains("알려줘")
                 || text.contains("업체")
+                || text.contains("동물병원")
                 || text.contains("병원")
                 || text.contains("미용")
                 || text.contains("호텔")
@@ -150,10 +159,14 @@ public class GeminiService {
         String animalKeyword = extractAnimalKeyword(prompt);
         String locationKeyword = extractLocationKeyword(prompt);
         String serviceKeyword = extractServiceKeyword(prompt);
+        String categoryKeyword = extractCategoryKeyword(prompt);
+        String interestKeyword = extractInterestKeyword(prompt);
 
         map.put("animalKeyword", animalKeyword);
         map.put("locationKeyword", locationKeyword);
         map.put("serviceKeyword", serviceKeyword);
+        map.put("categoryKeyword", categoryKeyword);
+        map.put("interestKeyword", interestKeyword);
 
         List<StoreRecommend> storeList = geminiMapper.selectStoreRecommendList(map);
 
@@ -161,47 +174,208 @@ public class GeminiService {
             return "조건에 맞는 업체를 찾지 못했습니다. 지역명이나 원하는 서비스명을 조금 더 구체적으로 입력해 주세요.";
         }
 
-        String storeListText = makeStoreListText(storeList);
+        StringBuilder answer = new StringBuilder();
 
-        String recommendPrompt = """
-            너는 UNIPET의 업체 추천 도우미다.
+        int count = 0;
 
-            사용자 질문에 가장 적합한 업체를 아래 후보 목록에서 최대 3개 추천해라.
+        for (StoreRecommend store : storeList) {
+            if (count >= 3) {
+                break;
+            }
 
-            규칙:
-            - 반드시 후보 목록 안에 있는 업체만 추천한다.
-            - 없는 업체를 만들지 않는다.
-            - 업체명, 추천 이유, 바로가기 링크를 포함한다.
-            - 추천 이유는 주소, 메뉴명, 소개글, 평점, 리뷰 수를 기준으로 짧게 작성한다.
-			- 리뷰 내용을 그대로 인용하지 말고 요약해서 작성한다.
-			- 문장이 중간에 끊기지 않게 각 업체 추천 이유는 한 문장으로 끝낸다.
-            - 사용자가 지역을 말한 경우 주소를 추천 이유에 포함한다.
-            - 사용자가 '싼 곳', '저렴한 곳', '가격'을 말한 경우 가격을 추천 이유에 포함한다.
-            - 사용자가 진료나 질병 관련 질문을 한 경우 치료 가능하다고 단정하지 말고, 리뷰와 소개글 기준으로만 추천한다.
-            - 답변은 한국어로 한다.
-            - 너무 길게 설명하지 않는다.
-            - 답변은 최대 3개 업체까지만 추천한다.
-			- 각 업체의 추천 이유는 1문장으로 작성한다.
-			- 따옴표를 사용하지 않는다.
-			- 반드시 각 업체마다 "업체번호: 숫자" 형식을 포함한다.
-			- 각 업체는 업체명, 업체번호, 추천 이유를 반드시 모두 작성한다.
-			- 추천 이유가 없는 업체는 추천하지 않는다.
-			- 문장을 중간에 끊지 말고 반드시 마침표로 끝낸다.
-			- 최대 3개 업체만 추천한다.
+            answer.append(count + 1).append(". ")
+                  .append(store.getStoreName()).append("\n");
 
-			답변 형식:
-			1. 업체명
-			업체번호: 업체번호
-			상세보기 버튼은 따로 만들 예정이므로 링크는 작성하지 않는다.
-			추천 이유: 한 문장으로 작성한다.
-			
-            사용자 질문:
-            """ + prompt + """
+            answer.append("상세보기|")
+                  .append(store.getStoreNo()).append("\n");
 
-            업체 후보:
-            """ + storeListText;
+            answer.append("추천 이유: ")
+	            .append(makeRecommendReason(store, prompt))
+	            .append("\n\n");
 
-        return callGemini(recommendPrompt);
+            count++;
+        }
+
+        return answer.toString().trim();
+    }
+    
+    private String makeRecommendReason(StoreRecommend store, String prompt) {
+
+        StringBuilder reason = new StringBuilder();
+
+        String interestKeyword = extractInterestKeyword(prompt);
+        String matchedReview = extractMatchedReview(store.getReviewContents(), interestKeyword);
+
+        if (interestKeyword != null && !interestKeyword.isEmpty() && matchedReview != null && !matchedReview.isEmpty()) {
+            reason.append("이용자 리뷰에서 ")
+                  .append(interestKeyword)
+                  .append("와 관련된 내용이 확인되어 추천드립니다. ");
+
+            reason.append("참고 리뷰: ")
+                  .append(matchedReview)
+                  .append(" ");
+        } else {
+            String positiveReview = extractPositiveReview(store.getReviewContents());
+
+            if (positiveReview != null && !positiveReview.isEmpty()) {
+                reason.append("이용자 리뷰에서 긍정적인 평가가 확인되어 추천드립니다. ");
+                reason.append("참고 리뷰: ").append(positiveReview).append(" ");
+            }
+        }
+
+        if (store.getMenuNames() != null && !store.getMenuNames().isEmpty()) {
+            reason.append("등록된 메뉴에 ")
+                  .append(store.getMenuNames())
+                  .append(" 등이 있습니다. ");
+        }
+
+        if (store.getReviewCount() > 0) {
+            reason.append("평점 ")
+                  .append(store.getAvgRating() == null ? "0" : store.getAvgRating())
+                  .append("점, 리뷰 ")
+                  .append(store.getReviewCount())
+                  .append("개가 등록되어 있습니다.");
+        }
+
+        return reason.toString();
+    }
+    
+    private String extractInterestKeyword(String prompt) {
+
+        String text = prompt.replaceAll("\\s", "");
+
+        if (text.contains("안과") || text.contains("눈") || text.contains("눈병") || text.contains("결막염")) {
+            return "안과";
+        }
+
+        if (text.contains("피부") || text.contains("피부병") || text.contains("피부염")) {
+            return "피부";
+        }
+
+        if (text.contains("치과") || text.contains("이빨") || text.contains("치아") || text.contains("스케일링")) {
+            return "치과";
+        }
+
+        if (text.contains("슬개골") || text.contains("관절") || text.contains("다리")) {
+            return "관절";
+        }
+
+        if (text.contains("건강검진") || text.contains("검진")) {
+            return "건강검진";
+        }
+
+        if (text.contains("응급") || text.contains("24시") || text.contains("야간")) {
+            return "응급";
+        }
+
+        return "";
+    }
+    
+    private String extractMatchedReview(String reviewContents, String keyword) {
+
+        if (reviewContents == null || reviewContents.trim().isEmpty()) {
+            return "";
+        }
+
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return "";
+        }
+
+        String[] reviews = reviewContents.split(" / ");
+
+        String[] searchWords;
+
+        if (keyword.equals("안과")) {
+            searchWords = new String[] {"안과", "눈", "눈물", "눈병", "결막염", "안구"};
+        } else if (keyword.equals("피부")) {
+            searchWords = new String[] {"피부", "피부병", "피부염", "가려움", "털빠짐"};
+        } else if (keyword.equals("치과")) {
+            searchWords = new String[] {"치과", "치아", "이빨", "스케일링", "구강"};
+        } else if (keyword.equals("관절")) {
+            searchWords = new String[] {"관절", "슬개골", "다리", "절뚝", "수술"};
+        } else if (keyword.equals("건강검진")) {
+            searchWords = new String[] {"건강검진", "검진", "검사", "피검사"};
+        } else if (keyword.equals("응급")) {
+            searchWords = new String[] {"응급", "24시", "야간", "급히", "위급"};
+        } else {
+            searchWords = new String[] {keyword};
+        }
+
+        for (String review : reviews) {
+            String cleanReview = review.trim().replaceAll("\\s+", " ");
+
+            if (cleanReview.isEmpty()) {
+                continue;
+            }
+
+            for (String word : searchWords) {
+                if (cleanReview.contains(word)) {
+                    if (cleanReview.length() > 70) {
+                        cleanReview = cleanReview.substring(0, 70) + "...";
+                    }
+
+                    return cleanReview;
+                }
+            }
+        }
+
+        return "";
+    }
+    
+    private String extractPositiveReview(String reviewContents) {
+
+        if (reviewContents == null || reviewContents.trim().isEmpty()) {
+            return "";
+        }
+
+        String[] reviews = reviewContents.split(" / ");
+
+        String[] positiveKeywords = {
+            "친절", "좋", "만족", "추천", "꼼꼼", "깨끗", "빠르", "정확",
+            "감사", "최고", "잘", "안심", "편안", "따뜻", "재방문"
+        };
+
+        String[] negativeKeywords = {
+            "불친절", "별로", "최악", "싫", "실망", "늦", "비싸", "불만",
+            "화남", "문제", "아쉬", "안좋", "안 좋", "다신", "환불"
+        };
+
+        for (String review : reviews) {
+            if (review == null) {
+                continue;
+            }
+
+            String cleanReview = review.trim().replaceAll("\\s+", " ");
+
+            if (cleanReview.isEmpty()) {
+                continue;
+            }
+
+            boolean hasNegative = false;
+
+            for (String negative : negativeKeywords) {
+                if (cleanReview.contains(negative)) {
+                    hasNegative = true;
+                    break;
+                }
+            }
+
+            if (hasNegative) {
+                continue;
+            }
+
+            for (String positive : positiveKeywords) {
+                if (cleanReview.contains(positive)) {
+                	if (cleanReview.length() > 60) {
+                	    cleanReview = cleanReview.substring(0, 60) + "...";
+                	}
+
+                    return cleanReview;
+                }
+            }
+        }
+
+        return "";
     }
 
     private String callGemini(String prompt) {
@@ -232,12 +406,20 @@ public class GeminiService {
 
                 requestCount.incrementAndGet(); // 🔥 성공 시 카운트 증가
 
-                return response.getCandidates()
-                        .get(0)
-                        .getContent()
-                        .getParts()
-                        .get(0)
-                        .getText();
+                StringBuilder result = new StringBuilder();
+
+                var parts = response.getCandidates()
+                    .get(0)
+                    .getContent()
+                    .getParts();
+
+                for (var part : parts) {
+                    if (part.getText() != null) {
+                        result.append(part.getText());
+                    }
+                }
+
+                return result.toString();
 
             } catch (Exception e) {
 
@@ -334,53 +516,44 @@ public class GeminiService {
 
     private String extractServiceKeyword(String prompt) {
 
-        String keyword = prompt;
+        String text = prompt.replaceAll("\\s", "");
 
-        keyword = keyword.replace("추천해줘", "");
-        keyword = keyword.replace("추천", "");
-        keyword = keyword.replace("업체", "");
-        keyword = keyword.replace("병원", "");
-        keyword = keyword.replace("곳", "");
-        keyword = keyword.replace("잘하는", "");
-        keyword = keyword.replace("알려줘", "");
-        keyword = keyword.replace("싼", "");
-        keyword = keyword.replace("저렴한", "");
-        keyword = keyword.replace("좀", "");
-        keyword = keyword.replace("인천", "");
-        keyword = keyword.replace("서울", "");
-        keyword = keyword.replace("부평", "");
-        keyword = keyword.replace("부천", "");
-        keyword = keyword.replace("강남", "");
-        keyword = keyword.replace("홍대", "");
-        keyword = keyword.replace("마포", "");
-        keyword = keyword.replace("송도", "");
-        keyword = keyword.replace("부산", "");
-        keyword = keyword.replace("대구", "");
-        keyword = keyword.replace("대전", "");
-        keyword = keyword.replace("광주", "");
-        keyword = keyword.replace("울산", "");
-        keyword = keyword.replace("수원", "");
-        keyword = keyword.replace("용인", "");
-        keyword = keyword.replace("성남", "");
-        keyword = keyword.replace("일산", "");
-        keyword = keyword.replace("김포", "");
-        keyword = keyword.replace("시흥", "");
-        keyword = keyword.replace("안산", "");
-        keyword = keyword.replace("안양", "");
-        keyword = keyword.replace("천안", "");
-        keyword = keyword.replace("청주", "");
-        keyword = keyword.replace("강아지", "");
-        keyword = keyword.replace("고양이", "");
-        keyword = keyword.replace("반려견", "");
-        keyword = keyword.replace("반려묘", "");
+        if (text.contains("건강검진")) {
+            return "건강검진";
+        }
 
-        keyword = keyword.trim();
+        if (text.contains("미용") || text.contains("컷") || text.contains("목욕") || text.contains("스파") || text.contains("샴푸")) {
+            return "미용";
+        }
 
-        if (keyword.length() < 2) {
+        if (text.contains("호텔") || text.contains("위탁") || text.contains("훈련")) {
+            return "호텔";
+        }
+
+        if (text.contains("동물병원") || text.contains("병원") || text.contains("진료") || text.contains("접종") || text.contains("응급")) {
             return "";
         }
 
-        return keyword;
+        return "";
+    }
+    
+    private String extractCategoryKeyword(String prompt) {
+
+        String text = prompt.replaceAll("\\s", "");
+
+        if (text.contains("미용") || text.contains("컷") || text.contains("목욕") || text.contains("스파") || text.contains("샴푸")) {
+            return "SAL";
+        }
+
+        if (text.contains("호텔") || text.contains("위탁") || text.contains("훈련")) {
+            return "BRD";
+        }
+
+        if (text.contains("동물병원") || text.contains("병원") || text.contains("진료") || text.contains("건강검진") || text.contains("접종") || text.contains("응급")) {
+            return "HOS";
+        }
+
+        return "";
     }
     
     private boolean isOverLimit() {

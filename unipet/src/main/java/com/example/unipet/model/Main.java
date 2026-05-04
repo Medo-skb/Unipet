@@ -15,6 +15,8 @@ public class Main {
     String menuName1;
     Integer menuPrice1;
     String subTitle;
+    String badgeText;
+    String sStatus;
     
     // 상품 정보
 	int productNo;
