@@ -36,10 +36,13 @@
                         <div class="search-thumb-wrap">
                             <img v-if="item.filePath && item.fileName"
                                 :src="item.filePath + item.fileName"
-                                alt="상품 이미지"
+                                alt="이미지"
                                 class="search-thumb-image"
                                 @error="handleImgError">
-                            <div v-else class="search-thumb"></div>
+
+                            <div v-else class="no-image-box">
+                                등록된 이미지가<br>없습니다.
+                            </div>
                         </div>
 
                         <div class="search-info">

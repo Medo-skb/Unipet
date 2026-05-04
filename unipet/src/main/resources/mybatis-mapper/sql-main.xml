@@ -198,14 +198,22 @@
 		    S.STORE_NO AS storeNo,
 		    S.STORE_NAME AS storeName,
 		    S.S_ADDR AS sAddr,
+		    S.S_STATUS AS sStatus,
 		    S.S_CATEGORY AS sCategory,
 		    SF.FILE_PATH AS filePath,
 		    SF.FILE_NAME AS fileName,
+		
+		    CASE 
+		        WHEN S.S_STATUS = 'GEN' THEN '유니펫 회원사'
+		        WHEN S.S_STATUS = 'AFF' THEN '유니펫 제휴사'
+		        ELSE ''
+		    END AS badgeText,
 		
 		    M.MENU_NAME AS menuName1,
 		    M.MENU_PRICE AS menuPrice1
 		
 		FROM STORE S
+		
 		LEFT JOIN STORE_FILE SF
 		    ON S.STORE_NO = SF.STORE_NO
 		   AND SF.IS_MAIN = 'Y'
@@ -225,15 +233,22 @@
 		    ON S.STORE_NO = M.STORE_NO
 		   AND M.RN = 1
 		
-		WHERE S.S_STATUS != 'EXT'
-		  AND S.S_CATEGORY = #{sCategory}
+		WHERE S.S_CATEGORY = #{sCategory}
+		  AND S.S_STATUS IN ('AFF', 'GEN', 'EXT')
 		  AND (
 		        S.STORE_NAME LIKE CONCAT('%', #{keyword}, '%')
 		        OR S.S_ADDR LIKE CONCAT('%', #{keyword}, '%')
 		        OR M.MENU_NAME LIKE CONCAT('%', #{keyword}, '%')
 		      )
 		
-		ORDER BY S.STORE_NAME ASC;
+		ORDER BY 
+		    CASE 
+		        WHEN S.S_STATUS = 'AFF' THEN 1
+		        WHEN S.S_STATUS = 'GEN' THEN 2
+		        WHEN S.S_STATUS = 'EXT' THEN 3
+		        ELSE 4
+		    END,
+		    S.STORE_NAME ASC;
 	</select>
 	
 	<!-- 업체 전체 개수 조회 -->

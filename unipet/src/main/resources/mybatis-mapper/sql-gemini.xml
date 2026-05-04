@@ -30,6 +30,10 @@
 	        ON S.STORE_NO = R.STORE_NO
 		WHERE S.S_STATUS IN ('GEN', 'AFF')
 		  AND S.IS_OPEN = 'Y'
+		
+		<if test="categoryKeyword != null and categoryKeyword != ''">
+		    AND S.S_CATEGORY = #{categoryKeyword}
+		</if>
 	
 		<if test="locationKeyword != null and locationKeyword != ''">
 		    AND S.S_ADDR LIKE CONCAT('%', #{locationKeyword}, '%')
@@ -49,6 +53,16 @@
 		        SM.MENU_NAME LIKE CONCAT('%', #{animalKeyword}, '%')
 		        OR IFNULL(SM.MENU_INFO, '') LIKE CONCAT('%', #{animalKeyword}, '%')
 		        OR IFNULL(SD.S_CONTENTS, '') LIKE CONCAT('%', #{animalKeyword}, '%')
+		    )
+		</if>
+		
+		<if test="interestKeyword != null and interestKeyword != ''">
+		    AND (
+		        IFNULL(R.R_CONTENTS, '') LIKE CONCAT('%', #{interestKeyword}, '%')
+		        OR IFNULL(SM.MENU_NAME, '') LIKE CONCAT('%', #{interestKeyword}, '%')
+		        OR IFNULL(SM.MENU_INFO, '') LIKE CONCAT('%', #{interestKeyword}, '%')
+		        OR IFNULL(SD.SUB_TITLE, '') LIKE CONCAT('%', #{interestKeyword}, '%')
+		        OR IFNULL(SD.S_CONTENTS, '') LIKE CONCAT('%', #{interestKeyword}, '%')
 		    )
 		</if>
 	

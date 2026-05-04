@@ -105,7 +105,9 @@
                                     class="store-image"
                                     @error="handleImgError">
 
-                                <div v-else class="store-image-placeholder">STORE IMAGE</div>
+                                <div v-else class="no-image-box">
+                                    등록된 이미지가<br>없습니다.
+                                </div>
 
                                 <div class="store-rank-badge">{{ index + 1 }}</div>
                             </div>
@@ -145,7 +147,9 @@
                                     class="product-image"
                                     @error="handleImgError">
 
-                                <div v-else class="product-image-placeholder">PRODUCT IMAGE</div>
+                                <div v-else class="no-image-box">
+                                    등록된 이미지가<br>없습니다.
+                                </div>
 
                                 <div class="rank-badge">{{ index + 1 }}</div>
                             </div>
@@ -189,7 +193,9 @@
                                         class="recommend-image"
                                         @error="handleImgError">
 
-                                    <div v-else class="recommend-image-placeholder">STORE IMAGE</div>
+                                    <div v-else class="no-image-box">
+                                        등록된 이미지가<br>없습니다.
+                                    </div>
                                 </div>
 
                                 <div class="recommend-card-body">
@@ -244,7 +250,9 @@
                                     class="recommend-image"
                                     @error="handleImgError">
 
-                                <div v-else class="recommend-image-placeholder">PRODUCT IMAGE</div>
+                                <div v-else class="no-image-box">
+                                    등록된 이미지가<br>없습니다.
+                                </div>
                             </div>
 
                             <div class="recommend-card-body">

@@ -15,7 +15,7 @@
     <jsp:include page="/WEB-INF/header/header.jsp" />
 
     <div id="app" class="chat-wrap">
-        <div class="chat-header">UNIPET 챗봇</div>
+        <div class="chat-header">UNIPET</div>
 
         <div class="chat-box" ref="chatBox">
             <div v-for="msg in messages" :class="['message', msg.type]" v-html="formatMessage(msg.text)">
@@ -125,7 +125,68 @@
                     return "";
                 }
 
-                return text.replaceAll("상세보기", "<span class='store-link-btn'>업체 바로가기</span>");
+            if (text.includes("상세보기|")) {
+                return this.formatStoreRecommend(text);
+            }
+
+                return text.replace(/\n/g, "<br>");
+            },
+
+            formatStoreRecommend(text) {
+                let blocks = text.split(/\n\s*\n/);
+                let html = "";
+
+                blocks.forEach(function(block) {
+                    let lines = block.split("\n").map(function(line) {
+                        return line.trim();
+                    }).filter(function(line) {
+                        return line !== "";
+                    });
+
+                    let storeName = "";
+                    let storeNo = "";
+                    let reason = "";
+
+                    lines.forEach(function(line) {
+                        if (line.indexOf("상세보기|") > -1) {
+                            let splitArr = line.split("|");
+
+                            if (splitArr.length > 1) {
+                                storeNo = splitArr[1].trim();
+                            }
+
+                        } else if (line.indexOf("추천 이유:") === 0) {
+                            reason = line;
+
+                        } else if (storeName === "") {
+                            storeName = line;
+                        }
+                    });
+
+                    if (storeName !== "" || storeNo !== "" || reason !== "") {
+                        html += "<div class='store-recommend-item'>";
+
+                        if (storeName !== "") {
+                            html += "<div class='store-name'>" + storeName + "</div>";
+                        }
+
+                        if (storeNo !== "") {
+                            html += "<div>";
+                            html += "<span class='store-link-btn' onclick=\"location.href='/reservation/store-detail.do?storeNo=" + storeNo + "'\">";
+                            html += "업체 바로가기";
+                            html += "</span>";
+                            html += "</div>";
+                        }
+
+                        if (reason !== "") {
+                            html += "<div class='store-reason'>" + reason + "</div>";
+                        }
+
+                        html += "</div>";
+                    }
+                });
+
+                return html;
             },
 
             sendMessage(customText = null) {

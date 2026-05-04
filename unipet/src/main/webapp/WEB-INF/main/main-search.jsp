@@ -44,18 +44,23 @@ pageEncoding="UTF-8"%>
                             <div v-for="item in hospitalList.slice(0, 4)"
                                 :key="item.storeNo"
                                 class="search-card search-card-row"
-                                @click="fnGoStoreDetail(item.storeNo)">
+                                @click="fnGoStore(item)">
                                 <div class="search-thumb-wrap">
                                     <img v-if="item.filePath && item.fileName"
                                         :src="item.filePath + item.fileName"
-                                        alt="업체 이미지"
                                         class="search-thumb-image"
                                         @error="handleImgError">
-                                    <div v-else class="search-thumb"></div>
+
+                                    <div v-else class="no-image-box">
+                                        등록된 이미지가<br>없습니다.
+                                    </div>
                                 </div>
 
                                 <div class="search-info">
-                                    <div class="search-card-title">{{ item.storeName }}</div>
+                                    <div class="search-card-title">
+                                        <span v-if="item.badgeText" class="badge">{{ item.badgeText }}</span>
+                                        {{ item.storeName }}
+                                    </div>
 
                                     <div v-if="item.menuName1" class="search-card-menu">
                                         {{ item.menuName1 }} - {{ item.menuPrice1 }}원 ~
@@ -81,18 +86,25 @@ pageEncoding="UTF-8"%>
                             <div v-for="item in salonList.slice(0, 4)"
                                 :key="item.storeNo"
                                 class="search-card search-card-row"
-                                @click="fnGoStoreDetail(item.storeNo)">
+                                @click="fnGoStore(item)">
                                 <div class="search-thumb-wrap">
                                     <img v-if="item.filePath && item.fileName"
                                         :src="item.filePath + item.fileName"
-                                        alt="업체 이미지"
                                         class="search-thumb-image"
                                         @error="handleImgError">
-                                    <div v-else class="search-thumb"></div>
+
+                                    <div v-else class="no-image-box">
+                                        등록된 이미지가<br>없습니다.
+                                    </div>
                                 </div>
 
                                 <div class="search-info">
-                                    <div class="search-card-title">{{ item.storeName }}</div>
+                                    <div class="search-card-title">
+                                        <span v-if="item.badgeText" class="badge">
+                                            {{ item.badgeText }}
+                                        </span>
+                                        {{ item.storeName }}
+                                    </div>
 
                                     <div v-if="item.menuName1" class="search-card-menu">
                                         {{ item.menuName1 }} - {{ item.menuPrice1 }}원 ~
@@ -118,18 +130,23 @@ pageEncoding="UTF-8"%>
                             <div v-for="item in boardingList.slice(0, 4)"
                                 :key="item.storeNo"
                                 class="search-card search-card-row"
-                                @click="fnGoStoreDetail(item.storeNo)">
+                                @click="fnGoStore(item)">
                                 <div class="search-thumb-wrap">
                                     <img v-if="item.filePath && item.fileName"
                                         :src="item.filePath + item.fileName"
-                                        alt="업체 이미지"
                                         class="search-thumb-image"
                                         @error="handleImgError">
-                                    <div v-else class="search-thumb"></div>
+
+                                    <div v-else class="no-image-box">
+                                        등록된 이미지가<br>없습니다.
+                                    </div>
                                 </div>
 
                                 <div class="search-info">
-                                    <div class="search-card-title">{{ item.storeName }}</div>
+                                    <div class="search-card-title">
+                                        <span v-if="item.badgeText" class="badge">{{ item.badgeText }}</span>
+                                        {{ item.storeName }}
+                                    </div>
 
                                     <div v-if="item.menuName1" class="search-card-menu">
                                         {{ item.menuName1 }} - {{ item.menuPrice1 }}원 ~
@@ -161,10 +178,12 @@ pageEncoding="UTF-8"%>
                             <div class="search-thumb-wrap">
                                 <img v-if="item.filePath && item.fileName"
                                     :src="item.filePath + item.fileName"
-                                    alt="상품 이미지"
                                     class="search-thumb-image"
                                     @error="handleImgError">
-                                <div v-else class="search-thumb"></div>
+
+                                <div v-else class="no-image-box">
+                                    등록된 이미지가<br>없습니다.
+                                </div>
                             </div>
 
                             <div class="search-info">
@@ -455,11 +474,31 @@ pageEncoding="UTF-8"%>
                 event.target.src = "${pageContext.request.contextPath}/img/no-image.png";
             },
 
-            fnGoStoreDetail: function (storeNo) {
-                if (!storeNo) {
+            fnGoStore: function (item) {
+                if (!item) {
                     return;
                 }
-                location.href = "/reservation/store-detail.do?storeNo=" + storeNo;
+
+                if (item.sStatus === "EXT") {
+                    let addrPart = "";
+
+                    if (item.sAddr) {
+                        const addrArray = item.sAddr.split(" ");
+                        addrPart = addrArray.length > 1 ? addrArray[1] : addrArray[0];
+                    }
+
+                    const keyword = addrPart + " " + item.storeName;
+                    const naverMapUrl = "https://map.naver.com/v5/search/" + encodeURIComponent(keyword.trim());
+
+                    window.open(naverMapUrl, "_blank");
+                    return;
+                }
+
+                if (!item.storeNo) {
+                    return;
+                }
+
+                location.href = "/reservation/store-detail.do?storeNo=" + item.storeNo;
             },
 
             fnGoProductDetail: function (productNo) {
