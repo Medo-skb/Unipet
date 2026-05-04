@@ -167,6 +167,7 @@
 | 📝 회의록 | [회의록 보기](https://drive.google.com/drive/folders/1d1CxrihnG_TbVloRdNIfcGgQ-Lkdas0k?usp=drive_link) |
 | 🏗 설계 자료 | [설계 보기](https://drive.google.com/drive/folders/17cAWy-taTVDPN2uJo4NCYHvQSAF1TFwI?usp=drive_link) |
 | 📚 공통 문서 | [공통 문서 보기](https://drive.google.com/drive/folders/1k4MLxfWRZGS_JbnkDp5hF_ht_NbGSbwh?usp=drive_link) |
+| 🛠 수정 내역 | [수정 로그 보기](https://drive.google.com/drive/folders/1cya6UYHxQlYqgekYmhSyMF3aRj55SYAP)
 
 ---
 
