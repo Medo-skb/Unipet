@@ -235,8 +235,8 @@
                             <thead>
                                 <tr>
                                     <th>메뉴명</th>
-                                    <th>메뉴 카테고리</th>
-                                    <th>설명</th>
+                                    <!-- <th>메뉴 카테고리</th>
+                                    <th>설명</th> -->
                                     <th>가격</th>
                                     <!-- <th>소요시간</th> -->
                                     <th>상태</th>
@@ -248,8 +248,8 @@
                                 </tr>
                                 <tr v-for="item in menuList" :key="item.menuNo">
                                     <td>{{item.menuName}}</td>
-                                    <td>{{item.menuCategory}}</td>
-                                    <td>{{item.menuInfo}}</td>
+                                    <!-- <td>{{item.menuCategory}}</td>
+                                    <td>{{item.menuInfo}}</td> -->
                                     <td>{{item.menuPrice}}</td>
                                     <!-- <td>{{item.reqTime}}분</td> -->
                                     <td>{{item.mStatusName ? item.mStatusName : (item.mStatus === 'Y' ? '판매중' : '판매중지')}}</td>
@@ -466,8 +466,8 @@
                                     <thead>
                                         <tr>
                                             <th>메뉴명</th>
-                                            <th>메뉴 카테고리</th>
-                                            <th>설명</th>
+                                            <!-- <th>메뉴 카테고리</th>
+                                            <th>설명</th> -->
                                             <th>가격</th>
                                             <!-- <th>소요시간</th> -->
                                             <th>상태</th>
@@ -477,8 +477,8 @@
                                     <tbody>
                                         <tr v-for="item in editMenuList" :key="item.menuNo">
                                             <td><input type="text" v-model="item.menuName"></td>
-                                            <td><input type="text" v-model="item.menuCategory"></td>
-                                            <td><input type="text" v-model="item.menuInfo"></td>
+                                            <!-- <td><input type="text" v-model="item.menuCategory"></td>
+                                            <td><input type="text" v-model="item.menuInfo"></td> -->
                                             <td><input type="number" v-model="item.menuPrice"></td>
                                             <!-- <td>
                                                 <select v-model="item.reqTime">
