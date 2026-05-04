@@ -31,51 +31,41 @@
 
                     <ul class="sidebar-menu">
                         <li class="menu-item" :class="{active: currentMenu==='userMyPage'}">
-                            <button type="button" @click="changeMenu('userMyPage')">홈</button>
+                            <button type="button" @click="fnChangeMenu('userMyPage')">홈</button>
                         </li>
 
                         <li class="menu-item" :class="{active: currentMenu==='subscriptionPage'}">
-                            <button type="button" @click="changeMenu('subscriptionPage')">구독</button>
+                            <button type="button" @click="fnChangeMenu('subscriptionPage')">구독</button>
                         </li>
 
                         <li class="menu-item" :class="{active: currentMenu==='communityPage'}">
-                            <button type="button" @click="changeMenu('communityPage')">커뮤니티</button>
+                            <button type="button" @click="fnChangeMenu('communityPage')">커뮤니티</button>
                         </li>
 
                         <li class="menu-item" :class="{active: currentMenu==='orderList'}">
-                            <button type="button" @click="changeMenu('orderList')">주문내역</button>
+                            <button type="button" @click="fnChangeMenu('orderList')">주문내역</button>
                         </li>
 
                         <li class="menu-item" :class="{active: currentMenu==='reserveList'}">
-                            <button type="button" @click="changeMenu('reserveList')">예약내역</button>
+                            <button type="button" @click="fnChangeMenu('reserveList')">예약내역</button>
                         </li>
 
                         <li class="menu-item" :class="{active: currentMenu==='petEdit'}">
-                            <button type="button" @click="changeMenu('petEdit')">반려동물</button>
+                            <button type="button" @click="fnChangeMenu('petEdit')">반려동물</button>
                         </li>
-
-                        <li class="menu-item" :class="{active: currentMenu==='petMyPage'}">
-                            <button type="button" @click="changeMenu('petMyPage')">건강조회</button>
-                        </li>
-
                         <li class="menu-item" :class="{active: currentMenu==='petHealthPage'}">
-                            <button type="button" @click="changeMenu('petHealthPage')">건강기록</button>
+                            <button type="button" @click="fnChangeMenu('petHealthPage')">
+                                반려동물 건강관리
+                            </button>
                         </li>
 
-                        <li class="menu-item" :class="{active: currentMenu==='petVacPage'}">
-                            <button type="button" @click="changeMenu('petVacPage')">접종기록</button>
-                        </li>
-
-                        <li class="menu-item" :class="{active: currentMenu==='petWeightPage'}">
-                            <button type="button" @click="changeMenu('petWeightPage')">몸무게</button>
-                        </li>
 
                         <li class="menu-item" :class="{active: currentMenu==='pointInfo'}">
-                            <button type="button" @click="changeMenu('pointInfo')">포인트</button>
+                            <button type="button" @click="fnChangeMenu('pointInfo')">포인트</button>
                         </li>
 
                         <li class="menu-item" :class="{active: currentMenu==='couponInfo'}">
-                            <button type="button" @click="changeMenu('couponInfo')">쿠폰</button>
+                            <button type="button" @click="fnChangeMenu('couponInfo')">쿠폰</button>
                         </li>
                     </ul>
                 </aside>
@@ -121,8 +111,8 @@
                                                     <button @click="openUserEditPanel = !openUserEditPanel">
                                                         {{ openUserEditPanel ? '수정 닫기' : '회원정보 수정' }}
                                                     </button>
-                                                    <button class="btn-gray" @click="openPwdModal">비밀번호 변경</button>
-                                                    <button class="btn-red" @click="deleteUser">회원 탈퇴</button>
+                                                    <button class="btn-gray" @click="fnOpenPwdModal">비밀번호 변경</button>
+                                                    <button class="btn-red" @click="fnDeleteUser">회원 탈퇴</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -149,7 +139,7 @@
                                             </div>
 
                                             <div class="btn-box">
-                                                <button @click="updateUser">회원정보 저장</button>
+                                                <button @click="fnUpdateUser">회원정보 저장</button>
                                             </div>
                                         </div>
                                     </div>
@@ -162,7 +152,7 @@
                                             <div class="pet-card" v-for="pet in petList" :key="pet.petNo">
                                                 <div class="pet-thumb">
                                                     <div class="pet-avatar">
-                                                        <img :src="getPetImage(pet)" alt="펫이미지">
+                                                        <img :src="fnGetPetImage(pet)" alt="펫이미지">
                                                     </div>
                                                 </div>
 
@@ -174,7 +164,7 @@
 
                                                     <button
                                                         :disabled="String(pet.isMain || pet.IS_MAIN).trim().toUpperCase() === 'Y'"
-                                                        class="pet-btn main" @click="changeMainPet(pet.petNo)">
+                                                        class="pet-btn main" @click="fnChangeMainPet(pet.petNo)">
                                                         {{ String(pet.isMain || pet.IS_MAIN).trim().toUpperCase() ===
                                                         'Y' ? ' 대표' : '대표로 변경' }}
                                                     </button>
@@ -182,15 +172,15 @@
 
                                                 <div class="pet-sub-btn-row">
                                                     <button class="pet-btn edit"
-                                                        @click="openEditPetModal(pet)">수정</button>
+                                                        @click="fnOpenEditPetModal(pet)">수정</button>
                                                     <button class="pet-btn delete"
-                                                        @click="deletePet(pet.petNo)">삭제</button>
+                                                        @click="fnDeletePet(pet.petNo)">삭제</button>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="pet-add-card" @click="openAddPetModal">
+                                    <div class="pet-add-card" @click="fnOpenAddPetModal">
                                         <div class="pet-add-plus">+</div>
                                         <div>프로필 추가</div>
                                     </div>
@@ -216,7 +206,7 @@
                                                     [{{ item.boardName }}] {{ item.title }}
                                                 </div>
                                                 <div class="list-sub">
-                                                    {{ formatDateTime(item.cdate) }}
+                                                    {{ fnFormatDateTime(item.cdate) }}
                                                 </div>
                                             </div>
                                         </div>
@@ -236,7 +226,7 @@
                                                     [{{ item.boardName }}] {{ item.content }}
                                                 </div>
                                                 <div class="list-sub">
-                                                    {{ formatDateTime(item.cdate) }}
+                                                    {{ fnFormatDateTime(item.cdate) }}
                                                 </div>
                                             </div>
                                         </div>
@@ -249,7 +239,8 @@
                                         <div class="point-flex">
 
                                             <!-- 포인트 -->
-                                            <div class="item" @click="changeMenu('pointInfo')" style="cursor:pointer;">
+                                            <div class="item" @click="fnChangeMenu('pointInfo')"
+                                                style="cursor:pointer;">
                                                 <div class="label">포인트</div>
                                                 <div class="value">
                                                     {{ Number(point || 0).toLocaleString() }} P
@@ -257,7 +248,8 @@
                                             </div>
 
                                             <!-- 쿠폰 -->
-                                            <div class="item" @click="changeMenu('couponInfo')" style="cursor:pointer;">
+                                            <div class="item" @click="fnChangeMenu('couponInfo')"
+                                                style="cursor:pointer;">
                                                 <div class="label">쿠폰</div>
                                                 <div class="value">
                                                     {{ usableCouponCount }} 장
@@ -285,6 +277,12 @@
 
                                             <div class="main-reserve-item" v-for="item in reservationList.slice(0, 2)"
                                                 :key="item.rsvNo">
+
+                                                <div class="list-title">
+                                                    {{ item.storeName || item.STORE_NAME || '업체명 없음' }}
+                                                </div>
+
+
                                                 <div>
                                                     <div class="list-title">{{ item.rsvDate || '-' }}</div>
                                                     <div class="list-sub">
@@ -295,15 +293,15 @@
                                                 <div class="list-sub">
                                                     상태 :
                                                     <span class="reserve-status-text"
-                                                        :class="getReserveStatusClass(item.rsvStatus || item.RSV_STATUS)">
-                                                        {{ getReservationStatusText(item.rsvStatus || item.RSV_STATUS)
+                                                        :class="fnGetReserveStatusClass(item.rsvStatus || item.RSV_STATUS)">
+                                                        {{ fnGetReservationStatusText(item.rsvStatus || item.RSV_STATUS)
                                                         }}
                                                     </span>
                                                 </div>
                                             </div>
 
                                             <div class="btn-box">
-                                                <button @click="changeMenu('reserveList')">예약 내역 보기</button>
+                                                <button @click="fnChangeMenu('reserveList')">예약 내역 보기</button>
                                             </div>
                                         </div>
                                     </div>
@@ -338,15 +336,15 @@
                                             </div>
 
                                             <div class="status-badge"
-                                                :class="getDeliStatusClass(group.items[0]?.deliStatus || group.items[0]?.DELI_STATUS)">
-                                                {{ getDeliStatusText(group.items[0]?.deliStatus ||
+                                                :class="fnGetDeliStatusClass(group.items[0]?.deliStatus || group.items[0]?.DELI_STATUS)">
+                                                {{ fnGetDeliStatusText(group.items[0]?.deliStatus ||
                                                 group.items[0]?.DELI_STATUS) }}
                                             </div>
                                         </div>
 
 
                                         <div class="btn-box">
-                                            <button @click="changeMenu('orderList')">주문 내역 보기</button>
+                                            <button @click="fnChangeMenu('orderList')">주문 내역 보기</button>
                                         </div>
                                     </div>
                                 </div>
@@ -359,7 +357,7 @@
 
                                 <div class="info-card">
                                     <div class="list-title">{{ subscriptionInfo.planName || '구독 정보 없음' }}</div>
-                                    <div class="list-sub">상태 : {{ getSubStatusText(subscriptionInfo.status)}}</div>
+                                    <div class="list-sub">상태 : {{ fnGetSubStatusText(subscriptionInfo.status)}}</div>
                                     <div class="list-sub">다음 결제일 : {{ subscriptionInfo.nextBillingDate || '-' }}</div>
                                     <div class="list-sub">
                                         자동결제 : {{ subscriptionInfo.isAuto === 'Y' ? '사용중' : '미사용' }}
@@ -368,16 +366,16 @@
 
                                 <div class="btn-box">
                                     <button class="small-btn" v-if="subscriptionInfo.status === '이용중'"
-                                        @click="updateAutoPay">
+                                        @click="fnUpdateAutoPay">
                                         자동결제 {{ subscriptionInfo.isAuto === 'Y' ? '해지' : '설정' }}
                                     </button>
 
                                     <button class="small-btn btn-red" v-if="subscriptionInfo.status === '이용중'"
-                                        @click="cancelSubscription">
+                                        @click="fnCancelSubscription">
                                         구독 해지
                                     </button>
 
-                                    <button class="small-btn" @click="toggleSubscriptionPayList">
+                                    <button class="small-btn" @click="fnToggleSubscriptionPayList">
                                         {{ showSubscriptionPayList ? '결제내역 닫기' : '결제내역 보기' }}
                                     </button>
                                 </div>
@@ -411,7 +409,7 @@
                             <div class="section-box">
                                 <div class="section-header">
                                     <div class="section-title" style="margin-bottom:0;">최근 내 게시글</div>
-                                    <button class="small-btn" @click="goCommunityPostList">전체 게시글 보기</button>
+                                    <button class="small-btn" @click="fnGoCommunityPostList">전체 게시글 보기</button>
                                 </div>
 
                                 <div v-if="recentPostList.length === 0" class="empty-text">작성한 게시글이 없습니다.</div>
@@ -420,7 +418,7 @@
                                     <div class="list-title">
                                         [{{ item.boardName }}] {{ item.title }}
                                     </div>
-                                    <div class="list-sub">{{ formatDateTime(item.cdate) }}</div>
+                                    <div class="list-sub">{{ fnFormatDateTime(item.cdate) }}</div>
                                 </div>
                             </div>
 
@@ -433,7 +431,7 @@
                                     <div class="list-title">
                                         [{{ item.boardName || '커뮤니티' }}] {{ item.content }}
                                     </div>
-                                    <div class="list-sub">{{ formatDateTime(item.cdate) }}</div>
+                                    <div class="list-sub">{{ fnFormatDateTime(item.cdate) }}</div>
                                 </div>
 
                             </div>
@@ -443,7 +441,7 @@
                             <div class="section-box">
                                 <div class="section-header">
                                     <div class="section-title" style="margin-bottom:0;">내 전체 게시글</div>
-                                    <button class="small-btn" @click="changeMenu('communityPage')">커뮤니티로</button>
+                                    <button class="small-btn" @click="fnChangeMenu('communityPage')">커뮤니티로</button>
                                 </div>
 
                                 <div v-if="myPostList.length === 0" class="empty-text">작성한 게시글이 없습니다.</div>
@@ -452,7 +450,7 @@
                                     <div class="list-title">
                                         [{{ item.boardName }}] {{ item.title }}
                                     </div>
-                                    <div class="list-sub">{{ formatDateTime(item.cdate) }}</div>
+                                    <div class="list-sub">{{ fnFormatDateTime(item.cdate) }}</div>
                                 </div>
                             </div>
                         </div>
@@ -482,7 +480,7 @@
                                             주문일자 : {{ (group.orderDate || '').substring(0,16) }}
                                         </div>
 
-                                        <button class="small-btn" @click="openOrderDetail(group)">
+                                        <button class="small-btn" @click="fnOpenOrderDetail(group)">
                                             상세보기
                                         </button>
                                     </div>
@@ -518,7 +516,7 @@
                             <div class="section-box">
                                 <div class="section-header">
                                     <div class="section-title" style="margin-bottom:0;">주문 상세</div>
-                                    <button class="small-btn" @click="goOrderList()">주문목록으로</button>
+                                    <button class="small-btn" @click="fnGoOrderList()">주문목록으로</button>
                                 </div>
 
                                 <div class="info-card" style="margin-bottom:18px;">
@@ -546,26 +544,26 @@
                                             </div>
 
                                             <div class="list-status">
-                                                결제상태 : {{ getPayStatusText(order.payStatus || order.PAY_STATUS) }}
+                                                결제상태 : {{ fnGetPayStatusText(order.payStatus || order.PAY_STATUS) }}
                                             </div>
 
                                             <div class="list-status">
-                                                배송상태 : {{ getDeliStatusText(order.deliStatus || order.DELI_STATUS)
+                                                배송상태 : {{ fnGetDeliStatusText(order.deliStatus || order.DELI_STATUS)
                                                 }}
                                             </div>
 
 
                                             <div class="btn-box">
-                                                <button class="small-btn btn-red" v-if="canRefundOrder(order)"
-                                                    @click="goRefundShop(order)">
+                                                <button class="small-btn btn-red" v-if="fnCanRefundOrder(order)"
+                                                    @click="fnGoRefundShop(order)">
                                                     환불
                                                 </button>
-                                                <button class="small-btn" v-if="canWriteReview(order)"
-                                                    @click="goReview(order)">
+                                                <button class="small-btn" v-if="fnCanWriteReview(order)"
+                                                    @click="fnGoReview(order)">
                                                     상품리뷰 작성
                                                 </button>
-                                                <button class="small-btn" v-if="canViewWrittenReview(order)"
-                                                    @click="openWrittenReview(order)">
+                                                <button class="small-btn" v-if="fnCanViewWrittenReview(order)"
+                                                    @click="fnOpenWrittenReview(order)">
                                                     작성완료 리뷰 보기
                                                 </button>
 
@@ -583,7 +581,7 @@
 
                                 <div class="section-header">
                                     <div class="section-title">리뷰 상세</div>
-                                    <button class="small-btn" @click="changeMenu('orderList')">주문목록으로</button>
+                                    <button class="small-btn" @click="fnChangeMenu('orderList')">주문목록으로</button>
                                 </div>
 
                                 <div class="info-card">
@@ -633,7 +631,7 @@
                                 <div v-for="group in pagedReservationList" :key="group.date"
                                     style="margin-bottom:20px;">
                                     <div class="section-title" style="font-size:17px; margin-bottom:10px;">
-                                        {{ formatDate(group.date) }}
+                                        {{ fnFormatDate(group.date) }}
                                     </div>
 
                                     <div class="info-card" v-for="item in group.items" :key="'all-' + item.rsvNo">
@@ -659,8 +657,8 @@
                                                 <div class="list-sub">
                                                     상태 :
                                                     <span class="reserve-status-text"
-                                                        :class="getReserveStatusClass(item.rsvStatus || item.RSV_STATUS)">
-                                                        {{ getReservationStatusText(item.rsvStatus ||
+                                                        :class="fnGetReserveStatusClass(item.rsvStatus || item.RSV_STATUS)">
+                                                        {{ fnGetReservationStatusText(item.rsvStatus ||
                                                         item.RSV_STATUS)
                                                         }}
                                                     </span>
@@ -668,19 +666,19 @@
                                             </div>
 
                                             <div class="btn-box">
-                                                <button class="small-btn" v-if="canPayRsv(item)"
-                                                    @click="goRsvPay(item)">
+                                                <button class="small-btn" v-if="fnCanPayRsv(item)"
+                                                    @click="fnGoRsvPay(item)">
                                                     예약결제
                                                 </button>
 
-                                                <button class="small-btn btn-red" v-if="canRefundRsv(item)"
-                                                    @click="goRefundRsv(item)">
+                                                <button class="small-btn btn-red" v-if="fnCanRefundRsv(item)"
+                                                    @click="fnGoRefundRsv(item)">
                                                     예약환불
                                                 </button>
 
                                                 <button class="small-btn"
                                                     v-if="(item.rsvStatus || item.RSV_STATUS) === 'FIN' && (item.reviewYn || item.REVIEW_YN) !== 'Y'"
-                                                    @click="pageChange('/user/mypage/rsv-review.do', {
+                                                    @click="fnPageChange('/user/mypage/rsv-review.do', {
                                                         rsvNo: item.rsvNo || item.RSV_NO
                                                     })">
                                                     예약리뷰작성
@@ -705,27 +703,27 @@
                             <div class="section-box">
                                 <div class="section-header">
                                     <div class="section-title" style="margin-bottom:0;">반려동물 프로필 관리</div>
-                                    <button class="small-btn" @click="openAddPetModal">프로필 추가</button>
+                                    <button class="small-btn" @click="fnOpenAddPetModal">프로필 추가</button>
                                 </div>
 
                                 <div class="pet-list">
                                     <div class="pet-card" v-for="pet in petList" :key="'edit-' + pet.petNo">
                                         <div class="pet-thumb">
                                             <div class="pet-avatar">
-                                                <img :src="getPetImage(pet)" alt="펫이미지">
+                                                <img :src="fnGetPetImage(pet)" alt="펫이미지">
                                             </div>
                                         </div>
 
                                         <div class="pet-body">
                                             <div class="pet-name">{{ pet.petName }}</div>
                                             <div class="pet-info">{{ pet.species || '' }}{{ pet.birthdate ? ' · ' +
-                                                getPetAge(pet.birthdate) + '살' : '' }}</div>
+                                                fnGetPetAge(pet.birthdate) + '살' : '' }}</div>
                                             <div class="pet-btns">
                                                 <div class="pet-sub-btn-row">
                                                     <button class="pet-btn edit"
-                                                        @click="openEditPetModal(pet)">수정</button>
+                                                        @click="fnOpenEditPetModal(pet)">수정</button>
                                                     <button class="pet-btn delete"
-                                                        @click="deletePet(pet.petNo)">삭제</button>
+                                                        @click="fnDeletePet(pet.petNo)">삭제</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -733,62 +731,20 @@
                                 </div>
                             </div>
                         </div>
-                        <div v-if="currentMenu === 'petMyPage'">
-
-                            <div class="section-box">
-                                <div class="section-title">건강 기록 조회</div>
-                                <div v-if="healthList.length === 0" class="empty-text">건강 기록이 없습니다.</div>
-
-                                <div class="info-card" v-for="item in healthList" :key="'h-' + item.id">
-                                    <div class="list-title">{{ item.title }}</div>
-                                    <div class="list-sub">기록일 : {{ formatDate(item.date) }}</div>
-                                    <div class="list-sub">내용 : {{ item.memo }}</div>
-                                </div>
-                            </div>
-
-                            <div class="section-box">
-                                <div class="section-title">접종 기록 조회</div>
-                                <div v-if="vacList.length === 0" class="empty-text">접종 기록이 없습니다.</div>
-
-                                <div class="info-card" v-for="item in vacList" :key="'v-' + item.id">
-                                    <div class="list-title">{{ item.name }}</div>
-                                    <div class="list-sub">반려동물 : {{ item.petName }}</div>
-                                    <div class="list-sub">접종일 : {{ formatDate(item.date) }}</div>
-                                    <div class="list-sub">다음 접종일 : {{ item.nextDate ? formatDate(item.nextDate) :
-                                        '-' }}</div>
-                                </div>
-                            </div>
-
-                            <div class="section-box">
-                                <div class="section-title">몸무게 기록 조회</div>
-                                <div v-if="weightList.length === 0" class="empty-text">몸무게 기록이 없습니다.</div>
-
-                                <div class="info-card" v-for="item in weightList" :key="'w-' + item.id">
-                                    <div class="list-title">{{ item.weight }} kg</div>
-                                    <div class="list-sub">반려동물 : {{ item.petName }}</div>
-                                    <div class="list-sub">기록일 : {{ formatDate(item.date) }}</div>
-                                </div>
-                            </div>
-
-                        </div>
-
-
-
-
-                        <div v-if="currentMenu === 'petVacPage'">
+                        <div v-if="currentMenu === 'petHealthPage'">
 
                             <!-- 반려동물 선택 -->
                             <div class="section-box">
                                 <div class="section-title">반려동물 선택</div>
 
                                 <div class="pet-list">
-                                    <div class="pet-card" v-for="pet in petList" :key="'vac-select-' + pet.petNo"
+                                    <div class="pet-card" v-for="pet in petList" :key="'health-select-' + pet.petNo"
                                         :class="{ active: String(selectedPetNo) === String(pet.petNo) }"
-                                        @click="selectPet(pet)">
+                                        @click="fnSelectPet(pet)">
 
                                         <div class="pet-thumb">
                                             <div class="pet-avatar">
-                                                <img :src="getPetImage(pet)" alt="펫이미지">
+                                                <img :src="fnGetPetImage(pet)" alt="펫이미지">
                                             </div>
                                         </div>
 
@@ -796,155 +752,183 @@
                                             <div class="pet-name">{{ pet.petName || '-' }}</div>
                                             <div class="pet-info">
                                                 {{ pet.species || '' }}
-                                                {{ pet.birthdate ? ' · ' + getPetAge(pet.birthdate) + '살' : '' }}
+                                                {{ pet.birthdate ? ' · ' + fnGetPetAge(pet.birthdate) + '살' : '' }}
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- 접종 기록 등록 -->
+                            <!-- 탭 -->
                             <div class="section-box">
-                                <div class="section-title">접종 기록 등록</div>
+                                <div class="health-tabs">
+                                    <button class="small-btn" :class="{active: healthTab === 'health'}"
+                                        @click="healthTab='health'; fnLoadHealthList()">
+                                        건강기록 등록
+                                    </button>
 
-                                <div class="row">
-                                    <label>백신명</label>
-                                    <input type="text" v-model="vacForm.name">
-                                </div>
+                                    <button class="small-btn" :class="{active: healthTab === 'weight'}"
+                                        @click="healthTab='weight'; fnLoadWeightList()">
+                                        몸무게 등록
+                                    </button>
 
-                                <div class="row">
-                                    <label>접종일</label>
-                                    <input type="date" v-model="vacForm.date">
-                                </div>
-
-                                <div class="row">
-                                    <label>다음 접종일</label>
-                                    <input type="date" v-model="vacForm.nextDate">
-                                </div>
-
-                                <div class="row">
-                                    <label>병원명</label>
-                                    <input type="text" v-model="vacForm.hospitalName">
-                                </div>
-
-                                <div class="row">
-                                    <label>비고</label>
-                                    <textarea v-model="vacForm.memo"></textarea>
-                                </div>
-
-                                <div class="btn-box">
-                                    <button @click="saveVacRecord">등록</button>
+                                    <button class="small-btn" :class="{active: healthTab === 'vaccine'}"
+                                        @click="healthTab='vaccine'; fnLoadVaccineList()">
+                                        백신기록 등록
+                                    </button>
                                 </div>
                             </div>
 
-                            <!-- 접종 기록 목록 -->
-                            <div class="section-box">
-                                <div class="section-title">접종 기록 목록</div>
+                            <!-- 건강기록 -->
+                            <div v-if="healthTab === 'health'">
+                                <div class="section-box">
+                                    <div class="section-title">건강 기록 등록</div>
 
-                                <div v-if="vacList.length === 0" class="empty-text">
-                                    접종 기록이 없습니다.
-                                </div>
-
-                                <div class="info-card" v-for="item in vacList" :key="'vac-' + item.id">
-                                    <div class="list-title">{{ item.name }}</div>
-
-                                    <div class="list-sub">반려동물 : {{ item.petName || '-' }}</div>
-                                    <div class="list-sub">접종일 : {{formatDate(item.date) }}</div>
-                                    <div class="list-sub">다음 접종일 :{{ item.nextDate ? formatDate(item.nextDate) : '-'
-                                        }}
+                                    <div class="row">
+                                        <label>제목</label>
+                                        <input type="text" v-model="healthForm.title">
                                     </div>
-                                    <div class="list-sub">병원명 : {{ item.hospitalName || '-' }}</div>
-                                    <div class="list-sub">비고 : {{ item.memo || '-' }}</div>
+
+                                    <div class="row">
+                                        <label>기록일</label>
+                                        <input type="date" v-model="healthForm.date">
+                                    </div>
+
+                                    <div class="row">
+                                        <label>내용</label>
+                                        <textarea v-model="healthForm.memo"></textarea>
+                                    </div>
 
                                     <div class="btn-box">
-                                        <button class="btn-red" @click="deleteVaccine(item.id)">삭제</button>
+                                        <button @click="fnSaveHealthRecord">등록</button>
+                                    </div>
+                                </div>
+
+                                <div class="section-box">
+                                    <div class="section-title">건강 기록 목록</div>
+
+                                    <div v-if="healthList.length === 0" class="empty-text">
+                                        건강 기록이 없습니다.
+                                    </div>
+
+                                    <div class="info-card" v-for="item in healthList" :key="'health-' + item.id">
+                                        <div class="list-title">{{ item.title || '-' }}</div>
+                                        <div class="list-sub">반려동물 : {{ item.petName || '-' }}</div>
+                                        <div class="list-sub">기록일 : {{ fnFormatDate(item.date) }}</div>
+                                        <div class="list-sub">내용 : {{ item.memo || '-' }}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 몸무게 -->
+                            <div v-if="healthTab === 'weight'">
+                                <div class="section-box">
+                                    <div class="section-title">몸무게 등록</div>
+
+                                    <div class="row">
+                                        <label>몸무게(kg)</label>
+                                        <input type="text" v-model="weightForm.weight">
+                                    </div>
+
+                                    <div class="row">
+                                        <label>기록일</label>
+                                        <input type="date" v-model="weightForm.date">
+                                    </div>
+
+                                    <div class="row">
+                                        <label>비고</label>
+                                        <textarea v-model="weightForm.memo"></textarea>
+                                    </div>
+
+                                    <div class="btn-box">
+                                        <button @click="fnSaveWeightRecord">등록</button>
+                                    </div>
+                                </div>
+
+                                <div class="section-box">
+                                    <div class="section-title">몸무게 변화 차트</div>
+                                    <div class="chart-wrap">
+                                        <canvas id="weightChart"></canvas>
+                                    </div>
+                                </div>
+
+                                <div class="section-box">
+                                    <div class="section-title">몸무게 기록 목록</div>
+
+                                    <div v-if="weightList.length === 0" class="empty-text">
+                                        몸무게 기록이 없습니다.
+                                    </div>
+
+                                    <div class="info-card" v-for="item in weightList" :key="'w-' + item.id">
+                                        <div class="list-title">{{ item.weight }} kg</div>
+                                        <div class="list-sub">반려동물 : {{ item.petName || '-' }}</div>
+                                        <div class="list-sub">기록일 : {{ fnFormatDate(item.date) }}</div>
+                                        <div class="list-sub">비고 : {{ item.memo || '-' }}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 백신 -->
+                            <div v-if="healthTab === 'vaccine'">
+                                <div class="section-box">
+                                    <div class="section-title">백신 기록 등록</div>
+
+                                    <div class="row">
+                                        <label>백신명</label>
+                                        <input type="text" v-model="vacForm.name">
+                                    </div>
+
+                                    <div class="row">
+                                        <label>접종일</label>
+                                        <input type="date" v-model="vacForm.date">
+                                    </div>
+
+                                    <div class="row">
+                                        <label>다음 접종일</label>
+                                        <input type="date" v-model="vacForm.nextDate">
+                                    </div>
+
+                                    <div class="row">
+                                        <label>병원명</label>
+                                        <input type="text" v-model="vacForm.hospitalName">
+                                    </div>
+
+                                    <div class="row">
+                                        <label>비고</label>
+                                        <textarea v-model="vacForm.memo"></textarea>
+                                    </div>
+
+                                    <div class="btn-box">
+                                        <button @click="fnSaveVacRecord">등록</button>
+                                    </div>
+                                </div>
+
+                                <div class="section-box">
+                                    <div class="section-title">백신 기록 목록</div>
+
+                                    <div v-if="vacList.length === 0" class="empty-text">
+                                        백신 기록이 없습니다.
+                                    </div>
+
+                                    <div class="info-card" v-for="item in vacList" :key="'vac-' + item.id">
+                                        <div class="list-title">{{ item.name || '-' }}</div>
+                                        <div class="list-sub">반려동물 : {{ item.petName || '-' }}</div>
+                                        <div class="list-sub">접종일 : {{ fnFormatDate(item.date) }}</div>
+                                        <div class="list-sub">
+                                            다음 접종일 : {{ item.nextDate ? fnFormatDate(item.nextDate) : '-' }}
+                                        </div>
+                                        <div class="list-sub">병원명 : {{ item.hospitalName || '-' }}</div>
+                                        <div class="list-sub">비고 : {{ item.memo || '-' }}</div>
+
+                                        <div class="btn-box">
+                                            <button class="btn-red" @click="fnDeleteVaccine(item.id)">삭제</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
                         </div>
-                        <div v-if="currentMenu === 'petWeightPage'">
-
-                            <!-- ✅ 반려동물 선택 -->
-                            <div class="section-box">
-                                <div class="section-title">반려동물 선택</div>
-
-                                <div class="pet-list">
-                                    <div class="pet-card" v-for="pet in petList" :key="'weight-select-' + pet.petNo"
-                                        :class="{ active: String(selectedPetNo) === String(pet.petNo) }"
-                                        @click="selectPet(pet)">
-
-                                        <div class="pet-thumb">
-                                            <div class="pet-avatar">
-                                                <img :src="getPetImage(pet)" alt="펫이미지">
-                                            </div>
-                                        </div>
-
-                                        <div class="pet-body">
-                                            <div class="pet-name">{{ pet.petName || '-' }}</div>
-                                            <div class="pet-info">
-                                                {{ pet.species || '' }}
-                                                {{ pet.birthdate ? ' · ' + getPetAge(pet.birthdate) + '살' : '' }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- ✅ 몸무게 등록 -->
-                            <div class="section-box">
-                                <div class="section-title">몸무게 등록</div>
-
-                                <div class="row">
-                                    <label>몸무게(kg)</label>
-                                    <input type="text" v-model="weightForm.weight">
-                                </div>
-
-                                <div class="row">
-                                    <label>기록일</label>
-                                    <input type="date" v-model="weightForm.date">
-                                </div>
-
-                                <div class="row">
-                                    <label>비고</label>
-                                    <textarea v-model="weightForm.memo"></textarea>
-                                </div>
-
-                                <div class="btn-box">
-                                    <button @click="saveWeightRecord">등록</button>
-                                </div>
-                            </div>
-
-                            <!-- ✅ 차트 -->
-                            <div class="section-box">
-                                <div class="section-title">몸무게 변화 차트</div>
-                                <div class="chart-wrap">
-                                    <canvas id="weightChart"></canvas>
-                                </div>
-                            </div>
-
-                            <!-- ✅ 목록 -->
-                            <div class="section-box">
-                                <div class="section-title">몸무게 기록 목록</div>
-
-                                <div v-if="weightList.length === 0" class="empty-text">
-                                    몸무게 기록이 없습니다.
-                                </div>
-
-                                <div class="info-card" v-for="item in weightList" :key="'w-' + item.id">
-                                    <div class="list-title">{{ item.weight }} kg</div>
-
-                                    <div class="list-sub">반려동물 : {{ item.petName || '-' }}</div>
-                                    <div class="list-sub">기록일 : {{ formatDate(item.date) }}</div>
-                                    <div class="list-sub">비고 : {{ item.memo || '-' }}</div>
-                                </div>
-                            </div>
-
-                        </div>
-
-
-
-
+                        <!-- ✅ petHealthPage 끝 -->
 
 
                         <div v-if="currentMenu === 'couponInfo'">
@@ -968,41 +952,39 @@
 
                                 <div class="info-card" v-for="coupon in filteredCouponList"
                                     :key="coupon.couponNo || coupon.COUPON_NO">
-                                    <div
-                                        style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
-                                        <div>
-                                            <div class="list-title">
-                                                {{ coupon.couponName || coupon.COUPON_NAME || '-' }}
-                                            </div>
-
-                                            <div class="list-sub">
-                                                할인금액 :
-                                                {{ Number(coupon.discountAmt || coupon.DISCOUNT_AMT ||
-                                                0).toLocaleString()
-                                                }}원
-                                            </div>
+                                    <div>
+                                        <div class="list-title">
+                                            {{ coupon.couponName || coupon.COUPON_NAME || '-' }}
+                                        </div>
 
                                         <div class="list-sub">
-                                            금액 :
-                                            {{ Number(coupon.discountAmt || coupon.DISCOUNT_AMT ||
-                                            0).toLocaleString()
+                                            할인금액 :
+                                            {{ Number(coupon.discountAmt || coupon.DISCOUNT_AMT || 0).toLocaleString()
                                             }}원
                                         </div>
 
                                         <div class="list-sub">
                                             유효기간 :
-                                            {{ formatDateTime(coupon.startDate || coupon.START_DATE) }}
+                                            {{ fnFormatDateTime(coupon.startDate || coupon.START_DATE) }}
                                             ~
-                                            {{ formatDateTime(coupon.endDate || coupon.END_DATE) }}
+                                            {{ fnFormatDateTime(coupon.endDate || coupon.END_DATE) }}
+                                        </div>
+
+                                        <div class="list-sub">
+                                            상태 : {{ fnGetCouponStatusText(coupon) }}
+                                        </div>
+
+                                        <div class="list-sub" v-if="coupon.useDate || coupon.USE_DATE">
+                                            사용 주문 :
+                                            {{ coupon.orderProductText || coupon.ORDER_PRODUCT_TEXT || '주문 정보 없음' }}
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-                    <div v-if="currentMenu === 'pointInfo'">
-                        <div class="section-box">
-                            <div class="section-title">포인트 현황</div>
+                        <div v-if="currentMenu === 'pointInfo'">
+                            <div class="section-box">
+                                <div class="section-title">포인트 현황</div>
 
                                 <div class="info-card">
                                     <div class="list-title">현재 보유 포인트</div>
@@ -1011,6 +993,7 @@
                                     </div>
                                 </div>
                             </div>
+
                             <div class="section-box">
                                 <div class="section-title">포인트 사용내역</div>
 
@@ -1031,17 +1014,22 @@
                                         잔액 : {{ Number(item.balance ?? item.BALANCE ?? 0).toLocaleString() }} P
                                     </div>
 
-                                    <div class="list-sub">주문번호 : {{ item.ordNo || item.ORD_NO || '-' }}</div>
+                                    <div class="list-sub">주문상품 : {{ item.orderProductText || '-' }}</div>
                                     <div class="list-sub">날짜 : {{ item.cdate || item.CDATE || '-' }}</div>
                                 </div>
                             </div>
-
-
                         </div>
+                        <!-- pointInfo 끝 -->
 
-                    </div> <!-- page-inner 끝 -->
+                    </div>
+                    <!-- page-inner 끝 -->
+
                 </main>
-            </div> <!-- user-page-container 끝 -->
+                <!-- user-content 끝 -->
+
+            </div>
+            <!-- user-page-container 끝 -->
+
 
             <!-- ✅ 반려동물 모달 -->
             <div class="modal-wrap" v-if="showPetModal">
@@ -1050,10 +1038,25 @@
                         {{ petForm.petNo ? '반려동물 프로필 수정' : '반려동물 프로필 추가' }}
                     </div>
 
-                    <div class="row"><label>이름</label><input type="text" v-model="petForm.petName"></div>
-                    <div class="row"><label>종</label><input type="text" v-model="petForm.species"></div>
-                    <div class="row"><label>품종</label><input type="text" v-model="petForm.breed"></div>
-                    <div class="row"><label>생년월일</label><input type="date" v-model="petForm.birthdate"></div>
+                    <div class="row">
+                        <label>이름</label>
+                        <input type="text" v-model="petForm.petName">
+                    </div>
+
+                    <div class="row">
+                        <label>종</label>
+                        <input type="text" v-model="petForm.species">
+                    </div>
+
+                    <div class="row">
+                        <label>품종</label>
+                        <input type="text" v-model="petForm.breed">
+                    </div>
+
+                    <div class="row">
+                        <label>생년월일</label>
+                        <input type="date" v-model="petForm.birthdate">
+                    </div>
 
                     <div class="row">
                         <label>성별</label>
@@ -1065,8 +1068,8 @@
                     </div>
 
                     <div class="modal-btns">
-                        <button class="btn-cancel" @click="closePetModal">취소</button>
-                        <button class="btn-save" @click="savePet">저장</button>
+                        <button class="btn-cancel" @click="fnClosePetModal">취소</button>
+                        <button class="btn-save" @click="fnSavePet">저장</button>
                     </div>
                 </div>
             </div>
@@ -1076,23 +1079,35 @@
                 <div class="modal-box">
                     <div class="modal-title">비밀번호 변경</div>
 
-                    <div class="row"><label>현재 비밀번호</label><input type="password" v-model="pwdForm.pwd"></div>
-                    <div class="row"><label>새 비밀번호</label><input type="password" v-model="pwdForm.newPwd"></div>
+                    <div class="row">
+                        <label>현재 비밀번호</label>
+                        <input type="password" v-model="pwdForm.pwd">
+                    </div>
+
+                    <div class="row">
+                        <label>새 비밀번호</label>
+                        <input type="password" v-model="pwdForm.newPwd">
+                    </div>
 
                     <div class="modal-btns">
-                        <button class="btn-cancel" @click="closePwdModal">취소</button>
-                        <button class="btn-save" @click="changePassword">변경</button>
+                        <button class="btn-cancel" @click="fnClosePwdModal">취소</button>
+                        <button class="btn-save" @click="fnChangePassword">변경</button>
                     </div>
                 </div>
             </div>
+
         </div>
+        <!-- app 끝 -->
+
 
 
         <jsp:include page="/WEB-INF/footer/footer.jsp" />
 
         <script>
+            // Vue 앱 생성
             const app = Vue.createApp({
                 data() {
+                    // 화면에서 사용하는 변수 선언
                     return {
                         currentMenu: "userMyPage",
                         openUserEditPanel: false,
@@ -1195,6 +1210,8 @@
                         rsvPage: 1,
                         rsvPageSize: 5,
                         selectedReview: {},
+                        healthTab: "health",
+
 
 
 
@@ -1203,6 +1220,7 @@
                 },
 
                 computed: {
+                    // 주문 목록 정렬 결과 계산
                     sortedOrderList() {
                         let list = [...this.groupedOrderList];
 
@@ -1211,9 +1229,9 @@
                         } else if (this.orderSortType === 'old') {
                             list.sort((a, b) => new Date(a.orderDate) - new Date(b.orderDate));
                         } else if (this.orderSortType === 'amountHigh') {
-                            list.sort((a, b) => this.getOrderTotal(b) - this.getOrderTotal(a));
+                            list.sort((a, b) => this.fnGetOrderTotal(b) - this.fnGetOrderTotal(a));
                         } else if (this.orderSortType === 'amountLow') {
-                            list.sort((a, b) => this.getOrderTotal(a) - this.getOrderTotal(b));
+                            list.sort((a, b) => this.fnGetOrderTotal(a) - this.fnGetOrderTotal(b));
                         } else if (this.orderSortType === 'payStatus') {
                             list.sort((a, b) => {
                                 let av = a.items[0]?.payStatus || a.items[0]?.PAY_STATUS || '';
@@ -1241,7 +1259,7 @@
                     },
                     usableCouponCount() {
                         return this.couponList.filter(coupon => {
-                            return this.getCouponStatus(coupon) === "ABLE";
+                            return this.fnGetCouponStatus(coupon) === "ABLE";
                         }).length;
                     },
 
@@ -1320,11 +1338,9 @@
                             reserveList: "예약 내역",
                             reservationDetail: "예약 상세",
                             petEdit: "반려동물 관리",
-                            petMyPage: "건강 조회",
-                            petHealthPage: "건강 기록",
-                            petVacPage: "접종 기록",
-                            petWeightPage: "몸무게 관리",
-                            pointInfo: "포인트 현황"
+                            petHealthPage: "반려동물 건강관리",
+                            pointInfo: "포인트 현황",
+                            couponInfo: "쿠폰 관리"
                         };
                         return map[this.currentMenu] || "홈";
                     },
@@ -1386,12 +1402,13 @@
                         }
 
                         return this.couponList.filter(coupon => {
-                            return this.getCouponStatus(coupon) === this.couponTab;
+                            return this.fnGetCouponStatus(coupon) === this.couponTab;
                         });
                     }
                 },
 
                 watch: {
+                    // 정렬 조건 변경 시 페이지 번호 초기화
                     orderSortType() {
                         this.orderPage = 1;
                     },
@@ -1401,7 +1418,8 @@
                 },
 
                 methods: {
-                    getOrderTotal(group) {
+                    // 주문 그룹의 총 결제 금액 계산
+                    fnGetOrderTotal: function (group) {
                         if (!group.items || group.items.length === 0) {
                             return 0;
                         }
@@ -1411,7 +1429,9 @@
                         }, 0);
                     },
 
-                    getSubStatusText(status) {
+                    // 구독 상태 코드를 화면 표시 문자로 변환
+
+                    fnGetSubStatusText: function (status) {
                         if (!status) return "-";
 
                         status = String(status).trim().toUpperCase();
@@ -1424,11 +1444,15 @@
                     },
 
 
-                    pageChange(url, param) {
+                    // 공통 페이지 이동 함수 호출
+
+
+                    fnPageChange: function (url, param) {
                         window.pageChange(url, param);
 
                     },
-                    selectPet(pet) {
+                    // 선택한 반려동물 기준으로 건강/접종/몸무게 데이터 조회
+                    fnSelectPet: function (pet) {
                         if (!pet || !pet.petNo) {
                             alert("반려동물 정보를 찾을 수 없습니다.");
                             return;
@@ -1440,22 +1464,11 @@
                         this.vacList = [];
                         this.weightList = [];
 
+
                         if (this.currentMenu === "petHealthPage") {
-                            this.loadHealthList();
-                        }
-
-                        if (this.currentMenu === "petVacPage") {
-                            this.loadVaccineList();
-                        }
-
-                        if (this.currentMenu === "petWeightPage") {
-                            this.loadWeightList();
-                        }
-
-                        if (this.currentMenu === "petMyPage") {
-                            this.loadHealthList();
-                            this.loadVaccineList();
-                            this.loadWeightList();
+                            this.fnLoadHealthList();
+                            this.fnLoadVaccineList();
+                            this.fnLoadWeightList();
                         }
                     },
 
@@ -1463,58 +1476,76 @@
 
 
 
-                    changeMenu(menu) {
+                    // 사이드 메뉴 변경 및 메뉴별 데이터 조회
+
+
+
+
+
+                    fnChangeMenu: function (menu) {
                         this.currentMenu = menu;
 
                         if (menu === "userMyPage") {
-                            this.loadMypage();
-                            this.loadPetList();
-                            this.loadReservationList();
-                            this.loadOrderList();
-                            this.loadSubscriptionInfo();
-                            this.loadMyPostList();
-                            this.loadMyCommentList();
-                            this.loadPointInfo();
-                            this.loadPointUseList();
-                            this.loadCouponList();
+                            this.fnLoadMypage();
+                            this.fnLoadPetList();
+                            this.fnLoadReservationList();
+                            this.fnLoadOrderList();
+                            this.fnLoadSubscriptionInfo();
+                            this.fnLoadMyPostList();
+                            this.fnLoadMyCommentList();
+                            this.fnLoadPointInfo();
+                            this.fnLoadPointUseList();
+                            this.fnLoadCouponList();
 
                         }
 
-                        if (menu === "subscriptionPage") this.loadSubscriptionInfo();
+
                         if (menu === "communityPage" || menu === "communityPostList") {
-                            this.loadMyPostList();
-                            this.loadMyCommentList();
+                            this.fnLoadMyPostList();
+                            this.fnLoadMyCommentList();
                         }
-                        if (menu === "reserveList") this.loadReservationAllList();
-                        if (menu === "orderList") this.loadOrderList();
-                        if (menu === "petWeightPage") this.loadWeightList();
-                        if (menu === "petHealthPage" || menu === "petMyPage") this.loadHealthList();
-                        if (menu === "petVacPage" || menu === "petMyPage") this.loadVaccineList();
+                        if (menu === "reserveList") this.fnLoadReservationAllList();
+                        if (menu === "orderList") this.fnLoadOrderList();
+
+                        if (menu === "petHealthPage") {
+                            this.healthTab = "health";
+                            this.fnLoadHealthList();
+                            this.fnLoadWeightList();
+                            this.fnLoadVaccineList();
+                        }
+
+
+
                         if (menu === "pointInfo") {
-                            this.loadPointInfo();
-                            this.loadPointUseList();
+                            this.fnLoadPointInfo();
+                            this.fnLoadPointUseList();
                         }
 
                         if (menu === "couponInfo") {
-                            this.loadCouponList();
+                            this.fnLoadCouponList();
                             this.couponTab = "ALL";
                         }
                         if (menu === "subscriptionPage") {
-                            this.loadSubscriptionInfo();
-                            this.loadSubscriptionPayList();
+                            this.fnLoadSubscriptionInfo();
+                            this.fnLoadSubscriptionPayList();
                         }
 
                     },
 
-                    goCommunityPostList() {
+                    // 내 전체 게시글 화면으로 이동
+
+                    fnGoCommunityPostList: function () {
                         this.currentMenu = "communityPostList";
-                        this.loadMyPostList();
+                        this.fnLoadMyPostList();
                     },
 
-                    goOrderList() {
+                    // 주문 목록 화면으로 이동
+
+                    fnGoOrderList: function () {
                         this.currentMenu = "orderList";
                     },
-                    canRefundOrder(order) {
+                    // 주문 상품 환불 가능 여부 확인
+                    fnCanRefundOrder: function (order) {
                         if (!order) return false;
 
                         const deliStatus = String(order.deliStatus || order.DELI_STATUS || "").trim().toUpperCase();
@@ -1533,7 +1564,9 @@
                         return true;
                     },
 
-                    goRefundShop(order) {
+                    // 쇼핑몰 환불 페이지로 이동
+
+                    fnGoRefundShop: function (order) {
                         if (!order || !order.orderNo) {
                             alert("환불에 필요한 주문 정보가 없습니다.");
                             return;
@@ -1546,7 +1579,9 @@
                         });
                     },
 
-                    canRefundRsv(item) {
+                    // 예약 환불 가능 여부 확인
+
+                    fnCanRefundRsv: function (item) {
                         if (!item) return false;
 
                         const status = String(item.rsvStatus || item.RSV_STATUS || "")
@@ -1556,7 +1591,8 @@
                         // 확정 예약만 환불 버튼 표시
                         return status === "CNF";
                     },
-                    canPayRsv(item) {
+                    // 예약 결제 가능 여부 확인
+                    fnCanPayRsv: function (item) {
                         if (!item) return false;
 
                         const status = String(item.rsvStatus || item.RSV_STATUS || "")
@@ -1566,7 +1602,9 @@
                         return status === "WAI"; // 예약대기만 결제 가능
                     },
 
-                    goRsvPay(item) {
+                    // 예약 결제 페이지로 이동
+
+                    fnGoRsvPay: function (item) {
                         const rsvNo = item.rsvNo || item.RSV_NO;
 
                         if (!rsvNo) {
@@ -1581,7 +1619,11 @@
 
 
 
-                    goRefundRsv(item) {
+                    // 예약 환불 페이지로 이동
+
+
+
+                    fnGoRefundRsv: function (item) {
                         if (!item || !(item.rsvNo || item.RSV_NO)) {
                             alert("예약 정보가 없습니다.");
                             return;
@@ -1591,7 +1633,8 @@
                             rsvNo: item.rsvNo || item.RSV_NO
                         });
                     },
-                    updateAutoPay() {
+                    // 구독 자동결제 설정 변경
+                    fnUpdateAutoPay: function () {
 
                         if (!this.subscriptionInfo.subNo) {
                             alert("구독 정보가 없습니다.");
@@ -1625,7 +1668,7 @@
                             success: (data) => {
                                 alert(data.message);
                                 if (data.result === "success") {
-                                    this.loadSubscriptionInfo();
+                                    this.fnLoadSubscriptionInfo();
                                 }
                             },
                             error: () => {
@@ -1633,17 +1676,22 @@
                             }
                         });
                     },
-                    toggleSubscriptionPayList() {
+                    // 구독 결제내역 영역 열기/닫기
+                    fnToggleSubscriptionPayList: function () {
                         this.showSubscriptionPayList = !this.showSubscriptionPayList;
 
                         if (this.showSubscriptionPayList && this.subscriptionPayList.length === 0) {
-                            this.loadSubscriptionPayList();
+                            this.fnLoadSubscriptionPayList();
                         }
                     },
 
 
 
-                    goReview(order) {
+                    // 상품 리뷰 작성 페이지로 이동
+
+
+
+                    fnGoReview: function (order) {
                         if (!order) return;
 
                         const productNo = order.productNo;
@@ -1660,7 +1708,8 @@
                             ordNo: order.orderNo   // ← 여기 유지 (DB는 orderNo지만 프론트는 ordNo로)
                         });
                     },
-                    openWrittenReview(order) {
+                    // 작성 완료된 리뷰 상세 열기
+                    fnOpenWrittenReview: function (order) {
                         if (!order) return;
 
                         this.selectedReview = order;
@@ -1668,7 +1717,10 @@
                     },
 
 
-                    openOrderDetail(group) {
+                    // 선택한 주문의 상세 화면 열기
+
+
+                    fnOpenOrderDetail: function (group) {
                         this.selectedOrderGroup = {
                             orderNo: group.orderNo,
                             orderDate: group.orderDate,
@@ -1676,19 +1728,22 @@
                         };
                         this.currentMenu = "orderDetail";
                     },
-                    getPayStatusText(status) {
+                    // 결제 상태 코드를 화면 표시 문자로 변환
+                    fnGetPayStatusText: function (status) {
                         if (!status) return "-";
                         status = String(status).trim().toUpperCase();
                         switch (status) {
                             case "RDY": return "준비";
                             case "PAY": return "결제";
-                            case "CANCEL": return "취소";
+                            case "CAN": return "취소";
                             case "FAL": return "실패";
                             default: return status;
                         }
                     },
 
-                    getPayStatusClass(status) {
+                    // 결제 상태에 맞는 CSS 클래스 반환
+
+                    fnGetPayStatusClass: function (status) {
                         if (!status) return "status-gray";
 
                         switch (status) {
@@ -1700,7 +1755,9 @@
                         }
                     },
 
-                    getDeliStatusText(status) {
+                    // 배송 상태 코드를 화면 표시 문자로 변환
+
+                    fnGetDeliStatusText: function (status) {
                         if (!status) return "-";
 
                         switch (status) {
@@ -1712,7 +1769,9 @@
                         }
                     },
 
-                    getDeliStatusClass(status) {
+                    // 배송 상태에 맞는 CSS 클래스 반환
+
+                    fnGetDeliStatusClass: function (status) {
                         if (!status) return "status-gray";
 
                         switch (status) {
@@ -1722,7 +1781,8 @@
                             default: return "status-gray";
                         }
                     },
-                    canWriteReview(order) {
+                    // 상품 리뷰 작성 가능 여부 확인
+                    fnCanWriteReview: function (order) {
                         if (!order) return false;
 
                         const deliStatus = String(order.deliStatus || order.DELI_STATUS || "")
@@ -1735,7 +1795,8 @@
 
                         return deliStatus === "CMP" && reviewYn !== "Y";
                     },
-                    canViewWrittenReview(order) {
+                    // 작성 완료 리뷰 조회 가능 여부 확인
+                    fnCanViewWrittenReview: function (order) {
                         if (!order) return false;
 
                         const deliStatus = String(order.deliStatus || order.DELI_STATUS || "")
@@ -1751,11 +1812,16 @@
 
 
 
-                    openReservationDetail(item) {
+                    // 예약 상세 화면 열기
+
+
+
+                    fnOpenReservationDetail: function (item) {
                         this.selectedReservation = item;
                         this.currentMenu = "reservationDetail";
                     },
-                    getReservationStatusText(status) {
+                    // 예약 상태 코드를 화면 표시 문자로 변환
+                    fnGetReservationStatusText: function (status) {
                         if (!status) return "-";
                         status = String(status).trim().toUpperCase();
 
@@ -1766,7 +1832,8 @@
 
                         return status;
                     },
-                    formatDateTime(dateStr) {
+                    // 날짜/시간 값을 yyyy-MM-dd HH:mm 형태로 변환
+                    fnFormatDateTime: function (dateStr) {
                         if (!dateStr) return "-";
 
                         let str = String(dateStr);
@@ -1782,7 +1849,12 @@
 
 
 
-                    formatDate(dateStr) {
+                    // 날짜 값을 yyyy-MM-dd 형태로 변환
+
+
+
+
+                    fnFormatDate: function (dateStr) {
 
 
                         if (!dateStr || dateStr === "날짜 없음") return "-";
@@ -1802,7 +1874,9 @@
                         return `${year}-${month}-${day}`;
                     },
 
-                    cancelSubscription() {
+                    // 구독 해지 처리
+
+                    fnCancelSubscription: function () {
                         const self = this;
                         if (!confirm("정말 구독을 해지하시겠습니까?")) return;
 
@@ -1811,7 +1885,7 @@
                             type: "POST",
                             success: function (data) {
                                 alert(data.message || (data.result === "success" ? "구독이 해지되었습니다." : "구독 해지에 실패했습니다."));
-                                if (data.result === "success") self.loadSubscriptionInfo();
+                                if (data.result === "success") self.fnLoadSubscriptionInfo();
                             },
                             error: function () {
                                 alert("구독 해지 중 오류가 발생했습니다.");
@@ -1819,7 +1893,9 @@
                         });
                     },
 
-                    getOrderStatusClass(status) {
+                    // 주문 상태에 맞는 CSS 클래스 반환
+
+                    fnGetOrderStatusClass: function (status) {
                         if (!status) return "status-gray";
                         if (status.includes("완료")) return "status-green";
                         if (status.includes("배송")) return "status-blue";
@@ -1828,7 +1904,10 @@
                     },
 
 
-                    getReserveStatusClass(status) {
+                    // 예약 상태에 맞는 CSS 클래스 반환
+
+
+                    fnGetReserveStatusClass: function (status) {
                         if (!status) return "status-orange";
 
                         status = String(status).trim().toUpperCase(); // 🔥 핵심
@@ -1842,7 +1921,10 @@
                     },
 
 
-                    loadMypage() {
+                    // 마이페이지 사용자 기본 정보 조회
+
+
+                    fnLoadMypage: function () {
                         const self = this;
                         $.ajax({
                             url: "/user/mypage.dox",
@@ -1877,7 +1959,9 @@
                         });
                     },
 
-                    loadSubscriptionInfo() {
+                    // 현재 구독 정보 조회
+
+                    fnLoadSubscriptionInfo: function () {
                         const self = this;
                         $.ajax({
                             url: "/user/subscription-info.dox",
@@ -1895,7 +1979,9 @@
                         });
                     },
 
-                    loadMyPostList() {
+                    // 내가 작성한 게시글 목록 조회
+
+                    fnLoadMyPostList: function () {
                         const self = this;
                         $.ajax({
                             url: "/user/community-post-list.dox",
@@ -1909,7 +1995,9 @@
                         });
                     },
 
-                    loadMyCommentList() {
+                    // 내가 작성한 댓글 목록 조회
+
+                    fnLoadMyCommentList: function () {
                         const self = this;
                         $.ajax({
                             url: "/user/community-comment-list.dox",
@@ -1923,7 +2011,9 @@
                         });
                     },
 
-                    updateUser() {
+                    // 회원정보 수정
+
+                    fnUpdateUser: function () {
                         const self = this;
                         $.ajax({
                             url: "/user/update-user.dox",
@@ -1938,16 +2028,22 @@
                         });
                     },
 
-                    openPwdModal() {
+                    // 비밀번호 변경 모달 열기
+
+                    fnOpenPwdModal: function () {
                         this.showPwdModal = true;
                     },
 
-                    closePwdModal() {
+                    // 비밀번호 변경 모달 닫기 및 입력값 초기화
+
+                    fnClosePwdModal: function () {
                         this.showPwdModal = false;
                         this.pwdForm = { pwd: "", newPwd: "" };
                     },
 
-                    changePassword() {
+                    // 현재 비밀번호 확인 후 새 비밀번호로 변경
+
+                    fnChangePassword: function () {
                         const self = this;
                         $.ajax({
                             url: "/user/check-password.dox",
@@ -1968,7 +2064,7 @@
                                     },
                                     success: function (data2) {
                                         alert(data2.message);
-                                        if (data2.result === "success") self.closePwdModal();
+                                        if (data2.result === "success") self.fnClosePwdModal();
                                     },
                                     error: function () {
                                         alert("비밀번호 변경 중 오류가 발생했습니다.");
@@ -1981,7 +2077,9 @@
                         });
                     },
 
-                    deleteUser() {
+                    // 회원 탈퇴 처리
+
+                    fnDeleteUser: function () {
                         if (!confirm("정말 탈퇴하시겠습니까?")) return;
 
                         $.ajax({
@@ -1997,7 +2095,9 @@
                         });
                     },
 
-                    loadPetList() {
+                    // 반려동물 목록 조회
+
+                    fnLoadPetList: function () {
                         const self = this;
                         $.ajax({
                             url: "/user/pet-list.dox",
@@ -2015,11 +2115,7 @@
 
                                     else self.selectedPetNo = "";
 
-                                    if (self.selectedPetNo) {
-                                        self.loadHealthList();
-                                        self.loadWeightList();
-                                        self.loadVaccineList();
-                                    }
+
                                 }
                             },
                             error: function () {
@@ -2028,7 +2124,8 @@
                         });
                     },
                     //구독결제내역
-                    loadSubscriptionPayList() {
+                    // 구독 결제내역 조회
+                    fnLoadSubscriptionPayList: function () {
                         $.ajax({
                             url: "/user/subscription-pay-list.dox",
                             type: "POST",
@@ -2051,12 +2148,18 @@
 
 
 
-                    getPetInitial(name) {
+                    // 반려동물 이름 첫 글자 반환
+
+
+
+                    fnGetPetInitial: function (name) {
                         if (!name) return "P";
                         return name.substring(0, 1);
                     },
 
-                    getPetAge(birthdate) {
+                    // 반려동물 생년월일 기준 나이 계산
+
+                    fnGetPetAge: function (birthdate) {
                         if (!birthdate) return "";
                         const birth = new Date(birthdate);
                         const today = new Date();
@@ -2067,7 +2170,8 @@
                         if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) age--;
                         return age >= 0 ? age : 0;
                     },
-                    openAddPetModal() {
+                    // 반려동물 추가 모달 열기
+                    fnOpenAddPetModal: function () {
                         this.petForm = {
                             petNo: "",
                             petName: "",
@@ -2079,7 +2183,9 @@
                         this.showPetModal = true;
                     },
 
-                    openEditPetModal(pet) {
+                    // 반려동물 수정 모달 열기
+
+                    fnOpenEditPetModal: function (pet) {
                         console.log("수정 클릭됨", pet);
 
                         this.petForm = {
@@ -2094,11 +2200,15 @@
                         this.showPetModal = true;
                     },
 
-                    closePetModal() {
+                    // 반려동물 모달 닫기
+
+                    fnClosePetModal: function () {
                         this.showPetModal = false;
                     },
 
-                    savePet() {
+                    // 반려동물 추가/수정 저장
+
+                    fnSavePet: function () {
                         const self = this;
                         const url = self.petForm.petNo ? "/user/update-pet.dox" : "/user/add-pet.dox";
 
@@ -2109,8 +2219,8 @@
                             success: function (data) {
                                 alert(data.message);
                                 if (data.result === "success") {
-                                    self.closePetModal();
-                                    self.loadPetList();
+                                    self.fnClosePetModal();
+                                    self.fnLoadPetList();
                                 }
                             },
                             error: function () {
@@ -2122,7 +2232,12 @@
 
 
 
-                    deletePet(petNo) {
+                    // 반려동물 삭제
+
+
+
+
+                    fnDeletePet: function (petNo) {
                         const self = this;
                         if (!confirm("반려동물 정보를 삭제하시겠습니까?")) return;
 
@@ -2132,14 +2247,15 @@
                             data: { petNo: petNo },
                             success: function (data) {
                                 alert(data.message);
-                                if (data.result === "success") self.loadPetList();
+                                if (data.result === "success") self.fnLoadPetList();
                             },
                             error: function () {
                                 alert("반려동물 삭제 중 오류가 발생했습니다.");
                             }
                         });
                     },
-                    changeMainPet(petNo) {
+                    // 대표 반려동물 변경
+                    fnChangeMainPet: function (petNo) {
 
                         const pet = this.petList.find(p =>
                             String(p.petNo || p.PET_NO) === String(petNo)
@@ -2162,7 +2278,7 @@
                             success: (data) => {
                                 if (data.result === "success") {
                                     alert("대표 프로필이 변경되었습니다.");
-                                    this.loadPetList();
+                                    this.fnLoadPetList();
                                 } else {
                                     alert(data.message || "변경 실패");
                                 }
@@ -2176,7 +2292,12 @@
 
 
 
-                    loadReservationList() {
+                    // 최근 예약 목록 조회
+
+
+
+
+                    fnLoadReservationList: function () {
                         const self = this;
                         $.ajax({
                             url: "/user/reservation-list.dox",
@@ -2191,7 +2312,9 @@
                         });
                     },
 
-                    loadReservationAllList() {
+                    // 전체 예약 목록 조회
+
+                    fnLoadReservationAllList: function () {
                         const self = this;
                         $.ajax({
                             url: "/user/reservation-all-list.dox",
@@ -2206,7 +2329,9 @@
                         });
                     },
 
-                    loadOrderList() {
+                    // 주문 목록 조회
+
+                    fnLoadOrderList: function () {
                         const self = this;
                         $.ajax({
                             url: "/user/order-list.dox",
@@ -2221,7 +2346,9 @@
                         });
                     },
 
-                    loadHealthList() {
+                    // 건강 기록 목록 조회
+
+                    fnLoadHealthList: function () {
                         const self = this;
                         if (!self.selectedPetNo) return;
 
@@ -2235,7 +2362,9 @@
                         });
                     },
 
-                    loadWeightList() {
+                    // 몸무게 기록 목록 조회
+
+                    fnLoadWeightList: function () {
                         const self = this;
                         if (!self.selectedPetNo) return;
 
@@ -2245,12 +2374,20 @@
                             data: { petNo: self.selectedPetNo },
                             success: function (data) {
                                 self.weightList = data.result === "success" ? (data.weightList || []) : [];
-                                setTimeout(() => self.drawWeightChart(), 100);
+
+                                self.$nextTick(function () {
+                                    self.fnDrawWeightChart();
+                                });
+                            },
+                            error: function () {
+                                self.weightList = [];
                             }
                         });
                     },
 
-                    loadVaccineList() {
+                    // 접종 기록 목록 조회
+
+                    fnLoadVaccineList: function () {
                         const self = this;
                         if (!self.selectedPetNo) return;
 
@@ -2263,7 +2400,8 @@
                             }
                         });
                     },
-                    saveHealthRecord() {
+                    // 건강 기록 저장
+                    fnSaveHealthRecord: function () {
                         const self = this;
 
                         if (!self.selectedPetNo) {
@@ -2284,12 +2422,13 @@
                                 alert(data.message);
                                 if (data.result === "success") {
                                     self.healthForm = { title: "", date: "", memo: "" };
-                                    self.loadHealthList();
+                                    self.fnLoadHealthList();
                                 }
                             }
                         });
                     },
-                    saveVacRecord() {
+                    // 접종 기록 저장
+                    fnSaveVacRecord: function () {
                         const self = this;
 
                         if (!self.selectedPetNo) {
@@ -2312,7 +2451,7 @@
                                 alert(data.message);
                                 if (data.result === "success") {
                                     self.vacForm = { name: "", date: "", nextDate: "", hospitalName: "", memo: "" };
-                                    self.loadVaccineList();
+                                    self.fnLoadVaccineList();
                                 }
                             }
                         });
@@ -2324,7 +2463,15 @@
 
 
 
-                    saveWeightRecord() {
+                    // 몸무게 기록 저장
+
+
+
+
+
+
+
+                    fnSaveWeightRecord: function () {
                         const self = this;
 
                         if (!self.selectedPetNo) {
@@ -2345,51 +2492,50 @@
                                 alert(data.message);
                                 if (data.result === "success") {
                                     self.weightForm = { weight: "", date: "", memo: "" };
-                                    self.loadWeightList();
+                                    self.fnLoadWeightList();
                                 }
                             }
                         });
                     },
-                    drawWeightChart() {
+                    // 몸무게 변화 차트 그리기
+                    fnDrawWeightChart: function () {
                         const canvas = document.getElementById("weightChart");
-                        if (!canvas) return;
 
-                        const labels = this.weightList.map(item => item.date);
-                        const values = this.weightList.map(item => Number(item.weight));
+                        if (!canvas) return;
 
                         if (this.weightChart) {
                             this.weightChart.destroy();
-                            this.weightChart = null;
+                            this.weightchart = null;
                         }
+
+                        const list = [...this.weightList].sort((a, b) => {
+                            return String(a.date || "").localeCompare(String(b.date || ""));
+                        });
+
+                        const labels = list.map(item => this.fnFormatDate(item.date));
+                        const values = list.map(item => Number(item.weight || 0));
 
                         this.weightChart = new Chart(canvas, {
                             type: "line",
                             data: {
                                 labels: labels,
                                 datasets: [{
-                                    label: "몸무게 (kg)",
+                                    label: "몸무게(kg)",
                                     data: values,
-                                    fill: false,
-                                    tension: 0.3,
-                                    borderWidth: 2,
-                                    pointRadius: 4,
-                                    pointHoverRadius: 6
+                                    tension: 0.3
                                 }]
                             },
                             options: {
                                 responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: {
-                                    legend: { display: true }
-                                },
-                                scales: {
-                                    y: { beginAtZero: false }
-                                }
+                                maintainAspectRatio: false
                             }
                         });
                     },
 
-                    loadPointInfo() {
+
+                    // 현재 보유 포인트 조회
+
+                    fnLoadPointInfo: function () {
                         const self = this;
 
                         $.ajax({
@@ -2411,7 +2557,9 @@
                         });
                     },
 
-                    loadPointUseList() {
+                    // 포인트 사용내역 조회
+                    // 포인트 사용내역 조회
+                    fnLoadPointUseList: function () {
                         const self = this;
 
                         $.ajax({
@@ -2419,8 +2567,14 @@
                             type: "POST",
                             dataType: "json",
                             success: function (res) {
-                                if (res.result === true || res.result === "success") {
-                                    self.pointUseList = res.list || [];
+                                console.log("포인트 사용내역 응답:", res);
+
+                                if (res.result === "success" || res.result === true) {
+                                    self.pointUseList =
+                                        res.pointUseList ||
+                                        res.list ||
+                                        res.useList ||
+                                        [];
                                 } else if (Array.isArray(res)) {
                                     self.pointUseList = res;
                                 } else {
@@ -2429,14 +2583,19 @@
 
                                 self.showPointUseList = true;
                             },
-                            error: function () {
+                            error: function (xhr) {
+                                console.log("포인트 사용내역 오류:", xhr.responseText);
+
                                 self.pointUseList = [];
                                 self.showPointUseList = true;
                                 alert("포인트 사용내역 조회 실패");
                             }
                         });
                     },
-                    loadCouponList() {
+
+
+                    // 쿠폰 목록 조회
+                    fnLoadCouponList: function () {
                         const self = this;
 
                         $.ajax({
@@ -2457,7 +2616,8 @@
                             }
                         });
                     },
-                    getCouponStatus(coupon) {
+                    // 쿠폰 사용 가능/사용완료/만료 상태 계산
+                    fnGetCouponStatus: function (coupon) {
                         const status = coupon.cpStatus || coupon.CP_STATUS;
                         const endDate = coupon.endDate || coupon.EXP_DATE;
 
@@ -2485,23 +2645,30 @@
                     },
 
 
-                    getCouponStatusText(coupon) {
-                        const status = this.getCouponStatus(coupon);
+                    // 쿠폰 상태를 화면 표시 문자로 변환
+
+
+                    fnGetCouponStatusText: function (coupon) {
+                        const status = this.fnGetCouponStatus(coupon);
 
                         if (status === "USED") return "사용완료";
                         if (status === "EXPIRED") return "만료";
                         return "사용가능";
                     },
 
-                    getCouponStatusClass(coupon) {
-                        const status = this.getCouponStatus(coupon);
+                    // 쿠폰 상태에 맞는 CSS 클래스 반환
+
+                    fnGetCouponStatusClass: function (coupon) {
+                        const status = this.fnGetCouponStatus(coupon);
 
                         if (status === "USED") return "status-gray";
                         if (status === "EXPIRED") return "status-red";
                         return "status-green";
                     },
 
-                    getPetImage(pet) {
+                    // 반려동물 이미지 경로 반환
+
+                    fnGetPetImage: function (pet) {
                         // 나중에 업로드 이미지 있으면 우선 사용
                         if (pet.petImg) {
                             return pet.petImg;
@@ -2516,24 +2683,25 @@
                     }
                 },
 
+                // 화면 최초 로딩 시 실행
                 mounted() {
-                    this.loadMypage();
-                    this.loadPetList();
-                    this.loadReservationList();
-                    this.loadReservationAllList();
-                    this.loadOrderList();
-                    this.loadSubscriptionInfo();
-                    this.loadMyPostList();
-                    this.loadMyCommentList();
-                    this.loadPointInfo();
-                    this.loadCouponList();
+                    this.fnLoadMypage();
+                    this.fnLoadPetList();
+                    this.fnLoadReservationList();
+                    this.fnLoadReservationAllList();
+                    this.fnLoadOrderList();
+                    this.fnLoadSubscriptionInfo();
+                    this.fnLoadMyPostList();
+                    this.fnLoadMyCommentList();
+                    this.fnLoadPointInfo();
+                    this.fnLoadCouponList();
 
                     const trigger = sessionStorage.getItem("triggerFunction");
                     if (trigger === "openRsvList") {
-                        this.changeMenu("reserveList");
+                        this.fnChangeMenu("reserveList");
                         sessionStorage.removeItem("triggerFunction");
                     } else if (trigger === "openOrdList") {
-                        this.changeMenu("orderList");
+                        this.fnChangeMenu("orderList");
                         sessionStorage.removeItem("triggerFunction");
                     }
 

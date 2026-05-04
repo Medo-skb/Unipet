@@ -127,19 +127,28 @@
 
 	<!-- 최근 예약 목록 -->
 	<select id="selectReservationList" parameterType="hashmap"
-		resultType="hashmap">
-		SELECT
-		RSV_NO AS rsvNo,
-		DATE_FORMAT(RSV_DATE, '%Y-%m-%d') AS rsvDate,
-		DATE_FORMAT(RSV_START_TIME, '%H:%i') AS rsvStartTime,
-		DATE_FORMAT(RSV_END_TIME, '%H:%i') AS rsvEndTime,
-		PET_NO AS petNo,
-		RSV_STATUS AS rsvStatus
-		FROM reservation
-		WHERE USER_ID = #{userId}
-		ORDER BY RSV_DATE DESC, RSV_START_TIME DESC
-		LIMIT 5
-	</select>
+        resultType="hashmap">
+    SELECT
+        R.RSV_NO AS rsvNo,
+        DATE_FORMAT(R.RSV_DATE, '%Y-%m-%d') AS rsvDate,
+        DATE_FORMAT(R.RSV_START_TIME, '%H:%i') AS rsvStartTime,
+        DATE_FORMAT(R.RSV_END_TIME, '%H:%i') AS rsvEndTime,
+        R.PET_NO AS petNo,
+        R.RSV_STATUS AS rsvStatus,
+
+        R.STORE_NO AS storeNo,             <!-- 🔥 추가 -->
+        S.STORE_NAME AS storeName          <!-- 🔥 핵심 -->
+
+    FROM RESERVATION R
+
+    LEFT JOIN STORE S                    <!-- 🔥 핵심 -->
+        ON R.STORE_NO = S.STORE_NO
+
+    WHERE R.USER_ID = #{userId}
+
+    ORDER BY R.RSV_DATE DESC, R.RSV_START_TIME DESC
+    LIMIT 5
+</select>
 
 
 	<!-- 전체 예약 목록 조회 : 중복 예약은 1개만 표시 / 상태 alias 고정 -->
@@ -509,46 +518,81 @@
 		FROM USER_POINT
 		WHERE USER_ID = #{userId}
 	</select>
-	<!-- 포인트 사용내역 조회 + 잔액 계산 -->
+	
+	<!-- 포인트 전체내역 조회 (+ 적립 / - 사용 / 잔액 포함) -->
 <select id="selectPointUseList" parameterType="hashmap" resultType="hashmap">
-    SELECT
-        POINT_NO AS pointNo,
-        USER_ID AS userId,
-        POINT_AMOUNT AS pointAmount,
-        ORD_NO AS ordNo,
-        REVIEW_NO AS reviewNo,
-        DATE_FORMAT(CDATE, '%Y-%m-%d %H:%i') AS cdate,
+    <![CDATA[
+    SELECT *
+    FROM (
+        SELECT
+            UP.POINT_NO AS pointNo,
+            UP.USER_ID AS userId,
+            UP.POINT_AMOUNT AS pointAmount,
+            UP.ORD_NO AS ordNo,
+            UP.REVIEW_NO AS reviewNo,
+            DATE_FORMAT(UP.CDATE, '%Y-%m-%d %H:%i') AS cdate,
 
-        SUM(POINT_AMOUNT) OVER (
-            PARTITION BY USER_ID
-            ORDER BY CDATE ASC, POINT_NO ASC
-        ) AS balance
+            CASE
+                WHEN UP.POINT_AMOUNT > 0 AND UP.REVIEW_NO IS NOT NULL THEN '리뷰 작성 적립'
+                WHEN UP.POINT_AMOUNT > 0 THEN '포인트 적립'
+                WHEN OI.firstProductName IS NULL THEN '포인트 사용'
+                WHEN OI.productCnt > 1 THEN CONCAT(OI.firstProductName, ' 외 ', OI.productCnt - 1, '건')
+                ELSE OI.firstProductName
+            END AS orderProductText,
 
-    FROM USER_POINT
-    WHERE USER_ID = #{userId}
-    ORDER BY CDATE DESC, POINT_NO DESC
+            SUM(UP.POINT_AMOUNT) OVER (
+                PARTITION BY UP.USER_ID
+                ORDER BY UP.CDATE ASC, UP.POINT_NO ASC
+            ) AS balance
+
+        FROM USER_POINT UP
+
+        LEFT JOIN (
+            SELECT
+                OD.ORD_NO,
+                MIN(P.PRODUCT_NAME) AS firstProductName,
+                COUNT(*) AS productCnt
+            FROM ORDER_DETAIL OD
+            JOIN PRODUCT P
+                ON OD.PRODUCT_NO = P.PRODUCT_NO
+            GROUP BY OD.ORD_NO
+        ) OI
+            ON UP.ORD_NO = OI.ORD_NO
+
+        WHERE UP.USER_ID = #{userId}
+    ) X
+    ORDER BY X.cdate DESC, X.pointNo DESC
+    ]]>
 </select>
+
+	
+    
 
 	
 	<!-- 쿠폰 목록 조회 -->
 	<select id="selectCouponList" parameterType="hashmap" resultType="hashmap">
-		SELECT
-		uc.UCP_NO AS couponNo,
-		uc.USER_ID AS userId,
-		uc.COUPON_NO AS couponNoRef,
+    SELECT
+        uc.UCP_NO AS couponNo,
+        uc.USER_ID AS userId,
+        uc.COUPON_NO AS couponNoRef,
 
-		c.COUPON_NAME AS couponName,
-		c.CP_CONTENTS AS cpContents,
-		c.DEDUCEPRICE AS discountAmt,
+        c.COUPON_NAME AS couponName,
+        c.CP_CONTENTS AS cpContents,
+        c.DEDUCEPRICE AS discountAmt,
 
-		uc.CP_STATUS AS cpStatus,
-		uc.CDATE AS startDate,
-		uc.EXP_DATE AS endDate,
-		uc.USE_DATE AS useDate
-		FROM USER_COUPON uc
-		JOIN COUPON c ON uc.COUPON_NO = c.COUPON_NO
-		WHERE uc.USER_ID = #{userId}
-		ORDER BY uc.EXP_DATE ASC
-	</select>
+        uc.CP_STATUS AS cpStatus,
+        DATE_FORMAT(uc.CDATE, '%Y-%m-%d') AS startDate,
+        DATE_FORMAT(uc.EXP_DATE, '%Y-%m-%d') AS endDate,
+        DATE_FORMAT(uc.USE_DATE, '%Y-%m-%d %H:%i') AS useDate,
+
+        '-' AS orderProductText
+
+    FROM USER_COUPON uc
+    JOIN COUPON c
+        ON uc.COUPON_NO = c.COUPON_NO
+
+    WHERE uc.USER_ID = #{userId}
+    ORDER BY uc.EXP_DATE ASC
+</select>
 
 </mapper>
