@@ -179,8 +179,8 @@
 
 | 분류 | 링크 |
 |------|------|
-| 📝 회의록 | [회의록 보기](https://drive.google.com/drive/folders/1bpM3vTIY-6_Rf_6FwxaOvptJlfphWDZC) |
-| 🏗 설계 자료 | [설계 보기](https://drive.google.com/drive/folders/1WqbDMTMkynVD0cCp9hnwFD0ld0HBcUQW) |
-| 📚 공통 문서 | [공통 문서 보기](https://drive.google.com/drive/folders/1Xm2uaNjuhy3Qlk6FlUh8F5hIuKT3p7nS) |
+| 📝 회의록 | [회의록 보기](https://drive.google.com/drive/folders/1d1CxrihnG_TbVloRdNIfcGgQ-Lkdas0k?usp=drive_link) |
+| 🏗 설계 자료 | [설계 보기](https://drive.google.com/drive/folders/17cAWy-taTVDPN2uJo4NCYHvQSAF1TFwI?usp=drive_link) |
+| 📚 공통 문서 | [공통 문서 보기](https://drive.google.com/drive/folders/1k4MLxfWRZGS_JbnkDp5hF_ht_NbGSbwh?usp=drive_link) |
 
 ---
