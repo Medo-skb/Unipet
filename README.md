@@ -1,10 +1,3 @@
-<div align="center">
-  <!-- <img src="./img/demo_main.gif" width="800" alt="GwasilZero 시연 영상"> -->
-</div>
-
-
-<br>
-
 # 🐶 UNIPET(유니펫) - 반려동물의 모든것!! 🐱
 
 ## 💡 프로젝트 소개
