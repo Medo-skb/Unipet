@@ -81,8 +81,19 @@
 				</div>
 
 				<div class="form-row">
-					<div class="label">첨부파일</div>
-					<input type="file" id="fileInput" multiple>
+				    <div class="label">첨부파일</div>
+
+				    <div>
+				        <input type="file" id="fileInput" multiple>
+
+				        <div class="existing-file-box" v-if="existingFileList.length > 0">
+				            <div class="existing-file-title">기존 첨부파일</div>
+
+				            <div class="existing-file-item" v-for="file in existingFileList" :key="file.fileNo">
+				                📎 {{file.fileName}}
+				            </div>
+				        </div>
+				    </div>
 				</div>
 
 				<div class="btn-row">
@@ -111,6 +122,7 @@
 					maxContentLength: 2000,
 					boardTitle: "게시글 작성",
 					isLocalBoard: false,
+					existingFileList: [],
 					sessionId: '<%=session.getAttribute("sessionId") == null ? "" : session.getAttribute("sessionId")%>',
 					sessionRole: '<%=session.getAttribute("sessionRole") == null ? "" : session.getAttribute("sessionRole")%>'
 				};
@@ -279,46 +291,40 @@
 				},
 
 				fnLoadTempBoard: function () {
-					let self = this;
+				    let self = this;
 
-					$.ajax({
-						url: "/board/temp-recent.dox",
-						type: "POST",
-						dataType: "json",
-						data: {},
-						success: function (data) {
-							if (data.result == "success") {
-								self.bSubNo = data.info.bSubNo == null || data.info.bSubNo == 0 ? "" : data.info.bSubNo;
-								self.localNo = data.info.localNo == null || data.info.localNo == 0 ? "" : data.info.localNo;
-								self.privateYn = data.info.privateYn == null ? "N" : data.info.privateYn;
-								self.title = data.info.title == null ? "" : data.info.title;
-								self.bContent = data.info.bContent == null ? "" : data.info.bContent;
+				    $.ajax({
+				        url: "/board/temp-recent.dox",
+				        type: "POST",
+				        dataType: "json",
+				        data: {},
+				        success: function (data) {
+				            if (data.result == "success") {
 
-								for (let i = 0; i < self.subTypeList.length; i++) {
-									if (String(self.subTypeList[i].bSubNo) == String(self.bSubNo)) {
-										self.selectedMainNo = self.subTypeList[i].bMainNo;
-										break;
-									}
-								}
+				                if (data.info == null || data.info.boardNo == null) {
+				                    alert("불러올 임시저장 글이 없습니다.");
+				                    return;
+				                }
 
-								self.fnSetBoardInfo();
-								self.fnFilterSubTypeList();
+				                alert("최근 임시저장 글을 불러왔습니다.");
 
-								alert("최근 임시저장 글을 불러왔습니다.");
+				                pageChange("/board/edit.do", {
+				                    boardNo: data.info.boardNo
+				                });
 
-							} else if (data.result == "login") {
-							    alert("로그인이 필요한 서비스입니다.");
-							    location.href = "/user/login.do";
+				            } else if (data.result == "login") {
+				                alert("로그인이 필요한 서비스입니다.");
+				                location.href = "/user/login.do";
 
-							} else {
-							    alert(data.message);
-							}
-						},
-						error: function (xhr, status, error) {
-							console.log("임시저장 불러오기 오류:", xhr.responseText);
-							alert("임시저장 글 불러오기 중 오류가 발생했습니다.");
-						}
-					});
+				            } else {
+				                alert(data.message);
+				            }
+				        },
+				        error: function (xhr, status, error) {
+				            console.log("임시저장 불러오기 오류:", xhr.responseText);
+				            alert("임시저장 글 불러오기 중 오류가 발생했습니다.");
+				        }
+				    });
 				}
 			},
 			mounted() {

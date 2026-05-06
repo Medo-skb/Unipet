@@ -112,10 +112,15 @@
 
 				<div class="form-row">
 					<div class="label">기존 첨부파일</div>
+
 					<div v-if="fileList.length == 0">첨부파일이 없습니다.</div>
+
 					<div v-else>
 						<div class="file-box" v-for="file in fileList" :key="file.fileNo">
-							{{file.originName}}
+							<span>
+								📎 {{file.originName ? file.originName : file.fileName}}
+							</span>
+
 							<button type="button" @click="fnRemoveFile(file.fileNo)">삭제</button>
 						</div>
 					</div>
@@ -188,11 +193,18 @@
 							self.loaded = true;
 
 							if (data.result == "success") {
+								console.log("수정페이지 data ===>", data);
+								console.log("첨부파일 목록 ===>", data.fileList);
+								
 								self.board = data.board;
 								self.mainTypeList = data.mainTypeList || [];
 								self.subTypeList = data.subTypeList || [];
 								self.localList = data.localList || [];
 								self.fileList = data.fileList || [];
+								
+								console.log("첫 번째 파일명 originName ===>", self.fileList[0].originName);
+								console.log("첫 번째 파일명 fileName ===>", self.fileList[0].fileName);
+								console.log("첫 번째 파일번호 fileNo ===>", self.fileList[0].fileNo);
 
 								self.bSubNo = data.board.bSubNo;
 								self.localNo = data.board.localNo == null || data.board.localNo == 0 ? "" : data.board.localNo;
