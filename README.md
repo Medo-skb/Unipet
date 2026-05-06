@@ -51,19 +51,22 @@
 [▶ 유니펫 발표 PPT](https://drive.google.com/file/d/1C6AbQpBsakz2-oQ4FgS1DqXs-AFRdFPq/view?usp=drive_link)
 
 ## 🎞 시연 영상  
-<!-- [▶ 유니펫 핵심기능 시연 영상](https://drive.google.com/file/d/1erdU57Da71Rt3PvvUt7lkM8fbHMvL8Fa/view?usp=sharing) -->
 
-[팀원별 페이지 시연 영상]
+[기능별 시연 영상]
 
- [▶김현동]()
+ [▶메인](https://drive.google.com/file/d/1cNljPfKGWV8V6fTXFnSum-I6-SC9nLcC/view?usp=drive_link)
   
- [▶장석재]()
+ [▶예약](https://drive.google.com/file/d/1TDprmk6yoAYbsZOzze1bfrifocVKpTtf/view?usp=drive_link)
   
- [▶이다빈]()
+ [▶쇼핑](https://drive.google.com/file/d/15ZrxDAf11WS-BaztgkX92T6gEoJYHxLG/view?usp=drive_link)
   
- [▶김예림]()
+ [▶커뮤니티](https://drive.google.com/file/d/1WVb4EiOfJF29o1aGAOgXf9EhOQEYOChD/view?usp=drive_link)
   
- [▶성기필]()
+ [▶마이페이지_사용자](https://drive.google.com/file/d/1G39UZnJMk1kziARkkOnPSrnYc2BXxXhW/view?usp=drive_link)
+
+ [▶마이페이지_사업자](https://drive.google.com/file/d/1ZE5zXBeH7lX9cqtnGQPPtLtk7Z6LzqxF/view?usp=drive_link)
+
+ [▶관리자](https://drive.google.com/file/d/12ERzl2wS56z31_Qc7AO7B78In1saduiU/view?usp=drive_link)
 
 ---
 
