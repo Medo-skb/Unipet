@@ -48,10 +48,10 @@
 ---
 
 ## 📕 발표 PPT  
-<!-- [▶ 과실제로 발표 PPT](https://drive.google.com/file/d/16b62kuGLnBxYrV_PAOYX5HQSF9qK51Kx/view?usp=drive_link) -->
+[▶ 유니펫 발표 PPT](https://drive.google.com/file/d/1C6AbQpBsakz2-oQ4FgS1DqXs-AFRdFPq/view?usp=drive_link)
 
 ## 🎞 시연 영상  
-<!-- [▶ 과실제로 핵심기능 시연 영상](https://drive.google.com/file/d/1erdU57Da71Rt3PvvUt7lkM8fbHMvL8Fa/view?usp=sharing) -->
+<!-- [▶ 유니펫 핵심기능 시연 영상](https://drive.google.com/file/d/1erdU57Da71Rt3PvvUt7lkM8fbHMvL8Fa/view?usp=sharing) -->
 
 [팀원별 페이지 시연 영상]
 
