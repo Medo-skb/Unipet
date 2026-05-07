@@ -260,15 +260,20 @@
                     success: function(data) {
                         if (data.result === "success") {
                             alert("예약이 정상적으로 취소되었습니다.");
+                            sessionStorage.setItem("triggerFunction", "openRsvList");
                             location.href = "/user/mypage.do";
                         } else {
                             alert("취소 처리 중 오류가 발생했습니다.");
+                            sessionStorage.setItem("triggerFunction", "openRsvList");
                             location.href = "/user/mypage.do";
                         }
                     }
                 });
             },
-            fnGoBack: function() { window.history.back(); }
+            fnGoBack: function() { 
+                sessionStorage.setItem("triggerFunction", "openRsvList");
+                location.href = "/user/mypage.do";
+            }
         },
         mounted() {
             let self = this;
