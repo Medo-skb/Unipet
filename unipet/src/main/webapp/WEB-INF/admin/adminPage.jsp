@@ -341,7 +341,14 @@
                                                 </tr>
                                                 <tr>
                                                     <th>업종</th>
-                                                    <td>{{ item.sCategory }}</td>
+                                                    <td>
+                                                        {{
+                                                            item.sCategory === 'HOS' ? '병원' :
+                                                            item.sCategory === 'SAL' ? '미용실' :
+                                                            item.sCategory === 'BRD' ? '위탁시설' :
+                                                            item.sCategory
+                                                        }}
+                                                    </td>
                                                 </tr>
                                                 <tr>
                                                     <th>주소</th>
