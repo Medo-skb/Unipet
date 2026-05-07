@@ -65,15 +65,35 @@
                 <div class="section-title">환불 내용</div>
                 <div class="summary-box">
                     <div class="summary-row">
-                        <span>환불 예정 금액</span>
-                        <span class="text-discount">{{ info.totalPrice?.toLocaleString() }}원</span>
+                        <span>상품 총 금액</span>
+                        <span>{{ calcItemsTotal.toLocaleString() }}원</span>
                     </div>
+                    
+                    <div class="summary-row">
+                        <span>배송비</span>
+                        <span>{{ calcShippingFee > 0 ? '+' + calcShippingFee.toLocaleString() + '원' : '무료' }}</span>
+                    </div>
+
+                    <div class="summary-row" v-if="info.disPrice > 0">
+                        <span>할인 금액</span>
+                        <span>-{{ info.disPrice.toLocaleString() }}원</span>
+                    </div>
+
+                    <hr class="summary-divider">
+
+                    <div class="summary-row final-price-row">
+                        <span>최종 환불 예정 금액</span>
+                        <span class="text-discount"><b>{{ info.totalPrice?.toLocaleString() }}원</b></span>
+                    </div>
+                    
                     <div class="summary-row">
                         <span>환불 수단</span>
                         <span>기존 결제 수단</span>
                     </div>
+                    
                     <div class="point-info">
                         * 배송 시작 전 주문에 한하여 <b>즉시 환불</b>이 진행됩니다.<br>
+                        <span v-if="info.disPrice > 0">* 사용하신 포인트/쿠폰 혜택은 환불 완료 시 규정에 따라 반환됩니다.</span>
                     </div>
                 </div>
             </div>
@@ -108,6 +128,31 @@
                 if (newVal !== '기타') {
                     this.refundDetail = "";
                 }
+            }
+        },
+        computed: {
+            // 1. 상품 총 금액 계산 (list 배열의 가격 * 수량 합산)
+            calcItemsTotal() {
+                if (!this.list || this.list.length === 0) return 0;
+                
+                let total = 0;
+                this.list.forEach(item => {
+                    total += (item.unitPrice * item.ordQty);
+                });
+                return total;
+            },
+            
+            // 2. 배송비 계산 (최종결제액 - 상품총액 + 할인금액 = 배송비)
+            calcShippingFee() {
+                if (!this.info.totalPrice) return 0;
+                
+                const finalPrice = this.info.totalPrice || 0;     // DB의 TOTAL_PRICE
+                const discount = this.info.disPrice || 0;         // DB의 DIS_PRICE
+                const itemsTotal = this.calcItemsTotal;           // 위에서 계산한 상품 총액
+                
+                const shippingFee = finalPrice - itemsTotal + discount;
+                
+                return shippingFee > 0 ? shippingFee : 0; // 마이너스가 나오지 않도록 방어 로직
             }
         },
         methods: {
@@ -160,6 +205,7 @@
                         success: function (data) {
                             if(data.result === "success") {
                                 alert("환불 완료!");
+                                sessionStorage.setItem("triggerFunction", "openOrdList");
                                 location.href = "/user/mypage.do";
                             } else {
                                 alert("오류: " + data.message);
@@ -168,7 +214,10 @@
                     });
                 }   
             },
-            fnGoBack: function() { window.history.back(); }
+            fnGoBack: function() { 
+                sessionStorage.setItem("triggerFunction", "openOrdList");
+                location.href = "/user/mypage.do";
+            }
         },
         mounted() {
             let self = this;
