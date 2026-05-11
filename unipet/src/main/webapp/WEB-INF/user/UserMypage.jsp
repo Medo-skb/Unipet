@@ -14,7 +14,9 @@
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/footer.css"> -->
         <link href="/css/user/usermypage.css" rel="stylesheet">
         <style>
-          [v-cloak] { display: none; }
+            [v-cloak] {
+                display: none;
+            }
         </style>
         <title>UNIPET - 마이페이지</title>
     </head>
@@ -131,8 +133,10 @@
                                             <div class="row">
                                                 <label>우편번호</label>
                                                 <div style="display:flex; gap:10px;">
-                                                    <input type="text" v-model="user.zipcode" readonly placeholder="우편번호 찾기를 이용해주세요">
-                                                    <button type="button" class="small-btn" @click="fnOpenAddressSearch">주소 변경</button>
+                                                    <input type="text" v-model="user.zipcode" readonly
+                                                        placeholder="우편번호 찾기를 이용해주세요">
+                                                    <button type="button" class="small-btn"
+                                                        @click="fnOpenAddressSearch">주소 변경</button>
                                                 </div>
                                             </div>
                                             <div class="row">
@@ -141,7 +145,8 @@
                                             </div>
                                             <div class="row">
                                                 <label>상세주소</label>
-                                                <input type="text" v-model="user.fullAddr" id="detailAddress" placeholder="상세주소를 입력해주세요">
+                                                <input type="text" v-model="user.fullAddr" id="detailAddress"
+                                                    placeholder="상세주소를 입력해주세요">
                                             </div>
 
                                             <div class="btn-box">
@@ -275,7 +280,8 @@
                                             <div v-if="reservationList.length === 0" class="empty-text">
                                                 예약 내역이 없습니다.
                                             </div>
-                                            <div class="main-reserve-item" v-for="item in reservationList.slice(0, 2)" :key="item.rsvNo">
+                                            <div class="main-reserve-item" v-for="item in reservationList.slice(0, 2)"
+                                                :key="item.rsvNo">
                                                 <!-- 업체명 -->
                                                 <div class="list-title">
                                                     {{ item.storeName || item.STORE_NAME || '업체명 없음' }}
@@ -292,8 +298,10 @@
                                                 <!-- 상태 -->
                                                 <div class="list-sub">
                                                     상태 :
-                                                    <span class="reserve-status-text" :class="fnGetReserveStatusClass(item.rsvStatus || item.RSV_STATUS)">
-                                                        {{ fnGetReservationStatusText(item.rsvStatus || item.RSV_STATUS) }}
+                                                    <span class="reserve-status-text"
+                                                        :class="fnGetReserveStatusClass(item.rsvStatus || item.RSV_STATUS)">
+                                                        {{ fnGetReservationStatusText(item.rsvStatus || item.RSV_STATUS)
+                                                        }}
                                                     </span>
                                                 </div>
                                             </div>
@@ -354,22 +362,26 @@
                                 <div class="section-title">구독 관리</div>
 
                                 <div v-if="subscriptionInfo && subscriptionInfo.status === '이용중'">
-                                    
+
                                     <div class="info-card">
                                         <div class="list-title">{{ subscriptionInfo.planName }}</div>
-                                        <div class="list-sub">상태 : {{ fnGetSubStatusText(subscriptionInfo.status) }}</div>
-                                        <div class="list-sub">다음 결제일 : {{ subscriptionInfo.nextBillingDate || '-' }}</div>
+                                        <div class="list-sub">상태 : {{ fnGetSubStatusText(subscriptionInfo.status) }}
+                                        </div>
+                                        <div class="list-sub">다음 결제일 : {{ subscriptionInfo.nextBillingDate || '-' }}
+                                        </div>
                                         <div class="list-sub">
                                             자동결제 : {{ subscriptionInfo.isAuto === 'Y' ? '사용중' : '미사용' }}
                                         </div>
                                     </div>
 
                                     <div class="btn-box">
-                                        <button class="small-btn" v-if="subscriptionInfo.status === '이용중'" @click="fnUpdateAutoPay">
+                                        <button class="small-btn" v-if="subscriptionInfo.status === '이용중'"
+                                            @click="fnUpdateAutoPay">
                                             자동결제 {{ subscriptionInfo.isAuto === 'Y' ? '해지' : '설정' }}
                                         </button>
 
-                                        <button class="small-btn btn-red" v-if="subscriptionInfo.status === '이용중'" @click="fnCancelSubscription">
+                                        <button class="small-btn btn-red" v-if="subscriptionInfo.status === '이용중'"
+                                            @click="fnCancelSubscription">
                                             구독 해지
                                         </button>
 
@@ -381,7 +393,7 @@
                                     <div class="list-sub" v-if="subscriptionInfo.canChangeAuto !== 'Y'">
                                         자동결제 변경은 다음 결제일 1일 전까지만 가능합니다.
                                     </div>
-                                    
+
                                 </div>
                                 <!-- ✅ 구독 중인 경우 끝 -->
 
@@ -557,11 +569,11 @@
                                             <div class="list-status">
                                                 결제상태 : {{ fnGetPayStatusText(order.payStatus || order.PAY_STATUS) }}
                                             </div>
-
-                                            <div class="list-status">
-                                                배송상태 : {{ fnGetDeliStatusText(order.deliStatus || order.DELI_STATUS)
-                                                }}
+                                            <div class="list-status"
+                                                v-if="(order.payStatus || order.PAY_STATUS) !== 'CAN'">
+                                                배송상태 : {{ fnGetDeliStatusText(order.deliStatus || order.DELI_STATUS) }}
                                             </div>
+
 
 
                                             <div class="btn-box">
@@ -2110,7 +2122,7 @@
                     fnDeleteUser: function () {
                         // 단순 confirm 대신 prompt를 사용하여 직접 타이핑하게 만들어 실수 방지
                         const confirmText = prompt("회원 탈퇴를 진행하시려면 창에 '탈퇴 확인' 이라고 정확히 입력해주세요.");
-                        
+
                         if (confirmText !== "탈퇴 확인") {
                             alert("입력한 문구가 일치하지 않아 탈퇴가 취소되었습니다.");
                             return;
@@ -2734,10 +2746,10 @@
 
                         return '/img/user/pet/etc.png';
                     },
-                    fnOpenAddressSearch: function() {
+                    fnOpenAddressSearch: function () {
                         const self = this;
                         new daum.Postcode({
-                            oncomplete: function(data) {
+                            oncomplete: function (data) {
                                 // 팝업에서 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
                                 // 도로명 주소의 노출 규칙에 따라 주소를 표시한다.
                                 let addr = ''; // 주소 변수
@@ -2752,17 +2764,17 @@
                                 // 우편번호와 주소 정보를 Vue 변수에 대입한다.
                                 self.user.zipcode = data.zonecode;
                                 self.user.userAddr = addr;
-                                
+
                                 // 상세주소 칸을 비우고 커서를 이동시킨다.
                                 self.user.fullAddr = '';
                                 document.getElementById("detailAddress").focus();
                             }
                         }).open();
                     },
-                    fnGoToSubPage: function() {
+                    fnGoToSubPage: function () {
                         location.href = "/payment/sub.do";
                     },
-                    fnGoPostDetail: function(id) {
+                    fnGoPostDetail: function (id) {
                         if (!id) return; // ID가 없으면 중단
                         pageChange("/board/view.do", { boardNo: id });
                     },
