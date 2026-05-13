@@ -42,8 +42,10 @@
 					<div class="main-tab-left">
 						<button class="tab-btn" :class="{active : selectedMainNo == ''}"
 							@click="fnSelectMain('')">전체</button>
+
 						<button class="tab-btn" :class="{active : selectedMainNo == '1'}"
 							@click="fnSelectMain('1')">통합</button>
+
 						<button class="tab-btn" :class="{active : selectedMainNo == '2'}"
 							@click="fnSelectMain('2')">지역</button>
 					</div>
@@ -53,25 +55,31 @@
 				<div class="tab-row" v-if="selectedMainNo == '1'">
 					<button class="tab-btn" :class="{active : integratedCategory == ''}"
 						@click="fnSelectIntegratedCategory('')">전체</button>
+
 					<button class="tab-btn" :class="{active : integratedCategory == 'NTC'}"
 						@click="fnSelectIntegratedCategory('NTC')">공지사항</button>
+
 					<button class="tab-btn" :class="{active : integratedCategory == 'GEN'}"
 						@click="fnSelectIntegratedCategory('GEN')">일반</button>
+
 					<button class="tab-btn" :class="{active : integratedCategory == 'INF'}"
 						@click="fnSelectIntegratedCategory('INF')">정보/팁</button>
+
 					<button class="tab-btn" :class="{active : integratedCategory == 'GIF'}"
 						@click="fnSelectIntegratedCategory('GIF')">움짤</button>
+
 					<button class="tab-btn" :class="{active : integratedCategory == 'VID'}"
 						@click="fnSelectIntegratedCategory('VID')">동영상</button>
+
 					<button class="tab-btn" :class="{active : integratedCategory == 'QNA'}"
 						@click="fnSelectIntegratedCategory('QNA')">질문</button>
+
 					<button class="tab-btn" :class="{active : integratedCategory == 'MAR'}"
 						@click="fnSelectIntegratedCategory('MAR')">나눔/장터</button>
 				</div>
 
 				<!-- 지역 카테고리 필터 -->
 				<div class="tab-row local-tab-row" v-if="selectedMainNo == '2'">
-
 					<select class="local-select" v-model="localNo" @change="fnSelectLocalNo()">
 						<option value="">지역 전체</option>
 						<option value="1">서울</option>
@@ -92,18 +100,25 @@
 
 					<button class="tab-btn" :class="{active : localCategory == ''}"
 						@click="fnSelectLocalCategory('')">전체</button>
+
 					<button class="tab-btn" :class="{active : localCategory == 'WALK'}"
 						@click="fnSelectLocalCategory('WALK')">산책</button>
+
 					<button class="tab-btn" :class="{active : localCategory == 'MEET'}"
 						@click="fnSelectLocalCategory('MEET')">소모임</button>
+
 					<button class="tab-btn" :class="{active : localCategory == 'TRAVEL'}"
 						@click="fnSelectLocalCategory('TRAVEL')">여행</button>
+
 					<button class="tab-btn" :class="{active : localCategory == 'LINFO'}"
 						@click="fnSelectLocalCategory('LINFO')">지역정보</button>
+
 					<button class="tab-btn" :class="{active : localCategory == 'HOSP'}"
 						@click="fnSelectLocalCategory('HOSP')">병원추천</button>
+
 					<button class="tab-btn" :class="{active : localCategory == 'CARE'}"
 						@click="fnSelectLocalCategory('CARE')">돌봄</button>
+
 					<button class="tab-btn" :class="{active : localCategory == 'MARKET'}"
 						@click="fnSelectLocalCategory('MARKET')">중고거래</button>
 				</div>
@@ -127,10 +142,13 @@
 					<div class="sort-row">
 						<button class="sort-btn" :class="{active : sortType == 'new'}"
 							@click="fnChangeSort('new')">최신순</button>
+
 						<button class="sort-btn" :class="{active : sortType == 'like'}"
 							@click="fnChangeSort('like')">추천순</button>
+
 						<button class="sort-btn" :class="{active : sortType == 'view'}"
 							@click="fnChangeSort('view')">조회순</button>
+
 						<button class="sort-btn" :class="{active : sortType == 'comment'}"
 							@click="fnChangeSort('comment')">댓글순</button>
 					</div>
@@ -191,6 +209,7 @@
 
 									<span v-if="item.bSubType == '공지사항'" class="notice-badge">📌 공지사항</span>
 									<span v-else class="category">{{item.bSubType}}</span>
+
 									<span class="title-text" v-if="fnCanReadBoard(item)">
 										{{item.title}}
 									</span>
@@ -205,6 +224,7 @@
 							<td>{{item.viewCount}}</td>
 							<td>{{item.likeCnt}}</td>
 							<td>{{item.commentCnt}}</td>
+
 							<td>
 								<div class="date-box" v-if="item.createTime != null && item.createTime != ''">
 									<div>{{item.createTime.substring(0,10)}}</div>
@@ -217,14 +237,21 @@
 
 				<!-- 페이징 -->
 				<div class="pagination" v-if="pageCount > 0">
+					<button @click="fnGoPage(1)" v-if="currentPage > 1">&lt;&lt;</button>
+
 					<button @click="fnGoPage(currentPage - 1)" v-if="currentPage > 1">&lt;</button>
 
-					<button v-for="n in pageCount" :key="n" :class="{active : currentPage == n}"
-						@click="fnGoPage(n)">
-						{{n}}
+					<button 
+						v-for="page in pageList" 
+						:key="page" 
+						:class="{active : currentPage == page}"
+						@click="fnGoPage(page)">
+						{{page}}
 					</button>
 
 					<button @click="fnGoPage(currentPage + 1)" v-if="currentPage < pageCount">&gt;</button>
+
+					<button @click="fnGoPage(pageCount)" v-if="currentPage < pageCount">&gt;&gt;</button>
 				</div>
 			</div>
 		</div>
@@ -234,30 +261,38 @@
 		const app = Vue.createApp({
 			data() {
 				return {
+					// 게시글 목록
 					boardList: [],
+
+					// 검색 / 필터 / 정렬
 					selectedMainNo: '<%=request.getAttribute("bMainNo") == null ? "" : request.getAttribute("bMainNo")%>',
 					searchType: '<%=request.getAttribute("searchType") == null ? "" : request.getAttribute("searchType")%>',
 					keyword: '<%=request.getAttribute("keyword") == null ? "" : request.getAttribute("keyword")%>',
 					sortType: '<%=request.getAttribute("sortType") == null || request.getAttribute("sortType").equals("") ? "new" : request.getAttribute("sortType")%>',
-					currentPage: Number('<%=request.getAttribute("page") == null || request.getAttribute("page").equals("") ? "1" : request.getAttribute("page")%>'),
-					tempYn: '<%=request.getAttribute("tempYn") == null ? "" : request.getAttribute("tempYn")%>',
-					sessionId: '<%=session.getAttribute("sessionId") == null ? "" : session.getAttribute("sessionId")%>',
-					sessionRole: '<%=session.getAttribute("sessionRole") == null ? "" : session.getAttribute("sessionRole")%>',
-					pageSize: 10,
-					totalCount: 0,
 					integratedCategory: '',
 					localCategory: '',
 					localNo: "",
+					tempYn: '<%=request.getAttribute("tempYn") == null ? "" : request.getAttribute("tempYn")%>',
+
+					// 로그인 정보
+					sessionId: '<%=session.getAttribute("sessionId") == null ? "" : session.getAttribute("sessionId")%>',
+					sessionRole: '<%=session.getAttribute("sessionRole") == null ? "" : session.getAttribute("sessionRole")%>',
+
+					// 페이징
+					currentPage: Number('<%=request.getAttribute("page") == null || request.getAttribute("page").equals("") ? "1" : request.getAttribute("page")%>'),
+					pageSize: 10,
+					pageBlockSize: 10,
+					totalCount: 0,
+					pageCount: 0,
+					pageList: [],
+
+					// 알림
 					showAlarm: false,
 					alarmList: [],
 					alarmCount: 0
 				};
 			},
-			computed: {
-				pageCount() {
-					return Math.ceil(this.totalCount / this.pageSize);
-				}
-			},
+
 			methods: {
 				fnIsAdmin: function () {
 					if (this.sessionRole == "A") {
@@ -286,67 +321,116 @@
 
 					return false;
 				},
-				
+
 				fnGetBoardList: function () {
 					let self = this;
+
+					let param = {
+						bMainNo: self.selectedMainNo,
+						searchType: self.searchType,
+						keyword: self.keyword,
+						sortType: self.sortType,
+						page: self.currentPage,
+						pageSize: self.pageSize,
+						tempYn: self.tempYn,
+						integratedCategory: self.integratedCategory,
+						localCategory: self.localCategory,
+						localNo: self.localNo
+					};
 
 					$.ajax({
 						url: "/board/list.dox",
 						type: "POST",
 						dataType: "json",
-						data: {
-							bMainNo: self.selectedMainNo,
-							searchType: self.searchType,
-							keyword: self.keyword,
-							sortType: self.sortType,
-							page: self.currentPage,
-							pageSize: self.pageSize,
-							tempYn: self.tempYn,
-							integratedCategory: self.integratedCategory,
-							localCategory: self.localCategory,
-							localNo: self.localNo
-						},
+						data: param,
 						success: function (data) {
-							console.log("게시글 목록 data ===>", data);
-							console.log("첫 번째 게시글 ===>", data.list[0]);
-								
-								
 							if (data.result == "success") {
 								self.boardList = data.list || [];
 								self.totalCount = data.count || 0;
+
+								self.fnSetPageInfo();
+
+							} else {
+								alert(data.message);
 							}
+						},
+						error: function (xhr) {
+							console.log(xhr.responseText);
+							alert("게시글 목록 조회 중 오류가 발생했습니다.");
 						}
 					});
 				},
 
-				fnSelectMain: function (bMainNo) {
-					this.selectedMainNo = bMainNo;
-					this.currentPage = 1;
-					this.integratedCategory = "";
-					this.localCategory = "";
-					this.localNo = "";
-					this.tempYn = "";
-					this.fnGetBoardList();
-				},
+				fnSetPageInfo: function () {
+					let self = this;
 
-				fnChangeSort: function (sortType) {
-					this.sortType = sortType;
-					this.currentPage = 1;
-					this.fnGetBoardList();
-				},
+					self.pageList = [];
 
-				fnSearch: function () {
-					this.currentPage = 1;
-					this.fnGetBoardList();
-				},
+					self.pageCount = Math.ceil(self.totalCount / self.pageSize);
 
-				fnGoPage: function (page) {
-					if (page < 1 || page > this.pageCount) {
+					if (self.pageCount == 0) {
+						self.currentPage = 1;
 						return;
 					}
 
-					this.currentPage = page;
-					this.fnGetBoardList();
+					if (self.currentPage > self.pageCount) {
+						self.currentPage = self.pageCount;
+					}
+
+					let startPage = Math.floor((self.currentPage - 1) / self.pageBlockSize) * self.pageBlockSize + 1;
+					let endPage = startPage + self.pageBlockSize - 1;
+
+					if (endPage > self.pageCount) {
+						endPage = self.pageCount;
+					}
+
+					for (let i = startPage; i <= endPage; i++) {
+						self.pageList.push(i);
+					}
+				},
+
+				fnSelectMain: function (bMainNo) {
+					let self = this;
+
+					self.selectedMainNo = bMainNo;
+					self.currentPage = 1;
+					self.integratedCategory = "";
+					self.localCategory = "";
+					self.localNo = "";
+					self.tempYn = "";
+
+					self.fnGetBoardList();
+				},
+
+				fnChangeSort: function (sortType) {
+					let self = this;
+
+					self.sortType = sortType;
+					self.currentPage = 1;
+
+					self.fnGetBoardList();
+				},
+
+				fnSearch: function () {
+					let self = this;
+
+					self.currentPage = 1;
+					self.fnGetBoardList();
+				},
+
+				fnGoPage: function (page) {
+					let self = this;
+
+					if (page < 1) {
+						return;
+					}
+
+					if (page > self.pageCount) {
+						return;
+					}
+
+					self.currentPage = page;
+					self.fnGetBoardList();
 				},
 
 				fnMoveView: function (item) {
@@ -382,67 +466,85 @@
 						bMainNo: this.selectedMainNo
 					});
 				},
-				
+
 				fnMoveTempList: function () {
-					this.tempYn = "Y";
-					this.selectedMainNo = "";
-					this.integratedCategory = "";
-					this.localCategory = "";
-					this.localNo = "";
+					let self = this;
 
-					this.searchType = "";
-					this.keyword = "";
+					self.tempYn = "Y";
+					self.selectedMainNo = "";
+					self.integratedCategory = "";
+					self.localCategory = "";
+					self.localNo = "";
+					self.searchType = "";
+					self.keyword = "";
+					self.sortType = "new";
+					self.currentPage = 1;
 
-					this.sortType = "new";
-
-					this.currentPage = 1;
-					this.fnGetBoardList();
+					self.fnGetBoardList();
 				},
 
 				fnMoveNormalList: function () {
-					this.tempYn = "";
-					this.selectedMainNo = "";
-					this.integratedCategory = "";
-					this.localCategory = "";
-					this.localNo = "";
-					this.currentPage = 1;
-					this.fnGetBoardList();
+					let self = this;
+
+					self.tempYn = "";
+					self.selectedMainNo = "";
+					self.integratedCategory = "";
+					self.localCategory = "";
+					self.localNo = "";
+					self.currentPage = 1;
+
+					self.fnGetBoardList();
 				},
 
 				fnTempList: function () {
-					this.tempYn = "Y";
-					this.currentPage = 1;
-					this.fnGetBoardList();
+					let self = this;
+
+					self.tempYn = "Y";
+					self.currentPage = 1;
+
+					self.fnGetBoardList();
 				},
 
 				fnNormalList: function () {
-					this.tempYn = "";
-					this.currentPage = 1;
-					this.fnGetBoardList();
+					let self = this;
+
+					self.tempYn = "";
+					self.currentPage = 1;
+
+					self.fnGetBoardList();
 				},
 
 				fnSelectLocalCategory: function (category) {
-					this.selectedMainNo = "2";
-					this.localCategory = category;
-					this.tempYn = "";
-					this.currentPage = 1;
-					this.fnGetBoardList();
+					let self = this;
+
+					self.selectedMainNo = "2";
+					self.localCategory = category;
+					self.tempYn = "";
+					self.currentPage = 1;
+
+					self.fnGetBoardList();
 				},
 
 				fnSelectIntegratedCategory: function (category) {
-					this.selectedMainNo = "1";
-					this.integratedCategory = category;
-					this.tempYn = "";
-					this.currentPage = 1;
-					this.fnGetBoardList();
+					let self = this;
+
+					self.selectedMainNo = "1";
+					self.integratedCategory = category;
+					self.tempYn = "";
+					self.currentPage = 1;
+
+					self.fnGetBoardList();
 				},
 
 				fnSelectLocalNo: function () {
-					this.tempYn = "";
-					this.currentPage = 1;
-					this.fnGetBoardList();
+					let self = this;
+
+					self.tempYn = "";
+					self.currentPage = 1;
+
+					self.fnGetBoardList();
 				},
-				
+
 				fnIsLocalBoard: function (item) {
 					if (String(item.bMainNo) == "2") {
 						return true;
@@ -498,7 +600,7 @@
 
 					return "지역";
 				},
-				
+
 				fnShowLocalBadge: function (item) {
 					if (item.bSubType == "공지사항") {
 						return false;
@@ -539,13 +641,15 @@
 				fnReadAlarm: function (item) {
 					let self = this;
 
+					let param = {
+						alarmNo: item.alarmNo
+					};
+
 					$.ajax({
 						url: "/board/alarm/read.dox",
 						type: "POST",
 						dataType: "json",
-						data: {
-							alarmNo: item.alarmNo
-						},
+						data: param,
 						success: function (data) {
 							if (self.alarmCount > 0) {
 								self.alarmCount--;
@@ -594,15 +698,12 @@
 			mounted() {
 				// 처음 시작할 때 실행되는 부분
 				let self = this;
+
 				self.fnGetBoardList();
 				self.fnGetAlarmCount();
 				self.showAlarm = false;
 
 				document.addEventListener("click", self.fnCloseAlarmOutside);
-			},
-
-			beforeUnmount() {
-				document.removeEventListener("click", this.fnCloseAlarmOutside);
 			}
 		});
 

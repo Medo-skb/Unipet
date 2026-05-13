@@ -21,7 +21,6 @@
 	cursor: pointer;
 	font-size: 30px;
 	background: #fff;
-	/* border: 1px solid var(--line-soft); */
 	width: 56px;
 	height: 56px;
 	border-radius: 50%;
@@ -277,14 +276,15 @@
 
 .product-list {
 	display: grid;
-	grid-template-columns: repeat(4, 1fr);
-	gap: 20px;
+	grid-template-columns: repeat(4, 240px);
+	gap: 18px;
+	justify-content: center;
 }
 
 .product-card {
 	background: #fff;
 	border: 1px solid var(--line-soft);
-	border-radius: 20px;
+	border-radius: 16px;
 	padding: 0;
 	cursor: pointer;
 	overflow: hidden;
@@ -297,29 +297,29 @@
 
 .product-card img {
 	width: 100%;
-	height: 220px;
+	height: 160px;
 	object-fit: cover;
 	border-radius: 10px;
 	background: #f3f3f3;
 }
 
 .product-name {
-	font-size: 16px;
+	font-size: 15px;
 	font-weight: bold;
-	margin-top: 10px;
+	margin-top: 4px;
 }
 
 .product-info {
-	font-size: 13px;
+	font-size: 12px;
 	color: var(--text-sub);
-	margin-top: 5px;
+	margin-top: 2px;
 }
 
 .product-price {
-	font-size: 18px;
+	font-size: 17px;
 	font-weight: 800;
 	color: var(--point);
-	margin-top: 10px;
+	margin-top: 6px;
 }
 
 .empty-box {
@@ -332,7 +332,7 @@
 
 .product-image-box {
 	width: 100%;
-	height: 220px;
+	height: 160px;
 	background: var(--image-soft);
 	border-bottom: 1px solid var(--line-soft);
 	overflow: hidden;
@@ -350,10 +350,10 @@
 }
 
 .product-card-body {
-	padding: 18px 18px 20px;
+	padding: 14px 14px 16px;
 	display: flex;
 	flex-direction: column;
-	gap: 14px;
+	gap: 8px;
 }
 
 /* 내부 카테고리 테두리 제거 */
@@ -401,4 +401,39 @@
 
 .product-review-row.no-review {
 	color: #999;
+}
+
+/* 페이징 */
+.pagination {
+	display: flex;
+	justify-content: center;
+	gap: 8px;
+	margin-top: 20px;
+}
+
+.pagination button {
+	width: 36px;
+	height: 36px;
+	border: 1px solid var(--line-soft);
+	background: var(--bg);
+	border-radius: 8px;
+	cursor: pointer;
+	color: var(--text-main);
+}
+
+.pagination button.active {
+	background: var(--main);
+	color: #fff;
+	border-color: var(--main);
+}
+
+.pagination button:hover {
+	color: var(--main);
+	border-color: var(--main);
+}
+
+.pagination button.active:hover {
+	background: var(--main);
+	color: #fff;
+	border-color: var(--main);
 }
