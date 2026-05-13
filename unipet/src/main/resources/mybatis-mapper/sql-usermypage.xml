@@ -581,7 +581,8 @@
 
 	
 	<!-- 쿠폰 목록 조회 -->
-	<select id="selectCouponList" parameterType="hashmap" resultType="hashmap">
+	<!-- 쿠폰 목록 조회 -->
+<select id="selectCouponList" parameterType="hashmap" resultType="hashmap">
     SELECT
         uc.UCP_NO AS couponNo,
         uc.USER_ID AS userId,
@@ -596,24 +597,37 @@
         DATE_FORMAT(uc.EXP_DATE, '%Y-%m-%d') AS endDate,
         DATE_FORMAT(uc.USE_DATE, '%Y-%m-%d %H:%i') AS useDate,
 
-        '-' AS orderProductText
+        CASE
+            WHEN oi.firstProductName IS NULL THEN '-'
+            WHEN oi.productCnt > 1
+                THEN CONCAT(oi.firstProductName, ' 외 ', oi.productCnt - 1, '건')
+            ELSE oi.firstProductName
+        END AS orderProductText
 
     FROM USER_COUPON uc
+
     JOIN COUPON c
         ON uc.COUPON_NO = c.COUPON_NO
 
+    LEFT JOIN ORDERS o
+        ON uc.UCP_NO = o.COUPON_NO
+
+    LEFT JOIN (
+        SELECT
+            od.ORD_NO,
+            MIN(p.PRODUCT_NAME) AS firstProductName,
+            COUNT(*) AS productCnt
+        FROM ORDER_DETAIL od
+        JOIN PRODUCT p
+            ON od.PRODUCT_NO = p.PRODUCT_NO
+        GROUP BY od.ORD_NO
+    ) oi
+        ON o.ORD_NO = oi.ORD_NO
+
     WHERE uc.USER_ID = #{userId}
+
     ORDER BY uc.EXP_DATE ASC
 </select>
-<update id="updateOrderRefund">
-    UPDATE ORDERS
-    SET 
-        ORD_STATUS = 'CAN',
-        PAY_STATUS = 'CAN',
-        DELI_STATUS = 'CAN'
-    WHERE ORD_NO = #{ordNo}
-</update>
-
-
+	
 
 </mapper>
