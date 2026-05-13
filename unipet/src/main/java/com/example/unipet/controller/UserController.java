@@ -712,4 +712,12 @@ public class UserController {
 		response.sendRedirect("/main.do");
 		return;
 	}
+	
+	@RequestMapping(value = "/user/updateSms.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+    @ResponseBody
+    public String savePayment(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+        HashMap<String, Object> resultMap = userService.updateSms(map);
+        
+        return new Gson().toJson(resultMap); 
+    }
 }

@@ -362,26 +362,17 @@
                                 <div class="section-title">구독 관리</div>
 
                                 <div v-if="subscriptionInfo && subscriptionInfo.status === '이용중'">
-
                                     <div class="info-card">
                                         <div class="list-title">{{ subscriptionInfo.planName }}</div>
-                                        <div class="list-sub">상태 : {{ fnGetSubStatusText(subscriptionInfo.status) }}
-                                        </div>
-                                        <div class="list-sub">다음 결제일 : {{ subscriptionInfo.nextBillingDate || '-' }}
-                                        </div>
+                                        <div class="list-sub">상태 : {{ fnGetSubStatusText(subscriptionInfo.status) }}</div>
+                                        <div class="list-sub">다음 결제일 : {{ subscriptionInfo.nextBillingDate || '-' }}</div>
                                         <div class="list-sub">
                                             자동결제 : {{ subscriptionInfo.isAuto === 'Y' ? '사용중' : '미사용' }}
                                         </div>
                                     </div>
 
                                     <div class="btn-box">
-                                        <button class="small-btn" v-if="subscriptionInfo.status === '이용중'"
-                                            @click="fnUpdateAutoPay">
-                                            자동결제 {{ subscriptionInfo.isAuto === 'Y' ? '해지' : '설정' }}
-                                        </button>
-
-                                        <button class="small-btn btn-red" v-if="subscriptionInfo.status === '이용중'"
-                                            @click="fnCancelSubscription">
+                                        <button class="small-btn btn-red" @click="fnCancelSubscription">
                                             구독 해지
                                         </button>
 
@@ -391,19 +382,14 @@
                                     </div>
 
                                     <div class="list-sub" v-if="subscriptionInfo.canChangeAuto !== 'Y'">
-                                        자동결제 변경은 다음 결제일 1일 전까지만 가능합니다.
+                                        구독 해지는 다음 결제일 1일 전까지만 가능합니다.
                                     </div>
-
-                                </div>
-                                <!-- ✅ 구독 중인 경우 끝 -->
-
-                                <!-- ✅ 2. 미구독 상태인 경우 (v-else를 사용하여 위의 조건이 아닐 때 보여줌) -->
-                                <div v-else class="empty-text" style="text-align: center; padding: 40px 0;">
-                                    <p style="margin-bottom: 20px; color: #666;">현재 이용 중인 프리미엄 구독 상품이 없습니다.</p>
-                                    <!-- 필요하다면 아래처럼 구독 페이지로 이동하는 버튼을 추가해 동선을 유도할 수 있습니다 -->
-                                    <button class="small-btn" @click=fnGoToSubPage>프리미엄 구독</button>
                                 </div>
 
+                                <div v-else class="empty-text-box">
+                                    <p class="empty-msg">현재 이용 중인 프리미엄 구독 상품이 없습니다.</p>
+                                    <button class="small-btn" @click="fnGoToSubPage" style="margin-top: 5pt;">프리미엄 구독하기</button>
+                                </div>
                             </div>
 
                             <!-- ✅ 결제 내역 영역 (이 부분은 기존과 동일하게 유지) -->
@@ -1902,7 +1888,7 @@
 
                     fnCancelSubscription: function () {
                         const self = this;
-                        if (!confirm("정말 구독을 해지하시겠습니까?")) return;
+                        if (!confirm("정말 구독을 해지하시겠습니까? 남은 구독 기간까지는 혜택이 유지됩니다.")) return;
 
                         $.ajax({
                             url: "/user/cancel-subscription.dox",

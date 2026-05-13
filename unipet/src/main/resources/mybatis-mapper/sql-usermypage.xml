@@ -499,7 +499,6 @@
 	<update id="cancelSubscription" parameterType="hashmap">
 		UPDATE subscription
 		SET
-		SUB_STATUS = 'N',
 		IS_AUTO = 'N'
 		WHERE USER_ID = #{userId}
 		AND SUB_STATUS = 'Y'
