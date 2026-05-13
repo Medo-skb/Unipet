@@ -341,7 +341,7 @@
             },
 
             goBasicInfoPage: function () {
-                location.href = "/user/social-basic-info.do";
+                location.href = "/user/phone-verify.do";
             },
             fnList: function () {
                 let self = this;

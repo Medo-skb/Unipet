@@ -272,5 +272,13 @@
 	    WHERE USER_ID = #{userId} 
 	      AND PHONE = #{phone}
 	</select>
+	
+	<update id="updateSms" parameterType="hashmap">
+	    UPDATE users
+	    SET 
+	        phone = #{phone}	
+	    WHERE 
+	        user_id = #{userId}
+	</update>
 
 </mapper>

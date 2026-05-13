@@ -450,5 +450,23 @@ public class UserService {
         
         return resultMap;
     }
+	
+	public HashMap<String, Object> updateSms(HashMap<String, Object> map){
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+		try {
+
+			int result = userMapper.updateSms(map);
+			
+			resultMap.put("result", true);
+			resultMap.put("message", Message.MSG_ADD);
+		} catch (Exception e) {
+			// TODO: handle exception
+			System.out.println(e.getMessage());
+			resultMap.put("result", false);
+			resultMap.put("message", Message.MSG_SERVER_ERR);
+		}
+		return resultMap;
+	}
+	
 }
 
