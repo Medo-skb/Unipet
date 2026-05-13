@@ -81,42 +81,31 @@ public class PaymentController {
 	}
 
 	@GetMapping("/payment/toss-success.do")
-	public String tossSuccess(@RequestParam String customerKey, @RequestParam String authKey) {
-		// 1. 빌링키 발급 및 DB 저장 (HashMap으로 결과를 받습니다)
+	public void tossSuccess(@RequestParam String customerKey, @RequestParam String authKey, HttpServletResponse response) throws Exception {
+	    response.setContentType("text/html; charset=UTF-8");
+	    PrintWriter out = response.getWriter();
+	    
+	    // 1. 빌링키 발급 및 DB 저장
 	    HashMap<String, Object> billingResult = paymentService.getBillingKey(customerKey, authKey);
 	    
-	    // 결과 바구니가 비어있지 않다면 성공!
 	    if (billingResult != null && billingResult.get("billingKey") != null) {
-	        
-	        // 2. HashMap에서 필요한 정보를 직접 꺼냅니다.
 	        String savedBillingKey = (String) billingResult.get("billingKey");
 	        Integer methodNo = Integer.parseInt(String.valueOf(billingResult.get("methodNo")));
-	        
-	        System.out.println("✅ 빌링키 발급 성공! 카드번호(methodNo): " + methodNo);
 
-	        // 3. 꺼낸 정보(savedBillingKey, methodNo)를 들고 실제 결제를 진행합니다.
+	        // 2. 실제 결제 진행
 	        HashMap<String, Object> payResult = paymentService.executeBilling(
-	            savedBillingKey, 
-	            customerKey, 
-	            1000, 
-	            "유니펫 프리미엄 구독",
-	            methodNo,
-	            "N"
+	            savedBillingKey, customerKey, 1000, "유니펫 프리미엄 구독", methodNo, "N"
 	        );
 
-	        // 4. 최종 결과 확인
 	        if ("success".equals(payResult.get("result"))) {
-	            System.out.println("구독 및 결제 성공");
-	            return "redirect:/main.do"; 
+	            out.println("<script>alert('구독 및 결제가 성공적으로 완료되었습니다!'); location.href='/main.do';</script>");
 	        } else {
-	            System.out.println("결제 승인 실패");
-	            return "redirect:/payment/sub.do"; 
+	            out.println("<script>alert('결제 승인에 실패했습니다. 다시 시도해주세요.'); location.href='/payment/sub.do';</script>");
 	        }
-	        
 	    } else {
-	        System.out.println("결제 수단 등록 실패");
-	        return "redirect:/payment/sub.do"; 
+	        out.println("<script>alert('결제 수단 등록에 실패했습니다.'); location.href='/payment/sub.do';</script>");
 	    }
+	    out.flush();
 	}
 	
 	@RequestMapping("/payment/pay-success.do")

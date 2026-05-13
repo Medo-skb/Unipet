@@ -362,26 +362,17 @@
                                 <div class="section-title">구독 관리</div>
 
                                 <div v-if="subscriptionInfo && subscriptionInfo.status === '이용중'">
-
                                     <div class="info-card">
                                         <div class="list-title">{{ subscriptionInfo.planName }}</div>
-                                        <div class="list-sub">상태 : {{ fnGetSubStatusText(subscriptionInfo.status) }}
-                                        </div>
-                                        <div class="list-sub">다음 결제일 : {{ subscriptionInfo.nextBillingDate || '-' }}
-                                        </div>
+                                        <div class="list-sub">상태 : {{ fnGetSubStatusText(subscriptionInfo.status) }}</div>
+                                        <div class="list-sub">다음 결제일 : {{ subscriptionInfo.nextBillingDate || '-' }}</div>
                                         <div class="list-sub">
                                             자동결제 : {{ subscriptionInfo.isAuto === 'Y' ? '사용중' : '미사용' }}
                                         </div>
                                     </div>
 
                                     <div class="btn-box">
-                                        <button class="small-btn" v-if="subscriptionInfo.status === '이용중'"
-                                            @click="fnUpdateAutoPay">
-                                            자동결제 {{ subscriptionInfo.isAuto === 'Y' ? '해지' : '설정' }}
-                                        </button>
-
-                                        <button class="small-btn btn-red" v-if="subscriptionInfo.status === '이용중'"
-                                            @click="fnCancelSubscription">
+                                        <button class="small-btn btn-red" @click="fnCancelSubscription">
                                             구독 해지
                                         </button>
 
@@ -391,19 +382,14 @@
                                     </div>
 
                                     <div class="list-sub" v-if="subscriptionInfo.canChangeAuto !== 'Y'">
-                                        자동결제 변경은 다음 결제일 1일 전까지만 가능합니다.
+                                        구독 해지는 다음 결제일 1일 전까지만 가능합니다.
                                     </div>
-
-                                </div>
-                                <!-- ✅ 구독 중인 경우 끝 -->
-
-                                <!-- ✅ 2. 미구독 상태인 경우 (v-else를 사용하여 위의 조건이 아닐 때 보여줌) -->
-                                <div v-else class="empty-text" style="text-align: center; padding: 40px 0;">
-                                    <p style="margin-bottom: 20px; color: #666;">현재 이용 중인 프리미엄 구독 상품이 없습니다.</p>
-                                    <!-- 필요하다면 아래처럼 구독 페이지로 이동하는 버튼을 추가해 동선을 유도할 수 있습니다 -->
-                                    <button class="small-btn" @click=fnGoToSubPage>프리미엄 구독</button>
                                 </div>
 
+                                <div v-else class="empty-text-box">
+                                    <p class="empty-msg">현재 이용 중인 프리미엄 구독 상품이 없습니다.</p>
+                                    <button class="small-btn" @click="fnGoToSubPage" style="margin-top: 5pt;">프리미엄 구독하기</button>
+                                </div>
                             </div>
 
                             <!-- ✅ 결제 내역 영역 (이 부분은 기존과 동일하게 유지) -->
@@ -623,11 +609,26 @@
 
 
 
-                        <div v-if="currentMenu === 'reserveList'">
-                            <div class="section-box">
-                                <div class="section-header">
-                                    <div class="section-title" style="margin-bottom:0;">예약 내역</div>
-                                </div>
+                                <!-- <select class="list-filter-select" v-model="rsvSortType">
+                                    <option value="latest">최신순</option>
+                                    <option value="old">오래된순</option>
+                                    <option value="timeAsc">시간 빠른순</option>
+                                    <option value="timeDesc">시간 늦은순</option>
+                                    <option value="status">예약상태순</option>
+                                </select> -->
+
+                                <!-- 1차 정렬: 날짜 (그룹의 순서) -->
+                                <select class="list-filter-select" v-model="rsvSortDate">
+                                    <option value="latest">최신순(날짜)</option>
+                                    <option value="old">오래된순(날짜)</option>
+                                </select>
+
+                                <!-- 2차 정렬: 상세 (그룹 내부 아이템의 순서) -->
+                                <select class="list-filter-select" v-model="rsvSortDetail">
+                                    <option value="timeAsc">시간 빠른순</option>
+                                    <option value="timeDesc">시간 늦은순</option>
+                                    <option value="status">예약상태순</option>
+                                </select>
 
                                 <select class="list-filter-select" v-model="rsvSortType">
                                     <option value="latest">최신순</option>
@@ -1220,7 +1221,9 @@
                         orderPage: 1,
                         orderPageSize: 5,
 
-                        rsvSortType: 'latest',
+                        //rsvSortType: 'latest',
+                        rsvSortDate: 'latest',      // 1차 정렬 (최신순/오래된순)
+                        rsvSortDetail: 'timeAsc',   // 2차 정렬 (시간순/상태순)
                         rsvPage: 1,
                         rsvPageSize: 5,
                         selectedReview: {},
@@ -1264,33 +1267,73 @@
                         }).length;
                     },
 
+                    // sortedReservationList() {
+                       // let list = [...this.groupedReservationList];
+
+                        //if (this.rsvSortType === 'latest') {
+                          //  list.sort((a, b) => new Date(b.date) - new Date(a.date));
+                        // } else if (this.rsvSortType === 'old') {
+                           // list.sort((a, b) => new Date(a.date) - new Date(b.date));
+                        // } else if (this.rsvSortType === 'timeAsc') {
+                           //  list.forEach(group => {
+                              //  group.items.sort((a, b) => (a.rsvStartTime || '').localeCompare(b.rsvStartTime || ''));
+                            // });
+                        // } else if (this.rsvSortType === 'timeDesc') {
+                           // list.forEach(group => {
+                             //   group.items.sort((a, b) => (b.rsvStartTime || '').localeCompare(a.rsvStartTime || ''));
+                            // });
+                        // } else if (this.rsvSortType === 'status') {
+                           // list.forEach(group => {
+                             //   group.items.sort((a, b) => {
+                               //     let av = a.rsvStatus || a.RSV_STATUS || '';
+                                 //   let bv = b.rsvStatus || b.RSV_STATUS || '';
+                                   // return av.localeCompare(bv);
+                               // });
+                           // });
+                       // }
+
+                       // return list;
+                    // },
+
                     sortedReservationList() {
+                        // 1. 원본 복사 (데이터 오염 방지)
                         let list = [...this.groupedReservationList];
 
-                        if (this.rsvSortType === 'latest') {
-                            list.sort((a, b) => new Date(b.date) - new Date(a.date));
-                        } else if (this.rsvSortType === 'old') {
-                            list.sort((a, b) => new Date(a.date) - new Date(b.date));
-                        } else if (this.rsvSortType === 'timeAsc') {
-                            list.forEach(group => {
-                                group.items.sort((a, b) => (a.rsvStartTime || '').localeCompare(b.rsvStartTime || ''));
-                            });
-                        } else if (this.rsvSortType === 'timeDesc') {
-                            list.forEach(group => {
-                                group.items.sort((a, b) => (b.rsvStartTime || '').localeCompare(a.rsvStartTime || ''));
-                            });
-                        } else if (this.rsvSortType === 'status') {
-                            list.forEach(group => {
+                        // --- [STEP 1] 1차 정렬: 그룹(날짜) 간의 정렬 ---
+                        list.sort((a, b) => {
+                            const dateA = new Date(a.date);
+                            const dateB = new Date(b.date);
+                            return this.rsvSortDate === 'latest' ? dateB - dateA : dateA - dateB;
+                        });
+
+                        // --- [STEP 2] 2차 정렬: 각 그룹 내부의 아이템 정렬 ---
+                        list.forEach(group => {
+                            if (group.items && Array.isArray(group.items)) {
                                 group.items.sort((a, b) => {
-                                    let av = a.rsvStatus || a.RSV_STATUS || '';
-                                    let bv = b.rsvStatus || b.RSV_STATUS || '';
-                                    return av.localeCompare(bv);
+                                    
+                                    // 시간 정렬 (timeAsc / timeDesc)
+                                    if (this.rsvSortDetail === 'timeAsc') {
+                                        return (a.rsvStartTime || '').localeCompare(b.rsvStartTime || '');
+                                    } 
+                                    else if (this.rsvSortDetail === 'timeDesc') {
+                                        return (b.rsvStartTime || '').localeCompare(a.rsvStartTime || '');
+                                    } 
+                                    
+                                    // 상태 정렬 (status)
+                                    else if (this.rsvSortDetail === 'status') {
+                                        let av = a.rsvStatus || a.RSV_STATUS || '';
+                                        let bv = b.rsvStatus || b.RSV_STATUS || '';
+                                        return av.localeCompare(bv);
+                                    }
+                                    
+                                    return 0;
                                 });
-                            });
-                        }
+                            }
+                        });
 
                         return list;
                     },
+
                     sortedPointUseList() {
                         const list = [...this.pointUseList];
 
@@ -1412,7 +1455,13 @@
                     orderSortType() {
                         this.orderPage = 1;
                     },
-                    rsvSortType() {
+                    //rsvSortType() {
+                        //this.rsvPage = 1;
+                    //}
+                    rsvSortDate() {
+                        this.rsvPage = 1;
+                    },
+                    rsvSortDetail() {
                         this.rsvPage = 1;
                     }
                 },
@@ -1866,7 +1915,7 @@
 
                     fnCancelSubscription: function () {
                         const self = this;
-                        if (!confirm("정말 구독을 해지하시겠습니까?")) return;
+                        if (!confirm("정말 구독을 해지하시겠습니까? 남은 구독 기간까지는 혜택이 유지됩니다.")) return;
 
                         $.ajax({
                             url: "/user/cancel-subscription.dox",

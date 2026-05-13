@@ -132,7 +132,7 @@
 
                 <section class="main-product-section scroll-fade-up">
                     <div class="section-header">
-                        <h2 class="section-title">최다 찜 상품</h2>
+                        <h2 class="section-title">최다 주문 상품</h2>
                     </div>
 
                     <div class="product-card-list">
@@ -341,7 +341,7 @@
             },
 
             goBasicInfoPage: function () {
-                location.href = "/user/social-basic-info.do";
+                location.href = "/user/phone-verify.do";
             },
             fnList: function () {
                 let self = this;

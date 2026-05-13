@@ -18,7 +18,7 @@ public class ReservationScheduler {
     @Autowired
     private ReservationService reservationService;
 
-    // 기존 로직: 슬롯 자동 마감
+    // 슬롯 자동 마감
     @Scheduled(fixedDelay = 60000)
     @Scheduled(cron = "0 * * * * *")
     public void autoCloseExpiredSlots() {
@@ -32,7 +32,7 @@ public class ReservationScheduler {
         }
     }
 
-    // 신규 로직: 이용 완료(30분 경과) 건 자동 FIN 처리 및 로그 기록
+    // 이용 완료(30분 경과) 건 자동 FIN 처리 및 로그 기록
     @Scheduled(fixedDelay = 80000)
     @Scheduled(cron = "0 * * * * *")
     public void autoFinishReservations() {
@@ -51,7 +51,7 @@ public class ReservationScheduler {
         }
     }
     
-    // 신규 로직: 미결제 예약(10분 경과) 자동 취소 및 로그 기록
+    // 미결제 예약(10분 경과) 자동 취소 및 로그 기록
     @Scheduled(fixedDelay = 100000)
     @Scheduled(cron = "0 * * * * *")
     public void autoCancelPendingReservations() {

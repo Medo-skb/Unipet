@@ -34,7 +34,7 @@
 		WHERE S.S_USER_ID = #{sUserId}
 		  AND S.S_STATUS IN ('GEN', 'AFF')
 		  AND SU.U_STATUS = 'APR'
-		  AND R.RSV_STATUS IN ('CNF', 'FIN')
+		  AND R.RSV_STATUS = 'FIN'
 		GROUP BY SM.MENU_NO, SM.MENU_NAME
 		ORDER BY reserveCount DESC
 	</select>

@@ -155,78 +155,78 @@
 	<select id="selectReservationAllList" parameterType="hashmap"
 		resultType="hashmap">
 		SELECT
-		R.RSV_NO AS rsvNo,
-		R.SLOT_NO AS slotNo,
-		DATE_FORMAT(R.RSV_DATE, '%Y-%m-%d') AS rsvDate,
-		DATE_FORMAT(R.RSV_START_TIME, '%H:%i') AS rsvStartTime,
-		DATE_FORMAT(R.RSV_END_TIME, '%H:%i') AS rsvEndTime,
+			R.RSV_NO AS rsvNo,
+			R.SLOT_NO AS slotNo,
+			DATE_FORMAT(R.RSV_DATE, '%Y-%m-%d') AS rsvDate,
+			DATE_FORMAT(R.RSV_START_TIME, '%H:%i') AS rsvStartTime,
+			DATE_FORMAT(R.RSV_END_TIME, '%H:%i') AS rsvEndTime,
 
-		R.STORE_NO AS storeNo,
-		S.STORE_NAME AS storeName,
+			R.STORE_NO AS storeNo,
+			S.STORE_NAME AS storeName,
 
-		R.USER_ID AS userId,
-		R.PET_NO AS petNo,
-		P.PET_NAME AS petName,
+			R.USER_ID AS userId,
+			R.PET_NO AS petNo,
+			P.PET_NAME AS petName,
 
-		R.MENU_NO AS menuNo,
-		R.IS_EXTERNAL AS isExternal,
-		IFNULL(R.REQUEST, '') AS request,
+			R.MENU_NO AS menuNo,
+			R.IS_EXTERNAL AS isExternal,
+			IFNULL(R.REQUEST, '') AS request,
 
-		R.RSV_STATUS AS rsvStatus,
+			R.RSV_STATUS AS rsvStatus,
 
-		DATE_FORMAT(R.CDATE, '%Y-%m-%d %H:%i:%s') AS cdate,
+			DATE_FORMAT(R.CDATE, '%Y-%m-%d %H:%i:%s') AS cdate,
 
-		CASE
-		WHEN RV.REVIEW_NO IS NOT NULL THEN 'Y'
-		ELSE 'N'
-		END AS reviewYn
+			CASE
+			WHEN RV.REVIEW_NO IS NOT NULL THEN 'Y'
+			ELSE 'N'
+			END AS reviewYn
 
 		FROM (
-		SELECT *
-		FROM (
-		SELECT
-		R.*,
-		ROW_NUMBER() OVER (
-		PARTITION BY
-		R.USER_ID,
-		R.STORE_NO,
-		R.PET_NO,
-		R.RSV_DATE,
-		R.RSV_START_TIME,
-		R.RSV_END_TIME
-		ORDER BY
-		CASE
-		WHEN R.RSV_STATUS = 'CAN' THEN 1
-		WHEN R.RSV_STATUS = 'CNF' THEN 2
-		WHEN R.RSV_STATUS = 'FIN' THEN 3
-		WHEN R.RSV_STATUS = 'WAI' THEN 4
-		ELSE 5
-		END,
-		R.RSV_NO DESC
-		) AS rn
-		FROM RESERVATION R
-		WHERE R.USER_ID = #{userId}
-		) X
-		WHERE X.rn = 1
-		) R
+			SELECT *
+			FROM (
+				SELECT
+					R.*,
+					ROW_NUMBER() OVER (
+					PARTITION BY
+					R.USER_ID,
+					R.STORE_NO,
+					R.PET_NO,
+					R.RSV_DATE,
+					R.RSV_START_TIME,
+					R.RSV_END_TIME
+				ORDER BY
+					CASE
+					WHEN R.RSV_STATUS = 'CAN' THEN 1
+					WHEN R.RSV_STATUS = 'CNF' THEN 2
+					WHEN R.RSV_STATUS = 'FIN' THEN 3
+					WHEN R.RSV_STATUS = 'WAI' THEN 4
+				ELSE 5
+				END,
+				R.RSV_NO DESC
+				) AS rn
+				FROM RESERVATION R
+				WHERE R.USER_ID = #{userId}
+				) X
+				WHERE X.rn = 1
+				) R
 
 		LEFT JOIN STORE S
-		ON R.STORE_NO = S.STORE_NO
+			ON R.STORE_NO = S.STORE_NO
 
 		LEFT JOIN PET P
-		ON R.PET_NO = P.PET_NO
+			ON R.PET_NO = P.PET_NO
 
 		LEFT JOIN (
-		SELECT
-		RSV_NO,
-		USER_ID,
-		MAX(REVIEW_NO) AS REVIEW_NO
-		FROM REVIEW
-		WHERE RSV_NO IS NOT NULL
-		GROUP BY RSV_NO, USER_ID
-		) RV
-		ON R.RSV_NO = RV.RSV_NO
-		AND R.USER_ID = RV.USER_ID
+				SELECT
+				RSV_NO,
+				USER_ID,
+				MAX(REVIEW_NO) AS REVIEW_NO
+				FROM REVIEW
+				WHERE RSV_NO IS NOT NULL
+				GROUP BY RSV_NO, USER_ID
+				) RV
+			ON R.RSV_NO = RV.RSV_NO
+			AND R.USER_ID = RV.USER_ID
 
 		ORDER BY R.RSV_DATE DESC, R.RSV_START_TIME ASC, R.RSV_NO DESC
 	</select>
@@ -499,7 +499,6 @@
 	<update id="cancelSubscription" parameterType="hashmap">
 		UPDATE subscription
 		SET
-		SUB_STATUS = 'N',
 		IS_AUTO = 'N'
 		WHERE USER_ID = #{userId}
 		AND SUB_STATUS = 'Y'
