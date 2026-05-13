@@ -126,7 +126,7 @@
 					</div>
 
 					<div v-else class="product-list">
-						<div class="product-card" v-for="item in productList" :key="item.productNo"
+						<div class="product-card" v-for="item in pagedProductList" :key="item.productNo"
 							@click="fnMoveDetail(item.productNo)">
 
 							<div class="product-image-box">
@@ -156,6 +156,29 @@
 						</div>
 					</div>
 
+					<div class="pagination" v-if="productList.length > pageSize">
+						<button type="button" @click="fnGoPage(1)" v-if="currentPage > 1">
+							&lt;&lt;
+						</button>
+
+						<button type="button" @click="fnGoPage(currentPage - 1)" v-if="currentPage > 1">
+							&lt;
+						</button>
+
+						<button type="button" v-for="page in pageList" :key="'page' + page"
+							:class="{active : currentPage == page}" @click="fnGoPage(page)">
+							{{page}}
+						</button>
+
+						<button type="button" @click="fnGoPage(currentPage + 1)" v-if="currentPage < totalPage">
+							&gt;
+						</button>
+
+						<button type="button" @click="fnGoPage(totalPage)" v-if="currentPage < totalPage">
+							&gt;&gt;
+						</button>
+					</div>
+
 				</div>
 
 			</div>
@@ -172,13 +195,19 @@
 	const app = Vue.createApp({
 		data() {
 			return {
+				// 카테고리
 				categoryTab: "animal",
 				animalMainList: [],
 				animalSubList: [],
 				itemMainList: [],
 				itemSubList: [],
+
+				// 상품 목록
 				productList: [],
+				pagedProductList: [],
 				recommendList: [],
+
+				// 카테고리 열림/선택
 				openAnimalMainNo: "",
 				openItemMainNo: "",
 				selectedAMainNo: "",
@@ -187,9 +216,20 @@
 				selectedISubNo: "",
 				selectedAnimalText: "동물 전체",
 				selectedItemText: "상품 전체",
+
+				// 검색/정렬
 				keyword: "",
 				sort: "",
-				cartCount: 0
+
+				// 장바구니
+				cartCount: 0,
+
+				// 페이징
+				currentPage: 1,
+				pageSize: 8,
+				totalPage: 1,
+				pageList: [],
+				pageBlockSize: 5
 			};
 		},
 
@@ -327,6 +367,11 @@
 					success: function (data) {
 						if (data.result == "success") {
 							self.productList = data.list || [];
+
+							// 검색/정렬/카테고리 변경 시 1페이지부터 다시 보여주기
+							self.currentPage = 1;
+							self.fnSetPaging();
+
 						} else {
 							alert("상품 목록 조회 실패");
 						}
@@ -336,6 +381,64 @@
 						alert("상품 목록 조회 중 오류가 발생했습니다.");
 					}
 				});
+			},
+
+			// 페이징 계산
+			fnSetPaging: function () {
+				let self = this;
+
+				self.totalPage = Math.ceil(self.productList.length / self.pageSize);
+
+				if (self.totalPage == 0) {
+					self.totalPage = 1;
+				}
+
+				if (self.currentPage > self.totalPage) {
+					self.currentPage = self.totalPage;
+				}
+
+				let start = (self.currentPage - 1) * self.pageSize;
+				let end = start + self.pageSize;
+
+				self.pagedProductList = self.productList.slice(start, end);
+
+				self.fnSetPageList();
+			},
+
+			// 화면에 보여줄 페이지 번호 만들기
+			fnSetPageList: function () {
+				let self = this;
+
+				self.pageList = [];
+
+				let startPage = Math.floor((self.currentPage - 1) / self.pageBlockSize) * self.pageBlockSize + 1;
+				let endPage = startPage + self.pageBlockSize - 1;
+
+				if (endPage > self.totalPage) {
+					endPage = self.totalPage;
+				}
+
+				for (let i = startPage; i <= endPage; i++) {
+					self.pageList.push(i);
+				}
+			},
+
+			// 페이지 이동
+			fnGoPage: function (page) {
+				let self = this;
+
+				if (page < 1) {
+					page = 1;
+				}
+
+				if (page > self.totalPage) {
+					page = self.totalPage;
+				}
+
+				self.currentPage = page;
+				self.fnSetPaging();
+
+				window.scrollTo(0, 0);
 			},
 
 			fnMoveDetail: function (productNo) {
@@ -382,9 +485,10 @@
 					}
 				});
 			}
-		},
+		}, // methods
 
 		mounted() {
+			// 처음 시작할 때 실행되는 부분
 			let self = this;
 			self.fnGetCategoryList();
 			self.fnGetProductList();

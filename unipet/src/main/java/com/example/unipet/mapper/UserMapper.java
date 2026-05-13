@@ -52,4 +52,6 @@ public interface UserMapper {
 
 	// 비밀번호 변경용 사용자 조회
 	int selectUserCheckCount(HashMap<String, Object> map);
+
+	int updateSms(HashMap<String, Object> map);
 }

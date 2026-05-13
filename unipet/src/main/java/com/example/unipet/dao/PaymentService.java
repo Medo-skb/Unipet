@@ -518,7 +518,7 @@ public class PaymentService {
             
             paymentMapper.updateOrderCancelStatus(map);   // 주문 상태 취소
             paymentMapper.updatePaymentStatus(map); // 결제 상태 취소
-            paymentMapper.updateStockRestore(map);        // 재고 원복 (샀던 거 다시 진열대에!)
+            paymentMapper.updateStockRestore(map);  // 재고 원복 (샀던 거 다시 진열대에!)
 
             // Default 형식과 동일하게 성공 결과 세팅
             resultMap.put("result", "success");

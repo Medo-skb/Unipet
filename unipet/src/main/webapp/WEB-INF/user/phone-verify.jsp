@@ -64,11 +64,33 @@
                 const data = typeof res === "string" ? JSON.parse(res) : res;
 
                 if (data.result === true) {
-                    alert("휴대폰 인증 완료");
+                    updatePhone();
+                } else {
+                    alert(data.message);
+                }
+            }
+        });
+    }
 
-                    // 🔥 pagechange 방식
-                    pageChange("/main.do");
+    function updatePhone() {
+        const phone = $("#phone").val().trim();
+        const currentUserId = "${sessionId}";
 
+        let param = {
+            phone : phone,
+            userId : currentUserId
+        }
+
+        $.ajax({
+            url: "/user/updateSms.dox",
+            type: "POST",
+            data: param,
+            success: function (res) {
+                const data = typeof res === "string" ? JSON.parse(res) : res;
+
+                if (data.result === true) {
+                    alert("휴대폰 연동이 완료되었습니다.");
+                    location.href = "/main.do";
                 } else {
                     alert(data.message);
                 }
