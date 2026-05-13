@@ -462,8 +462,6 @@
                                 </div>
                             </div>
                         </div>
-                        
-
                         <div v-if="currentMenu === 'orderList'">
                             <div class="section-box">
                                 <div class="section-title">쇼핑몰 주문 내역</div>
@@ -473,8 +471,6 @@
                                     <option value="old">오래된순</option>
                                     <option value="amountHigh">금액 높은순</option>
                                     <option value="amountLow">금액 낮은순</option>
-                                    <option value="payStatus">결제상태순</option>
-                                    <option value="deliStatus">배송상태순</option>
                                 </select>
 
                                 <div v-if="groupedOrderList.length === 0" class="empty-text">
@@ -484,17 +480,26 @@
                                 <div class="info-card" v-for="group in pagedOrderList" :key="group.orderNo"
                                     style="margin-bottom:16px;">
 
-                                    <div
-                                        style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-                                        <div class="list-title">
-                                            주문일자 : {{ (group.orderDate || '').substring(0,16) }}
+                                    <!-- 주문 상단 -->
+                                    <div style="display:flex;
+                        justify-content:space-between;
+                        align-items:center;
+                        margin-bottom:14px;">
+
+                                        <div>
+                                            <div class="list-title">
+                                                주문일자 : {{ (group.orderDate || '').substring(0,16) }}
+                                            </div>
                                         </div>
 
-                                        <button class="small-btn" @click="fnOpenOrderDetail(group)">
-                                            상세보기
+                                        <button class="small-btn btn-red"
+                                            v-if="group.items.length > 0 && fnCanRefundOrder(group.items[0])"
+                                            @click="fnGoRefundShop(group.items[0])">
+                                            환불
                                         </button>
                                     </div>
 
+                                    <!-- 상품 리스트 -->
                                     <div v-for="order in group.items"
                                         :key="order.orderDetailNo || order.orderNo + '-' + order.productNo"
                                         class="order-item">
@@ -503,130 +508,106 @@
                                             alt="상품이미지">
 
                                         <div style="flex:1;">
-                                            <div class="list-title">{{ order.productName || '-' }}</div>
-                                            <div class="list-sub">수량 : {{ order.qty }}개</div>
-                                            <div class="list-sub">금액 : {{ Number(order.price || 0).toLocaleString()
-                                                }}원
+
+                                            <div class="list-title">
+                                                {{ order.productName || '-' }}
                                             </div>
-                                        </div>
-                                    </div>
-                                </div>
 
-                                <div class="btn-box paging-box" v-if="orderTotalPage > 1">
-                                    <button class="small-btn" :disabled="orderPage === 1"
-                                        @click="orderPage--">이전</button>
-                                    <span>{{ orderPage }} / {{ orderTotalPage }}</span>
-                                    <button class="small-btn" :disabled="orderPage === orderTotalPage"
-                                        @click="orderPage++">다음</button>
-                                </div>
-                            </div>
-                        </div>
+                                            <div class="list-sub">
+                                                수량 : {{ order.qty }}개
+                                            </div>
 
-                        <div v-if="currentMenu === 'orderDetail'">
-                            <div class="section-box">
-                                <div class="section-header">
-                                    <div class="section-title" style="margin-bottom:0;">주문 상세</div>
-                                    <button class="small-btn" @click="fnGoOrderList()">주문목록으로</button>
-                                </div>
-
-                                <div class="info-card" style="margin-bottom:18px;">
-                                    <div class="list-sub">주문일자 : {{ selectedOrderGroup.orderDate }}</div>
-                                    <div class="list-sub">총 상품 수 : {{ selectedOrderGroup.items.length }}건</div>
-                                    <div class="btn-box" style="margin-top:10px;">
-                                        <button class="small-btn btn-red" v-if="selectedOrderGroup.items.length > 0 
-                && fnCanRefundOrder(selectedOrderGroup.items[0])" @click="fnGoRefundShop(selectedOrderGroup.items[0])">
-                                            환불
-                                        </button>
-                                   
-                                </div>
-
-                                <div v-if="selectedOrderGroup.items.length === 0" class="empty-text">
-                                    주문 상세 내역이 없습니다.
-                                </div>
-
-                                <div class="info-card" v-for="order in selectedOrderGroup.items"
-                                    :key="'detail-' + (order.orderDetailNo || order.orderNo + '-' + order.productNo)">
-
-                                    <div class="order-item">
-                                        <img class="order-img" :src="order.productImg || '/img/no-image.png'"
-                                            alt="상품이미지">
-
-                                        <div style="flex:1;">
-                                            <div class="list-title">{{ order.productName || '-' }}</div>
-
-                                            <div class="list-sub">수량 : {{ order.qty }}개</div>
-                                            <div class="list-sub">금액 : {{ Number(order.price || 0).toLocaleString()
-                                                }}원
+                                            <div class="list-sub">
+                                                금액 :
+                                                {{ Number(order.price || 0).toLocaleString() }}원
                                             </div>
 
                                             <div class="list-status">
-                                                결제상태 : {{ fnGetPayStatusText(order.payStatus || order.PAY_STATUS) }}
+                                                결제상태 :
+                                                {{ fnGetPayStatusText(order.payStatus || order.PAY_STATUS) }}
                                             </div>
+
                                             <div class="list-status"
                                                 v-if="(order.payStatus || order.PAY_STATUS) !== 'CAN'">
-                                                배송상태 : {{ fnGetDeliStatusText(order.deliStatus || order.DELI_STATUS) }}
+                                                배송상태 :
+                                                {{ fnGetDeliStatusText(order.deliStatus || order.DELI_STATUS) }}
                                             </div>
 
+                                            <div class="btn-box" style="margin-top:8px;">
 
+                                                <button class="small-btn" v-if="fnCanWriteReview(order)"
+                                                    @click="fnGoReview(order)">
+                                                    상품리뷰 작성
+                                                </button>
 
+                                                <button class="small-btn" v-if="fnCanViewWrittenReview(order)"
+                                                    @click="fnOpenWrittenReview(order)">
+                                                    작성완료 리뷰 보기
+                                                </button>
 
-                                            <button class="small-btn" v-if="fnCanWriteReview(order)"
-                                                @click="fnGoReview(order)">
-                                                상품리뷰 작성
-                                            </button>
-                                            <button class="small-btn" v-if="fnCanViewWrittenReview(order)"
-                                                @click="fnOpenWrittenReview(order)">
-                                                작성완료 리뷰 보기
-                                            </button>
-
-
+                                            </div>
 
                                         </div>
                                     </div>
                                 </div>
+
+                                <!-- 주문 페이징 -->
+                                <div class="btn-box paging-box" v-if="orderTotalPage > 1">
+
+                                    <button class="small-btn" :disabled="orderPage === 1" @click="orderPage--">
+                                        이전
+                                    </button>
+
+                                    <span>
+                                        {{ orderPage }} / {{ orderTotalPage }}
+                                    </span>
+
+                                    <button class="small-btn" :disabled="orderPage === orderTotalPage"
+                                        @click="orderPage++">
+                                        다음
+                                    </button>
+
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div v-if="currentMenu === 'reviewdetailView'">
-                        <div class="section-box">
 
-                            <div class="section-header">
-                                <div class="section-title">리뷰 상세</div>
-                                <button class="small-btn" @click="fnChangeMenu('orderList')">주문목록으로</button>
+
+
+
+                        <div v-if="currentMenu === 'reviewdetailView'">
+                            <div class="section-box">
+
+                                <div class="section-header">
+                                    <div class="section-title">리뷰 상세</div>
+                                    <button class="small-btn" @click="fnChangeMenu('orderList')">주문목록으로</button>
+                                </div>
+
+                                <div class="info-card">
+
+                                    <img class="order-img" :src="selectedReview.productImg || '/img/no-image.png'">
+
+                                    <div class="list-title">
+                                        {{ selectedReview.productName || '-' }}
+                                    </div>
+
+                                    <div class="list-sub">
+                                        주문일자 : {{ selectedReview.orderDate }}
+                                    </div>
+
+                                    <div class="list-sub">
+                                        리뷰내용 :
+                                        {{ selectedReview.reviewContent || selectedReview.REVIEW_CONTENT || '리뷰 없음' }}
+                                    </div>
+
+                                </div>
+
                             </div>
-
-                            <div class="info-card">
-
-                                <img class="order-img" :src="selectedReview.productImg || '/img/no-image.png'">
-
-                                <div class="list-title">
-                                    {{ selectedReview.productName || '-' }}
-                                </div>
-
-                                <div class="list-sub">
-                                    주문일자 : {{ selectedReview.orderDate }}
-                                </div>
-
-                                <div class="list-sub">
-                                    리뷰내용 :
-                                    {{ selectedReview.reviewContent || selectedReview.REVIEW_CONTENT || '리뷰 없음' }}
-                                </div>
-
-                            </div>
-
                         </div>
-                    </div>
 
 
 
 
-
-                    <div v-if="currentMenu === 'reserveList'">
-                        <div class="section-box">
-                            <div class="section-header">
-                                <div class="section-title" style="margin-bottom:0;">예약 내역</div>
-                            </div>
 
                                 <!-- <select class="list-filter-select" v-model="rsvSortType">
                                     <option value="latest">최신순</option>
@@ -649,477 +630,486 @@
                                     <option value="status">예약상태순</option>
                                 </select>
 
-                            <div v-if="reservationAllList.length === 0" class="empty-text">
-                                예약 내역이 없습니다.
-                            </div>
+                                <select class="list-filter-select" v-model="rsvSortType">
+                                    <option value="latest">최신순</option>
+                                    <option value="old">오래된순</option>
+                                    <option value="timeAsc">시간 빠른순</option>
+                                    <option value="timeDesc">시간 늦은순</option>
+                                    <option value="status">예약상태순</option>
+                                </select>
 
-                            <div v-for="group in pagedReservationList" :key="group.date" style="margin-bottom:20px;">
-                                <div class="section-title" style="font-size:17px; margin-bottom:10px;">
-                                    {{ fnFormatDate(group.date) }}
+                                <div v-if="reservationAllList.length === 0" class="empty-text">
+                                    예약 내역이 없습니다.
                                 </div>
 
-                                <div class="info-card" v-for="item in group.items" :key="'all-' + item.rsvNo">
-                                    <div
-                                        style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
-                                        <div style="flex:1;">
-                                            <div class="list-title">
-                                                {{ item.rsvStartTime || '-' }} ~ {{ item.rsvEndTime || '-' }}
+                                <div v-for="group in pagedReservationList" :key="group.date"
+                                    style="margin-bottom:20px;">
+                                    <div class="section-title" style="font-size:17px; margin-bottom:10px;">
+                                        {{ fnFormatDate(group.date) }}
+                                    </div>
+
+                                    <div class="info-card" v-for="item in group.items" :key="'all-' + item.rsvNo">
+                                        <div
+                                            style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+                                            <div style="flex:1;">
+                                                <div class="list-title">
+                                                    {{ item.rsvStartTime || '-' }} ~ {{ item.rsvEndTime || '-' }}
+                                                </div>
+
+                                                <div class="list-sub">
+                                                    예약처 : {{ item.storeName || item.STORE_NAME || '-' }}
+                                                </div>
+
+                                                <div class="list-sub">
+                                                    반려동물 : {{ item.petName || item.PET_NAME || '-' }}
+                                                </div>
+
+                                                <div class="list-sub">
+                                                    요청사항 : {{ item.request || '-' }}
+                                                </div>
+
+                                                <div class="list-sub">
+                                                    상태 :
+                                                    <span class="reserve-status-text"
+                                                        :class="fnGetReserveStatusClass(item.rsvStatus || item.RSV_STATUS)">
+                                                        {{ fnGetReservationStatusText(item.rsvStatus ||
+                                                        item.RSV_STATUS)
+                                                        }}
+                                                    </span>
+                                                </div>
                                             </div>
 
-                                            <div class="list-sub">
-                                                예약처 : {{ item.storeName || item.STORE_NAME || '-' }}
-                                            </div>
+                                            <div class="btn-box">
+                                                <button class="small-btn" v-if="fnCanPayRsv(item)"
+                                                    @click="fnGoRsvPay(item)">
+                                                    예약결제
+                                                </button>
 
-                                            <div class="list-sub">
-                                                반려동물 : {{ item.petName || item.PET_NAME || '-' }}
-                                            </div>
+                                                <button class="small-btn btn-red" v-if="fnCanRefundRsv(item)"
+                                                    @click="fnGoRefundRsv(item)">
+                                                    예약환불
+                                                </button>
 
-                                            <div class="list-sub">
-                                                요청사항 : {{ item.request || '-' }}
-                                            </div>
-
-                                            <div class="list-sub">
-                                                상태 :
-                                                <span class="reserve-status-text"
-                                                    :class="fnGetReserveStatusClass(item.rsvStatus || item.RSV_STATUS)">
-                                                    {{ fnGetReservationStatusText(item.rsvStatus ||
-                                                    item.RSV_STATUS)
-                                                    }}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <div class="btn-box">
-                                            <button class="small-btn" v-if="fnCanPayRsv(item)"
-                                                @click="fnGoRsvPay(item)">
-                                                예약결제
-                                            </button>
-
-                                            <button class="small-btn btn-red" v-if="fnCanRefundRsv(item)"
-                                                @click="fnGoRefundRsv(item)">
-                                                예약환불
-                                            </button>
-
-                                            <button class="small-btn"
-                                                v-if="(item.rsvStatus || item.RSV_STATUS) === 'FIN' && (item.reviewYn || item.REVIEW_YN) !== 'Y'"
-                                                @click="fnPageChange('/user/mypage/rsv-review.do', {
+                                                <button class="small-btn"
+                                                    v-if="(item.rsvStatus || item.RSV_STATUS) === 'FIN' && (item.reviewYn || item.REVIEW_YN) !== 'Y'"
+                                                    @click="fnPageChange('/user/mypage/rsv-review.do', {
                                                         rsvNo: item.rsvNo || item.RSV_NO
                                                     })">
-                                                예약리뷰작성
-                                            </button>
+                                                    예약리뷰작성
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div class="btn-box paging-box" v-if="rsvTotalPage > 1">
-                                <button class="small-btn" :disabled="rsvPage === 1" @click="rsvPage--">이전</button>
-                                <span>{{ rsvPage }} / {{ rsvTotalPage }}</span>
-                                <button class="small-btn" :disabled="rsvPage === rsvTotalPage"
-                                    @click="rsvPage++">다음</button>
+                                <div class="btn-box paging-box" v-if="rsvTotalPage > 1">
+                                    <button class="small-btn" :disabled="rsvPage === 1" @click="rsvPage--">이전</button>
+                                    <span>{{ rsvPage }} / {{ rsvTotalPage }}</span>
+                                    <button class="small-btn" :disabled="rsvPage === rsvTotalPage"
+                                        @click="rsvPage++">다음</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
 
 
-                    <div v-if="currentMenu === 'petEdit'">
-                        <div class="section-box">
-                            <div class="section-header">
-                                <div class="section-title" style="margin-bottom:0;">반려동물 프로필 관리</div>
-                                <button class="small-btn" @click="fnOpenAddPetModal">프로필 추가</button>
-                            </div>
+                        <div v-if="currentMenu === 'petEdit'">
+                            <div class="section-box">
+                                <div class="section-header">
+                                    <div class="section-title" style="margin-bottom:0;">반려동물 프로필 관리</div>
+                                    <button class="small-btn" @click="fnOpenAddPetModal">프로필 추가</button>
+                                </div>
 
-                            <div class="pet-list">
-                                <div class="pet-card" v-for="pet in petList" :key="'edit-' + pet.petNo">
-                                    <div class="pet-thumb">
-                                        <div class="pet-avatar">
-                                            <img :src="fnGetPetImage(pet)" alt="펫이미지">
+                                <div class="pet-list">
+                                    <div class="pet-card" v-for="pet in petList" :key="'edit-' + pet.petNo">
+                                        <div class="pet-thumb">
+                                            <div class="pet-avatar">
+                                                <img :src="fnGetPetImage(pet)" alt="펫이미지">
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    <div class="pet-body">
-                                        <div class="pet-name">{{ pet.petName }}</div>
-                                        <div class="pet-info">{{ pet.species || '' }}{{ pet.birthdate ? ' · ' +
-                                            fnGetPetAge(pet.birthdate) + '살' : '' }}</div>
-                                        <div class="pet-btns">
-                                            <div class="pet-sub-btn-row">
-                                                <button class="pet-btn edit"
-                                                    @click="fnOpenEditPetModal(pet)">수정</button>
-                                                <button class="pet-btn delete"
-                                                    @click="fnDeletePet(pet.petNo)">삭제</button>
+                                        <div class="pet-body">
+                                            <div class="pet-name">{{ pet.petName }}</div>
+                                            <div class="pet-info">{{ pet.species || '' }}{{ pet.birthdate ? ' · ' +
+                                                fnGetPetAge(pet.birthdate) + '살' : '' }}</div>
+                                            <div class="pet-btns">
+                                                <div class="pet-sub-btn-row">
+                                                    <button class="pet-btn edit"
+                                                        @click="fnOpenEditPetModal(pet)">수정</button>
+                                                    <button class="pet-btn delete"
+                                                        @click="fnDeletePet(pet.petNo)">삭제</button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div v-if="currentMenu === 'petHealthPage'">
+                        <div v-if="currentMenu === 'petHealthPage'">
 
-                        <!-- 반려동물 선택 -->
-                        <div class="section-box">
-                            <div class="section-title">반려동물 선택</div>
+                            <!-- 반려동물 선택 -->
+                            <div class="section-box">
+                                <div class="section-title">반려동물 선택</div>
 
-                            <div class="pet-list">
-                                <div class="pet-card" v-for="pet in petList" :key="'health-select-' + pet.petNo"
-                                    :class="{ active: String(selectedPetNo) === String(pet.petNo) }"
-                                    @click="fnSelectPet(pet)">
+                                <div class="pet-list">
+                                    <div class="pet-card" v-for="pet in petList" :key="'health-select-' + pet.petNo"
+                                        :class="{ active: String(selectedPetNo) === String(pet.petNo) }"
+                                        @click="fnSelectPet(pet)">
 
-                                    <div class="pet-thumb">
-                                        <div class="pet-avatar">
-                                            <img :src="fnGetPetImage(pet)" alt="펫이미지">
+                                        <div class="pet-thumb">
+                                            <div class="pet-avatar">
+                                                <img :src="fnGetPetImage(pet)" alt="펫이미지">
+                                            </div>
+                                        </div>
+
+                                        <div class="pet-body">
+                                            <div class="pet-name">{{ pet.petName || '-' }}</div>
+                                            <div class="pet-info">
+                                                {{ pet.species || '' }}
+                                                {{ pet.birthdate ? ' · ' + fnGetPetAge(pet.birthdate) + '살' : '' }}
+                                            </div>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
 
-                                    <div class="pet-body">
-                                        <div class="pet-name">{{ pet.petName || '-' }}</div>
-                                        <div class="pet-info">
-                                            {{ pet.species || '' }}
-                                            {{ pet.birthdate ? ' · ' + fnGetPetAge(pet.birthdate) + '살' : '' }}
-                                        </div>
+                            <!-- 탭 -->
+                            <div class="section-box">
+                                <div class="health-tabs">
+                                    <button class="small-btn" :class="{active: healthTab === 'health'}"
+                                        @click="healthTab='health'; fnLoadHealthList()">
+                                        건강기록 등록
+                                    </button>
+
+                                    <button class="small-btn" :class="{active: healthTab === 'weight'}"
+                                        @click="healthTab='weight'; fnLoadWeightList()">
+                                        몸무게 등록
+                                    </button>
+
+                                    <button class="small-btn" :class="{active: healthTab === 'vaccine'}"
+                                        @click="healthTab='vaccine'; fnLoadVaccineList()">
+                                        백신기록 등록
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- 건강기록 -->
+                            <div v-if="healthTab === 'health'">
+                                <div class="section-box">
+                                    <div class="section-title">건강 기록 등록</div>
+
+                                    <div class="row">
+                                        <label>제목</label>
+                                        <input type="text" v-model="healthForm.title">
                                     </div>
-                                </div>
-                            </div>
-                        </div>
 
-                        <!-- 탭 -->
-                        <div class="section-box">
-                            <div class="health-tabs">
-                                <button class="small-btn" :class="{active: healthTab === 'health'}"
-                                    @click="healthTab='health'; fnLoadHealthList()">
-                                    건강기록 등록
-                                </button>
-
-                                <button class="small-btn" :class="{active: healthTab === 'weight'}"
-                                    @click="healthTab='weight'; fnLoadWeightList()">
-                                    몸무게 등록
-                                </button>
-
-                                <button class="small-btn" :class="{active: healthTab === 'vaccine'}"
-                                    @click="healthTab='vaccine'; fnLoadVaccineList()">
-                                    백신기록 등록
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- 건강기록 -->
-                        <div v-if="healthTab === 'health'">
-                            <div class="section-box">
-                                <div class="section-title">건강 기록 등록</div>
-
-                                <div class="row">
-                                    <label>제목</label>
-                                    <input type="text" v-model="healthForm.title">
-                                </div>
-
-                                <div class="row">
-                                    <label>기록일</label>
-                                    <input type="date" v-model="healthForm.date">
-                                </div>
-
-                                <div class="row">
-                                    <label>내용</label>
-                                    <textarea v-model="healthForm.memo"></textarea>
-                                </div>
-
-                                <div class="btn-box">
-                                    <button @click="fnSaveHealthRecord">등록</button>
-                                </div>
-                            </div>
-
-                            <div class="section-box">
-                                <div class="section-title">건강 기록 목록</div>
-
-                                <div v-if="healthList.length === 0" class="empty-text">
-                                    건강 기록이 없습니다.
-                                </div>
-
-                                <div class="info-card" v-for="item in healthList" :key="'health-' + item.id">
-                                    <div class="list-title">{{ item.title || '-' }}</div>
-                                    <div class="list-sub">반려동물 : {{ item.petName || '-' }}</div>
-                                    <div class="list-sub">기록일 : {{ fnFormatDate(item.date) }}</div>
-                                    <div class="list-sub">내용 : {{ item.memo || '-' }}</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 몸무게 -->
-                        <div v-if="healthTab === 'weight'">
-                            <div class="section-box">
-                                <div class="section-title">몸무게 등록</div>
-
-                                <div class="row">
-                                    <label>몸무게(kg)</label>
-                                    <input type="text" v-model="weightForm.weight">
-                                </div>
-
-                                <div class="row">
-                                    <label>기록일</label>
-                                    <input type="date" v-model="weightForm.date">
-                                </div>
-
-                                <div class="row">
-                                    <label>비고</label>
-                                    <textarea v-model="weightForm.memo"></textarea>
-                                </div>
-
-                                <div class="btn-box">
-                                    <button @click="fnSaveWeightRecord">등록</button>
-                                </div>
-                            </div>
-
-                            <div class="section-box">
-                                <div class="section-title">몸무게 변화 차트</div>
-                                <div class="chart-wrap">
-                                    <canvas id="weightChart"></canvas>
-                                </div>
-                            </div>
-
-                            <div class="section-box">
-                                <div class="section-title">몸무게 기록 목록</div>
-
-                                <div v-if="weightList.length === 0" class="empty-text">
-                                    몸무게 기록이 없습니다.
-                                </div>
-
-                                <div class="info-card" v-for="item in weightList" :key="'w-' + item.id">
-                                    <div class="list-title">{{ item.weight }} kg</div>
-                                    <div class="list-sub">반려동물 : {{ item.petName || '-' }}</div>
-                                    <div class="list-sub">기록일 : {{ fnFormatDate(item.date) }}</div>
-                                    <div class="list-sub">비고 : {{ item.memo || '-' }}</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 백신 -->
-                        <div v-if="healthTab === 'vaccine'">
-                            <div class="section-box">
-                                <div class="section-title">백신 기록 등록</div>
-
-                                <div class="row">
-                                    <label>백신명</label>
-                                    <input type="text" v-model="vacForm.name">
-                                </div>
-
-                                <div class="row">
-                                    <label>접종일</label>
-                                    <input type="date" v-model="vacForm.date">
-                                </div>
-
-                                <div class="row">
-                                    <label>다음 접종일</label>
-                                    <input type="date" v-model="vacForm.nextDate">
-                                </div>
-
-                                <div class="row">
-                                    <label>병원명</label>
-                                    <input type="text" v-model="vacForm.hospitalName">
-                                </div>
-
-                                <div class="row">
-                                    <label>비고</label>
-                                    <textarea v-model="vacForm.memo"></textarea>
-                                </div>
-
-                                <div class="btn-box">
-                                    <button @click="fnSaveVacRecord">등록</button>
-                                </div>
-                            </div>
-
-                            <div class="section-box">
-                                <div class="section-title">백신 기록 목록</div>
-
-                                <div v-if="vacList.length === 0" class="empty-text">
-                                    백신 기록이 없습니다.
-                                </div>
-
-                                <div class="info-card" v-for="item in vacList" :key="'vac-' + item.id">
-                                    <div class="list-title">{{ item.name || '-' }}</div>
-                                    <div class="list-sub">반려동물 : {{ item.petName || '-' }}</div>
-                                    <div class="list-sub">접종일 : {{ fnFormatDate(item.date) }}</div>
-                                    <div class="list-sub">
-                                        다음 접종일 : {{ item.nextDate ? fnFormatDate(item.nextDate) : '-' }}
+                                    <div class="row">
+                                        <label>기록일</label>
+                                        <input type="date" v-model="healthForm.date">
                                     </div>
-                                    <div class="list-sub">병원명 : {{ item.hospitalName || '-' }}</div>
-                                    <div class="list-sub">비고 : {{ item.memo || '-' }}</div>
+
+                                    <div class="row">
+                                        <label>내용</label>
+                                        <textarea v-model="healthForm.memo"></textarea>
+                                    </div>
 
                                     <div class="btn-box">
-                                        <button class="btn-red" @click="fnDeleteVaccine(item.id)">삭제</button>
+                                        <button @click="fnSaveHealthRecord">등록</button>
+                                    </div>
+                                </div>
+
+                                <div class="section-box">
+                                    <div class="section-title">건강 기록 목록</div>
+
+                                    <div v-if="healthList.length === 0" class="empty-text">
+                                        건강 기록이 없습니다.
+                                    </div>
+
+                                    <div class="info-card" v-for="item in healthList" :key="'health-' + item.id">
+                                        <div class="list-title">{{ item.title || '-' }}</div>
+                                        <div class="list-sub">반려동물 : {{ item.petName || '-' }}</div>
+                                        <div class="list-sub">기록일 : {{ fnFormatDate(item.date) }}</div>
+                                        <div class="list-sub">내용 : {{ item.memo || '-' }}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 몸무게 -->
+                            <div v-if="healthTab === 'weight'">
+                                <div class="section-box">
+                                    <div class="section-title">몸무게 등록</div>
+
+                                    <div class="row">
+                                        <label>몸무게(kg)</label>
+                                        <input type="text" v-model="weightForm.weight">
+                                    </div>
+
+                                    <div class="row">
+                                        <label>기록일</label>
+                                        <input type="date" v-model="weightForm.date">
+                                    </div>
+
+                                    <div class="row">
+                                        <label>비고</label>
+                                        <textarea v-model="weightForm.memo"></textarea>
+                                    </div>
+
+                                    <div class="btn-box">
+                                        <button @click="fnSaveWeightRecord">등록</button>
+                                    </div>
+                                </div>
+
+                                <div class="section-box">
+                                    <div class="section-title">몸무게 변화 차트</div>
+                                    <div class="chart-wrap">
+                                        <canvas id="weightChart"></canvas>
+                                    </div>
+                                </div>
+
+                                <div class="section-box">
+                                    <div class="section-title">몸무게 기록 목록</div>
+
+                                    <div v-if="weightList.length === 0" class="empty-text">
+                                        몸무게 기록이 없습니다.
+                                    </div>
+
+                                    <div class="info-card" v-for="item in weightList" :key="'w-' + item.id">
+                                        <div class="list-title">{{ item.weight }} kg</div>
+                                        <div class="list-sub">반려동물 : {{ item.petName || '-' }}</div>
+                                        <div class="list-sub">기록일 : {{ fnFormatDate(item.date) }}</div>
+                                        <div class="list-sub">비고 : {{ item.memo || '-' }}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 백신 -->
+                            <div v-if="healthTab === 'vaccine'">
+                                <div class="section-box">
+                                    <div class="section-title">백신 기록 등록</div>
+
+                                    <div class="row">
+                                        <label>백신명</label>
+                                        <input type="text" v-model="vacForm.name">
+                                    </div>
+
+                                    <div class="row">
+                                        <label>접종일</label>
+                                        <input type="date" v-model="vacForm.date">
+                                    </div>
+
+                                    <div class="row">
+                                        <label>다음 접종일</label>
+                                        <input type="date" v-model="vacForm.nextDate">
+                                    </div>
+
+                                    <div class="row">
+                                        <label>병원명</label>
+                                        <input type="text" v-model="vacForm.hospitalName">
+                                    </div>
+
+                                    <div class="row">
+                                        <label>비고</label>
+                                        <textarea v-model="vacForm.memo"></textarea>
+                                    </div>
+
+                                    <div class="btn-box">
+                                        <button @click="fnSaveVacRecord">등록</button>
+                                    </div>
+                                </div>
+
+                                <div class="section-box">
+                                    <div class="section-title">백신 기록 목록</div>
+
+                                    <div v-if="vacList.length === 0" class="empty-text">
+                                        백신 기록이 없습니다.
+                                    </div>
+
+                                    <div class="info-card" v-for="item in vacList" :key="'vac-' + item.id">
+                                        <div class="list-title">{{ item.name || '-' }}</div>
+                                        <div class="list-sub">반려동물 : {{ item.petName || '-' }}</div>
+                                        <div class="list-sub">접종일 : {{ fnFormatDate(item.date) }}</div>
+                                        <div class="list-sub">
+                                            다음 접종일 : {{ item.nextDate ? fnFormatDate(item.nextDate) : '-' }}
+                                        </div>
+                                        <div class="list-sub">병원명 : {{ item.hospitalName || '-' }}</div>
+                                        <div class="list-sub">비고 : {{ item.memo || '-' }}</div>
+
+                                        <div class="btn-box">
+                                            <button class="btn-red" @click="fnDeleteVaccine(item.id)">삭제</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <!-- ✅ petHealthPage 끝 -->
+
+
+                        <div v-if="currentMenu === 'couponInfo'">
+                            <div class="section-box">
+                                <div class="section-title">쿠폰 관리</div>
+
+                                <div class="coupon-tabs">
+                                    <button class="small-btn" :class="{active: couponTab === 'ALL'}"
+                                        @click="couponTab='ALL'">전체</button>
+                                    <button class="small-btn" :class="{active: couponTab === 'ABLE'}"
+                                        @click="couponTab='ABLE'">사용가능</button>
+                                    <button class="small-btn" :class="{active: couponTab === 'USED'}"
+                                        @click="couponTab='USED'">사용완료</button>
+                                    <button class="small-btn" :class="{active: couponTab === 'EXPIRED'}"
+                                        @click="couponTab='EXPIRED'">만료</button>
+                                </div>
+
+                                <div v-if="filteredCouponList.length === 0" class="empty-text">
+                                    쿠폰이 없습니다.
+                                </div>
+
+                                <div class="info-card" v-for="coupon in filteredCouponList"
+                                    :key="coupon.couponNo || coupon.COUPON_NO">
+                                    <div>
+                                        <div class="list-title">
+                                            {{ coupon.couponName || coupon.COUPON_NAME || '-' }}
+                                        </div>
+
+                                        <div class="list-sub">
+                                            할인금액 :
+                                            {{ Number(coupon.discountAmt || coupon.DISCOUNT_AMT || 0).toLocaleString()
+                                            }}원
+                                        </div>
+
+                                        <div class="list-sub">
+                                            유효기간 :
+                                            {{ fnFormatDateTime(coupon.startDate || coupon.START_DATE) }}
+                                            ~
+                                            {{ fnFormatDateTime(coupon.endDate || coupon.END_DATE) }}
+                                        </div>
+
+                                        <div class="list-sub">
+                                            상태 : {{ fnGetCouponStatusText(coupon) }}
+                                        </div>
+
+                                        <div class="list-sub" v-if="coupon.useDate || coupon.USE_DATE">
+                                            사용 주문 :
+                                            {{ coupon.orderProductText || coupon.ORDER_PRODUCT_TEXT || '주문 정보 없음' }}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                        <div v-if="currentMenu === 'pointInfo'">
+                            <div class="section-box">
+                                <div class="section-title">포인트 현황</div>
 
-                    </div>
-                    <!-- ✅ petHealthPage 끝 -->
-
-
-                    <div v-if="currentMenu === 'couponInfo'">
-                        <div class="section-box">
-                            <div class="section-title">쿠폰 관리</div>
-
-                            <div class="coupon-tabs">
-                                <button class="small-btn" :class="{active: couponTab === 'ALL'}"
-                                    @click="couponTab='ALL'">전체</button>
-                                <button class="small-btn" :class="{active: couponTab === 'ABLE'}"
-                                    @click="couponTab='ABLE'">사용가능</button>
-                                <button class="small-btn" :class="{active: couponTab === 'USED'}"
-                                    @click="couponTab='USED'">사용완료</button>
-                                <button class="small-btn" :class="{active: couponTab === 'EXPIRED'}"
-                                    @click="couponTab='EXPIRED'">만료</button>
+                                <div class="info-card">
+                                    <div class="list-title">현재 보유 포인트</div>
+                                    <div class="list-sub point-current">
+                                        {{ Number(point || 0).toLocaleString() }} P
+                                    </div>
+                                </div>
                             </div>
 
-                            <div v-if="filteredCouponList.length === 0" class="empty-text">
-                                쿠폰이 없습니다.
-                            </div>
+                            <div class="section-box">
+                                <div class="section-title">포인트 사용내역</div>
 
-                            <div class="info-card" v-for="coupon in filteredCouponList"
-                                :key="coupon.couponNo || coupon.COUPON_NO">
-                                <div>
-                                    <div class="list-title">
-                                        {{ coupon.couponName || coupon.COUPON_NAME || '-' }}
+                                <div v-if="pointUseList.length === 0" class="empty-text">
+                                    사용내역이 없습니다.
+                                </div>
+
+                                <div class="info-card" v-for="item in sortedPointUseList"
+                                    :key="item.pointNo || item.POINT_NO">
+
+                                    <div class="list-title"
+                                        :class="Number(item.pointAmount ?? item.POINT_AMOUNT ?? 0) > 0 ? 'point-plus' : 'point-minus'">
+                                        {{ Number(item.pointAmount ?? item.POINT_AMOUNT ?? 0) > 0 ? '+' : '' }}
+                                        {{ Number(item.pointAmount ?? item.POINT_AMOUNT ?? 0).toLocaleString() }} P
                                     </div>
 
                                     <div class="list-sub">
-                                        할인금액 :
-                                        {{ Number(coupon.discountAmt || coupon.DISCOUNT_AMT || 0).toLocaleString()
-                                        }}원
+                                        잔액 : {{ Number(item.balance ?? item.BALANCE ?? 0).toLocaleString() }} P
                                     </div>
 
-                                    <div class="list-sub">
-                                        유효기간 :
-                                        {{ fnFormatDateTime(coupon.startDate || coupon.START_DATE) }}
-                                        ~
-                                        {{ fnFormatDateTime(coupon.endDate || coupon.END_DATE) }}
-                                    </div>
-
-                                    <div class="list-sub">
-                                        상태 : {{ fnGetCouponStatusText(coupon) }}
-                                    </div>
-
-                                    <div class="list-sub" v-if="coupon.useDate || coupon.USE_DATE">
-                                        사용 주문 :
-                                        {{ coupon.orderProductText || coupon.ORDER_PRODUCT_TEXT || '주문 정보 없음' }}
-                                    </div>
+                                    <div class="list-sub">주문상품 : {{ item.orderProductText || '-' }}</div>
+                                    <div class="list-sub">날짜 : {{ item.cdate || item.CDATE || '-' }}</div>
                                 </div>
                             </div>
                         </div>
+                        <!-- pointInfo 끝 -->
+
                     </div>
-                    <div v-if="currentMenu === 'pointInfo'">
-                        <div class="section-box">
-                            <div class="section-title">포인트 현황</div>
+                    <!-- page-inner 끝 -->
 
-                            <div class="info-card">
-                                <div class="list-title">현재 보유 포인트</div>
-                                <div class="list-sub point-current">
-                                    {{ Number(point || 0).toLocaleString() }} P
-                                </div>
-                            </div>
-                        </div>
+                </main>
+                <!-- user-content 끝 -->
 
-                        <div class="section-box">
-                            <div class="section-title">포인트 사용내역</div>
+            </div>
+            <!-- user-page-container 끝 -->
 
-                            <div v-if="pointUseList.length === 0" class="empty-text">
-                                사용내역이 없습니다.
-                            </div>
 
-                            <div class="info-card" v-for="item in sortedPointUseList"
-                                :key="item.pointNo || item.POINT_NO">
-
-                                <div class="list-title"
-                                    :class="Number(item.pointAmount ?? item.POINT_AMOUNT ?? 0) > 0 ? 'point-plus' : 'point-minus'">
-                                    {{ Number(item.pointAmount ?? item.POINT_AMOUNT ?? 0) > 0 ? '+' : '' }}
-                                    {{ Number(item.pointAmount ?? item.POINT_AMOUNT ?? 0).toLocaleString() }} P
-                                </div>
-
-                                <div class="list-sub">
-                                    잔액 : {{ Number(item.balance ?? item.BALANCE ?? 0).toLocaleString() }} P
-                                </div>
-
-                                <div class="list-sub">주문상품 : {{ item.orderProductText || '-' }}</div>
-                                <div class="list-sub">날짜 : {{ item.cdate || item.CDATE || '-' }}</div>
-                            </div>
-                        </div>
+            <!-- ✅ 반려동물 모달 -->
+            <div class="modal-wrap" v-if="showPetModal">
+                <div class="modal-box">
+                    <div class="modal-title">
+                        {{ petForm.petNo ? '반려동물 프로필 수정' : '반려동물 프로필 추가' }}
                     </div>
-                    <!-- pointInfo 끝 -->
 
-            </div>
-            <!-- page-inner 끝 -->
+                    <div class="row">
+                        <label>이름</label>
+                        <input type="text" v-model="petForm.petName">
+                    </div>
 
-            </main>
-            <!-- user-content 끝 -->
+                    <div class="row">
+                        <label>종</label>
+                        <input type="text" v-model="petForm.species">
+                    </div>
 
-        </div>
-        <!-- user-page-container 끝 -->
+                    <div class="row">
+                        <label>품종</label>
+                        <input type="text" v-model="petForm.breed">
+                    </div>
 
+                    <div class="row">
+                        <label>생년월일</label>
+                        <input type="date" v-model="petForm.birthdate">
+                    </div>
 
-        <!-- ✅ 반려동물 모달 -->
-        <div class="modal-wrap" v-if="showPetModal">
-            <div class="modal-box">
-                <div class="modal-title">
-                    {{ petForm.petNo ? '반려동물 프로필 수정' : '반려동물 프로필 추가' }}
-                </div>
+                    <div class="row">
+                        <label>성별</label>
+                        <select v-model="petForm.gender">
+                            <option value="">선택해주세요</option>
+                            <option value="M">수컷</option>
+                            <option value="F">암컷</option>
+                            <option value="N">중성화</option>
+                        </select>
+                    </div>
 
-                <div class="row">
-                    <label>이름</label>
-                    <input type="text" v-model="petForm.petName">
-                </div>
-
-                <div class="row">
-                    <label>종</label>
-                    <input type="text" v-model="petForm.species">
-                </div>
-
-                <div class="row">
-                    <label>품종</label>
-                    <input type="text" v-model="petForm.breed">
-                </div>
-
-                <div class="row">
-                    <label>생년월일</label>
-                    <input type="date" v-model="petForm.birthdate">
-                </div>
-
-                <div class="row">
-                    <label>성별</label>
-                    <select v-model="petForm.gender">
-                        <option value="">선택해주세요</option>
-                        <option value="M">수컷</option>
-                        <option value="F">암컷</option>
-                        <option value="N">중성화</option>
-                    </select>
-                </div>
-
-                <div class="modal-btns">
-                    <button class="btn-cancel" @click="fnClosePetModal">취소</button>
-                    <button class="btn-save" @click="fnSavePet">저장</button>
+                    <div class="modal-btns">
+                        <button class="btn-cancel" @click="fnClosePetModal">취소</button>
+                        <button class="btn-save" @click="fnSavePet">저장</button>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- ✅ 비밀번호 모달 -->
-        <div class="modal-wrap" v-if="showPwdModal">
-            <div class="modal-box">
-                <div class="modal-title">비밀번호 변경</div>
+            <!-- ✅ 비밀번호 모달 -->
+            <div class="modal-wrap" v-if="showPwdModal">
+                <div class="modal-box">
+                    <div class="modal-title">비밀번호 변경</div>
 
-                <div class="row">
-                    <label>현재 비밀번호</label>
-                    <input type="password" v-model="pwdForm.pwd">
-                </div>
+                    <div class="row">
+                        <label>현재 비밀번호</label>
+                        <input type="password" v-model="pwdForm.pwd">
+                    </div>
 
-                <div class="row">
-                    <label>새 비밀번호</label>
-                    <input type="password" v-model="pwdForm.newPwd">
-                </div>
+                    <div class="row">
+                        <label>새 비밀번호</label>
+                        <input type="password" v-model="pwdForm.newPwd">
+                    </div>
 
-                <div class="modal-btns">
-                    <button class="btn-cancel" @click="fnClosePwdModal">취소</button>
-                    <button class="btn-save" @click="fnChangePassword">변경</button>
+                    <div class="modal-btns">
+                        <button class="btn-cancel" @click="fnClosePwdModal">취소</button>
+                        <button class="btn-save" @click="fnChangePassword">변경</button>
+                    </div>
                 </div>
             </div>
-        </div>
 
         </div>
         <!-- app 끝 -->
@@ -1259,20 +1249,7 @@
                             list.sort((a, b) => this.fnGetOrderTotal(b) - this.fnGetOrderTotal(a));
                         } else if (this.orderSortType === 'amountLow') {
                             list.sort((a, b) => this.fnGetOrderTotal(a) - this.fnGetOrderTotal(b));
-                        } else if (this.orderSortType === 'payStatus') {
-                            list.sort((a, b) => {
-                                let av = a.items[0]?.payStatus || a.items[0]?.PAY_STATUS || '';
-                                let bv = b.items[0]?.payStatus || b.items[0]?.PAY_STATUS || '';
-                                return av.localeCompare(bv);
-                            });
-                        } else if (this.orderSortType === 'deliStatus') {
-                            list.sort((a, b) => {
-                                let av = a.items[0]?.deliStatus || a.items[0]?.DELI_STATUS || '';
-                                let bv = b.items[0]?.deliStatus || b.items[0]?.DELI_STATUS || '';
-                                return av.localeCompare(bv);
-                            });
                         }
-
                         return list;
                     },
 
@@ -1401,7 +1378,6 @@
                             communityPage: "커뮤니티 활동",
                             communityPostList: "내 전체 게시글",
                             orderList: "주문 내역",
-                            orderDetail: "주문 상세",
                             reserveList: "예약 내역",
                             reservationDetail: "예약 상세",
                             petEdit: "반려동물 관리",
@@ -1788,26 +1764,16 @@
                     },
 
 
-                    // 선택한 주문의 상세 화면 열기
 
-
-                    fnOpenOrderDetail: function (group) {
-                        this.selectedOrderGroup = {
-                            orderNo: group.orderNo,
-                            orderDate: group.orderDate,
-                            items: group.items
-                        };
-                        this.currentMenu = "orderDetail";
-                    },
                     // 결제 상태 코드를 화면 표시 문자로 변환
                     fnGetPayStatusText: function (status) {
                         if (!status) return "-";
                         status = String(status).trim().toUpperCase();
                         switch (status) {
-                            case "RDY": return "준비";
-                            case "PAY": return "결제";
-                            case "CAN": return "취소";
-                            case "FAL": return "실패";
+                            case "RDY": return "결제대기";
+                            case "PAY": return "결제완료";
+                            case "CAN": return "결제취소";
+                            case "FAL": return "결제실패";
                             default: return status;
                         }
                     },
