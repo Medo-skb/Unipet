@@ -3,25 +3,35 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <!-- <link href="/css/user/phone-verify2.css" rel="stylesheet"> -->
     <link href="/css/user/phone-verify.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <title>휴대폰 인증</title>
 </head>
 
 <body>
+    <jsp:include page="/WEB-INF/header/header.jsp" />
 
-<div class="verify-wrap">
-    <h2>휴대폰 인증</h2>
-    <p class="desc">연동을 위해 휴대폰 인증을 진행해주세요.</p>
+    <div class="verify-page">
+        <div class="verify-wrap">
+            <h2>휴대폰 인증</h2>
+            <p class="desc">연동을 위해 휴대폰 인증을 진행해주세요.</p>
 
-    <input type="text" id="phone" placeholder="휴대폰 번호 입력 예: 01012345678">
-    <button type="button" onclick="sendSms()">인증번호 발송</button>
+            <div class="input-button-row">
+                <input type="text" id="phone" placeholder="휴대폰 번호 입력 예: 01012345678">
+                <button type="button" onclick="sendSms()">인증번호 발송</button>
+            </div>
 
-    <div id="codeBox" style="display:none;">
-        <input type="text" id="code" placeholder="인증번호 입력">
-        <button type="button" onclick="checkSms()">인증 확인</button>
+            <div id="codeBox">
+                <div class="input-button-row">
+                    <input type="text" id="code" placeholder="인증번호 입력">
+                    <button type="button" onclick="checkSms()">인증 확인</button>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
+
+    <jsp:include page="/WEB-INF/footer/footer.jsp" />
 
 <script>
     function sendSms() {
