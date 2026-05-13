@@ -580,7 +580,7 @@
     
 
 	
-	<!-- 쿠폰 목록 조회 -->
+	
 	<!-- 쿠폰 목록 조회 -->
 <select id="selectCouponList" parameterType="hashmap" resultType="hashmap">
     SELECT
