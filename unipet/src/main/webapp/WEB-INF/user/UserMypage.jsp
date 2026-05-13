@@ -482,9 +482,9 @@
 
                                     <!-- 주문 상단 -->
                                     <div style="display:flex;
-                        justify-content:space-between;
-                        align-items:center;
-                        margin-bottom:14px;">
+                                    justify-content:space-between;
+                                    align-items:center;
+                                    margin-bottom:14px;">
 
                                         <div>
                                             <div class="list-title">
@@ -609,13 +609,11 @@
 
 
 
-                                <!-- <select class="list-filter-select" v-model="rsvSortType">
-                                    <option value="latest">최신순</option>
-                                    <option value="old">오래된순</option>
-                                    <option value="timeAsc">시간 빠른순</option>
-                                    <option value="timeDesc">시간 늦은순</option>
-                                    <option value="status">예약상태순</option>
-                                </select> -->
+                        <div v-if="currentMenu === 'reserveList'">
+                            <div class="section-box">
+                                <div class="section-header">
+                                    <div class="section-title" style="margin-bottom:0;">예약 내역</div>
+                                </div>
 
                                 <!-- 1차 정렬: 날짜 (그룹의 순서) -->
                                 <select class="list-filter-select" v-model="rsvSortDate">
@@ -625,14 +623,6 @@
 
                                 <!-- 2차 정렬: 상세 (그룹 내부 아이템의 순서) -->
                                 <select class="list-filter-select" v-model="rsvSortDetail">
-                                    <option value="timeAsc">시간 빠른순</option>
-                                    <option value="timeDesc">시간 늦은순</option>
-                                    <option value="status">예약상태순</option>
-                                </select>
-
-                                <select class="list-filter-select" v-model="rsvSortType">
-                                    <option value="latest">최신순</option>
-                                    <option value="old">오래된순</option>
                                     <option value="timeAsc">시간 빠른순</option>
                                     <option value="timeDesc">시간 늦은순</option>
                                     <option value="status">예약상태순</option>
