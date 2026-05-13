@@ -340,9 +340,9 @@
                         }
 
                         // [검사 2] 아이디 영문 소문자 체크 (혹시 중복확인 후 다시 바꿨을까봐 한 번 더 체크)
-                        const idRegex = /^[a-z]+$/;
+                        const idRegex = /^[a-z0-9]+$/;
                         if (!idRegex.test(this.userId.trim())) {
-                            alert("아이디는 영문 소문자만 사용할 수 있습니다.");
+                            alert("아이디는 영문 소문자와 숫자만 사용할 수 있습니다.");
                             return;
                         }
 
