@@ -67,29 +67,29 @@
 
 	<!-- 사람들이 많이 찜한 인기상품 -->
 	<select id="selectPopularProductList" parameterType="hashmap" resultType="com.example.unipet.model.Main">
-	    SELECT
-	        p.PRODUCT_NO AS productNo,
-	        p.PRODUCT_NAME AS productName,
-	        p.PRODUCT_PRICE AS productPrice,
-	        p.I_SUB_NO AS iSubNo,
-	        pf.FILE_PATH AS filePath,
-	        pf.FILE_NAME AS fileName
-	    FROM PRODUCT p
-	    JOIN WISH w
-	        ON p.PRODUCT_NO = w.PRODUCT_NO
-	    LEFT JOIN PRODUCT_FILE pf
-	        ON p.PRODUCT_NO = pf.PRODUCT_NO
-	        AND pf.IS_MAIN = 'Y'
-	    WHERE p.PRODUCT_STATUS = 'Y'
-	    GROUP BY
-	        p.PRODUCT_NO,
-	        p.PRODUCT_NAME,
-	        p.PRODUCT_PRICE,
-	        p.I_SUB_NO,
-	        pf.FILE_PATH,
-	        pf.FILE_NAME
-	    ORDER BY COUNT(w.WISH_NO) DESC
-	    LIMIT 4
+		SELECT
+		    p.PRODUCT_NO AS productNo,
+		    p.PRODUCT_NAME AS productName,
+		    p.PRODUCT_PRICE AS productPrice,
+		    p.I_SUB_NO AS iSubNo,
+		    pf.FILE_PATH AS filePath,
+		    pf.FILE_NAME AS fileName
+		FROM PRODUCT p
+		JOIN ORDER_DETAIL od
+		    ON p.PRODUCT_NO = od.PRODUCT_NO
+		LEFT JOIN PRODUCT_FILE pf
+		    ON p.PRODUCT_NO = pf.PRODUCT_NO
+		    AND pf.IS_MAIN = 'Y'
+		WHERE p.PRODUCT_STATUS = 'Y'
+		GROUP BY
+		    p.PRODUCT_NO,
+		    p.PRODUCT_NAME,
+		    p.PRODUCT_PRICE,
+		    p.I_SUB_NO,
+		    pf.FILE_PATH,
+		    pf.FILE_NAME
+		ORDER BY COUNT(od.PRODUCT_NO) DESC
+		LIMIT 4
 	</select>
 	
 	<!-- 카테고리별 주소 기반 업체 조회 -->
@@ -177,7 +177,7 @@
 		WHERE pam.A_MAIN_NO = #{aMainNo}
 		  AND p.PRODUCT_STATUS = 'Y'
 		
-		ORDER BY orderCnt DESC   -- 인기순
+		ORDER BY orderCnt DESC
 		LIMIT 4;
 	</select>
 	

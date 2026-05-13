@@ -176,8 +176,20 @@
                     let total = self.menuChartList.reduce((sum, item) => sum + item.reserveCount, 0);
                     self.totalCount = total;
 
+                    // 삭제된 메뉴 이름 처리
+                    let deletedMenuNo = 1;
+
                     self.menuChartList.forEach(item => {
-                        item.percent = total > 0 ? ((item.reserveCount / total) * 100).toFixed(1) : 0;
+                        if (!item.menuName || item.menuName.trim() === "") {
+                            item.menuName = "삭제된 메뉴 " + deletedMenuNo;
+                            deletedMenuNo++;
+                        }
+                    });
+
+                    self.menuChartList.forEach(item => {
+                        item.percent = total > 0
+                            ? ((item.reserveCount / total) * 100).toFixed(1)
+                            : 0;
                     });
 
                     let seriesData = self.menuChartList.map(item => item.reserveCount);
@@ -200,7 +212,11 @@
                         }
                     };
 
-                    self.menuChart = new ApexCharts(document.querySelector("#menuPieChart"), options);
+                    self.menuChart = new ApexCharts(
+                        document.querySelector("#menuPieChart"),
+                        options
+                    );
+
                     self.menuChart.render();
                 },
 
