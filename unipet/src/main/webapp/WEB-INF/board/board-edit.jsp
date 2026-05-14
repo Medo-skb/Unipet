@@ -201,17 +201,19 @@
 								self.subTypeList = data.subTypeList || [];
 								self.localList = data.localList || [];
 								self.fileList = data.fileList || [];
-								
-								console.log("첫 번째 파일명 originName ===>", self.fileList[0].originName);
-								console.log("첫 번째 파일명 fileName ===>", self.fileList[0].fileName);
-								console.log("첫 번째 파일번호 fileNo ===>", self.fileList[0].fileNo);
+
+								if (self.fileList.length > 0) {
+									console.log("첫 번째 파일명 originName ===>", self.fileList[0].originName);
+									console.log("첫 번째 파일명 fileName ===>", self.fileList[0].fileName);
+									console.log("첫 번째 파일번호 fileNo ===>", self.fileList[0].fileNo);
+								}
 
 								self.bSubNo = data.board.bSubNo;
 								self.localNo = data.board.localNo == null || data.board.localNo == 0 ? "" : data.board.localNo;
-								self.privateYn = data.board.privateYn;
-								self.title = data.board.title;
-								self.bContent = data.board.bContent;
-
+								self.privateYn = data.board.privateYn == null ? "N" : data.board.privateYn;
+								self.title = data.board.title == null ? "" : data.board.title;
+								self.bContent = data.board.bContent == null ? "" : data.board.bContent;
+								
 								for (let i = 0; i < self.subTypeList.length; i++) {
 									if (String(self.subTypeList[i].bSubNo) == String(self.bSubNo)) {
 										self.selectedMainNo = self.subTypeList[i].bMainNo;
