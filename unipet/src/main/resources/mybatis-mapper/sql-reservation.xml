@@ -1,0 +1,277 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.example.unipet.mapper.ReservationMapper">
+	<!-- 여러개 검색 -->
+	<select id="selectStoreList" parameterType="hashmap" resultType="com.example.unipet.model.Store">
+	    SELECT S.*, C.KOR AS STORE_TYPE
+	    FROM STORE S
+	    LEFT JOIN CODE C ON S.S_CATEGORY = C.VALUE AND C.TYPE = 'S_CATEGORY'
+	    -- 업체 정책 테이블 JOIN
+	    LEFT JOIN STORE_POLICY SP ON S.STORE_NO = SP.STORE_NO 
+	    WHERE S.LAT BETWEEN #{swLat} AND #{neLat}
+	      AND S.LNG BETWEEN #{swLng} AND #{neLng}
+	    
+	    <if test="storeType != null and storeType != ''">
+	      AND C.KOR = #{storeType}
+	    </if>
+	
+	    <if test="startDate != null and startDate != ''">
+	      AND (
+	          -- 1. 비회원사(ext)는 항상 노출
+	          S.S_STATUS = 'ext'
+	          
+	          OR 
+	          
+	          -- 2. 회원사(gen)는 슬롯 및 업체별 Cutoff 정책 확인
+	          (S.S_STATUS = 'gen' AND EXISTS (
+	              SELECT 1 
+	              FROM RSV_SLOT RS 
+	              WHERE RS.STORE_NO = S.STORE_NO 
+	                AND RS.SLOT_DATE BETWEEN #{startDate} AND #{endDate}
+	                AND RS.SLOT_TIME BETWEEN #{startTime} AND #{endTime}
+	                AND RS.IS_AVAILABLE = 'Y'
+	                
+	                -- [핵심] SP.CUTOFF 값을 가져와 현재 시간과 비교 (설정값 없으면 기본값 0 적용)
+	                -- 슬롯 일시가 (현재 시간 + 업체별 마감 시간)보다 미래여야 함
+	                AND TIMESTAMP(RS.SLOT_DATE, RS.SLOT_TIME) > DATE_ADD(NOW(), INTERVAL COALESCE(SP.CUTOFF, 0) HOUR)
+	          ))
+	      )
+	    </if>
+	</select>
+	
+	<select id="selectStoreMenuList" parameterType="hashmap" resultType="com.example.unipet.model.Store">
+	    SELECT S.STORE_NO, STORE_NAME, MENU_NO, MENU_NAME, MENU_PRICE, M_STATUS 
+	    FROM STORE S
+	    LEFT JOIN STORE_MENU M ON S.STORE_NO = M.STORE_NO
+	    WHERE
+	    	M_STATUS = 'Y'
+		    AND S.STORE_NO = #{storeNo}
+	</select>
+	
+	<select id="selectStoreImgList" parameterType="hashmap" resultType="com.example.unipet.model.Store">
+    SELECT 
+        STORE_NO, FILE_NO, FILE_PATH, FILE_NAME, ORIGIN_NAME, IS_MAIN
+    FROM 
+        STORE_FILE
+    WHERE 
+        STORE_NO = #{storeNo}
+    ORDER BY 
+        IS_MAIN DESC, FILE_NO ASC
+   </select>
+   
+   <select id="selectStoreReviewList" parameterType="hashmap" resultType="com.example.unipet.model.Review">
+	    SELECT 
+	        R.USER_ID,
+	        NICKNAME,
+	        RATING,
+	        R_CONTENTS,
+	        DATE_FORMAT(R.CDATE, '%Y-%m-%d %H:%i') AS cdate,
+	        RSV_NO
+	    FROM REVIEW R
+	    JOIN USERS U ON R.USER_ID = U.USER_ID
+	    WHERE STORE_NO = #{storeNo}
+	    <if test="rsvNo != null and rsvNo != ''">
+	        AND RSV_NO = #{rsvNo}
+	    </if>
+	    ORDER BY R.CDATE DESC
+	    LIMIT 2
+	</select>
+	
+	<select id="selectStoreSlotList" parameterType="hashmap" resultType="com.example.unipet.model.Store">
+	    SELECT 
+	        SLOT_NO, STORE_NO, SLOT_DATE, DATE_FORMAT(SLOT_TIME, '%H:%i') AS SLOT_TIME, 
+	        CAPACITY, CUR_COUNT, IS_AVAILABLE
+	    FROM 
+	        RSV_SLOT
+	    WHERE 
+	        STORE_NO = #{storeNo}
+	        AND SLOT_DATE = #{targetDate}  ORDER BY 
+	        SLOT_TIME ASC
+	</select>
+	
+	<select id="selectStorePolicy" parameterType="hashmap" resultType="com.example.unipet.model.Store">
+	    SELECT *
+	    FROM 
+	        STORE_POLICY
+	    WHERE 
+	        STORE_NO = #{storeNo}
+	</select>
+	
+	<select id="selectExpiredWaiList" resultType="com.example.unipet.model.Reservation">
+	    SELECT 
+	        * FROM RESERVATION 
+	    WHERE RSV_STATUS = 'WAI'
+	      AND CDATE &lt; DATE_SUB(NOW(), INTERVAL #{minutes} MINUTE)
+	</select>
+
+	
+	<!-- 한개 검색 -->
+	<select id="selectUser" parameterType="hashmap" resultType="com.example.unipet.model.Default">
+	</select>
+	
+	<select id="selectStoreInfo" parameterType="hashmap" resultType="com.example.unipet.model.Store">
+	    SELECT S.STORE_NO, STORE_NAME, S_ADDR, S_STATUS, LAT, LNG, C.KOR AS STORE_TYPE,
+	    		SUB_TITLE, S_CONTENTS
+	    FROM STORE S
+	    LEFT JOIN CODE C ON S.S_CATEGORY = C.VALUE
+	    LEFT JOIN STORE_DETAIL D ON S.STORE_NO = D.STORE_NO
+	    WHERE
+	    	TYPE = 'S_CATEGORY'
+		    AND S.STORE_NO = #{storeNo}
+	</select>
+	
+	<select id="checkSlotAvailability" parameterType="hashmap" resultType="int">
+	    SELECT COUNT(*)
+	    FROM rsv_slot
+	    WHERE SLOT_NO = #{slotNo}
+	      AND IS_AVAILABLE = 'Y'
+	    <![CDATA[
+	      AND CUR_COUNT < CAPACITY
+	    ]]>
+	</select>
+
+	<select id="selectStoreReviewSummary" parameterType="hashmap" resultType="hashmap">
+	    SELECT 
+	        COUNT(*) AS REVIEW_COUNT,
+	        IFNULL(ROUND(AVG(RATING), 1), 0) AS REVIEW_AVG
+	    FROM REVIEW
+	    WHERE STORE_NO = #{storeNo}
+	</select>
+
+	<select id="selectExpiredReservations" parameterType="hashmap" resultType="com.example.unipet.model.Reservation">
+	    SELECT 
+	        RSV_NO AS rsvNo,
+	        USER_ID AS userId,
+	        RSV_STATUS AS rsvStatus
+	    FROM reservation
+	    WHERE RSV_STATUS = 'CNF' 
+	      AND STR_TO_DATE(CONCAT(RSV_DATE, ' ', RSV_END_TIME), '%Y-%m-%d %H:%i') <![CDATA[ <= ]]> DATE_SUB(NOW(), INTERVAL 30 MINUTE)
+	</select>
+	
+	<!-- 삽입 -->
+	<insert id="insertUser" parameterType="hashmap">
+	</insert>
+	
+	<insert id="insertReservation" parameterType="hashmap" useGeneratedKeys="true" keyProperty="rsvNo" keyColumn="RSV_NO">
+	    INSERT INTO reservation (
+	        SLOT_NO, RSV_DATE, RSV_START_TIME, RSV_END_TIME,
+	        STORE_NO, USER_ID, PET_NO, MENU_NO,
+	        REQUEST, RSV_STATUS, CDATE
+	    ) VALUES (
+	        #{slotNo},
+	        #{date},
+	        #{time},
+	        DATE_ADD(STR_TO_DATE(CONCAT(#{date}, ' ', #{time}), '%Y-%m-%d %H:%i'), 
+	                 INTERVAL (SELECT slot FROM store_policy WHERE store_no = #{storeNo}) MINUTE),
+	        #{storeNo},
+	        #{userId},
+	        #{petNo},
+	        #{menuNo},
+	        #{request},
+	        'WAI',
+	        NOW()
+	    )
+	</insert>
+	
+	<insert id="insertRsvLog" parameterType="hashmap">
+	    INSERT INTO rsv_log (
+	        RSV_NO, 
+	        ACTION, 
+	        OLD_STATUS, 
+	        NEW_STATUS, 
+	        ACTOR_TYPE,
+	        ACTOR_ID, 
+	        LOG_DATE, 
+	        REMARK
+	    ) VALUES (
+	        #{rsvNo}, 
+	        #{action}, 
+	        #{oldStatus}, 
+	        #{newStatus}, 
+	        IFNULL(#{actorType}, 'USER'),
+	        #{userId}, 
+	        NOW(), 
+	        #{remark}
+	    )
+	</insert>
+	
+<!--	<insert id="insertReviewRsv" parameterType="hashmap" useGeneratedKeys="true" keyProperty="reviewNo" keyColumn="REVIEW_NO">
+	    INSERT INTO review (USER_ID, STORE_NO, RSV_NO, RATING, R_CONTENTS, CDATE)
+	    VALUES (#{userId}, #{storeNo}, #{rsvNo}, #{rating}, #{rContents}, NOW())
+	</insert>
+	
+	<insert id="insertReviewRsvFile" parameterType="hashmap">
+	    INSERT INTO review_file (REVIEW_NO, FILE_PATH, FILE_NAME, ORIGIN_NAME, FILE_SIZE, FILE_EXT)
+	    VALUES (#{reviewNo}, #{file_path}, #{file_name}, #{origin_name}, #{file_size}, #{file_ext})
+	</insert>
+-->
+	
+	<!-- 삭제 -->
+	<delete id="deleteUser" parameterType="hashmap">
+	</delete>
+	
+	<!-- 수정 -->
+	<update id="updateUser" parameterType="hashmap">
+	</update>
+	
+	<update id="updateRsvSlot" parameterType="hashmap">
+	    UPDATE RSV_SLOT S
+	    /* 1. 예약 테이블과 조인하여 rsvNo로 슬롯을 특정함 */
+	    JOIN RESERVATION R ON S.SLOT_NO = R.SLOT_NO
+	    /* 2. 정책 테이블과 조인하여 Cutoff 시간 확인 */
+	    JOIN STORE_POLICY SP ON S.STORE_NO = SP.STORE_NO
+	    SET 
+	        S.CUR_COUNT = S.CUR_COUNT + 1,
+	        S.IS_AVAILABLE = CASE 
+	                            WHEN S.CUR_COUNT + 1 >= S.CAPACITY THEN 'N'
+	                            ELSE 'Y'
+	                         END
+	    WHERE R.RSV_NO = #{rsvNo}  /* 3. 예약 상태가 결제 완료(CNF)인 경우에만 슬롯 카운트 증가 */
+	      AND R.RSV_STATUS = 'CNF'
+	      /* 4. 정책상 마감 시간(Cutoff) 이내인지 확인 */
+	      <![CDATA[
+	      AND TIMESTAMP(S.SLOT_DATE, S.SLOT_TIME) > DATE_ADD(NOW(), INTERVAL COALESCE(SP.CUTOFF, 0) HOUR)
+	      ]]>
+	</update>
+	
+	<update id="updateExpiredSlots">
+	    UPDATE rsv_slot s
+	    JOIN store_policy sp ON s.STORE_NO = sp.STORE_NO
+	    SET s.IS_AVAILABLE = 'N'
+	    WHERE s.IS_AVAILABLE = 'Y'
+	      /* 현재 시간 + Cutoff 정책 시간이 슬롯 시간보다 크거나 같으면 마감 */
+	      <![CDATA[
+	      AND TIMESTAMP(s.SLOT_DATE, s.SLOT_TIME) <= DATE_ADD(NOW(), INTERVAL COALESCE(sp.CUTOFF, 0) HOUR)
+	      ]]>
+	</update>
+	
+	<update id="updateRsvStatusCancel" parameterType="hashmap">
+	    UPDATE RESERVATION
+	    SET RSV_STATUS = 'CAN'
+	    WHERE RSV_NO = #{rsvNo}
+	</update>
+
+	<update id="updateRsvSlotCancel" parameterType="hashmap">
+	    UPDATE RSV_SLOT
+	    SET 
+	        CUR_COUNT = CUR_COUNT - 1,
+	        /* 카운트가 줄어들면 무조건 수용량(CAPACITY) 미만이 되므로 Y로 변경 */
+	        IS_AVAILABLE = 'Y'
+	    WHERE SLOT_NO = #{slotNo}
+	      AND CUR_COUNT > 0 /* 0 이하로 내려가는 것 방지 */
+	</update>
+	
+	<update id="updateRsvStatusToFin" parameterType="hashmap">
+	    UPDATE RESERVATION 
+	    SET RSV_STATUS = 'FIN'
+	    WHERE RSV_NO = #{rsvNo}
+	</update>
+	
+	<update id="updateStatusToCancel">
+	    UPDATE RESERVATION 
+	    SET RSV_STATUS = 'CAN' 
+	    WHERE RSV_NO = #{rsvNo}
+	</update>
+	
+</mapper>

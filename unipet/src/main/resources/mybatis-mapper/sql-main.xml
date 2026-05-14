@@ -1,0 +1,376 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.example.unipet.mapper.MainMapper">
+	<!-- 예약 많은 업체 -->
+	<select id="selectPopularStoreList" parameterType="hashmap" resultType="com.example.unipet.model.Main">
+		SELECT 
+		    s.STORE_NO AS storeNo,
+		    s.STORE_NAME AS storeName,
+		    s.S_CATEGORY AS sCategory,
+		    c.KOR AS sCategoryName,
+		    s.S_ADDR AS sAddr,
+		    sd.SUB_TITLE AS subTitle,
+		    pm.MENU_NAME AS popularMenuName,
+		    sf.FILE_PATH AS filePath,
+		    sf.FILE_NAME AS fileName
+		FROM STORE s
+		JOIN RESERVATION r 
+		    ON s.STORE_NO = r.STORE_NO
+		   AND r.CDATE >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
+		
+		LEFT JOIN STORE_DETAIL sd
+		    ON s.STORE_NO = sd.STORE_NO
+		
+		LEFT JOIN CODE c 
+		    ON s.S_CATEGORY = c.VALUE
+		   AND c.TYPE = 'S_CATEGORY'
+		
+		LEFT JOIN STORE_FILE sf
+		    ON s.STORE_NO = sf.STORE_NO
+		   AND sf.IS_MAIN = 'Y'
+		
+		LEFT JOIN (
+		    SELECT STORE_NO, MENU_NAME
+		    FROM (
+		        SELECT 
+		            m.STORE_NO,
+		            m.MENU_NAME,
+		            ROW_NUMBER() OVER (
+		                PARTITION BY m.STORE_NO
+		                ORDER BY COUNT(*) DESC, m.MENU_NO ASC
+		            ) AS rn
+		        FROM RESERVATION r
+		        JOIN STORE_MENU m
+		            ON r.MENU_NO = m.MENU_NO
+		        WHERE r.CDATE >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
+		        GROUP BY m.STORE_NO, m.MENU_NO, m.MENU_NAME
+		    ) x
+		    WHERE rn = 1
+		) pm
+		    ON s.STORE_NO = pm.STORE_NO
+		
+		GROUP BY 
+		    s.STORE_NO, 
+		    s.STORE_NAME, 
+		    s.S_CATEGORY,
+		    c.KOR,
+		    s.S_ADDR,
+		    sd.SUB_TITLE,
+		    pm.MENU_NAME,
+		    sf.FILE_PATH,
+		    sf.FILE_NAME
+		
+		ORDER BY COUNT(r.RSV_NO) DESC
+		LIMIT 4;
+	</select>
+
+	<!-- 사람들이 많이 찜한 인기상품 -->
+	<select id="selectPopularProductList" parameterType="hashmap" resultType="com.example.unipet.model.Main">
+		SELECT
+		    p.PRODUCT_NO AS productNo,
+		    p.PRODUCT_NAME AS productName,
+		    p.PRODUCT_PRICE AS productPrice,
+		    p.I_SUB_NO AS iSubNo,
+		    pf.FILE_PATH AS filePath,
+		    pf.FILE_NAME AS fileName
+		FROM PRODUCT p
+		JOIN ORDER_DETAIL od
+		    ON p.PRODUCT_NO = od.PRODUCT_NO
+		LEFT JOIN PRODUCT_FILE pf
+		    ON p.PRODUCT_NO = pf.PRODUCT_NO
+		    AND pf.IS_MAIN = 'Y'
+		WHERE p.PRODUCT_STATUS = 'Y'
+		GROUP BY
+		    p.PRODUCT_NO,
+		    p.PRODUCT_NAME,
+		    p.PRODUCT_PRICE,
+		    p.I_SUB_NO,
+		    pf.FILE_PATH,
+		    pf.FILE_NAME
+		ORDER BY COUNT(od.PRODUCT_NO) DESC
+		LIMIT 4
+	</select>
+	
+	<!-- 카테고리별 주소 기반 업체 조회 -->
+	<select id="selectStoreByCategoryList" parameterType="hashmap" resultType="com.example.unipet.model.Main">
+		SELECT
+		    s.STORE_NO AS storeNo,
+		    s.STORE_NAME AS storeName,
+		    s.S_CATEGORY AS sCategory,
+		    s.S_ADDR AS sAddr,
+		    c.KOR AS sCategoryName,
+		    sd.SUB_TITLE AS subTitle,
+		    sf.FILE_PATH AS filePath,
+		    sf.FILE_NAME AS fileName
+		FROM STORE s
+		LEFT JOIN STORE_DETAIL sd
+		    ON s.STORE_NO = sd.STORE_NO
+		LEFT JOIN CODE c
+		    ON s.S_CATEGORY = c.VALUE
+		   AND c.TYPE = 'S_CATEGORY'
+		LEFT JOIN STORE_FILE sf
+		    ON s.STORE_NO = sf.STORE_NO
+		   AND sf.IS_MAIN = 'Y'
+		LEFT JOIN USERS u
+		    ON u.USER_ID = #{sessionId}
+		WHERE s.S_STATUS != 'EXT'
+		  AND s.S_CATEGORY = #{category}
+		ORDER BY
+		    CASE
+		        WHEN #{sessionId} IS NOT NULL
+		         AND #{sessionId} != ''
+		         AND u.USER_ADDR IS NOT NULL
+		         AND u.USER_ADDR != ''
+		         AND s.S_ADDR IS NOT NULL
+		         AND s.S_ADDR != ''
+		         AND LEFT(TRIM(u.USER_ADDR), 2) = LEFT(TRIM(s.S_ADDR), 2)
+		        THEN 0
+		        ELSE 1
+		    END,
+		
+		    (
+		        SELECT COUNT(*)
+		        FROM RESERVATION r
+		        WHERE r.STORE_NO = s.STORE_NO
+		    ) DESC,
+		
+		    RAND()
+		LIMIT 4;
+	</select>
+	
+	<!-- 상품 카테고리 조회 -->
+	<select id="selectAnimalMainCategoryList" resultType="com.example.unipet.model.Main">
+	    SELECT
+	        A_MAIN_NO AS aMainNo,
+	        A_MAIN_TYPE AS aMainType
+	    FROM PC_ANIMAL_MAIN
+	    ORDER BY A_MAIN_NO ASC
+	</select>
+	
+	<!-- 카테고리별 랜덤 상품 조회 -->
+	<select id="selectProductByCategoryList" parameterType="hashmap" resultType="com.example.unipet.model.Main">
+		SELECT
+		    p.PRODUCT_NO AS productNo,
+		    p.PRODUCT_NAME AS productName,
+		    p.PRODUCT_PRICE AS productPrice,
+		    pam.A_MAIN_NO AS aMainNo,
+		    pam.A_MAIN_TYPE AS aMainType,
+		    pf.FILE_PATH AS filePath,
+		    pf.FILE_NAME AS fileName,
+		    IFNULL(od.orderCnt, 0) AS orderCnt
+		FROM PRODUCT p
+		LEFT JOIN PC_ANIMAL_SUB pas
+		    ON pas.A_SUB_NO = p.A_SUB_NO
+		LEFT JOIN PC_ANIMAL_MAIN pam
+		    ON pam.A_MAIN_NO = pas.A_MAIN_NO
+		LEFT JOIN PRODUCT_FILE pf
+		    ON p.PRODUCT_NO = pf.PRODUCT_NO
+		   AND pf.IS_MAIN = 'Y'
+		LEFT JOIN (
+		    SELECT PRODUCT_NO, COUNT(*) AS orderCnt
+		    FROM ORDER_DETAIL
+		    GROUP BY PRODUCT_NO
+		) od
+		    ON p.PRODUCT_NO = od.PRODUCT_NO
+		
+		WHERE pam.A_MAIN_NO = #{aMainNo}
+		  AND p.PRODUCT_STATUS = 'Y'
+		
+		ORDER BY orderCnt DESC
+		LIMIT 4;
+	</select>
+	
+	<!-- 소셜로그인 기본정보 확인 -->
+	<select id="selectSocialBasicCheck" parameterType="hashmap" resultType="com.example.unipet.model.Main">
+	    SELECT
+	        USER_ID AS userId,
+	        SOCIALTYPE AS socialType
+	    FROM USERS
+	    WHERE USER_ID = #{userId}
+	      AND SOCIALTYPE IN ('KAKAO', 'NAVER')
+	      AND (PHONE IS NULL OR PHONE = '')
+	</select>
+	
+	<!-- 통합검색 업체 -->
+	<select id="selectSearchStoreList" parameterType="map" resultType="com.example.unipet.model.Main">
+		SELECT 
+		    S.STORE_NO AS storeNo,
+		    S.STORE_NAME AS storeName,
+		    S.S_ADDR AS sAddr,
+		    S.S_STATUS AS sStatus,
+		    S.S_CATEGORY AS sCategory,
+		    SF.FILE_PATH AS filePath,
+		    SF.FILE_NAME AS fileName,
+		
+		    CASE 
+		        WHEN S.S_STATUS = 'GEN' THEN '유니펫 회원사'
+		        WHEN S.S_STATUS = 'AFF' THEN '유니펫 제휴사'
+		        ELSE ''
+		    END AS badgeText,
+		
+		    M.MENU_NAME AS menuName1,
+		    M.MENU_PRICE AS menuPrice1
+		
+		FROM STORE S
+		
+		LEFT JOIN STORE_FILE SF
+		    ON S.STORE_NO = SF.STORE_NO
+		   AND SF.IS_MAIN = 'Y'
+		
+		LEFT JOIN (
+		    SELECT
+		        X.STORE_NO,
+		        X.MENU_NAME,
+		        X.MENU_PRICE,
+		        ROW_NUMBER() OVER (
+		            PARTITION BY X.STORE_NO
+		            ORDER BY X.MENU_PRICE ASC, X.MENU_NO ASC
+		        ) AS RN
+		    FROM STORE_MENU X
+		    WHERE X.M_STATUS = 'Y'
+		) M
+		    ON S.STORE_NO = M.STORE_NO
+		   AND M.RN = 1
+		
+		WHERE S.S_CATEGORY = #{sCategory}
+		  AND S.S_STATUS IN ('AFF', 'GEN', 'EXT')
+		  AND (
+		        S.STORE_NAME LIKE CONCAT('%', #{keyword}, '%')
+		        OR S.S_ADDR LIKE CONCAT('%', #{keyword}, '%')
+		        OR M.MENU_NAME LIKE CONCAT('%', #{keyword}, '%')
+		      )
+		
+		ORDER BY 
+		    CASE 
+		        WHEN S.S_STATUS = 'AFF' THEN 1
+		        WHEN S.S_STATUS = 'GEN' THEN 2
+		        WHEN S.S_STATUS = 'EXT' THEN 3
+		        ELSE 4
+		    END,
+		    S.STORE_NAME ASC;
+	</select>
+	
+	<!-- 업체 전체 개수 조회 -->
+	<select id="selectSearchStoreCount" parameterType="hashmap" resultType="int">
+		SELECT COUNT(*)
+		FROM STORE
+		WHERE S_STATUS != 'EXT'
+		  AND S_CATEGORY = #{sCategory}
+		  AND (
+				STORE_NAME LIKE CONCAT('%', #{keyword}, '%')
+				OR S_ADDR LIKE CONCAT('%', #{keyword}, '%')
+			  )
+	</select>
+
+	<!-- 통합검색 상품 -->
+	<select id="selectSearchProductList" parameterType="hashmap" resultType="com.example.unipet.model.Main">
+	    SELECT 
+	        P.PRODUCT_NO AS productNo,
+	        P.PRODUCT_NAME AS productName,
+	        P.PRODUCT_PRICE AS productPrice,
+	        P.BRAND AS brand,
+	        PAM.A_MAIN_TYPE AS aMainType,
+	        PAS.A_SUB_TYPE AS aSubType,
+	        PIS.I_SUB_TYPE AS iSubType,
+	        PF.FILE_PATH AS filePath,
+	        PF.FILE_NAME AS fileName,
+	        IFNULL(RV.RATING, 0) AS rating,
+	        IFNULL(RV.REVIEW_COUNT, 0) AS reviewCount
+	    FROM PRODUCT P
+	    LEFT JOIN PRODUCT_FILE PF
+	        ON PF.PRODUCT_NO = P.PRODUCT_NO
+	       AND PF.IS_MAIN = 'Y'
+	    LEFT JOIN PC_ITEM_SUB PIS
+	        ON PIS.I_SUB_NO = P.I_SUB_NO
+	    LEFT JOIN PC_ANIMAL_SUB PAS
+	        ON PAS.A_SUB_NO = P.A_SUB_NO
+	    LEFT JOIN PC_ANIMAL_MAIN PAM
+	        ON PAM.A_MAIN_NO = PAS.A_MAIN_NO
+	    LEFT JOIN (
+	        SELECT
+	            R.PRODUCT_NO,
+	            ROUND(AVG(R.RATING), 1) AS RATING,
+	            COUNT(*) AS REVIEW_COUNT
+	        FROM REVIEW R
+	        GROUP BY R.PRODUCT_NO
+	    ) RV
+	        ON RV.PRODUCT_NO = P.PRODUCT_NO
+	    WHERE P.PRODUCT_STATUS = 'Y'
+	      AND (
+	            P.PRODUCT_NAME LIKE CONCAT('%', #{keyword}, '%')
+	            OR P.BRAND LIKE CONCAT('%', #{keyword}, '%')
+	            OR PAM.A_MAIN_TYPE LIKE CONCAT('%', #{keyword}, '%')
+	            OR PAS.A_SUB_TYPE LIKE CONCAT('%', #{keyword}, '%')
+	            OR PIS.I_SUB_TYPE LIKE CONCAT('%', #{keyword}, '%')
+	          )
+	    ORDER BY P.PRODUCT_NO DESC
+	</select>
+	
+	<!-- 상품 개수 -->
+	<select id="selectSearchProductCount" parameterType="hashmap" resultType="int">
+		SELECT COUNT(*)
+		FROM PRODUCT P
+		LEFT JOIN PC_ITEM_SUB PIS ON PIS.I_SUB_NO = P.I_SUB_NO
+		LEFT JOIN PC_ANIMAL_SUB PAS ON PAS.A_SUB_NO = P.A_SUB_NO
+		LEFT JOIN PC_ANIMAL_MAIN PAM ON PAM.A_MAIN_NO = PAS.A_MAIN_NO
+		WHERE (
+			P.PRODUCT_NAME LIKE CONCAT('%', #{keyword}, '%')
+			OR P.BRAND LIKE CONCAT('%', #{keyword}, '%')
+			OR PAM.A_MAIN_TYPE LIKE CONCAT('%', #{keyword}, '%')
+			OR PAS.A_SUB_TYPE LIKE CONCAT('%', #{keyword}, '%')
+			OR PIS.I_SUB_TYPE LIKE CONCAT('%', #{keyword}, '%')
+		)
+	</select>
+	
+	<!-- 통합검색 커뮤니티 -->
+	<select id="selectSearchBoardList" parameterType="hashmap" resultType="com.example.unipet.model.Main">
+		SELECT 
+		    B.BOARD_NO AS boardNo,
+		    B.TITLE AS title,
+		    B.B_CONTENT AS bContent,
+		    BTS.B_MAIN_NO AS bMainNo
+		FROM BOARD B
+		LEFT JOIN BOARD_TYPE_SUB BTS ON B.B_SUB_NO = BTS.B_SUB_NO
+		WHERE BTS.B_MAIN_NO = #{bMainNo}
+		  AND B.B_STATUS = 'Y'
+		  AND B.PRIVATE = 'N'
+		  AND (
+		        B.TITLE LIKE CONCAT('%', #{keyword}, '%')
+		        OR B.B_CONTENT LIKE CONCAT('%', #{keyword}, '%')
+		      )
+		ORDER BY B.BOARD_NO DESC
+	</select>
+	
+	<!-- 커뮤니티 개수 조회 -->
+	<select id="selectSearchBoardCount" parameterType="hashmap" resultType="int">
+		SELECT COUNT(*)
+		FROM BOARD B
+		LEFT JOIN BOARD_TYPE_SUB BTS ON B.B_SUB_NO = BTS.B_SUB_NO
+		WHERE BTS.B_MAIN_NO = #{bMainNo}
+		  AND (
+			B.TITLE LIKE CONCAT('%', #{keyword}, '%')
+			OR B.B_CONTENT LIKE CONCAT('%', #{keyword}, '%')
+		  )
+	</select>
+	
+	<!-- 유치원 보내주개 -->
+	<select id="selectKindergartenStoreList" resultType="com.example.unipet.model.Main">
+	    SELECT
+	        S.STORE_NO AS storeNo,
+	        S.STORE_NAME AS storeName,
+	        S.S_ADDR AS sAddr,
+	        SD.SUB_TITLE AS subTitle,
+	        SF.FILE_PATH AS filePath,
+	        SF.FILE_NAME AS fileName
+	    FROM STORE S
+	    LEFT JOIN STORE_DETAIL SD
+	        ON S.STORE_NO = SD.STORE_NO
+	    LEFT JOIN STORE_FILE SF
+	        ON S.STORE_NO = SF.STORE_NO
+	       AND SF.IS_MAIN = 'Y'
+	    WHERE S.S_STATUS IN ('GEN','AFF')
+	      AND S.STORE_NAME LIKE '%유치원%'
+	    ORDER BY S.STORE_NO DESC
+	</select>
+</mapper>

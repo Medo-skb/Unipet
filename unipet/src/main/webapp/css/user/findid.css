@@ -1,0 +1,204 @@
+@charset "UTF-8";
+
+#app {
+    width: 520px;
+    margin: 160px auto 200px;
+    background: var(--box-bg);
+    border: 1px solid var(--line-soft);
+    border-radius: 22px;
+    padding: 40px 36px;
+    box-sizing: border-box;
+}
+
+#app::before {
+    content: "아이디 찾기";
+    display: block;
+    text-align: center;
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 28px;
+    color: var(--text-main);
+}
+
+.row {
+    margin-bottom: 14px;
+}
+
+.row label {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text-main);
+}
+
+.row input {
+    width: 100%;
+    height: 46px;
+    border: 1px solid var(--line-soft);
+    border-radius: 12px;
+    padding: 0 14px;
+    box-sizing: border-box;
+    font-size: 14px;
+    background: var(--bg);
+    color: var(--text-main);
+    transition: border-color 0.1s;
+}
+
+.row input::placeholder {
+    color: var(--text-light);
+}
+
+.row input:focus {
+    border-color: var(--main);
+    outline: none;
+}
+
+/* =========================================
+   [추가됨] 휴대폰 인증 UI 가로 배치 스타일 
+========================================= */
+.input-group {
+    display: flex;
+    gap: 10px;
+}
+
+.input-group > div {
+    flex: 1; /* 인풋창이 남은 공간을 꽉 채우도록 */
+}
+
+/* 우측 인증 발송 / 확인 버튼 */
+.side-btn {
+    width: 130px;
+    height: 46px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 700;
+    border: 1px solid var(--main);
+    background: transparent;
+    color: var(--main);
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.side-btn:hover:not(:disabled) {
+    background: var(--main);
+    color: var(--bg);
+}
+
+/* 인풋창 내부 타이머 텍스트 */
+.timer-text {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: #ff4d4f; /* 눈에 띄는 빨간색 */
+    font-weight: 600;
+    pointer-events: none;
+}
+
+/* =========================================
+   [추가됨] 비활성화(막힘) 상태 스타일 (매우 중요)
+========================================= */
+button:disabled, 
+.btn-disabled {
+    background-color: #f5f5f5 !important;
+    border-color: #d9d9d9 !important;
+    color: #b3b3b3 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important; /* 마우스 클릭 원천 차단 */
+}
+
+input:disabled {
+    background-color: #f5f5f5 !important;
+    color: #999999 !important;
+    cursor: not-allowed;
+}
+
+/* =========================================
+   하단 최종 버튼 스타일 
+========================================= */
+.btn-box {
+    margin-top: 26px;
+}
+
+.btn-box button {
+    width: 100%;
+    height: 50px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 700;
+    border: 1px solid var(--main);
+    background: transparent;
+    color: var(--main);
+    transition: background 0.1s, color 0.1s;
+}
+
+.btn-box button:hover:not(:disabled) {
+    background: var(--main);
+    color: var(--bg);
+}
+
+/* 모바일 반응형 */
+@media (max-width: 600px) {
+    #app {
+        width: calc(100% - 32px);
+        margin: 80px auto 120px;
+        padding: 34px 20px 30px;
+    }
+    
+    .side-btn {
+        width: 110px; /* 모바일에서는 버튼 크기 축소 */
+        font-size: 13px;
+    }
+}
+
+/* =========================================
+   [오차 교정] 1. 인증번호 입력창 & 버튼 가로 길이 완벽 맞춤
+========================================= */
+.input-group {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+
+/* div로 묶인 타이머/인증번호 영역이 남은 공간을 꽉 채우도록 설정 */
+.input-group > div, 
+.input-group > input {
+    flex: 1;
+}
+
+/* div 안쪽에 있는 input 자체도 부모 크기에 맞춰 100% 늘어나도록 강제 */
+.input-group > div > input {
+    width: 100%;
+}
+
+/* 우측 인증버튼 크기 고정 (창이 줄어들어도 찌그러지지 않게 방어) */
+.side-btn {
+    width: 130px;
+    height: 46px;
+    flex-shrink: 0;
+}
+
+
+/* =========================================
+   [오차 교정] 2. 맨 아래 비활성화(회색) 버튼 색상 통일
+========================================= */
+/* 두 페이지의 휑한 회색톤과 테두리를 완벽하게 똑같이 맞춥니다 */
+.btn-box button:disabled, 
+.btn-box .btn-disabled {
+    background-color: #f4f4f4 !important; /* 배경색 통일 */
+    border: 1px solid #e0e0e0 !important; /* 테두리 질감 통일 */
+    color: #aaaaaa !important;            /* 글자색 통일 */
+    cursor: not-allowed !important;
+}
+
+/* =========================================
+   [오차 교정] 3. 인풋창 잠금(회색) 상태 색상 통일
+========================================= */
+input:disabled {
+    background-color: #fbfbfb !important;
+    border: 1px solid #ececec !important;
+    color: #999999 !important;
+}

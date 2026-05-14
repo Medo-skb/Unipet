@@ -33,31 +33,7 @@ public class DefaultController {
 	public String copy(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 //		resultMap = 서비스객체.함수(map);
-
-		return new Gson().toJson(resultMap); 
-	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	// ====================================
-	@RequestMapping("/default.do") 
-	public String test(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception{
-		return "/default";
-	}
-
-	
-	@RequestMapping(value = "/default.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
-	@ResponseBody
-	public String login(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
-		HashMap<String, Object> resultMap = new HashMap<String, Object>();
-		
+ 
 		return new Gson().toJson(resultMap); 
 	}
 

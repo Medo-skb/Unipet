@@ -1,0 +1,115 @@
+body {
+    background: var(--bg);
+    color: var(--text-main);
+}
+
+.verify-wrap {
+    width: 520px;
+    margin: 150px auto;
+    padding: 38px 36px 40px;
+    background: var(--box-bg);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    box-sizing: border-box;
+    text-align: left;
+}
+
+.verify-wrap h2,
+h2 {
+    margin: 0 0 30px;
+    text-align: center;
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.desc {
+    display: none;
+}
+
+label {
+    display: block;
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+input {
+    width: 100%;
+    height: 46px;
+    padding: 0 14px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-sizing: border-box;
+    font-size: 14px;
+    color: var(--text-main);
+    outline: none;
+}
+
+input::placeholder {
+    color: var(--text-light);
+}
+
+input:focus {
+    border-color: var(--main);
+}
+
+.form-row {
+    margin-bottom: 16px;
+}
+
+.input-button-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.input-button-row input {
+    flex: 1;
+}
+
+.input-button-row button {
+    width: 130px;
+    flex-shrink: 0;
+}
+
+button {
+    height: 46px;
+    border: 1px solid var(--main);
+    border-radius: 12px;
+    background: var(--box-bg);
+    color: var(--main);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+button:hover {
+    background: var(--soft-pink);
+}
+
+.find-btn,
+button[type="submit"] {
+    width: 100%;
+    height: 50px;
+    margin-top: 10px;
+    border: 1px solid var(--line-dark);
+    background: var(--line-soft);
+    color: var(--text-light);
+    font-size: 16px;
+    font-weight: 800;
+    cursor: default;
+}
+
+.find-btn.active,
+button[type="submit"].active {
+    border-color: var(--main);
+    background: var(--main);
+    color: var(--text-white);
+    cursor: pointer;
+}
+
+#codeBox {
+    display: none;
+}

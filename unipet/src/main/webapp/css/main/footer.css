@@ -1,0 +1,134 @@
+@font-face {
+    font-family: 'Suit';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_suit@1.0/SUIT-Thin.woff2') format('woff2');
+    font-weight: 100;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Suit';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_suit@1.0/SUIT-ExtraLight.woff2') format('woff2');
+    font-weight: 200;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Suit';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_suit@1.0/SUIT-Light.woff2') format('woff2');
+    font-weight: 300;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Suit';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_suit@1.0/SUIT-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Suit';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_suit@1.0/SUIT-Medium.woff2') format('woff2');
+    font-weight: 500;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Suit';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_suit@1.0/SUIT-SemiBold.woff2') format('woff2');
+    font-weight: 600;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Suit';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_suit@1.0/SUIT-Bold.woff2') format('woff2');
+    font-weight: 700;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Suit';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_suit@1.0/SUIT-ExtraBold.woff2') format('woff2');
+    font-weight: 800;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Suit';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_suit@1.0/SUIT-Heavy.woff2') format('woff2');
+    font-weight: 900;
+    font-display: swap;
+}
+
+body {
+    font-family: 'Suit', sans-serif;
+    font-weight: 500;
+    letter-spacing: -0.2px;
+    color: #222;
+}
+
+/* 푸터 전체 */
+.site-footer {
+    width: 100%;
+    min-width: 1400px;
+    border-top: 1px solid #bdbdbd;
+    background-color: #f3f3f3;
+}
+
+/* 내부 정렬 */
+.site-footer .footer-inner {
+    width: 100%;
+    max-width: 1400px;
+    min-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+/* 메뉴 */
+.site-footer .footer-top {
+    height: 68px;
+    display: flex;
+    align-items: center;
+    gap: 42px;
+    white-space: nowrap;
+}
+
+/* 메뉴-정보 사이 선 */
+.site-footer .footer-divider {
+    width: 100%;
+    min-width: 1400px;
+    height: 1px;
+    background-color: #c9c9c9;
+}
+
+/* 메뉴 */
+.site-footer .footer-menu {
+    text-decoration: none;
+    color: #111;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* 회사 정보 */
+.site-footer .footer-bottom {
+    padding: 18px 0 22px;
+}
+
+/* 상호명 */
+.site-footer .company-name {
+    margin: 0 0 8px 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: #111;
+}
+
+/* 정보 */
+.site-footer .company-info {
+    margin: 0;
+    font-size: 12px;
+    color: #7a7a7a;
+    line-height: 1.45;
+}

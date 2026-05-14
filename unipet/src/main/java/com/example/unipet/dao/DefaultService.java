@@ -24,7 +24,7 @@ public class DefaultService {
 	//	User info = defaultMapper.selectUser();
 	// 수정, 삭제, 삽입 -> updateXXX, deleteXXX, insertXXX
 	//	int result = defaultMapper.updateXXX();
-	
+		
 	public HashMap<String, Object> getItem(HashMap<String, Object> map){
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 		try {
@@ -33,20 +33,16 @@ public class DefaultService {
 //			int result = defaultMapper.updateXXX(map);
 			
 //			resultMap.put("list", list);
-			resultMap.put("result", "success");
+			resultMap.put("result", true);
 			resultMap.put("message", Message.MSG_ADD);
 		} catch (Exception e) {
 			// TODO: handle exception
 			System.out.println(e.getMessage());
-			resultMap.put("result", "fail");
+			resultMap.put("result", false);
 			resultMap.put("message", Message.MSG_SERVER_ERR);
 		}
 		return resultMap;
 	}
-	
-	
-	
-	
 
 	
 }

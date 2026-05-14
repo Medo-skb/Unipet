@@ -1,0 +1,375 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.example.unipet.mapper.PaymentMapper">
+	<!-- 한개 검색 -->
+	<select id="selectRsvPayment" resultType="com.example.unipet.model.Payment">
+        SELECT 
+            r.RSV_NO,        
+            r.RSV_DATE,
+            r.RSV_START_TIME,      
+            r.RSV_END_TIME,      
+            r.REQUEST,
+            r.RSV_STATUS,    
+
+            s.STORE_NAME,    
+ 
+            m.MENU_NAME, 
+            m.MENU_PRICE, 
+            m.M_STATUS, 
+
+			u.user_id, 
+            u.USER_NAME, 
+            u.PHONE,
+            u.email          
+            
+        FROM reservation r
+        INNER JOIN store s ON r.STORE_NO = s.STORE_NO
+        INNER JOIN store_menu m ON r.MENU_NO = m.MENU_NO
+        INNER JOIN users u ON r.USER_ID = u.USER_ID
+        WHERE r.RSV_NO = #{rsvNo}
+    </select>
+    
+    <select id="selectUser" parameterType="hashmap" resultType="com.example.unipet.model.Payment">
+        SELECT 
+            USER_ID,
+            USER_NAME,
+            PHONE,
+            email,
+            user_addr,
+            full_addr
+		FROM USERS 
+        WHERE USER_ID = #{userId}
+    </select>
+	
+	<select id="selectSubStatus" parameterType="String" resultType="int">
+	    SELECT COUNT(*)
+	    FROM subscription
+	    WHERE USER_ID = #{userId}
+	      AND sub_STATUS = 'Y'
+	</select>
+    
+     <select id="selectTodaySub" resultType="hashmap">
+	    SELECT 
+	        s.SUB_NO,
+	        s.USER_ID,
+	        s.SUB_PRICE,
+	        s.METHOD_NO,
+	        pm.BILLINGKEY  
+	        FROM subscription s
+	    JOIN payment_method pm ON s.METHOD_NO = pm.METHOD_NO
+	    WHERE s.SUB_STATUS = 'Y'
+	    AND s.IS_AUTO = 'Y'   
+	    AND DATE(s.N_DATE) = CURDATE()
+     </select>
+     
+	<select id="selectProductList" resultType="hashmap">
+	    SELECT 
+	        c.CART_NO,
+	        p.PRODUCT_NO,
+	        p.PRODUCT_NAME,
+	        p.PRODUCT_PRICE,
+	        c.QTY
+	    FROM cart c
+	    JOIN product p ON c.PRODUCT_NO = p.PRODUCT_NO
+	    WHERE c.USER_ID = #{userId}
+	      AND c.CART_NO IN 
+	      <foreach collection="list" item="id" open="(" separator="," close=")">
+	          #{id}
+	      </foreach>
+	</select>
+	
+	<select id="selectCoupon" resultType="com.example.unipet.model.Coupon">
+	    SELECT 
+	        uc.UCP_NO,
+	        c.COUPON_NO,
+	        c.COUPON_NAME,
+	        c.DEDUCEPRICE,
+	        uc.EXP_DATE
+	    FROM user_coupon uc
+	    JOIN coupon c ON uc.COUPON_NO = c.COUPON_NO
+	    WHERE uc.USER_ID = #{userId}
+	      AND uc.CP_STATUS = 'RDY'
+	      AND uc.EXP_DATE >= NOW()
+	</select>
+	
+	<select id="selectUserPoint" resultType="int">
+	    SELECT 
+	        COALESCE(SUM(POINT_AMOUNT), 0) FROM user_point
+	    WHERE USER_ID = #{userId}
+	</select>
+	
+	<select id="selectOrderDetail" parameterType="hashmap" resultType="com.example.unipet.model.Order">
+	    SELECT 
+	        d.PRODUCT_NO, 
+	        p.PRODUCT_NAME,
+	        f.FILE_PATH, 
+	        f.FILE_NAME,  
+	        d.UNIT_PRICE, 
+	        d.ORD_QTY
+	    FROM order_detail d
+	    JOIN product p ON d.PRODUCT_NO = p.PRODUCT_NO
+	    LEFT JOIN product_file f ON p.PRODUCT_NO = f.PRODUCT_NO 
+	                                AND f.IS_MAIN = 'Y'
+	    WHERE 
+	        d.ORD_NO = #{id}  
+	</select>
+	
+	<select id="selectOrderMaster" parameterType="hashmap" resultType="com.example.unipet.model.Order">
+	    SELECT 
+	        ORD_NO, 
+	        ORD_ADDR, 
+	        ORD_MEMO, 
+	        TOTAL_PRICE, 
+	        ORD_DATE,
+	        DIS_PRICE
+	    FROM orders
+	    WHERE 
+	        ORD_NO = #{id}
+	</select>
+	
+	<select id="selectReservation" parameterType="hashmap" resultType="com.example.unipet.model.Order">
+	    SELECT 
+	        r.RSV_NO,          
+	        r.RSV_DATE,        
+	        r.RSV_START_TIME,
+	        r.RSV_END_TIME,
+	        s.STORE_NAME,      
+	        m.MENU_NAME,       
+	        m.MENU_PRICE,                      
+	        r.REQUEST     
+	    FROM reservation r
+	    JOIN store s      ON r.STORE_NO = s.STORE_NO
+	    JOIN store_menu m ON r.MENU_NO = m.MENU_NO
+	    WHERE r.RSV_NO = #{id}
+	</select>
+	
+	<select id="selectRsvDetail" parameterType="hashmap" resultType="hashmap">
+	    SELECT 
+	    	pm.PAY_NO		   AS payNo,
+	        pm.RSV_NO          AS rsvNo,
+	        pm.TID             AS tid,            
+	        pm.TOTALPRICE      AS totalPrice,     
+	        pm.PAY_STATUS      AS payStatus,      
+	        pm.ORD_NAME        AS ordName,        
+	
+	        r.RSV_DATE         AS rsvDate,     
+	        r.SLOT_NO		   AS slotNo,   
+	        r.RSV_START_TIME   AS startTime,      
+	        r.RSV_END_TIME     AS endTime,        
+	        r.RSV_STATUS       AS rsvStatus,      
+	        r.REQUEST          AS request,        
+	
+	        s.STORE_NAME       AS storeName,      
+	        s.S_ADDR           AS storeAddr,      
+	        m.MENU_NAME        AS menuName,       
+	        m.MENU_PRICE       AS menuPrice
+	    FROM 
+	        payment_master pm
+	    INNER JOIN 
+	        reservation r   ON pm.RSV_NO = r.RSV_NO
+	    LEFT JOIN 
+	        store s         ON r.STORE_NO = s.STORE_NO
+	    LEFT JOIN 
+	        store_menu m    ON r.MENU_NO = m.MENU_NO
+	    WHERE 
+	        pm.RSV_NO = #{rsvNo}
+	        AND pm.PAY_STATUS = 'PAY'
+	</select>
+    
+	<insert id="insertPayment" parameterType="hashmap">
+	    INSERT INTO payment_master (
+	        USER_ID,      
+	        METHOD_NO,  
+	        RSV_NO,   
+	        ORD_NO,        
+	        SUB_NO,    
+	        ORD_NAME,      
+	        TOTALPRICE,   
+	        TID,        
+	        PAY_STATUS,  
+	        PAY_DATE       
+	    ) VALUES (
+	        #{userId}, 
+	        #{methodNo}, 
+	        #{rsvNo}, 
+	        #{ordNo}, 
+	        #{subNo}, 
+	        #{ordName}, 
+	        #{totalprice}, 
+	        #{tid}, 
+	        #{payStatus},
+	        NOW()
+	    )
+	</insert>
+    
+    <insert id="insertSub" parameterType="hashmap" useGeneratedKeys="true" keyProperty="subNo">
+	    INSERT INTO subscription (
+	        USER_ID, 
+	        METHOD_NO, 
+	        S_DATE, 
+	        E_DATE, 
+	        N_DATE, 
+	        SUB_PRICE, 
+	        SUB_STATUS, 
+	        IS_AUTO 
+	    ) VALUES (
+	        #{userId},  
+	        #{methodNo},  
+	        NOW(), 
+	        DATE_ADD(NOW(), INTERVAL 1 MONTH), 
+	        DATE_ADD(NOW(), INTERVAL 1 MONTH), 
+	        #{totalprice}, 
+	        'Y',         
+	        'Y'
+   	 )
+	</insert>
+	
+	<insert id="insertPaymentMethod" parameterType="hashmap" useGeneratedKeys="true" keyProperty="methodNo">
+	    INSERT INTO payment_method (
+			USER_ID, 
+			PM_NAME, 
+			BILLINGKEY, 
+			IS_DEFAULT
+		) VALUES (
+			#{userId}, 
+			#{pmName}, 
+			#{billingKey}, 
+			'Y')
+	</insert>
+	
+	<insert id="insertPoint" useGeneratedKeys="true" keyProperty="pointNo" keyColumn="POINT_NO">
+	    INSERT INTO user_point (
+	        USER_ID, 
+	        POINT_AMOUNT,
+	        CDATE
+	    ) VALUES (
+	        #{userId}, 
+	        -#{usedPoint},
+	        NOW()
+	    )
+	</insert>
+	
+	<update id="updatePoint" parameterType="hashmap">
+    UPDATE user_point 
+    SET 
+        ORD_NO = #{ordNo} 
+    WHERE 
+        POINT_NO = #{pointNo} 
+    </update>
+
+	<insert id="insertOrder" useGeneratedKeys="true" keyProperty="ordNo" keyColumn="ORD_NO">
+	    INSERT INTO orders (
+	        USER_ID, 
+	        COUPON_NO, 
+	        POINT_NO,    
+	        DIS_PRICE, 
+	        TOTAL_PRICE, 
+	        ORD_ADDR, 
+	        ORD_MEMO,
+	        ORD_STATUS,
+	        DELI_STATUS
+	    ) VALUES (
+	        #{userId}, 
+	        #{couponNo}, 
+	        #{pointNo},  
+	        #{discountPrice}, 
+	        #{totalprice}, 
+	        #{ordAddr}, 
+	        #{memo},
+	        'PAY',
+	        'RDY'
+	    )
+	</insert>
+	
+	<insert id="insertOrderDetail" parameterType="hashmap">
+	    INSERT INTO order_detail (
+			ORD_NO,       
+			PRODUCT_NO,    
+			ORD_QTY,       
+			UNIT_PRICE     
+		) VALUES (
+			#{ordNo},
+			#{PRODUCT_NO},
+			#{QTY},
+			#{PRODUCT_PRICE}
+	    )
+	</insert>
+
+    <update id="updateRsvStatus" parameterType="hashmap">
+        UPDATE reservation
+        SET 
+            RSV_STATUS = 'CNF'
+        WHERE 
+            RSV_NO = #{rsvNo}
+    </update>
+    
+    <update id="updateSub" parameterType="hashmap">
+	    UPDATE subscription
+	    SET 
+	        S_DATE = NOW(),   
+	        E_DATE = DATE_ADD(NOW(), INTERVAL 1 MONTH),    
+	        N_DATE = DATE_ADD(NOW(), INTERVAL 1 MONTH)
+	        WHERE SUB_NO = #{subNo}
+	</update>
+   
+	<update id="updateCouponStatus" parameterType="hashmap">
+	    UPDATE user_coupon 
+	    SET 
+	    	CP_STATUS = 'USE',      
+	        USE_DATE = NOW()        
+	    WHERE 
+	        UCP_NO = #{ucpNo}       
+	        AND USER_ID = #{userId} 
+    </update> 
+    
+    <update id="updateStock" parameterType="hashmap">
+	    UPDATE product
+	    SET 
+	        STOCK_QTY = STOCK_QTY - #{QTY}
+	    WHERE 
+	        PRODUCT_NO = #{PRODUCT_NO}
+	        AND STOCK_QTY >= #{QTY}
+	</update>
+    
+    <delete id="deleteCart" parameterType="hashmap">
+    	DELETE FROM cart 
+    	WHERE 
+    		CART_NO = #{CART_NO}      
+        	AND USER_ID = #{userId}   
+    </delete>
+    
+    <select id="selectPaymentInfo" parameterType="hashmap" resultType="hashmap">
+        SELECT 
+            TID AS IMP_UID, 
+            TOTALPRICE AS AMOUNT, 
+            PAY_STATUS 
+        FROM payment_master 
+        WHERE ORD_NO = #{ordNo}
+    </select>
+
+    <update id="updateOrderCancelStatus" parameterType="hashmap">
+        UPDATE orders 
+        SET ORD_STATUS = 'CAN'  WHERE ORD_NO = #{ordNo}
+    </update>
+
+    <update id="updatePaymentStatus" parameterType="hashmap">
+        UPDATE payment_master 
+        SET PAY_STATUS = 'REF' 
+        WHERE PAY_NO = #{payNo}
+    </update>
+
+    <update id="updateStockRestore" parameterType="hashmap">
+        UPDATE product p
+        JOIN order_detail od ON p.PRODUCT_NO = od.PRODUCT_NO
+        SET p.STOCK_QTY = p.STOCK_QTY + od.ORD_QTY
+        WHERE od.ORD_NO = #{ordNo}
+    </update>
+    
+    <update id="updateReservationCancel" parameterType="hashmap">
+	    UPDATE reservation 
+	    SET RSV_STATUS = 'CAN' 
+	    WHERE RSV_NO = #{rsvNo}
+	</update>
+    
+</mapper>

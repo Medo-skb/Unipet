@@ -1,0 +1,86 @@
+.verify-page {
+    min-height: 520px;
+    padding: 190px 0 255px;
+    box-sizing: border-box;
+}
+
+.verify-wrap {
+    width: 520px;
+    margin: 0 auto;
+    padding: 42px 36px 56px;
+    background: var(--box-bg);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    box-sizing: border-box;
+}
+
+.verify-wrap h2 {
+    margin: 0 0 36px;
+    text-align: center;
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.desc {
+    display: none;
+}
+
+.input-button-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.input-button-row input {
+    flex: 1;
+    min-width: 0;
+}
+
+.input-button-row button {
+    width: 120px;
+    flex-shrink: 0;
+}
+
+input {
+    height: 48px;
+    padding: 0 16px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-sizing: border-box;
+    font-size: 14px;
+    color: var(--text-main);
+    outline: none;
+    background: var(--bg);
+}
+
+input::placeholder {
+    color: var(--text-light);
+}
+
+input:focus {
+    border-color: var(--main);
+}
+
+button {
+    height: 48px;
+    border: 1px solid var(--main);
+    border-radius: 12px;
+    background: var(--box-bg);
+    color: var(--main);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+    white-space: nowrap;
+}
+
+button:hover {
+    background: var(--main);
+    color: var(--bg);
+}
+
+#codeBox {
+    display: none;
+}

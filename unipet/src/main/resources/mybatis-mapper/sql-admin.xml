@@ -1,0 +1,308 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.unipet.mapper.AdminMapper">
+
+	<!-- 관리자 로그인 -->
+	<select id="selectAdminLogin" parameterType="hashmap"
+		resultType="com.example.unipet.model.Admin">
+		SELECT
+		ADMIN_ID AS adminId,
+		ADMIN_PWD AS adminPwd
+		FROM TBL_ADMIN
+		WHERE ADMIN_ID = #{adminId}
+		AND ADMIN_PWD = #{adminPwd}
+	</select>
+	
+	<!-- 쇼핑몰 문의 미답변 목록 -->
+	<select id="selectQnaAnswerList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+		SELECT
+		    Q.QNA_NO AS qnaNo,
+		    Q.PRODUCT_NO AS productNo,
+		    P.PRODUCT_NAME AS productName,
+		    Q.QNA_TITLE AS qnaTitle,
+		    Q.Q_CONTENTS AS qContents,
+		    Q.IS_SECRET AS isSecret,
+		    Q.ANS_STATUS AS ansStatus,
+		
+		    Q.USER_ID AS userId,
+		    Q.CDATE AS cdate,
+		
+		    U.USER_NAME AS userName,
+		    U.NICKNAME AS nickname
+		
+		FROM QNA Q
+		LEFT JOIN PRODUCT P
+		    ON Q.PRODUCT_NO = P.PRODUCT_NO
+		
+		LEFT JOIN USERS U
+		    ON Q.USER_ID = U.USER_ID
+		
+		WHERE Q.ANS_STATUS = 'N'
+		ORDER BY Q.QNA_NO DESC
+	</select>
+	
+	<!-- 쇼핑몰 문의 답변 등록 -->
+	<update id="updateQnaAnswer" parameterType="hashmap">
+	    UPDATE QNA
+	    SET A_CONTENTS = #{aContents},
+	        ANS_STATUS = 'Y'
+	    WHERE QNA_NO = #{qnaNo}
+	</update>
+	
+	<!-- 쇼핑몰 문의 삭제 -->
+	<delete id="deleteQna" parameterType="hashmap">
+	    DELETE FROM QNA
+	    WHERE QNA_NO = #{qnaNo}
+	</delete>
+
+	<!-- 사업자 승인 리스트 -->
+	<select id="selectAdminBiz" parameterType="hashmap"
+		resultType="com.example.unipet.model.Admin">
+		SELECT
+		S.STORE_NO,
+		SU.S_USER_ID,
+		SU.U_STATUS,
+		S.STORE_NAME,
+		S.S_CATEGORY,
+		S.S_ADDR,
+		S.S_FULL_ADDR,
+		S.S_STATUS,
+		SF.FILE_PATH,
+		SF.FILE_NAME,
+		SF.ORIGIN_NAME
+		FROM STORE S
+		LEFT JOIN STORE_USER SU ON S.S_USER_ID = SU.S_USER_ID
+		LEFT JOIN STORE_FILE SF
+		ON S.STORE_NO = SF.STORE_NO
+		AND SF.IS_PROOF = 'Y'
+		WHERE SU.U_STATUS = 'PND'
+   			AND S.S_STATUS = 'PND';
+	</select>
+	
+	<!-- 사업자 승인 -->
+	<update id="updateBizStatusApr" parameterType="hashmap">
+		UPDATE STORE S
+		JOIN STORE_USER SU ON S.S_USER_ID = SU.S_USER_ID
+		SET
+		S.S_STATUS = 'GEN',
+		SU.U_STATUS = 'APR'
+		WHERE S.STORE_NO = #{storeNo}
+		AND SU.S_USER_ID = #{sUserId};
+	</update>
+
+	<!-- 사업자 승인하면서 부가적인 데이터 생성 -->
+	<insert id="insertDefaultStoreDetail" parameterType="hashmap">
+		INSERT INTO STORE_DETAIL (
+		STORE_NO,
+		SUB_TITLE,
+		S_CONTENTS
+		)
+		VALUES (
+		#{storeNo},
+		'소개 소제목을 입력해주세요.',
+		'소개글을 작성해주세요.'
+		)
+	</insert>
+
+	<insert id="insertDefaultStorePolicy" parameterType="hashmap">
+		INSERT INTO STORE_POLICY (
+		STORE_NO,
+		REFUND_POLICY
+		)
+		VALUES (
+		#{storeNo},
+		NULL
+		)
+	</insert>
+
+	<!-- 사업자 비승인 -->
+	<update id="updateBizStatusRej" parameterType="hashmap">
+		UPDATE STORE S
+		JOIN STORE_USER SU ON S.S_USER_ID = SU.S_USER_ID
+		SET
+		S.S_STATUS = 'REJ',
+		S.REJ_REASON = #{rejReason},
+		SU.U_STATUS = 'REJ'
+		WHERE S.STORE_NO = #{storeNo}
+		AND SU.S_USER_ID = #{sUserId}
+	</update>
+
+	<!-- 상품 리뷰 신고 -->
+	<select id="selectProductReviewReportList" parameterType="hashmap"
+		resultType="com.example.unipet.model.Admin">
+		SELECT
+		RR.REPORT_NO AS reportNo,
+		RR.REVIEW_NO AS reviewNo,
+		R.USER_ID AS userId,
+		RR.REPORTER_ID AS reporterId,
+		RR.REP_STATUS AS repStatus,
+		R.R_CONTENTS AS rContents,
+		(
+		SELECT RF.FILE_PATH
+		FROM REVIEW_FILE RF
+		WHERE RF.REVIEW_NO = R.REVIEW_NO
+		LIMIT 1
+		) AS filePath,
+		P.PRODUCT_NAME AS productName,
+		R.ORD_NO AS ordNo
+		FROM REVIEW_REPORT RR
+		INNER JOIN REVIEW R
+		ON RR.REVIEW_NO = R.REVIEW_NO
+		LEFT JOIN PRODUCT P
+		ON R.PRODUCT_NO = P.PRODUCT_NO
+		WHERE R.STORE_NO IS NULL
+		AND R.RSV_NO IS NULL
+		AND RR.REP_STATUS = 'WAI'
+		ORDER BY RR.REPORT_NO DESC;
+	</select>
+
+	<!-- 예약 리뷰 신고 -->
+	<select id="selectReservationReviewReportList" parameterType="hashmap"
+		resultType="com.example.unipet.model.Admin">
+		SELECT
+		RR.REPORT_REASON AS reportReason,
+		RR.REPORT_NO AS reportNo,
+		RR.REVIEW_NO AS reviewNo,
+		R.USER_ID AS userId,
+		RR.REPORTER_ID AS reporterId,
+		RR.REP_STATUS AS repStatus,
+		R.R_CONTENTS AS rContents,
+		(
+		SELECT RF.FILE_PATH
+		FROM REVIEW_FILE RF
+		WHERE RF.REVIEW_NO = R.REVIEW_NO
+		LIMIT 1
+		) AS filePath,
+		S.STORE_NAME AS storeName,
+		R.RSV_NO AS rsvNo
+		FROM REVIEW_REPORT RR
+		INNER JOIN REVIEW R
+		ON RR.REVIEW_NO = R.REVIEW_NO
+		LEFT JOIN STORE S
+		ON R.STORE_NO = S.STORE_NO
+		WHERE R.PRODUCT_NO IS NULL
+		AND R.ORD_NO IS NULL
+		AND RR.REP_STATUS = 'WAI'
+		ORDER BY RR.REPORT_NO DESC;
+	</select>
+
+	<!-- 리뷰 신고 반려 -->
+	<update id="updateReportStatusReject">
+		UPDATE REVIEW_REPORT
+		SET REP_STATUS = 'REJ'
+		WHERE REPORT_NO = #{reportNo}
+	</update>
+
+	<!-- 리뷰 신고 승인 -->
+	<update id="updateReportStatusApprove" parameterType="map">
+		UPDATE REVIEW_REPORT
+		SET REP_STATUS = 'ACC'
+		WHERE REPORT_NO = #{reportNo}
+	</update>
+
+	<!-- 리뷰 파일 존재 여부 확인 -->
+	<select id="selectReviewFileCount" parameterType="map" resultType="int">
+		SELECT COUNT(*)
+		FROM REVIEW_FILE
+		WHERE REVIEW_NO = #{reviewNo}
+	</select>
+
+	<!-- 리뷰 파일 삭제 -->
+	<delete id="deleteReviewFile" parameterType="map">
+		DELETE FROM REVIEW_FILE
+		WHERE REVIEW_NO = #{reviewNo}
+	</delete>
+
+	<!-- 리뷰 신고 승인 리뷰 삭제 -->
+	<delete id="deleteReview" parameterType="map">
+		DELETE FROM REVIEW
+		WHERE REVIEW_NO = #{reviewNo}
+	</delete>
+
+	<!-- 커뮤니티 글 신고 리스트 -->
+	<select id="selectCommunityPostReportList" parameterType="hashmap"
+		resultType="com.example.unipet.model.Admin">
+		SELECT
+		BR.REPORT_NO AS reportNo,
+		BR.BOARD_NO AS targetNo,
+		BR.REPORTER_ID AS reporterId,
+		B.USER_ID AS reportedUserId,
+		BR.REPORT_REASON AS reportReason,
+		BR.REP_STATUS AS repStatus,
+		(
+		SELECT BF.FILE_PATH
+		FROM BOARD_FILE BF
+		WHERE BF.BOARD_NO = BR.BOARD_NO
+		ORDER BY BF.FILE_NO ASC
+		LIMIT 1
+		) AS filePath
+		FROM BOARD_REPORT BR
+		INNER JOIN BOARD B
+		ON BR.BOARD_NO = B.BOARD_NO
+		WHERE BR.REP_STATUS = 'WAI'
+		ORDER BY BR.REPORT_NO DESC
+	</select>
+
+	<!-- 커뮤니티 댓글 신고 리스트 -->
+	<select id="selectCommunityCommentReportList" parameterType="hashmap"
+		resultType="com.example.unipet.model.Admin">
+		SELECT
+		BR.REPORT_NO AS reportNo,
+		BR.COMMENT_NO AS targetNo,
+		BR.REPORTER_ID AS reporterId,
+		BR.REPORT_REASON AS reportReason,
+		BR.REP_STATUS AS repStatus,
+		C.USER_ID AS reportedUserId,
+		C.C_CONTENT AS contents,
+		B.BOARD_NO AS boardNo,
+		B.TITLE AS title
+		FROM BOARD_REPORT BR
+		LEFT JOIN COMMENT C
+		ON C.COMMENT_NO = BR.COMMENT_NO
+		LEFT JOIN BOARD B
+		ON C.BOARD_NO = B.BOARD_NO
+		WHERE BR.REP_STATUS = 'WAI'
+		AND BR.COMMENT_NO IS NOT NULL
+		ORDER BY BR.REPORT_NO DESC
+	</select>
+
+	<!-- 커뮤니티 신고 반려 -->
+	<update id="updateCommunityReportStatusReject" parameterType="map">
+		UPDATE BOARD_REPORT
+		SET REP_STATUS = 'REJ'
+		WHERE REPORT_NO = #{reportNo}
+	</update>
+
+	<!-- 커뮤니티 신고 승인 -->
+	<update id="updateCommunityReportStatusApprove" parameterType="map">
+		UPDATE BOARD_REPORT
+		SET REP_STATUS = 'ACC'
+		WHERE REPORT_NO = #{reportNo}
+	</update>
+
+	<!-- 커뮤니티 글 파일 삭제 -->
+	<delete id="deleteBoardFile" parameterType="map">
+		DELETE FROM BOARD_FILE
+		WHERE BOARD_NO = #{targetNo}
+	</delete>
+
+	<!-- 커뮤니티 글 삭제 -->
+	<delete id="deleteBoard" parameterType="map">
+		DELETE FROM BOARD
+		WHERE BOARD_NO = #{targetNo}
+	</delete>
+
+	<!-- 커뮤니티 댓글 삭제 -->
+	<delete id="deleteBoardComment" parameterType="map">
+		DELETE FROM COMMENT
+		WHERE COMMENT_NO = #{targetNo}
+	</delete>
+
+	<!-- 밴 할건지 선택 -->
+	<update id="updateUserStatusBan">
+		UPDATE USERS
+		SET USER_STATUS = 'BAN'
+		WHERE USER_ID = #{reportedUserId}
+	</update>
+
+</mapper>

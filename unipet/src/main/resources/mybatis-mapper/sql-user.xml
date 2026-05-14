@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.unipet.mapper.UserMapper">
+
+	<!-- 사용자 아이디 중복체크 -->
+	<select id="checkUser" parameterType="hashmap" resultType="int">
+	    SELECT (
+	        (SELECT COUNT(*) FROM users WHERE USER_ID = #{userId}) +
+	        (SELECT COUNT(*) FROM tbl_admin WHERE ADMIN_ID = #{userId}) +
+	        (SELECT COUNT(*) FROM store_user WHERE S_USER_ID = #{userId})
+	    ) AS totalCount
+	</select>
+
+	<!-- 휴대폰 중복체크 -->
+	<select id="checkPhone" parameterType="hashmap" resultType="int">
+	    SELECT COUNT(*)
+	    FROM (
+	        SELECT PHONE FROM unipet.users
+	        UNION ALL
+	        SELECT PHONE FROM unipet.admin
+	        UNION ALL
+	        SELECT PHONE FROM unipet.store_user
+	    ) AS all_phones
+	    WHERE PHONE = #{phone}
+	</select>
+
+	<!-- 사용자 회원가입 -->
+	<insert id="insertUser" parameterType="hashmap">
+		INSERT INTO unipet.users (
+			USER_ID,
+			USER_PWD,
+			USER_NAME,
+			NICKNAME,
+			PHONE,
+			EMAIL,
+			USER_ADDR,
+			FULL_ADDR,
+			ZIPCODE,
+			ROLE,
+			CDATE
+		) VALUES (
+			#{userId},
+			#{pwd},
+			#{userName},
+			#{nickname},
+			#{phone},
+			#{email},
+			#{userAddr},
+			#{fullAddr},
+			#{zipcode},
+			'USER',
+			NOW()
+		)
+	</insert>
+
+	<!-- 사업자 회원가입 -->
+	<insert id="insertBizUser" parameterType="hashmap">
+		INSERT INTO unipet.store_user (
+			S_USER_ID,
+			S_USER_PWD,
+			CEO_NAME,
+			BIZ_FILE_NAME,
+			U_STATUS
+		) VALUES (
+		#{userId},
+			#{pwd},
+			#{userName},
+			#{bizFileName},
+			'PND'
+		)
+	</insert>
+
+
+	<!-- 사용자 로그인 -->
+	<select id="selectUser" parameterType="hashmap"
+		resultType="com.example.unipet.model.User">
+		SELECT
+			USER_ID AS userId,
+			USER_PWD AS pwd,
+			USER_NAME AS userName,
+			NICKNAME AS nickname,
+			PHONE,
+			EMAIL,
+			USER_ADDR AS userAddr,
+			FULL_ADDR AS fullAddr,
+			ZIPCODE,
+			ROLE,
+			USER_STATUS AS userStatus
+		FROM unipet.users
+		WHERE USER_ID = #{userId}
+	</select>
+
+
+	<!-- 사업자 로그인 -->
+	<select id="selectStoreUser" parameterType="hashmap"
+		resultType="com.example.unipet.model.User">
+		SELECT 
+		    SU.S_USER_ID AS userId,
+		    SU.S_USER_PWD AS pwd,
+		    SU.CEO_NAME AS userName,
+		    SU.U_STATUS AS status,
+		    S.S_STATUS AS storeStatus,
+		    'BIZ' AS role
+		FROM unipet.store_user SU
+		LEFT JOIN unipet.store S 
+		    ON SU.S_USER_ID = S.S_USER_ID
+		WHERE SU.S_USER_ID = #{userId}
+		AND SU.U_STATUS NOT IN ('BAN', 'EXT')
+	</select>
+	
+	<!-- 사업자 아이디 찾기 -->
+	<select id="findBizId" parameterType="hashmap"
+		resultType="com.example.unipet.model.User">
+		SELECT
+		S_USER_ID AS userId,
+		CEO_NAME AS userName
+		FROM unipet.store_user
+		WHERE CEO_NAME = #{userName}
+		AND S_USER_PWD = #{pwd}
+		AND U_STATUS NOT IN ('BAN', 'EXT')
+	</select>
+
+
+	<!-- 사용자아이디 찾기 -->
+	<select id="findId" parameterType="hashmap" resultType="com.example.unipet.model.User">
+		SELECT
+	        USER_ID AS userId,
+	        USER_NAME AS userName
+	    FROM unipet.users
+	    WHERE USER_NAME = #{userName}
+	      AND PHONE = #{phone}  LIMIT 1
+	</select>
+
+	<!-- 비밀번호 재설정 대상 확인 -->
+	<select id="checkUserForReset" parameterType="hashmap"
+		resultType="com.example.unipet.model.User">
+		SELECT
+		USER_ID AS userId,
+		USER_NAME AS userName,
+		PHONE
+		FROM unipet.users
+		WHERE TRIM(USER_ID) = TRIM(#{userId})
+	</select>
+
+
+	<!-- 비밀번호 변경 -->
+	<update id="resetPwd" parameterType="hashmap">
+		UPDATE unipet.users
+		SET USER_PWD = #{pwd}
+		WHERE USER_ID = #{userId}
+	</update>
+
+
+	<!-- 소셜 로그인 조회 -->
+	<select id="selectSocialUser" parameterType="hashmap"
+		resultType="com.example.unipet.model.User">
+		SELECT
+		USER_ID AS userId,
+		USER_NAME AS userName,
+		NICKNAME AS nickname,
+		PHONE AS phone,
+		EMAIL AS email,
+		SOCIALTYPE AS socialType,
+		ROLE AS role
+		FROM unipet.users
+		WHERE USER_ID = #{userId}
+	</select>
+	<!-- 소셜 회원가입 -->
+	<insert id="insertSocialUser" parameterType="hashmap">
+		INSERT INTO unipet.users (
+		USER_ID,
+		USER_PWD,
+		USER_NAME,
+		NICKNAME,
+		EMAIL,
+		SOCIALTYPE,
+		ROLE,
+		CDATE
+		) VALUES (
+		#{userId},
+		#{userId},
+		#{userName},
+		#{nickname},
+		#{email},
+		#{socialType},
+		'USER',
+		NOW()
+		)
+	</insert>
+	<update id="updatePhone" parameterType="hashmap">
+		UPDATE unipet.users
+		SET PHONE = #{phone}
+		WHERE USER_ID = #{userId}
+	</update>
+
+	<!-- 휴대폰 인증번호 저장 -->
+	<insert id="insertPhoneVerify" parameterType="hashmap">
+		INSERT INTO unipet.phone_verify (
+		PHONE,
+		CODE,
+		EXPIRE_TIME
+		) VALUES (
+		#{phone},
+		#{code},
+		DATE_ADD(NOW(), INTERVAL 3 MINUTE)
+		)
+	</insert>
+
+	<!-- 최신 휴대폰 인증번호 조회 -->
+	<select id="selectLatestPhoneVerify" parameterType="hashmap"
+		resultType="hashmap">
+		SELECT
+		VERIFY_NO AS verifyNo,
+		PHONE AS phone,
+		CODE AS code,
+		EXPIRE_TIME AS expireTime,
+		VERIFIED_YN AS verifiedYn
+		FROM unipet.phone_verify
+		WHERE PHONE = #{phone}
+		ORDER BY VERIFY_NO DESC
+		LIMIT 1
+	</select>
+
+	<!-- 휴대폰 인증 완료 처리 -->
+	<update id="updatePhoneVerified" parameterType="hashmap">
+		UPDATE unipet.phone_verify
+		SET VERIFIED_YN = 'Y'
+		WHERE VERIFY_NO = #{verifyNo}
+	</update>
+	<!-- 매장 등록 후 생성된 STORE_NO 조회 -->
+	<select id="selectStoreNoByUserId" parameterType="hashmap" resultType="int">
+		SELECT STORE_NO
+		FROM unipet.store
+		WHERE S_USER_ID = #{userId}
+		ORDER BY STORE_NO DESC
+		LIMIT 1
+	</select>
+	<!-- 매장 정보 저장 -->
+	<insert id="insertStore"> INSERT INTO unipet.store ( S_USER_ID, STORE_NAME,
+		S_CATEGORY, S_ADDR, S_FULL_ADDR, LAT, LNG, S_STATUS, IS_OPEN <!-- 🔥 추가 --> ) VALUES (
+		#{userId}, #{storeName}, #{sCategory}, #{sAddr}, #{sFullAddr}, #{lat},
+		#{lng}, #{sStatus}, 'Y' <!-- 🔥 추가 --> ) </insert>
+
+
+	<!-- 사업자등록증 파일 저장 -->
+	<insert id="insertStoreFile" parameterType="hashmap">
+		INSERT INTO unipet.store_file (
+		STORE_NO,
+		FILE_NAME,
+		ORIGIN_NAME,
+		FILE_PATH,
+		FILE_EXT,
+		FILE_SIZE,
+		IS_MAIN,
+		IS_PROOF
+		) VALUES (
+		#{storeNo},
+		#{fileName},
+		#{originName},
+		#{filePath},
+		#{fileExt},
+		#{fileSize},
+		'N',
+		'Y'
+		)
+	</insert>
+
+	<select id="selectUserCheckCount" parameterType="hashmap" resultType="int">
+	    SELECT COUNT(*)
+	    FROM unipet.users
+	    WHERE USER_ID = #{userId} 
+	      AND PHONE = #{phone}
+	</select>
+	
+	<update id="updateSms" parameterType="hashmap">
+	    UPDATE users
+	    SET 
+	        phone = #{phone}	
+	    WHERE 
+	        user_id = #{userId}
+	</update>
+
+</mapper>
