@@ -281,9 +281,7 @@
 		    ACC_NO = #{accNo},
 		    ACC_HOLDER = #{accHolder},
 		    S_ADDR = #{sAddr},
-		    S_FULL_ADDR = #{sFullAddr},
-		    LAT = NULLIF(#{lat}, ''),
-		    LNG = NULLIF(#{lng}, '')
+		    S_FULL_ADDR = #{sFullAddr}
 		WHERE STORE_NO = #{storeNo}
 	</update>
 	
@@ -576,8 +574,6 @@
 			S.BIZNUM = #{biznum},
 			S.S_ADDR = #{sAddr},
 			S.S_FULL_ADDR = #{sFullAddr},
-			S.LAT = NULLIF(#{lat}, ''),
-			S.LNG = NULLIF(#{lng}, ''),
 			S.ACC_NAME = #{accName},
 			S.ACC_NO = #{accNo},
 			S.ACC_HOLDER = #{accHolder},
