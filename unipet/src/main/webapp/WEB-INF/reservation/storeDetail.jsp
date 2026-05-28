@@ -10,10 +10,11 @@
     <script src="/js/page-change.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=2198e0ed2782e12a610e46213693750e&libraries=services"></script>
+    
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoApiKey}&libraries=services"></script>
+    
     <title>UNIPET</title>
     <link href="/css/reservation/storeDetail.css" rel="stylesheet">
-    
 </head>
 <body>
     <jsp:include page="/WEB-INF/header/header.jsp" />
