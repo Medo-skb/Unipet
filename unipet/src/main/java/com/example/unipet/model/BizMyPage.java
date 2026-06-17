@@ -18,6 +18,9 @@ public class BizMyPage {
 	String sFullAddr;
 	String sStatus;
 	String rejReason;
+	Double lat;
+	Double lng;
+	
 	
 	// DETAIL
 	String subTitle;

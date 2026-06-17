@@ -15,9 +15,8 @@
 		    sf.FILE_PATH AS filePath,
 		    sf.FILE_NAME AS fileName
 		FROM STORE s
-		JOIN RESERVATION r 
+		LEFT JOIN RESERVATION r 
 		    ON s.STORE_NO = r.STORE_NO
-		   AND r.CDATE >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
 		
 		LEFT JOIN STORE_DETAIL sd
 		    ON s.STORE_NO = sd.STORE_NO
@@ -43,7 +42,6 @@
 		        FROM RESERVATION r
 		        JOIN STORE_MENU m
 		            ON r.MENU_NO = m.MENU_NO
-		        WHERE r.CDATE >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
 		        GROUP BY m.STORE_NO, m.MENU_NO, m.MENU_NAME
 		    ) x
 		    WHERE rn = 1

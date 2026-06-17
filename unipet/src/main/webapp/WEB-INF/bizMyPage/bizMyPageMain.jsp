@@ -78,6 +78,7 @@
                                 <div class="chart-summary">
                                     <div class="total-count">
                                         총 예약 <strong>{{ totalCount }}건</strong>
+                                        <div class="chart-guide-text">* 삭제된 메뉴는 표시되지 않습니다.</div>
                                     </div>
 
                                     <ul class="menu-rank">

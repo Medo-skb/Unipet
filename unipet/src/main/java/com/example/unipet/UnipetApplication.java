@@ -2,14 +2,18 @@ package com.example.unipet;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
 @SpringBootApplication
 //@EnableScheduling
-public class UnipetApplication {
-
+public class UnipetApplication extends SpringBootServletInitializer {
+	@Override
+    protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
+        return builder.sources(UnipetApplication.class);
+    }
+	
 	public static void main(String[] args) {
 		SpringApplication.run(UnipetApplication.class, args);
 	}
-
 }
