@@ -1,153 +1,392 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 
-    <!DOCTYPE html>
-    <html lang="ko">
+<!DOCTYPE html>
+<html lang="ko">
 
-    <head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UNIPET - 반려동물 관리</title>
 
-        <!-- 문자 인코딩 -->
-        <meta charset="UTF-8">
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="/js/page-change.js"></script>
 
-        <!-- 모바일 반응형 -->
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/header.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/footer.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/user/usermypage.css">
 
-        <title>UNIPET - 반려동물 관리</title>
+    <style>
+        [v-cloak] {
+            display: none;
+        }
 
-        <!-- jQuery -->
-        <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+        .main-badge {
+            display: inline-block;
+            margin-left: 10px;
+            padding: 4px 12px;
+            background: #ff5c7c;
+            color: #fff;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            vertical-align: middle;
+        }
 
-        <!-- Vue -->
-        <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+        .main-pet-card {
+            border: 2px solid #ff5c7c !important;
+            background: #fff8fa;
+        }
 
-        <!-- 공통 페이지 이동 -->
-        <script src="/js/page-change.js"></script>
+        .pet-profile-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 20px;
+        }
 
-        <!-- CSS -->
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/header.css">
+        .pet-profile-card {
+            display: flex;
+            align-items: stretch;
+            gap: 28px;
+            width: 100%;
+            padding: 28px;
+            border: 1px solid #eee;
+            border-radius: 22px;
+            background: #fff;
+            box-sizing: border-box;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+        }
 
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/footer.css">
+        .pet-profile-img-area {
+            width: 180px;
+            min-width: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fafafa;
+            border-radius: 20px;
+        }
 
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/user/usermypage.css">
+        .pet-profile-img {
+            width: 130px;
+            height: 130px;
+            border-radius: 24px;
+            overflow: hidden;
+            background: #fff;
+            border: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-        <style>
-            /* Vue 렌더링 전 숨김 */
-            [v-cloak] {
-                display: none;
+        .pet-profile-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .pet-profile-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .pet-profile-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 18px;
+        }
+
+        .pet-profile-name {
+            font-size: 26px;
+            font-weight: 800;
+            color: #222;
+        }
+
+        .pet-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px 24px;
+            margin-top: 12px;
+        }
+
+        .pet-info-item {
+            padding: 12px 14px;
+            background: #fafafa;
+            border-radius: 12px;
+            font-size: 14px;
+            color: #444;
+        }
+
+        .pet-info-label {
+            display: inline-block;
+            min-width: 76px;
+            color: #777;
+            font-weight: 700;
+        }
+
+        .pet-profile-btns {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 22px;
+            flex-wrap: wrap;
+        }
+
+        .pet-profile-btns button {
+            min-width: 82px;
+            height: 36px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-main {
+            background: #ff5c7c;
+            color: #fff;
+        }
+
+        .btn-main-gray {
+            background: #ddd;
+            color: #777;
+            cursor: default !important;
+        }
+
+        .btn-edit {
+            background: #333;
+            color: #fff;
+        }
+
+        .btn-delete {
+            background: #f44336;
+            color: #fff;
+        }
+
+        .modal-wrap {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .modal-box {
+            width: 520px;
+            max-width: 90%;
+            background: #fff;
+            border-radius: 18px;
+            padding: 26px;
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            margin-bottom: 14px;
+        }
+
+        .form-row label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .form-row input,
+        .form-row select {
+            width: 100%;
+            height: 42px;
+            padding: 0 12px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-sizing: border-box;
+        }
+
+        .check-row label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .check-row input {
+            width: auto;
+            height: auto;
+        }
+
+        .modal-btns {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 22px;
+        }
+
+        .modal-btns button {
+            min-width: 90px;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-cancel {
+            background: #eee;
+        }
+
+        .btn-save {
+            background: #ff5c7c;
+            color: #fff;
+        }
+
+        @media (max-width: 768px) {
+            .pet-profile-card {
+                flex-direction: column;
             }
-        </style>
 
-    </head>
+            .pet-profile-img-area {
+                width: 100%;
+                min-width: 0;
+                padding: 25px 0;
+            }
 
-    <body>
+            .pet-info-grid {
+                grid-template-columns: 1fr;
+            }
 
-        <!-- 헤더 -->
-        <jsp:include page="/WEB-INF/header/header.jsp" />
+            .pet-profile-top {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
 
-        <!-- Vue 영역 -->
-        <div id="app" class="user-page-wrap" v-cloak>
+<body>
 
-            <div class="user-page-container">
+<jsp:include page="/WEB-INF/header/header.jsp" />
 
-                <!-- 사이드바 -->
-                <jsp:include page="/WEB-INF/user/Mypage/sidebar.jsp" />
+<div id="app" class="user-page-wrap" v-cloak>
 
-                <!-- 본문 -->
-                <main class="user-content">
+    <div class="user-page-container">
 
-                    <!-- 제목 -->
-                    <div class="content-header">
+        <jsp:include page="/WEB-INF/user/Mypage/sidebar.jsp" />
 
-                        <h1>반려동물 관리</h1>
+        <main class="user-content">
 
+            <div class="content-header">
+                <h1>반려동물 관리</h1>
+            </div>
+
+            <div class="page-inner">
+
+                <div class="section-box">
+
+                    <div class="section-header">
+                        <div class="section-title" style="margin-bottom:0;">
+                            반려동물 프로필 관리
+                        </div>
+
+                        <button class="small-btn" @click="fnOpenAddPetModal">
+                            프로필 추가
+                        </button>
                     </div>
 
-                    <div class="page-inner">
+                    <div class="pet-profile-list">
 
-                        <div class="section-box">
+                        <div class="pet-profile-card"
+                             v-for="pet in petList"
+                             :key="pet.petNo || pet.PET_NO"
+                             :class="{'main-pet-card': (pet.isMain || pet.IS_MAIN) === 'Y'}">
 
-                            <!-- 상단 -->
-                            <div class="section-header">
+                            <div class="pet-profile-img-area">
+                                <div class="pet-profile-img">
+                                    <img :src="fnGetPetImage(pet)" alt="펫이미지">
+                                </div>
+                            </div>
 
-                                <div class="section-title" style="margin-bottom:0;">
+                            <div class="pet-profile-content">
 
-                                    반려동물 프로필 관리
+                                <div class="pet-profile-top">
+                                    <div class="pet-profile-name">
+                                        {{ pet.petName || pet.PET_NAME || '-' }}
+
+                                        <span v-if="(pet.isMain || pet.IS_MAIN) === 'Y'" class="main-badge">
+                                            대표동물
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="pet-info-grid">
+
+                                    <div class="pet-info-item">
+                                        <span class="pet-info-label">이름</span>
+                                        {{ pet.petName || pet.PET_NAME || '-' }}
+                                    </div>
+
+                                    <div class="pet-info-item">
+                                        <span class="pet-info-label">종류</span>
+                                        {{ pet.species || pet.SPECIES || '-' }}
+                                    </div>
+
+                                    <div class="pet-info-item">
+                                        <span class="pet-info-label">품종</span>
+                                        {{ pet.breed || pet.BREED || '-' }}
+                                    </div>
+
+                                    <div class="pet-info-item">
+                                        <span class="pet-info-label">성별</span>
+                                        {{ fnGenderText(pet.gender || pet.GENDER) }}
+                                    </div>
+
+                                    <div class="pet-info-item">
+                                        <span class="pet-info-label">생년월일</span>
+                                        {{ fnFormatDate(pet.birthdate || pet.BIRTHDATE) }}
+                                    </div>
+
+                                    <div class="pet-info-item">
+                                        <span class="pet-info-label">나이</span>
+                                        {{ fnGetPetAge(pet.birthdate || pet.BIRTHDATE) }}살
+                                    </div>
+
+                                    <div class="pet-info-item">
+                                        <span class="pet-info-label">대표여부</span>
+                                        {{ (pet.isMain || pet.IS_MAIN) === 'Y' ? '대표동물' : '일반' }}
+                                    </div>
 
                                 </div>
 
-                                <!-- 추가 버튼 -->
-                                <button class="small-btn" @click="fnOpenAddPetModal">
+                                <div class="pet-profile-btns">
 
-                                    프로필 추가
+                                    <button class="btn-main"
+                                            v-if="(pet.isMain || pet.IS_MAIN) !== 'Y'"
+                                            @click="fnChangeMainPet(pet.petNo || pet.PET_NO)">
+                                        대표설정
+                                    </button>
 
-                                </button>
+                                    <button class="btn-main-gray"
+                                            v-else
+                                            disabled>
+                                        대표동물
+                                    </button>
 
-                            </div>
+                                    <button class="btn-edit" @click="fnOpenEditPetModal(pet)">
+                                        수정
+                                    </button>
 
-                            <!-- 반려동물 목록 -->
-                            <div class="pet-list">
-
-                                <div class="pet-card" v-for="pet in petList" :key="pet.petNo || pet.PET_NO">
-
-                                    <!-- 프로필 이미지 -->
-                                    <div class="pet-thumb">
-
-                                        <div class="pet-avatar">
-
-                                            <img :src="fnGetPetImage(pet)" alt="펫이미지">
-
-                                        </div>
-
-                                    </div>
-
-                                    <!-- 프로필 내용 -->
-                                    <div class="pet-body">
-
-                                        <!-- 이름 -->
-                                        <div class="pet-name">
-
-                                            {{ pet.petName || pet.PET_NAME }}
-
-                                        </div>
-
-                                        <!-- 종 / 나이 -->
-                                        <div class="pet-info">
-
-                                            {{ pet.species || pet.SPECIES || '' }}
-
-                                            <template v-if="pet.birthdate || pet.BIRTHDATE">
-
-                                                ·
-                                                {{ fnGetPetAge(pet.birthdate || pet.BIRTHDATE) }}살
-
-                                            </template>
-
-                                        </div>
-
-                                        <!-- 버튼 -->
-                                        <div class="pet-btns">
-
-                                            <div class="pet-sub-btn-row">
-
-                                                <!-- 수정 -->
-                                                <button class="pet-btn edit" @click="fnOpenEditPetModal(pet)">
-
-                                                    수정
-
-                                                </button>
-
-                                                <!-- 삭제 -->
-                                                <button class="pet-btn delete"
-                                                    @click="fnDeletePet(pet.petNo || pet.PET_NO)">
-
-                                                    삭제
-
-                                                </button>
-
-                                            </div>
-
-                                        </div>
-
-                                    </div>
+                                    <button class="btn-delete"
+                                            @click="fnDeletePet(pet.petNo || pet.PET_NO)">
+                                        삭제
+                                    </button>
 
                                 </div>
 
@@ -157,264 +396,325 @@
 
                     </div>
 
-                </main>
+                    <div v-if="petList.length === 0" class="empty-text">
+                        등록된 반려동물이 없습니다.
+                    </div>
 
+                </div>
+
+            </div>
+
+        </main>
+
+    </div>
+
+    <!-- 반려동물 등록/수정 모달 -->
+    <div class="modal-wrap" v-if="showPetModal">
+
+        <div class="modal-box">
+
+            <div class="modal-title">
+                {{ petForm.petNo ? '반려동물 수정' : '반려동물 등록' }}
+            </div>
+
+            <div class="form-row">
+                <label>이름</label>
+                <input type="text" v-model="petForm.petName" placeholder="반려동물 이름">
+            </div>
+
+            <div class="form-row">
+                <label>종류</label>
+                <select v-model="petForm.species">
+                    <option value="">선택</option>
+                    <option value="강아지">강아지</option>
+                    <option value="고양이">고양이</option>
+                    <option value="조류">조류</option>
+                    <option value="어류">어류</option>
+                    <option value="기타">기타</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label>품종</label>
+                <input type="text" v-model="petForm.breed" placeholder="품종">
+            </div>
+
+            <div class="form-row">
+                <label>생년월일</label>
+                <input type="date" v-model="petForm.birthdate">
+            </div>
+
+            <div class="form-row">
+                <label>성별</label>
+                <select v-model="petForm.gender">
+                    <option value="">선택</option>
+                    <option value="M">수컷</option>
+                    <option value="F">암컷</option>
+                </select>
+            </div>
+
+            <div class="form-row check-row">
+                <label>
+                    <input type="checkbox"
+                           v-model="petForm.isMain"
+                           true-value="Y"
+                           false-value="N">
+                    대표 동물로 설정
+                </label>
+            </div>
+
+            <div class="modal-btns">
+                <button type="button" class="btn-cancel" @click="fnClosePetModal">
+                    취소
+                </button>
+
+                <button type="button" class="btn-save" @click="fnSavePet">
+                    저장
+                </button>
             </div>
 
         </div>
 
-        <!-- 푸터 -->
-        <jsp:include page="/WEB-INF/footer/footer.jsp" />
+    </div>
 
-        <script>
+</div>
 
-            // Vue 앱 생성
-            const app = Vue.createApp({
+<jsp:include page="/WEB-INF/footer/footer.jsp" />
 
-                data() {
+<script>
+    const app = Vue.createApp({
 
-                    return {
+        data() {
+            return {
+                petList: [],
+                showPetModal: false,
 
-                        // 반려동물 목록
-                        petList: [],
+                petForm: {
+                    petNo: "",
+                    petName: "",
+                    species: "",
+                    breed: "",
+                    birthdate: "",
+                    gender: "",
+                    isMain: "N"
+                }
+            };
+        },
 
-                        // 모달 여부
-                        showPetModal: false,
+        methods: {
 
-                        // 반려동물 폼
-                        petForm: {
+            fnLoadPetList: function () {
+                let self = this;
 
-                            petNo: "",
-                            petName: "",
-                            species: "",
-                            breed: "",
-                            birthdate: "",
-                            gender: ""
-
-                        }
-
-                    };
-
-                },
-
-                methods: {
-
-                    // 반려동물 목록 조회
-                    fnLoadPetList: function () {
-
-                        let self = this;
-
-                        let param = {};
-
-                        $.ajax({
-
-                            url: "/user/pet-list.dox",
-
-                            dataType: "json",
-
-                            type: "POST",
-
-                            data: param,
-
-                            success: function (data) {
-
-                                self.petList =
-                                    data.result === "success"
-                                        ? (data.petList || [])
-                                        : [];
-
-                            },
-
-                            error: function () {
-
-                                self.petList = [];
-
-                                alert("반려동물 목록 조회 실패");
-
-                            }
-
-                        });
-
+                $.ajax({
+                    url: "/user/pet-list.dox",
+                    dataType: "json",
+                    type: "POST",
+                    data: {},
+                    success: function (data) {
+                        self.petList = data.result === "success" ? (data.petList || []) : [];
                     },
-
-                    // 반려동물 추가 모달 열기
-                    fnOpenAddPetModal: function () {
-
-                        this.petForm = {
-
-                            petNo: "",
-                            petName: "",
-                            species: "",
-                            breed: "",
-                            birthdate: "",
-                            gender: ""
-
-                        };
-
-                        this.showPetModal = true;
-
-                    },
-
-                    // 반려동물 수정 모달 열기
-                    fnOpenEditPetModal: function (pet) {
-
-                        this.petForm = {
-
-                            petNo: pet.petNo || pet.PET_NO || "",
-                            petName: pet.petName || pet.PET_NAME || "",
-                            species: pet.species || pet.SPECIES || "",
-                            breed: pet.breed || pet.BREED || "",
-                            birthdate: pet.birthdate || pet.BIRTHDATE || "",
-                            gender: pet.gender || pet.GENDER || ""
-
-                        };
-
-                        this.showPetModal = true;
-
-                    },
-
-                    // 반려동물 모달 닫기
-                    fnClosePetModal: function () {
-
-                        this.showPetModal = false;
-
-                    },
-
-                    // 반려동물 저장
-                    fnSavePet: function () {
-
-                        let self = this;
-
-                        const url =
-                            self.petForm.petNo
-                                ? "/user/update-pet.dox"
-                                : "/user/add-pet.dox";
-
-                        $.ajax({
-
-                            url: url,
-
-                            type: "POST",
-
-                            data: self.petForm,
-
-                            success: function () {
-
-                                self.showPetModal = false;
-
-                                self.fnLoadPetList();
-
-                            },
-
-                            error: function () {
-
-                                alert("반려동물 저장 실패");
-
-                            }
-
-                        });
-
-                    },
-
-                    // 반려동물 삭제
-                    fnDeletePet: function (petNo) {
-
-                        let self = this;
-
-                        if (!confirm("삭제하시겠습니까?")) {
-
-                            return;
-
-                        }
-
-                        $.ajax({
-
-                            url: "/user/delete-pet.dox",
-
-                            type: "POST",
-
-                            data: {
-                                petNo: petNo
-                            },
-
-                            success: function () {
-
-                                self.fnLoadPetList();
-
-                            },
-
-                            error: function () {
-
-                                alert("반려동물 삭제 실패");
-
-                            }
-
-                        });
-
-                    },
-
-                    // 반려동물 이미지
-                    // 반려동물 이미지
-                    fnGetPetImage: function (pet) {
-
-                        if (pet.petImg || pet.PET_IMG) {
-                            return pet.petImg || pet.PET_IMG;
-                        }
-
-                        const species = pet.species || pet.SPECIES || "";
-
-                        if (species === "고양이") {
-                            return "/img/user/pet/cat.png";
-                        }
-
-                        if (species === "강아지") {
-                            return "/img/user/pet/dog.png";
-                        }
-
-                        if (species === "조류") {
-                            return "/img/user/pet/bird.png";
-                        }
-
-                        if (species === "어류") {
-                            return "/img/user/pet/fish.png";
-                        }
-
-                        return "/img/user/pet/etc.png";
-                    },
-                    // 반려동물 나이 계산
-                    fnGetPetAge: function (birthdate) {
-
-                        if (!birthdate) {
-
-                            return "-";
-
-                        }
-
-                        const age =
-                            new Date().getFullYear()
-                            - new Date(birthdate).getFullYear();
-
-                        return isNaN(age)
-                            ? "-"
-                            : age;
-
+                    error: function () {
+                        self.petList = [];
+                        alert("반려동물 목록 조회 실패");
                     }
+                });
+            },
 
-                },
+            fnOpenAddPetModal: function () {
+                this.petForm = {
+                    petNo: "",
+                    petName: "",
+                    species: "",
+                    breed: "",
+                    birthdate: "",
+                    gender: "",
+                    isMain: "N"
+                };
 
-                // 시작 시 실행
-                mounted() {
+                this.showPetModal = true;
+            },
 
-                    this.fnLoadPetList();
+            fnOpenEditPetModal: function (pet) {
+                this.petForm = {
+                    petNo: pet.petNo || pet.PET_NO || "",
+                    petName: pet.petName || pet.PET_NAME || "",
+                    species: pet.species || pet.SPECIES || "",
+                    breed: pet.breed || pet.BREED || "",
+                    birthdate: this.fnFormatDate(pet.birthdate || pet.BIRTHDATE),
+                    gender: pet.gender || pet.GENDER || "",
+                    isMain: pet.isMain || pet.IS_MAIN || "N"
+                };
 
+                this.showPetModal = true;
+            },
+
+            fnClosePetModal: function () {
+                this.showPetModal = false;
+            },
+
+            fnSavePet: function () {
+                let self = this;
+
+                if (!self.petForm.petName) {
+                    alert("반려동물 이름을 입력해주세요.");
+                    return;
                 }
 
-            });
+                if (!self.petForm.species) {
+                    alert("반려동물 종류를 선택해주세요.");
+                    return;
+                }
 
-            app.mount("#app");
+                const url = self.petForm.petNo
+                    ? "/user/update-pet.dox"
+                    : "/user/add-pet.dox";
 
-        </script>
+                $.ajax({
+                    url: url,
+                    type: "POST",
+                    dataType: "json",
+                    data: self.petForm,
+                    success: function (res) {
+                        alert(res.message || "저장되었습니다.");
 
-    </body>
+                        if (res.result === "success") {
+                            self.showPetModal = false;
+                            self.fnLoadPetList();
+                        }
+                    },
+                    error: function () {
+                        alert("반려동물 저장 실패");
+                    }
+                });
+            },
 
-    </html>
+            fnChangeMainPet: function (petNo) {
+                let self = this;
+
+                if (!confirm("대표 동물로 설정하시겠습니까?")) {
+                    return;
+                }
+
+                $.ajax({
+                    url: "/user/change-main-pet.dox",
+                    type: "POST",
+                    dataType: "json",
+                    data: {
+                        petNo: petNo
+                    },
+                    success: function (res) {
+                        alert(res.message || "대표동물이 변경되었습니다.");
+                        self.fnLoadPetList();
+                    },
+                    error: function () {
+                        alert("대표동물 변경 실패");
+                    }
+                });
+            },
+
+            fnDeletePet: function (petNo) {
+                let self = this;
+
+                if (!confirm("삭제하시겠습니까?")) {
+                    return;
+                }
+
+                $.ajax({
+                    url: "/user/delete-pet.dox",
+                    type: "POST",
+                    dataType: "json",
+                    data: {
+                        petNo: petNo
+                    },
+                    success: function (res) {
+                        alert(res.message || "삭제되었습니다.");
+                        self.fnLoadPetList();
+                    },
+                    error: function () {
+                        alert("반려동물 삭제 실패");
+                    }
+                });
+            },
+
+            fnGetPetImage: function (pet) {
+                if (pet.petImg || pet.PET_IMG) {
+                    return pet.petImg || pet.PET_IMG;
+                }
+
+                const species = pet.species || pet.SPECIES || "";
+
+                if (species === "고양이") {
+                    return "/img/user/pet/cat.png";
+                }
+
+                if (species === "강아지") {
+                    return "/img/user/pet/dog.png";
+                }
+
+                if (species === "조류") {
+                    return "/img/user/pet/bird.png";
+                }
+
+                if (species === "어류") {
+                    return "/img/user/pet/fish.png";
+                }
+
+                return "/img/user/pet/etc.png";
+            },
+
+            fnFormatDate: function (dateStr) {
+                if (!dateStr) {
+                    return "";
+                }
+
+                return String(dateStr).substring(0, 10);
+            },
+
+            fnGenderText: function (gender) {
+                if (gender === "M") {
+                    return "수컷";
+                }
+
+                if (gender === "F") {
+                    return "암컷";
+                }
+
+                return "-";
+            },
+
+            fnGetPetAge: function (birthdate) {
+                if (!birthdate) {
+                    return "-";
+                }
+
+                const birth = new Date(birthdate);
+                const today = new Date();
+
+                if (isNaN(birth.getTime())) {
+                    return "-";
+                }
+
+                let age = today.getFullYear() - birth.getFullYear();
+
+                const monthDiff = today.getMonth() - birth.getMonth();
+                const dayDiff = today.getDate() - birth.getDate();
+
+                if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+                    age--;
+                }
+
+                return age;
+            }
+        },
+
+        mounted() {
+            this.fnLoadPetList();
+        }
+    });
+
+    app.mount("#app");
+</script>
+
+</body>
+</html>

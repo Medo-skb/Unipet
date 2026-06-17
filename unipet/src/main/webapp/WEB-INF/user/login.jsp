@@ -113,7 +113,7 @@
                 pwd: pwd
             },
             success: function (res) {
-                console.log("로그인 응답:", res);
+              
 
                 let data = (typeof res === "string") ? JSON.parse(res) : res;
 
@@ -122,7 +122,7 @@
                     location.href = "/main.do";
                 } else {
                     alert(data.message || "아이디 또는 비밀번호를 확인해주세요.");
-                    console.log(pwd)
+ 
                 }
             },
             error: function () {

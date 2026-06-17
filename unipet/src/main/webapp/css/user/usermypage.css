@@ -298,6 +298,7 @@ button {
     text-align: center;
     cursor: pointer;
     transition: transform 0.2s ease;
+
 }
 
 .pet-card.active {
@@ -346,12 +347,7 @@ button {
     margin-bottom: 10px;
 }
 
-.pet-btns {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 6px;
-}
+
 
 .pet-btn {
     height: 32px;
@@ -644,60 +640,7 @@ button {
     color: #fff !important;
 }
 
-.main-reserve-item,
-.main-order-item {
-    align-items: flex-start;
-    gap: 16px;
-}
 
-.main-reserve-item > div:first-child,
-.main-order-item > div:first-child {
-    flex: 1;
-    min-width: 0;
-}
-
-.main-reserve-item .list-title,
-.main-order-item .list-title {
-    white-space: nowrap;
-    font-size: 15px;
-    line-height: 1.4;
-}
-
-.main-reserve-item .list-sub,
-.main-order-item .list-sub {
-    font-size: 13px;
-    line-height: 1.6;
-}
-
-.main-reserve-item > .list-sub {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    white-space: nowrap;
-    margin-top: 2px;
-}
-
-.main-order-item {
-    display: grid;
-    grid-template-columns: 1fr auto;
-}
-
-.main-order-item > div:first-child {
-    display: grid !important;
-    grid-template-columns: 76px 1fr;
-    gap: 12px !important;
-    align-items: center !important;
-}
-
-.main-order-item .order-img {
-    width: 76px;
-    height: 76px;
-}
-
-.main-order-item .status-badge {
-    align-self: center;
-    min-width: 80px;
-}
 
 .mini-panel-body .btn-box {
     margin-top: 22px;
@@ -708,35 +651,6 @@ button {
     padding: 0 18px;
 }
 
-.main-order-item {
-    grid-template-columns: 1fr;
-    row-gap: 10px;
-}
-
-.main-order-item .status-badge {
-    justify-self: flex-start;
-    align-self: flex-start;
-    margin-left: 88px;
-    min-width: 86px;
-}
-
-.main-order-item > div:first-child {
-    grid-template-columns: 76px 1fr;
-}
-
-.main-order-item .list-title,
-.main-order-item .list-sub {
-    white-space: normal;
-    word-break: keep-all;
-}
-
-.main-order-item .list-sub {
-    max-width: 120px;
-}
-
-.pet-card {
-    width: 180px;
-}
 
 .pet-btns {
     min-height: 76px;
@@ -862,16 +776,7 @@ button {
     color: var(--text-main);
 }
 
-.reserve-status-text {
-    background: none !important;
-    border: none !important;
-    padding: 0 !important;
-    height: auto !important;
-    min-width: auto !important;
 
-    font-size: 14px;
-    font-weight: 600;
-}
 
 .reserve-status-text {
     background: none !important;
@@ -938,63 +843,93 @@ button {
     }
 }
 
-/* ✅ 1. Grid 적용: 방을 3개로 확실하게 쪼갭니다 (비율 3.5 : 4.5 : 2) */
+
+
+/* 최근 예약 / 주문 최종 수정 */
+.mypage-dashboard > .mini-dashboard {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+}
+
+.mini-dashboard {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 18px !important;
+    width: 100% !important;
+}
+
+.mini-panel {
+    min-width: 0 !important;
+    overflow: visible !important;
+}
+
+/* 최근 예약 */
 .main-reserve-item {
-    display: grid;
-    grid-template-columns: 3.5fr 4.5fr 2fr; 
-    align-items: center;
-    gap: 10px;
-    padding: 15px 0;
-    border-bottom: 1px solid #eee;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr auto !important;
+    gap: 12px !important;
+    align-items: center !important;
 }
 
-/* ✅ 2. 1번 방 (업체명): 말줄임표 강력 적용 */
-.main-reserve-item .grid-store-name {
-    min-width: 0; /* 그리드 밖으로 튀어나가는 현상 완벽 차단 */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-weight: bold;
-    font-size: 15px;
+.reserve-store-name {
+    min-width: 0 !important;
+    font-weight: 700 !important;
+    word-break: keep-all !important;
 }
 
-/* ✅ 3. 2번 방 (날짜/시간): 중앙 정렬 및 폰트 크기 강제 */
-.main-reserve-item .grid-res-date {
-    min-width: 0;
-    text-align: center;
-}
-.main-reserve-item .grid-res-date .date-text {
-    font-weight: bold;
-    font-size: 15px;
-    color: #333;
-}
-.main-reserve-item .grid-res-date .time-text {
-    margin-top: 4px;
-    font-size: 13px;
-    color: #777;
+.reserve-status-box {
+    white-space: nowrap !important;
 }
 
-/* ✅ 4. 3번 방 (상태): 우측 정렬 */
-.main-reserve-item .grid-res-status {
-    min-width: 0;
-    text-align: right;
-    font-size: 14px;
-    white-space: nowrap; /* 상태 글자 쪼개짐 방지 */
-    padding-right: 15px;
+/* 최근 주문 */
+.main-order-item {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 16px !important;
+    width: 100% !important;
 }
 
-.list-item .post-title {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--text-main);
-    margin-bottom: 6px;
-    cursor: pointer; /* 마우스 커서를 손가락 모양으로 변경 */
-    display: inline-block; /* 클릭 영역을 텍스트 크기에 맞춤 */
-    transition: color 0.2s; /* 부드러운 색상 변화 */
+.main-order-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+    flex: 1 !important;
+    min-width: 0 !important;
 }
 
-/* 마우스를 올렸을 때 시각적 효과 */
-.list-item .post-title:hover {
-    color: var(--main); /* 메인 컬러로 변경 (기존 CSS 변수 활용) */
-    text-decoration: underline; /* 밑줄 추가 */
+.main-order-info {
+    flex: 1 !important;
+    min-width: 0 !important;
+}
+
+.main-order-info .list-title,
+.main-order-info .list-sub {
+    white-space: normal !important;
+    word-break: keep-all !important;
+    line-height: 1.45 !important;
+}
+
+.main-order-item .order-img {
+    width: 64px !important;
+    height: 64px !important;
+    object-fit: contain !important;
+    flex-shrink: 0 !important;
+}
+
+.main-order-item .status-badge {
+    flex-shrink: 0 !important;
+    min-width: 82px !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+}
+
+@media screen and (max-width: 1024px) {
+    .mini-dashboard {
+        grid-template-columns: 1fr !important;
+    }
+
+    .main-reserve-item {
+        grid-template-columns: 1fr !important;
+    }
 }
