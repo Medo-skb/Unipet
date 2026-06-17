@@ -292,3 +292,62 @@
 	color: #e74c3c;
 	font-weight: bold;
 }
+
+.board-move-box {
+	background: #ffffff;
+	border: 1px solid #dddddd;
+	border-radius: 12px;
+	margin: 20px 0;
+	overflow: hidden;
+}
+
+.board-move-row {
+	display: flex;
+	align-items: center;
+	min-height: 54px;
+	border-bottom: 1px solid #eeeeee;
+	cursor: pointer;
+	background: #ffffff;
+}
+
+.board-move-row:last-child {
+	border-bottom: none;
+}
+
+.board-move-row:hover {
+	background: #fafafa;
+}
+
+.board-move-row.empty {
+	cursor: default;
+	background: #ffffff;
+}
+
+.board-move-row.empty .board-move-title {
+	color: #999999;
+}
+
+.board-move-label {
+	width: 110px;
+	padding: 0 18px;
+	font-size: 14px;
+	font-weight: bold;
+	color: #333333;
+	border-right: 1px solid #eeeeee;
+	flex-shrink: 0;
+}
+
+.board-move-title {
+	flex: 1;
+	padding: 0 18px;
+	font-size: 15px;
+	color: #222222;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.board-move-row:not(.empty) .board-move-title:hover {
+	color: #ff7a00;
+	text-decoration: underline;
+}

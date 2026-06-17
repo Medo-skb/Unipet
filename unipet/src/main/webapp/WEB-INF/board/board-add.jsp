@@ -199,7 +199,6 @@
 							}
 						},
 						error: function (xhr, status, error) {
-							console.log("카테고리 조회 오류:", xhr.responseText);
 							alert("카테고리 조회 중 오류가 발생했습니다.");
 						}
 					});
@@ -278,7 +277,6 @@
 							}
 						},
 						error: function (xhr, status, error) {
-							console.log("게시글 등록 오류:", xhr.responseText);
 							alert("게시글 등록 중 오류가 발생했습니다.");
 						}
 					});
@@ -321,7 +319,6 @@
 				            }
 				        },
 				        error: function (xhr, status, error) {
-				            console.log("임시저장 불러오기 오류:", xhr.responseText);
 				            alert("임시저장 글 불러오기 중 오류가 발생했습니다.");
 				        }
 				    });

@@ -193,8 +193,6 @@
 							self.loaded = true;
 
 							if (data.result == "success") {
-								console.log("수정페이지 data ===>", data);
-								console.log("첨부파일 목록 ===>", data.fileList);
 								
 								self.board = data.board;
 								self.mainTypeList = data.mainTypeList || [];
@@ -203,9 +201,6 @@
 								self.fileList = data.fileList || [];
 
 								if (self.fileList.length > 0) {
-									console.log("첫 번째 파일명 originName ===>", self.fileList[0].originName);
-									console.log("첫 번째 파일명 fileName ===>", self.fileList[0].fileName);
-									console.log("첫 번째 파일번호 fileNo ===>", self.fileList[0].fileNo);
 								}
 
 								self.bSubNo = data.board.bSubNo;
