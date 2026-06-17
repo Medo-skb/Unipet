@@ -18,5 +18,4 @@ public class UnipetApplication extends SpringBootServletInitializer {
 	public static void main(String[] args) {
 		SpringApplication.run(UnipetApplication.class, args);
 	}
-
 }
