@@ -42,6 +42,10 @@ public interface BoardMapper {
 
 	public Board selectRecentTempBoard(HashMap<String, Object> map);
 
+	public Board selectPrevBoardInfo(HashMap<String, Object> map);
+
+	public Board selectNextBoardInfo(HashMap<String, Object> map);
+
 	// 삭제
 	public int deleteBoardLike(HashMap<String, Object> map);
 

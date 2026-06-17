@@ -39,6 +39,8 @@ public class Store {
 	private String breakEnd;
 	private String offDay;
 	private String refundPolicy;
+	private String reviewCount;
+	private String reviewAvg;
 	
 	
 }

@@ -32,7 +32,8 @@
                 {{ buttonText }}
             </button>
         </div>
-        <div class="chat-input" >
+
+        <div class="chat-input">
             <textarea spellcheck="false" autocorrect="off" autocomplete="off"
                 v-model="userInput"
                 @keydown.enter.exact.prevent="sendMessage()"
@@ -100,7 +101,7 @@
                     "커뮤니티": {
                         "게시글 작성": `로그인 후 커뮤니티 게시판에서 카테고리를 선택한 뒤 ‘글쓰기’ 버튼을 통해 게시글을 작성할 수 있습니다.`,
 
-                    "카테고리": `커뮤니티 카테고리는 ‘통합’과 ‘지역’으로 나뉘어 있습니다.
+                        "카테고리": `커뮤니티 카테고리는 ‘통합’과 ‘지역’으로 나뉘어 있습니다.
                     
 ‘통합’ 카테고리는 반려동물에 관한 자유로운 이야기, 질문, 정보 및 팁을 공유하는 공간입니다.
 ‘지역’ 카테고리는 산책, 소모임, 지역 정보 등 각 지역별로 소통할 수 있는 공간입니다.`,
@@ -110,11 +111,10 @@
 
                         "이용 규칙": `욕설, 광고, 도배, 비방성 게시글은 관리자에 의해 삭제되거나 이용이 제한될 수 있습니다.`
                     },
-
                 },
-                
             };
         },
+
         methods: {
             normalizeText(text) {
                 return text.replace(/\s/g, "");
@@ -124,68 +124,8 @@
                 if (!text) {
                     return "";
                 }
-            if (text.includes("추천 이유:") && text.includes("상세보기|")) {
-                return this.formatStoreRecommend(text);
-            }
 
                 return text.replace(/\n/g, "<br>");
-            },
-
-            formatStoreRecommend(text) {
-                let blocks = text.split(/\n\s*\n/);
-                let html = "";
-
-                blocks.forEach(function(block) {
-                    let lines = block.split("\n").map(function(line) {
-                        return line.trim();
-                    }).filter(function(line) {
-                        return line !== "";
-                    });
-
-                    let storeName = "";
-                    let storeNo = "";
-                    let reason = "";
-
-                    lines.forEach(function(line) {
-                        if (line.indexOf("상세보기|") > -1) {
-                            let splitArr = line.split("|");
-
-                            if (splitArr.length > 1) {
-                                storeNo = splitArr[1].trim();
-                            }
-
-                        } else if (line.indexOf("추천 이유:") === 0) {
-                            reason = line;
-
-                        } else if (storeName === "") {
-                            storeName = line;
-                        }
-                    });
-
-                    if (storeName !== "" || storeNo !== "" || reason !== "") {
-                        html += "<div class='store-recommend-item'>";
-
-                        if (storeName !== "") {
-                            html += "<div class='store-name'>" + storeName + "</div>";
-                        }
-
-                        if (storeNo !== "") {
-                            html += "<div>";
-                            html += "<span class='store-link-btn' onclick=\"window.open('/reservation/store-detail.do?storeNo=" + storeNo + "', '_blank')\">";
-                            html += "업체 바로가기";
-                            html += "</span>";
-                            html += "</div>";
-                        }
-
-                        if (reason !== "") {
-                            html += "<div class='store-reason'>" + reason + "</div>";
-                        }
-
-                        html += "</div>";
-                    }
-                });
-
-                return html;
             },
 
             sendMessage(customText = null) {
@@ -243,7 +183,7 @@
                     return;
                 }
 
-                // 2. 큰 메뉴가 선택된 상태에서 세부 질문을 입력한 경우
+                // 3. 큰 메뉴가 선택된 상태에서 세부 질문을 입력한 경우
                 if (this.currentCategory && this.faqMap[this.currentCategory]) {
                     const matchedQuestion = Object.keys(this.faqMap[this.currentCategory]).find(question =>
                         this.normalizeText(question) === normalizedInput
@@ -260,11 +200,11 @@
                     }
                 }
 
-                // 4. AI 상담가 아닌 메뉴에서는 지정된 답변 외 입력 차단
+                // 4. AI 상담이 아닌 메뉴에서는 지정된 답변 외 입력 차단
                 if (this.currentCategory !== "AI 상담") {
                     this.messages.push({
                         text: `해당 메뉴는 없습니다.
-UNIPET 챗봇과 대화를 원하신다면 AI 상담를 눌러주세요.`,
+UNIPET 챗봇과 대화를 원하신다면 AI 상담을 눌러주세요.`,
                         type: "bot"
                     });
 
@@ -280,6 +220,7 @@ UNIPET 챗봇과 대화를 원하신다면 AI 상담를 눌러주세요.`,
                     type: "bot",
                     loading: true
                 });
+
                 this.scrollToBottom();
 
                 $.ajax({
@@ -310,7 +251,7 @@ UNIPET 챗봇과 대화를 원하신다면 AI 상담를 눌러주세요.`,
                     }
                 });
             },
-            
+
             removeLoadingMessage() {
                 this.messages = this.messages.filter(msg => !msg.loading);
             },
@@ -320,15 +261,15 @@ UNIPET 챗봇과 대화를 원하신다면 AI 상담를 눌러주세요.`,
                     const chatBox = this.$refs.chatBox;
                     chatBox.scrollTop = chatBox.scrollHeight;
                 });
-                
             },
+
             quickQuestion(buttonText) {
                 this.sendMessage(buttonText);
             },
         }
     });
 
-app.mount("#app");
+    app.mount("#app");
 </script>
 </body>
 </html>

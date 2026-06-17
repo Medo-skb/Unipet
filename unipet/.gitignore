@@ -46,6 +46,7 @@ application.properties
 .settings/
 .loadpath
 .recommenders
+output/
 
 # macOS metadata
 .DS_Store

@@ -101,8 +101,6 @@
                     type: "POST",
                     data: { rsvNo: self.rsvNo },
                     success: function(data) {
-                        console.log("서버 응답 데이터:", data);
-                        // 서버에서 넘겨주는 key가 'info'인지 확인하세요.
                         if (data && data.info) {
                             self.info = data.info;
                         } else {
