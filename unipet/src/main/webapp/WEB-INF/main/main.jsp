@@ -347,8 +347,7 @@
                 let self = this;
                 let param = {};
                 $.ajax({
-                	url: "http://localhost:8080/getMainBasicList.dox",
-                    <!-- url: "http://3.37.131.42:8080/getMainBasicList.dox", -->
+                    url: "/getMainBasicList.dox",
                     dataType: "json",
                     type: "POST",
                     data: param,

@@ -4,7 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,7 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.unipet.dao.BizMyPageService;
 import com.google.gson.Gson;
 
-import ch.qos.logback.core.model.Model;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
@@ -25,6 +26,9 @@ public class BizMyPageController {
 	
 	@Autowired
 	BizMyPageService bizMyPageService;
+	
+	@Value("${kakao.maps.apikey}")
+	private String kakaoJavascriptKey;
 	
 	// 사업자 마이페이지 메인
 	@RequestMapping("/biz/MyPage.do") 
@@ -50,6 +54,8 @@ public class BizMyPageController {
 	    if (sessionId == null || !"BIZ".equals(sessionRole)) {
 	        return "redirect:/user/login.do";
 	    }
+
+	    model.addAttribute("kakaoJavascriptKey", kakaoJavascriptKey);
 	    
 	    return "/bizMyPage/storeEdit";
 	}
