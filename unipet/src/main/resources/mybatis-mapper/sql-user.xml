@@ -242,10 +242,9 @@
 		#{userId}, #{storeName}, #{sCategory}, #{sAddr}, #{sFullAddr}, #{lat},
 		#{lng}, #{sStatus}, 'Y' <!-- 🔥 추가 --> ) </insert>
 
-
-	<!-- 사업자등록증 파일 저장 -->
-	<insert id="insertStoreFile" parameterType="hashmap">
-		INSERT INTO unipet.store_file (
+<!-- 사업자등록증 파일 저장 -->
+<insert id="insertStoreFile" parameterType="hashmap">
+	INSERT INTO unipet.store_file (
 		STORE_NO,
 		FILE_NAME,
 		ORIGIN_NAME,
@@ -254,7 +253,7 @@
 		FILE_SIZE,
 		IS_MAIN,
 		IS_PROOF
-		) VALUES (
+	) VALUES (
 		#{storeNo},
 		#{fileName},
 		#{originName},
@@ -262,9 +261,10 @@
 		#{fileExt},
 		#{fileSize},
 		'N',
-		'Y'
-		)
-	</insert>
+		#{isProof}
+	)
+</insert>
+	
 
 	<select id="selectUserCheckCount" parameterType="hashmap" resultType="int">
 	    SELECT COUNT(*)

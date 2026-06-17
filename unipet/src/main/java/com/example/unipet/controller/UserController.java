@@ -88,6 +88,8 @@ public class UserController {
 	public String signupBizPage() {
 		return "user/signup-biz";
 	}
+	
+	
 
 	@GetMapping("/user/find-id.do")
 	public String findIdPage() {
@@ -220,15 +222,21 @@ public class UserController {
 			map.put("bizFileName", originName);
 			map.put("fileName", originName);
 			map.put("originName", originName);
-			map.put("filePath", "/upload");
+
+			// 수정: /upload -> /file/store/
+			map.put("filePath", "/file/store/");
+
 			map.put("fileExt", fileExt);
 			map.put("fileSize", bizFile.getSize());
+
+			// 추가: 사업자 증빙파일 여부
+			map.put("isProof", "Y");
 		}
 
 		HashMap<String, Object> resultMap = userService.insertBizUser(map);
 		return gson.toJson(resultMap);
 	}
-
+	
 	@PostMapping("/user/check.dox")
 	@ResponseBody
 	public String checkUser(@RequestParam HashMap<String, Object> map) {
@@ -240,7 +248,9 @@ public class UserController {
 	public String checkBizUser(@RequestParam HashMap<String, Object> map) {
 		return gson.toJson(userService.checkStoreUser(map));
 	}
-
+	
+	
+	
 	// =========================
 	// SMS 인증번호 발송
 	// =========================

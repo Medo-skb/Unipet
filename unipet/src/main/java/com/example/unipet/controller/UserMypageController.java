@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.unipet.dao.UserMypageService;
@@ -54,6 +55,14 @@ public class UserMypageController {
 		if (!checkLogin(session, response)) return null;
 		return "user/Mypage/community";
 	}
+	// 커뮤니티 게시글 상세보기
+	@RequestMapping("/community/detail.do")
+	public String communityDetail(@RequestParam HashMap<String, Object> map,
+	                              Model model) {
+	    model.addAttribute("map", map);
+	    return "community/detail";
+	}
+	
 
 
 	// 주문내역 화면 이동
@@ -280,6 +289,49 @@ public class UserMypageController {
 		map.put("userId", session.getAttribute("sessionId"));
 		return userMypageService.addHealth(map);
 	}
+	
+	// 몸무게 기록 수정
+	@PostMapping("/user/update-weight.dox")
+	@ResponseBody
+	public HashMap<String, Object> updateWeight(@RequestParam HashMap<String, Object> map, HttpSession session) {
+		map.put("userId", session.getAttribute("sessionId"));
+		return userMypageService.updateWeight(map);
+	}
+
+	// 몸무게 기록 삭제
+	@PostMapping("/user/delete-weight.dox")
+	@ResponseBody
+	public HashMap<String, Object> deleteWeight(@RequestParam HashMap<String, Object> map, HttpSession session) {
+		map.put("userId", session.getAttribute("sessionId"));
+		return userMypageService.deleteWeight(map);
+	}
+
+	// 건강 기록 수정
+	@PostMapping("/user/update-health.dox")
+	@ResponseBody
+	public HashMap<String, Object> updateHealth(@RequestParam HashMap<String, Object> map, HttpSession session) {
+		map.put("userId", session.getAttribute("sessionId"));
+		return userMypageService.updateHealth(map);
+	}
+
+	// 건강 기록 삭제
+	@PostMapping("/user/delete-health.dox")
+	@ResponseBody
+	public HashMap<String, Object> deleteHealth(@RequestParam HashMap<String, Object> map, HttpSession session) {
+		map.put("userId", session.getAttribute("sessionId"));
+		return userMypageService.deleteHealth(map);
+	}
+
+	// 접종 기록 수정
+	@PostMapping("/user/update-vaccine.dox")
+	@ResponseBody
+	public HashMap<String, Object> updateVaccine(@RequestParam HashMap<String, Object> map, HttpSession session) {
+		map.put("userId", session.getAttribute("sessionId"));
+		return userMypageService.updateVaccine(map);
+	}
+
+	
+	
 
 	// 접종 기록 목록 조회
 	@PostMapping("/user/vaccine-list.dox")
@@ -449,26 +501,23 @@ public class UserMypageController {
 		return userMypageService.getPointInfo(map);
 	}
 
-	// 포인트 사용내역 조회
 	@PostMapping("/user/point-use-list.dox")
 	@ResponseBody
-	public HashMap<String, Object> getPointUseList(HttpSession session) {
-
-		HashMap<String, Object> result = new HashMap<>();
+	public HashMap<String, Object> getPointUseList(@RequestParam HashMap<String, Object> map,
+	                                               HttpSession session) {
 		Object sessionId = session.getAttribute("sessionId");
 
 		if (sessionId == null) {
+			HashMap<String, Object> result = new HashMap<>();
 			result.put("result", "fail");
 			result.put("pointUseList", new ArrayList<>());
 			return result;
 		}
 
-		HashMap<String, Object> map = new HashMap<>();
 		map.put("userId", sessionId);
 
 		return userMypageService.getPointUseList(map);
 	}
-
 	// 쿠폰 목록 조회
 	@PostMapping("/user/coupon-list.dox")
 	@ResponseBody

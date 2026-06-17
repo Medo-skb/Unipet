@@ -67,20 +67,12 @@ public class UserService {
 				result.put("message", "이미 사용중인 아이디입니다.");
 				return result;
 			}
-			
+
 			String phone = (String) map.get("phone");
-	        if (phone != null) {
-	            // 하이픈 등 숫자 이외의 문자 제거
-	            phone = phone.replaceAll("[^0-9]", "");
-	            map.put("phone", phone);
-	        }
-	        
-//	        int phoneCount = userMapper.checkPhone(map); 
-//	        if (phoneCount > 0) {
-//	            result.put("result", false);
-//	            result.put("message", "이미 가입된 휴대폰 번호입니다.");
-//	            return result;
-//	        }
+			if (phone != null) {
+				phone = phone.replaceAll("[^0-9]", "");
+				map.put("phone", phone);
+			}
 
 			String rawPwd = (String) map.get("pwd");
 			map.put("pwd", passwordEncoder.encode(rawPwd));
@@ -111,8 +103,7 @@ public class UserService {
 
 			if (count > 0) {
 
-				// 2. store 테이블 저장용 기본값 세팅
-				// 프론트에서 값이 넘어오면 그 값을 사용하고, 없으면 기본값 사용
+				// 2. store 테이블 기본값 세팅
 				if (map.get("storeName") == null || String.valueOf(map.get("storeName")).isBlank()) {
 					map.put("storeName", "임시매장");
 				}
@@ -146,14 +137,14 @@ public class UserService {
 				// 5. 사업자등록증 파일 정보가 있으면 store_file 저장
 				if (map.get("originName") != null && !String.valueOf(map.get("originName")).isBlank()) {
 					HashMap<String, Object> fileMap = new HashMap<>();
+
 					fileMap.put("storeNo", storeNo);
 					fileMap.put("fileName", map.get("fileName") != null ? map.get("fileName") : map.get("bizFileName"));
-					fileMap.put("originName",
-							map.get("originName") != null ? map.get("originName") : map.get("bizFileName"));
-					fileMap.put("filePath", map.get("filePath") != null ? map.get("filePath") : "/upload");
-					fileMap.put("fileExt", map.get("fileExt") != null ? map.get("fileExt")
-							: getFileExt(String.valueOf(map.get("bizFileName"))));
+					fileMap.put("originName", map.get("originName") != null ? map.get("originName") : map.get("bizFileName"));
+					fileMap.put("filePath", map.get("filePath") != null ? map.get("filePath") : "/file/store/");
+					fileMap.put("fileExt", map.get("fileExt") != null ? map.get("fileExt") : getFileExt(String.valueOf(map.get("bizFileName"))));
 					fileMap.put("fileSize", map.get("fileSize") != null ? map.get("fileSize") : 0);
+					fileMap.put("isProof", "Y");
 
 					userMapper.insertStoreFile(fileMap);
 				}
@@ -186,22 +177,22 @@ public class UserService {
 		try {
 			User user = userMapper.selectUser(map);
 
-	        if (user == null) {
-	            result.put("result", false);
-	            result.put("message", "존재하지 않는 아이디입니다.");
-	            return result;
-	        }
+			if (user == null) {
+				result.put("result", false);
+				result.put("message", "존재하지 않는 아이디입니다.");
+				return result;
+			}
 
-	        if ("BAN".equals(user.getUserStatus())) {
-	            result.put("result", false);
-	            result.put("message", "정지된 사용자입니다. 고객센터에 문의하세요.");
-	            return result;
-	        } else if ("EXT".equals(user.getUserStatus())) {
-	            result.put("result", false);
-	            result.put("message", "탈퇴한 사용자입니다.");
-	            return result;
-	        }
-			
+			if ("BAN".equals(user.getUserStatus())) {
+				result.put("result", false);
+				result.put("message", "정지된 사용자입니다. 고객센터에 문의하세요.");
+				return result;
+			} else if ("EXT".equals(user.getUserStatus())) {
+				result.put("result", false);
+				result.put("message", "탈퇴한 사용자입니다.");
+				return result;
+			}
+
 			String rawPwd = (String) map.get("pwd");
 			if (passwordEncoder.matches(rawPwd, user.getPwd())) {
 				result.put("result", true);
@@ -226,7 +217,6 @@ public class UserService {
 
 		try {
 			String rawPwd = (String) map.get("pwd");
-			
 			User user = userMapper.selectStoreUser(map);
 
 			if (user != null && passwordEncoder.matches(rawPwd, user.getPwd())) {
@@ -246,31 +236,29 @@ public class UserService {
 		return result;
 	}
 
-	// 사용자 아이디 찾기
-	 public HashMap<String, Object> findId(HashMap<String, Object> map) {
-        HashMap<String, Object> result = new HashMap<>();
+	public HashMap<String, Object> findId(HashMap<String, Object> map) {
+		HashMap<String, Object> result = new HashMap<>();
 
-        try {
-            User user = userMapper.findId(map);
+		try {
+			User user = userMapper.findId(map);
 
-            if (user != null) {
-                result.put("result", true);
-                result.put("userId", user.getUserId());
-                result.put("message", "아이디를 찾았습니다.");
-            } else {
-                result.put("result", false);
-                result.put("message", "일치하는 회원 정보가 없습니다.");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            result.put("result", false);
-            result.put("message", "아이디 찾기 중 오류가 발생했습니다.");
-        }
+			if (user != null) {
+				result.put("result", true);
+				result.put("userId", user.getUserId());
+				result.put("message", "아이디를 찾았습니다.");
+			} else {
+				result.put("result", false);
+				result.put("message", "일치하는 회원 정보가 없습니다.");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			result.put("result", false);
+			result.put("message", "아이디 찾기 중 오류가 발생했습니다.");
+		}
 
-        return result;
-    }
+		return result;
+	}
 
-	// 사업자 아이디 찾기
 	public HashMap<String, Object> findBizId(HashMap<String, Object> map) {
 		HashMap<String, Object> result = new HashMap<>();
 
@@ -294,7 +282,6 @@ public class UserService {
 		return result;
 	}
 
-	// 비밀번호 재설정 전 회원 확인
 	public HashMap<String, Object> checkUserForReset(HashMap<String, Object> map) {
 		HashMap<String, Object> result = new HashMap<>();
 
@@ -318,7 +305,6 @@ public class UserService {
 		return result;
 	}
 
-	// 비밀번호 재설정
 	public HashMap<String, Object> resetPwd(HashMap<String, Object> map) {
 		HashMap<String, Object> result = new HashMap<>();
 
@@ -338,7 +324,6 @@ public class UserService {
 		return result;
 	}
 
-	// 소셜 로그인 사용자 조회
 	public HashMap<String, Object> selectSocialUser(HashMap<String, Object> map) {
 		HashMap<String, Object> result = new HashMap<>();
 
@@ -362,7 +347,6 @@ public class UserService {
 		return result;
 	}
 
-	// 소셜 회원가입
 	public HashMap<String, Object> insertSocialUser(HashMap<String, Object> map) {
 		HashMap<String, Object> result = new HashMap<>();
 
@@ -379,7 +363,6 @@ public class UserService {
 		return result;
 	}
 
-	// 휴대폰 번호 저장
 	public HashMap<String, Object> updatePhone(HashMap<String, Object> map) {
 		HashMap<String, Object> result = new HashMap<>();
 
@@ -396,7 +379,6 @@ public class UserService {
 		return result;
 	}
 
-	// 휴대폰 인증번호 저장
 	public void insertPhoneVerify(HashMap<String, Object> map) {
 		String phone = String.valueOf(map.get("phone"));
 		phone = phone.replace("-", "");
@@ -405,7 +387,6 @@ public class UserService {
 		userMapper.insertPhoneVerify(map);
 	}
 
-	// 최신 인증번호 조회
 	public HashMap<String, Object> selectLatestPhoneVerify(HashMap<String, Object> map) {
 		String phone = String.valueOf(map.get("phone"));
 		phone = phone.replace("-", "");
@@ -414,59 +395,50 @@ public class UserService {
 		return userMapper.selectLatestPhoneVerify(map);
 	}
 
-	// 인증 완료 처리
 	public void updatePhoneVerified(HashMap<String, Object> map) {
 		userMapper.updatePhoneVerified(map);
 	}
-	
-	// 비밀번호 변경용 검색
+
 	public HashMap<String, Object> getUserCheck(HashMap<String, Object> map) {
-        HashMap<String, Object> resultMap = new HashMap<String, Object>();
-        
-        try {
-            // 1. 휴대폰 번호 정제 (숫자만 남기기)
-            String phone = (String) map.get("phone");
-            if (phone != null) {
-                map.put("phone", phone.replaceAll("[^0-9]", ""));
-            }
+		HashMap<String, Object> resultMap = new HashMap<>();
 
-            int userCount = userMapper.selectUserCheckCount(map);
-            
-            // 3. 결과 판단
-            if (userCount > 0) {
-                resultMap.put("result", true);
-                resultMap.put("message", "회원 확인 완료");
-            } else {
-                resultMap.put("result", false);
-                resultMap.put("message", "일치하는 회원 정보가 없습니다.");
-            }
-            
-        } catch (Exception e) {
-            // 예외 발생 시 DefaultService 형식과 동일하게 처리
-            System.out.println(e.getMessage());
-            resultMap.put("result", false);
-            resultMap.put("message", Message.MSG_SERVER_ERR);
-        }
-        
-        return resultMap;
-    }
-	
-	public HashMap<String, Object> updateSms(HashMap<String, Object> map){
-		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 		try {
+			String phone = (String) map.get("phone");
+			if (phone != null) {
+				map.put("phone", phone.replaceAll("[^0-9]", ""));
+			}
 
-			int result = userMapper.updateSms(map);
-			
+			int userCount = userMapper.selectUserCheckCount(map);
+
+			if (userCount > 0) {
+				resultMap.put("result", true);
+				resultMap.put("message", "회원 확인 완료");
+			} else {
+				resultMap.put("result", false);
+				resultMap.put("message", "일치하는 회원 정보가 없습니다.");
+			}
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			resultMap.put("result", false);
+			resultMap.put("message", Message.MSG_SERVER_ERR);
+		}
+
+		return resultMap;
+	}
+
+	public HashMap<String, Object> updateSms(HashMap<String, Object> map) {
+		HashMap<String, Object> resultMap = new HashMap<>();
+		try {
+			userMapper.updateSms(map);
+
 			resultMap.put("result", true);
 			resultMap.put("message", Message.MSG_ADD);
 		} catch (Exception e) {
-			// TODO: handle exception
 			System.out.println(e.getMessage());
 			resultMap.put("result", false);
 			resultMap.put("message", Message.MSG_SERVER_ERR);
 		}
 		return resultMap;
 	}
-	
 }
-
