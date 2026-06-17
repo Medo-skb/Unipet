@@ -105,6 +105,8 @@ public class BoardService {
 
 			List<Board> fileList = boardMapper.selectBoardFileList(map);
 			Board likeInfo = boardMapper.selectBoardLikeInfo(map);
+			Board prevBoard = boardMapper.selectPrevBoardInfo(map);
+			Board nextBoard = boardMapper.selectNextBoardInfo(map);
 
 			resultMap.put("board", info);
 			resultMap.put("fileList", fileList);
@@ -115,6 +117,22 @@ public class BoardService {
 			} else {
 				resultMap.put("likeCnt", likeInfo.getLikeCnt());
 				resultMap.put("myLike", likeInfo.getMyLike());
+			}
+
+			if (prevBoard == null) {
+				resultMap.put("prevBoardNo", "");
+				resultMap.put("prevBoardTitle", "");
+			} else {
+				resultMap.put("prevBoardNo", prevBoard.getBoardNo());
+				resultMap.put("prevBoardTitle", prevBoard.getTitle());
+			}
+
+			if (nextBoard == null) {
+				resultMap.put("nextBoardNo", "");
+				resultMap.put("nextBoardTitle", "");
+			} else {
+				resultMap.put("nextBoardNo", nextBoard.getBoardNo());
+				resultMap.put("nextBoardTitle", nextBoard.getTitle());
 			}
 
 			resultMap.put("result", "success");
@@ -283,7 +301,7 @@ public class BoardService {
 				resultMap.put("message", "로그인이 필요합니다.");
 				return resultMap;
 			}
-			
+
 			if ("admin".equals(sessionId)) {
 				resultMap.put("result", "fail");
 				resultMap.put("message", "관리자 계정은 신고할 수 없습니다.");
@@ -380,7 +398,7 @@ public class BoardService {
 				resultMap.put("message", "본문을 입력해주세요.");
 				return resultMap;
 			}
-			
+
 			if (bContent.length() > 2000) {
 				resultMap.put("result", "fail");
 				resultMap.put("message", "본문은 2000자까지 입력할 수 있습니다.");
@@ -546,7 +564,7 @@ public class BoardService {
 				resultMap.put("message", "본문을 입력해주세요.");
 				return resultMap;
 			}
-			
+
 			if (bContent.length() > 2000) {
 				resultMap.put("result", "fail");
 				resultMap.put("message", "본문은 2000자까지 입력할 수 있습니다.");
