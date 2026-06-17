@@ -3,12 +3,55 @@
 	
 <mapper namespace="com.example.unipet.mapper.ReservationMapper">
 	<!-- 여러개 검색 -->
-	<select id="selectStoreList" parameterType="hashmap" resultType="com.example.unipet.model.Store">
+	<!-- <select id="selectStoreList" parameterType="hashmap" resultType="com.example.unipet.model.Store">
 	    SELECT S.*, C.KOR AS STORE_TYPE
 	    FROM STORE S
 	    LEFT JOIN CODE C ON S.S_CATEGORY = C.VALUE AND C.TYPE = 'S_CATEGORY'
-	    -- 업체 정책 테이블 JOIN
 	    LEFT JOIN STORE_POLICY SP ON S.STORE_NO = SP.STORE_NO 
+	    WHERE S.LAT BETWEEN #{swLat} AND #{neLat}
+	      AND S.LNG BETWEEN #{swLng} AND #{neLng}
+	    
+	    <if test="storeType != null and storeType != ''">
+	      AND C.KOR = #{storeType}
+	    </if>
+	
+	    <if test="startDate != null and startDate != ''">
+	      AND (
+	          S.S_STATUS = 'ext'
+	          
+	          OR 
+	          
+	          (S.S_STATUS = 'gen' AND EXISTS (
+	              SELECT 1 
+	              FROM RSV_SLOT RS 
+	              WHERE RS.STORE_NO = S.STORE_NO 
+	                AND RS.SLOT_DATE BETWEEN #{startDate} AND #{endDate}
+	                AND RS.SLOT_TIME BETWEEN #{startTime} AND #{endTime}
+	                AND RS.IS_AVAILABLE = 'Y'
+	                
+	                AND TIMESTAMP(RS.SLOT_DATE, RS.SLOT_TIME) > DATE_ADD(NOW(), INTERVAL COALESCE(SP.CUTOFF, 0) HOUR)
+	          ))
+	      )
+	    </if>
+	</select> -->
+	
+	<select id="selectStoreList" parameterType="hashmap" resultType="com.example.unipet.model.Store">
+	    SELECT S.*, 
+	           C.KOR AS STORE_TYPE,
+	           IFNULL(R.REVIEW_COUNT, 0) AS REVIEW_COUNT,
+	           IFNULL(R.REVIEW_AVG, 0.0) AS REVIEW_AVG
+	    FROM STORE S
+	    LEFT JOIN CODE C ON S.S_CATEGORY = C.VALUE AND C.TYPE = 'S_CATEGORY'
+	    LEFT JOIN STORE_POLICY SP ON S.STORE_NO = SP.STORE_NO
+	    LEFT JOIN (
+	        SELECT 
+	            STORE_NO,
+	            COUNT(*) AS REVIEW_COUNT,
+	            ROUND(AVG(RATING), 1) AS REVIEW_AVG
+	        FROM REVIEW
+	        GROUP BY STORE_NO
+	    ) R ON S.STORE_NO = R.STORE_NO
+	    
 	    WHERE S.LAT BETWEEN #{swLat} AND #{neLat}
 	      AND S.LNG BETWEEN #{swLng} AND #{neLng}
 	    
@@ -38,7 +81,7 @@
 	          ))
 	      )
 	    </if>
-	</select>
+	</select> 
 	
 	<select id="selectStoreMenuList" parameterType="hashmap" resultType="com.example.unipet.model.Store">
 	    SELECT S.STORE_NO, STORE_NAME, MENU_NO, MENU_NAME, MENU_PRICE, M_STATUS 
