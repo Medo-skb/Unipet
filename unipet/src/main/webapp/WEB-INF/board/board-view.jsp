@@ -56,10 +56,12 @@
 
 							<div class="file-list" v-if="fileList.length > 0">
 								<div v-for="file in fileList" :key="file.fileNo">
-									<img v-if="fnIsImage(file.fileExt)" :src="file.fileUrl">
-									<video v-else-if="fnIsVideo(file.fileExt)" :src="file.fileUrl" controls></video>
+									<img v-if="fnIsImage(file.fileExt)" :src="fnGetFileUrl(file)"
+										@error="fnFileImageError($event)">
+									<video v-else-if="fnIsVideo(file.fileExt)" :src="fnGetFileUrl(file)"
+										controls></video>
 									<div v-else>
-										<a :href="file.fileUrl" download>{{file.originName}}</a>
+										<a :href="fnGetFileUrl(file)" download>{{file.originName}}</a>
 									</div>
 								</div>
 							</div>
@@ -132,7 +134,7 @@
 										</div>
 									</div>
 
-									<div class="btn-row" style="margin-top:10px;">
+									<div class="btn-row comment-edit-btn-row">
 										<button type="button" class="like-btn"
 											@click="fnUpdateComment(comment)">저장</button>
 										<button type="button" class="report-btn"
@@ -287,7 +289,6 @@
 
 										if (data.result == "success") {
 											self.board = data.board;
-
 											self.fileList = data.fileList || [];
 											self.likeCnt = data.likeCnt || 0;
 											self.myLike = data.myLike || "N";
@@ -529,12 +530,51 @@
 								});
 							},
 
+							fnGetFileUrl(file) {
+								if (file == null) {
+									return "/img/board/unipet_logo.png";
+								}
+
+								let url = "";
+
+								if (file.fileUrl != null && file.fileUrl != "") {
+									url = file.fileUrl;
+								} else if (file.img != null && file.img != "") {
+									url = file.img;
+								} else if (file.saveName != null && file.saveName != "") {
+									url = file.saveName;
+								} else if (file.fileName != null && file.fileName != "") {
+									url = file.fileName;
+								} else if (file.originName != null && file.originName != "") {
+									url = file.originName;
+								}
+
+								if (url == "") {
+									return "/img/board/unipet_logo.png";
+								}
+
+								if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("/")) {
+									return url;
+								}
+
+								return "/upload/board/" + url;
+							},
+
+							fnFileImageError(event) {
+								if (event == null || event.target == null) {
+									return;
+								}
+
+								event.target.onerror = null;
+								event.target.src = "/img/board/unipet_logo.png";
+							},
+
 							fnIsImage(ext) {
 								if (!ext) {
 									return false;
 								}
 
-								ext = ext.toLowerCase();
+								ext = ext.toLowerCase().replace(".", "");
 
 								return ext == 'jpg' || ext == 'jpeg' || ext == 'png' || ext == 'gif' || ext == 'webp';
 							},
@@ -544,7 +584,7 @@
 									return false;
 								}
 
-								ext = ext.toLowerCase();
+								ext = ext.toLowerCase().replace(".", "");
 
 								return ext == 'mp4' || ext == 'webm' || ext == 'ogg';
 							},

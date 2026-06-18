@@ -188,386 +188,386 @@
 		</div>
 
 		<jsp:include page="/WEB-INF/footer/footer.jsp" />
+
+		<script>
+			const app = Vue.createApp({
+				data() {
+					return {
+						// 카테고리
+						categoryTab: "animal",
+						animalMainList: [],
+						animalSubList: [],
+						itemMainList: [],
+						itemSubList: [],
+
+						// 상품 목록
+						productList: [],
+						pagedProductList: [],
+						recommendList: [],
+
+						// 카테고리 열림/선택
+						openAnimalMainNo: "",
+						openItemMainNo: "",
+						selectedAMainNo: "",
+						selectedASubNo: "",
+						selectedIMainNo: "",
+						selectedISubNo: "",
+						selectedAnimalText: "동물 전체",
+						selectedItemText: "상품 전체",
+
+						// 검색/정렬
+						keyword: "",
+						sort: "",
+
+						// 장바구니
+						cartCount: 0,
+
+						// 페이징
+						currentPage: 1,
+						pageSize: 8,
+						totalPage: 1,
+						pageList: [],
+						pageBlockSize: 5
+					};
+				},
+
+				methods: {
+					fnSaveProductFilter: function () {
+						let self = this;
+
+						let filter = {
+							categoryTab: self.categoryTab,
+							openAnimalMainNo: self.openAnimalMainNo,
+							openItemMainNo: self.openItemMainNo,
+							selectedAMainNo: self.selectedAMainNo,
+							selectedASubNo: self.selectedASubNo,
+							selectedIMainNo: self.selectedIMainNo,
+							selectedISubNo: self.selectedISubNo,
+							selectedAnimalText: self.selectedAnimalText,
+							selectedItemText: self.selectedItemText,
+							keyword: self.keyword,
+							sort: self.sort,
+							currentPage: self.currentPage
+						};
+
+						sessionStorage.setItem("unipetProductFilter", JSON.stringify(filter));
+					},
+
+					fnLoadProductFilter: function () {
+						let self = this;
+						let saved = sessionStorage.getItem("unipetProductFilter");
+
+						if (saved == null || saved == "") {
+							return;
+						}
+
+						try {
+							let filter = JSON.parse(saved);
+
+							self.categoryTab = filter.categoryTab || "animal";
+							self.openAnimalMainNo = filter.openAnimalMainNo || "";
+							self.openItemMainNo = filter.openItemMainNo || "";
+							self.selectedAMainNo = filter.selectedAMainNo || "";
+							self.selectedASubNo = filter.selectedASubNo || "";
+							self.selectedIMainNo = filter.selectedIMainNo || "";
+							self.selectedISubNo = filter.selectedISubNo || "";
+							self.selectedAnimalText = filter.selectedAnimalText || "동물 전체";
+							self.selectedItemText = filter.selectedItemText || "상품 전체";
+							self.keyword = filter.keyword || "";
+							self.sort = filter.sort || "";
+							self.currentPage = filter.currentPage == null || filter.currentPage == "" ? 1 : Number(filter.currentPage);
+
+						} catch (e) {
+							sessionStorage.removeItem("unipetProductFilter");
+						}
+					},
+
+					fnShowCategoryTab: function (type) {
+						this.categoryTab = type;
+						this.fnSaveProductFilter();
+					},
+
+					fnToggleAnimalSub: function (aMainNo) {
+						if (this.openAnimalMainNo == aMainNo) {
+							this.openAnimalMainNo = "";
+						} else {
+							this.openAnimalMainNo = aMainNo;
+						}
+
+						this.fnSaveProductFilter();
+					},
+
+					fnToggleItemSub: function (iMainNo) {
+						if (this.openItemMainNo == iMainNo) {
+							this.openItemMainNo = "";
+						} else {
+							this.openItemMainNo = iMainNo;
+						}
+
+						this.fnSaveProductFilter();
+					},
+
+					fnGetCategoryList: function () {
+						let self = this;
+						let param = {};
+
+						$.ajax({
+							url: "/productCategory.dox",
+							dataType: "json",
+							type: "POST",
+							data: param,
+							success: function (data) {
+								if (data.result == "success") {
+									self.animalMainList = data.animalMainList || [];
+									self.animalSubList = data.animalSubList || [];
+									self.itemMainList = data.itemMainList || [];
+									self.itemSubList = data.itemSubList || [];
+								} else {
+									alert("카테고리 조회 실패");
+								}
+							}
+						});
+					},
+
+					fnGetCartCount: function () {
+						let self = this;
+						let param = {};
+
+						$.ajax({
+							url: "/cart/count.dox",
+							dataType: "json",
+							type: "POST",
+							data: param,
+							success: function (data) {
+								if (data.result == "success") {
+									self.cartCount = data.cartCount;
+								}
+							}
+						});
+					},
+
+					fnSelectAnimalAll: function () {
+						this.selectedAMainNo = "";
+						this.selectedASubNo = "";
+						this.selectedAnimalText = "동물 전체";
+						this.fnGetProductList();
+					},
+
+					fnSelectAnimalMain: function (aMainNo, aMainType) {
+						this.selectedAMainNo = String(aMainNo);
+						this.selectedASubNo = "";
+						this.selectedAnimalText = aMainType + " 전체";
+						this.fnGetProductList();
+					},
+
+					fnSelectAnimalSub: function (aMainNo, aSubNo, aSubType) {
+						this.selectedAMainNo = String(aMainNo);
+						this.selectedASubNo = String(aSubNo);
+						this.selectedAnimalText = aSubType;
+						this.fnGetProductList();
+					},
+
+					fnSelectItemAll: function () {
+						this.selectedIMainNo = "";
+						this.selectedISubNo = "";
+						this.selectedItemText = "상품 전체";
+						this.fnGetProductList();
+					},
+
+					fnSelectItemMain: function (iMainNo, iMainType) {
+						this.selectedIMainNo = String(iMainNo);
+						this.selectedISubNo = "";
+						this.selectedItemText = iMainType + " 전체";
+						this.fnGetProductList();
+					},
+
+					fnSelectItemSub: function (iMainNo, iSubNo, iSubType) {
+						this.selectedIMainNo = String(iMainNo);
+						this.selectedISubNo = String(iSubNo);
+						this.selectedItemText = iSubType;
+						this.fnGetProductList();
+					},
+
+					fnResetFilter: function () {
+						this.categoryTab = "animal";
+						this.openAnimalMainNo = "";
+						this.openItemMainNo = "";
+						this.selectedAMainNo = "";
+						this.selectedASubNo = "";
+						this.selectedIMainNo = "";
+						this.selectedISubNo = "";
+						this.selectedAnimalText = "동물 전체";
+						this.selectedItemText = "상품 전체";
+						this.keyword = "";
+						this.sort = "";
+						this.currentPage = 1;
+						sessionStorage.removeItem("unipetProductFilter");
+						this.fnGetProductList();
+					},
+
+					fnGetProductList: function (isResetPage) {
+						let self = this;
+
+						if (isResetPage == null) {
+							isResetPage = true;
+						}
+
+						let param = {
+							keyword: self.keyword,
+							aMainNo: self.selectedAMainNo,
+							aSubNo: self.selectedASubNo,
+							iMainNo: self.selectedIMainNo,
+							iSubNo: self.selectedISubNo,
+							sort: self.sort
+						};
+
+						$.ajax({
+							url: "/productList.dox",
+							dataType: "json",
+							type: "POST",
+							data: param,
+							success: function (data) {
+								if (data.result == "success") {
+									self.productList = data.list || [];
+
+									if (isResetPage) {
+										self.currentPage = 1;
+									}
+
+									self.fnSetPaging();
+									self.fnSaveProductFilter();
+
+								} else {
+									alert("상품 목록 조회 실패");
+								}
+							},
+							error: function (xhr) {
+								console.log(xhr.responseText);
+								alert("상품 목록 조회 중 오류가 발생했습니다.");
+							}
+						});
+					},
+
+					// 페이징 계산
+					fnSetPaging: function () {
+						let self = this;
+
+						self.totalPage = Math.ceil(self.productList.length / self.pageSize);
+
+						if (self.totalPage == 0) {
+							self.totalPage = 1;
+						}
+
+						if (self.currentPage > self.totalPage) {
+							self.currentPage = self.totalPage;
+						}
+
+						let start = (self.currentPage - 1) * self.pageSize;
+						let end = start + self.pageSize;
+
+						self.pagedProductList = self.productList.slice(start, end);
+
+						self.fnSetPageList();
+					},
+
+					// 화면에 보여줄 페이지 번호 만들기
+					fnSetPageList: function () {
+						let self = this;
+
+						self.pageList = [];
+
+						let startPage = Math.floor((self.currentPage - 1) / self.pageBlockSize) * self.pageBlockSize + 1;
+						let endPage = startPage + self.pageBlockSize - 1;
+
+						if (endPage > self.totalPage) {
+							endPage = self.totalPage;
+						}
+
+						for (let i = startPage; i <= endPage; i++) {
+							self.pageList.push(i);
+						}
+					},
+
+					// 페이지 이동
+					fnGoPage: function (page) {
+						let self = this;
+
+						if (page < 1) {
+							page = 1;
+						}
+
+						if (page > self.totalPage) {
+							page = self.totalPage;
+						}
+
+						self.currentPage = page;
+						self.fnSetPaging();
+						self.fnSaveProductFilter();
+
+						window.scrollTo(0, 0);
+					},
+
+					fnMoveDetail: function (productNo) {
+						this.fnSaveProductFilter();
+
+						pageChange("/product/view.do", {
+							productNo: productNo
+						});
+					},
+
+					fnMoveCart: function () {
+						location.href = "/cart.do";
+					},
+
+					fnFormatPrice: function (price) {
+						return Number(price).toLocaleString();
+					},
+
+					fnFormatRating: function (rating) {
+						if (rating == null || rating == "") {
+							return "0.0";
+						}
+						return Number(rating).toFixed(1);
+					},
+
+					fnGetReviewCnt: function (item) {
+						if (item.reviewCount == null || item.reviewCount == "") {
+							return 0;
+						}
+						return Number(item.reviewCount);
+					},
+
+					fnMoveMain: function () {
+						location.href = "/product.do";
+					},
+
+					fnGetRecommend: function () {
+						let self = this;
+
+						$.ajax({
+							url: "/product/recommend.dox",
+							type: "POST",
+							dataType: "json",
+							success: function (data) {
+								self.recommendList = data.list || [];
+							}
+						});
+					}
+				}, // methods
+
+				mounted() {
+					// 처음 시작할 때 실행되는 부분
+					let self = this;
+					self.fnLoadProductFilter();
+					self.fnGetCategoryList();
+					self.fnGetProductList(false);
+					self.fnGetCartCount();
+					self.fnGetRecommend();
+				}
+			});
+
+			app.mount('#app');
+		</script>
 	</body>
 
 	</html>
-
-	<script>
-		const app = Vue.createApp({
-			data() {
-				return {
-					// 카테고리
-					categoryTab: "animal",
-					animalMainList: [],
-					animalSubList: [],
-					itemMainList: [],
-					itemSubList: [],
-
-					// 상품 목록
-					productList: [],
-					pagedProductList: [],
-					recommendList: [],
-
-					// 카테고리 열림/선택
-					openAnimalMainNo: "",
-					openItemMainNo: "",
-					selectedAMainNo: "",
-					selectedASubNo: "",
-					selectedIMainNo: "",
-					selectedISubNo: "",
-					selectedAnimalText: "동물 전체",
-					selectedItemText: "상품 전체",
-
-					// 검색/정렬
-					keyword: "",
-					sort: "",
-
-					// 장바구니
-					cartCount: 0,
-
-					// 페이징
-					currentPage: 1,
-					pageSize: 8,
-					totalPage: 1,
-					pageList: [],
-					pageBlockSize: 5
-				};
-			},
-
-			methods: {
-				fnSaveProductFilter: function () {
-					let self = this;
-
-					let filter = {
-						categoryTab: self.categoryTab,
-						openAnimalMainNo: self.openAnimalMainNo,
-						openItemMainNo: self.openItemMainNo,
-						selectedAMainNo: self.selectedAMainNo,
-						selectedASubNo: self.selectedASubNo,
-						selectedIMainNo: self.selectedIMainNo,
-						selectedISubNo: self.selectedISubNo,
-						selectedAnimalText: self.selectedAnimalText,
-						selectedItemText: self.selectedItemText,
-						keyword: self.keyword,
-						sort: self.sort,
-						currentPage: self.currentPage
-					};
-
-					sessionStorage.setItem("unipetProductFilter", JSON.stringify(filter));
-				},
-
-				fnLoadProductFilter: function () {
-					let self = this;
-					let saved = sessionStorage.getItem("unipetProductFilter");
-
-					if (saved == null || saved == "") {
-						return;
-					}
-
-					try {
-						let filter = JSON.parse(saved);
-
-						self.categoryTab = filter.categoryTab || "animal";
-						self.openAnimalMainNo = filter.openAnimalMainNo || "";
-						self.openItemMainNo = filter.openItemMainNo || "";
-						self.selectedAMainNo = filter.selectedAMainNo || "";
-						self.selectedASubNo = filter.selectedASubNo || "";
-						self.selectedIMainNo = filter.selectedIMainNo || "";
-						self.selectedISubNo = filter.selectedISubNo || "";
-						self.selectedAnimalText = filter.selectedAnimalText || "동물 전체";
-						self.selectedItemText = filter.selectedItemText || "상품 전체";
-						self.keyword = filter.keyword || "";
-						self.sort = filter.sort || "";
-						self.currentPage = filter.currentPage == null || filter.currentPage == "" ? 1 : Number(filter.currentPage);
-
-					} catch (e) {
-						sessionStorage.removeItem("unipetProductFilter");
-					}
-				},
-
-				fnShowCategoryTab: function (type) {
-					this.categoryTab = type;
-					this.fnSaveProductFilter();
-				},
-
-				fnToggleAnimalSub: function (aMainNo) {
-					if (this.openAnimalMainNo == aMainNo) {
-						this.openAnimalMainNo = "";
-					} else {
-						this.openAnimalMainNo = aMainNo;
-					}
-
-					this.fnSaveProductFilter();
-				},
-
-				fnToggleItemSub: function (iMainNo) {
-					if (this.openItemMainNo == iMainNo) {
-						this.openItemMainNo = "";
-					} else {
-						this.openItemMainNo = iMainNo;
-					}
-
-					this.fnSaveProductFilter();
-				},
-
-				fnGetCategoryList: function () {
-					let self = this;
-					let param = {};
-
-					$.ajax({
-						url: "/productCategory.dox",
-						dataType: "json",
-						type: "POST",
-						data: param,
-						success: function (data) {
-							if (data.result == "success") {
-								self.animalMainList = data.animalMainList || [];
-								self.animalSubList = data.animalSubList || [];
-								self.itemMainList = data.itemMainList || [];
-								self.itemSubList = data.itemSubList || [];
-							} else {
-								alert("카테고리 조회 실패");
-							}
-						}
-					});
-				},
-
-				fnGetCartCount: function () {
-					let self = this;
-					let param = {};
-
-					$.ajax({
-						url: "/cart/count.dox",
-						dataType: "json",
-						type: "POST",
-						data: param,
-						success: function (data) {
-							if (data.result == "success") {
-								self.cartCount = data.cartCount;
-							}
-						}
-					});
-				},
-
-				fnSelectAnimalAll: function () {
-					this.selectedAMainNo = "";
-					this.selectedASubNo = "";
-					this.selectedAnimalText = "동물 전체";
-					this.fnGetProductList();
-				},
-
-				fnSelectAnimalMain: function (aMainNo, aMainType) {
-					this.selectedAMainNo = String(aMainNo);
-					this.selectedASubNo = "";
-					this.selectedAnimalText = aMainType + " 전체";
-					this.fnGetProductList();
-				},
-
-				fnSelectAnimalSub: function (aMainNo, aSubNo, aSubType) {
-					this.selectedAMainNo = String(aMainNo);
-					this.selectedASubNo = String(aSubNo);
-					this.selectedAnimalText = aSubType;
-					this.fnGetProductList();
-				},
-
-				fnSelectItemAll: function () {
-					this.selectedIMainNo = "";
-					this.selectedISubNo = "";
-					this.selectedItemText = "상품 전체";
-					this.fnGetProductList();
-				},
-
-				fnSelectItemMain: function (iMainNo, iMainType) {
-					this.selectedIMainNo = String(iMainNo);
-					this.selectedISubNo = "";
-					this.selectedItemText = iMainType + " 전체";
-					this.fnGetProductList();
-				},
-
-				fnSelectItemSub: function (iMainNo, iSubNo, iSubType) {
-					this.selectedIMainNo = String(iMainNo);
-					this.selectedISubNo = String(iSubNo);
-					this.selectedItemText = iSubType;
-					this.fnGetProductList();
-				},
-
-				fnResetFilter: function () {
-					this.categoryTab = "animal";
-					this.openAnimalMainNo = "";
-					this.openItemMainNo = "";
-					this.selectedAMainNo = "";
-					this.selectedASubNo = "";
-					this.selectedIMainNo = "";
-					this.selectedISubNo = "";
-					this.selectedAnimalText = "동물 전체";
-					this.selectedItemText = "상품 전체";
-					this.keyword = "";
-					this.sort = "";
-					this.currentPage = 1;
-					sessionStorage.removeItem("unipetProductFilter");
-					this.fnGetProductList();
-				},
-
-				fnGetProductList: function (isResetPage) {
-					let self = this;
-
-					if (isResetPage == null) {
-						isResetPage = true;
-					}
-
-					let param = {
-						keyword: self.keyword,
-						aMainNo: self.selectedAMainNo,
-						aSubNo: self.selectedASubNo,
-						iMainNo: self.selectedIMainNo,
-						iSubNo: self.selectedISubNo,
-						sort: self.sort
-					};
-
-					$.ajax({
-						url: "/productList.dox",
-						dataType: "json",
-						type: "POST",
-						data: param,
-						success: function (data) {
-							if (data.result == "success") {
-								self.productList = data.list || [];
-
-								if (isResetPage) {
-									self.currentPage = 1;
-								}
-
-								self.fnSetPaging();
-								self.fnSaveProductFilter();
-
-							} else {
-								alert("상품 목록 조회 실패");
-							}
-						},
-						error: function (xhr) {
-							console.log(xhr.responseText);
-							alert("상품 목록 조회 중 오류가 발생했습니다.");
-						}
-					});
-				},
-
-				// 페이징 계산
-				fnSetPaging: function () {
-					let self = this;
-
-					self.totalPage = Math.ceil(self.productList.length / self.pageSize);
-
-					if (self.totalPage == 0) {
-						self.totalPage = 1;
-					}
-
-					if (self.currentPage > self.totalPage) {
-						self.currentPage = self.totalPage;
-					}
-
-					let start = (self.currentPage - 1) * self.pageSize;
-					let end = start + self.pageSize;
-
-					self.pagedProductList = self.productList.slice(start, end);
-
-					self.fnSetPageList();
-				},
-
-				// 화면에 보여줄 페이지 번호 만들기
-				fnSetPageList: function () {
-					let self = this;
-
-					self.pageList = [];
-
-					let startPage = Math.floor((self.currentPage - 1) / self.pageBlockSize) * self.pageBlockSize + 1;
-					let endPage = startPage + self.pageBlockSize - 1;
-
-					if (endPage > self.totalPage) {
-						endPage = self.totalPage;
-					}
-
-					for (let i = startPage; i <= endPage; i++) {
-						self.pageList.push(i);
-					}
-				},
-
-				// 페이지 이동
-				fnGoPage: function (page) {
-					let self = this;
-
-					if (page < 1) {
-						page = 1;
-					}
-
-					if (page > self.totalPage) {
-						page = self.totalPage;
-					}
-
-					self.currentPage = page;
-					self.fnSetPaging();
-					self.fnSaveProductFilter();
-
-					window.scrollTo(0, 0);
-				},
-
-				fnMoveDetail: function (productNo) {
-					this.fnSaveProductFilter();
-
-					pageChange("/product/view.do", {
-						productNo: productNo
-					});
-				},
-
-				fnMoveCart: function () {
-					location.href = "/cart.do";
-				},
-
-				fnFormatPrice: function (price) {
-					return Number(price).toLocaleString();
-				},
-
-				fnFormatRating: function (rating) {
-					if (rating == null || rating == "") {
-						return "0.0";
-					}
-					return Number(rating).toFixed(1);
-				},
-
-				fnGetReviewCnt: function (item) {
-					if (item.reviewCount == null || item.reviewCount == "") {
-						return 0;
-					}
-					return Number(item.reviewCount);
-				},
-
-				fnMoveMain: function () {
-					location.href = "/product.do";
-				},
-
-				fnGetRecommend: function () {
-					let self = this;
-
-					$.ajax({
-						url: "/product/recommend.dox",
-						type: "POST",
-						dataType: "json",
-						success: function (data) {
-							self.recommendList = data.list || [];
-						}
-					});
-				}
-			}, // methods
-
-			mounted() {
-				// 처음 시작할 때 실행되는 부분
-				let self = this;
-				self.fnLoadProductFilter();
-				self.fnGetCategoryList();
-				self.fnGetProductList(false);
-				self.fnGetCartCount();
-				self.fnGetRecommend();
-			}
-		});
-
-		app.mount('#app');
-	</script>
