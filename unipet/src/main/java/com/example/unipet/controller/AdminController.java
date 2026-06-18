@@ -30,15 +30,15 @@ public class AdminController {
 	}
 	
 	@RequestMapping("/admin.do") 
-	public String adminPage(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception{
-		HttpSession session = request.getSession();
-		String role = (String) session.getAttribute("sessionRole");
+	public String adminPage(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+	    HttpSession session = request.getSession();
+	    String role = (String) session.getAttribute("sessionRole");
 
-		if (role == null || !role.equals("ADMIN")) {
-			return "redirect:/admin/login.do";
-		}
+	    if (role == null || !role.equals("ADMIN")) {
+	        return "redirect:/admin/login.do";
+	    }
 
-		return "/admin/adminPage";
+	    return "redirect:/admin/report.do";
 	}
 	
 	@RequestMapping("/admin/logout.do")
@@ -50,6 +50,42 @@ public class AdminController {
 		}
 
 		return "redirect:/admin/login.do";
+	}
+	
+	@RequestMapping("/admin/report.do") 
+	public String adminReport(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+	    HttpSession session = request.getSession();
+	    String role = (String) session.getAttribute("sessionRole");
+
+	    if (role == null || !role.equals("ADMIN")) {
+	        return "redirect:/admin/login.do";
+	    }
+
+	    return "/admin/adminReport";
+	}
+
+	@RequestMapping("/admin/storeApprove.do") 
+	public String adminStoreApprove(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+	    HttpSession session = request.getSession();
+	    String role = (String) session.getAttribute("sessionRole");
+
+	    if (role == null || !role.equals("ADMIN")) {
+	        return "redirect:/admin/login.do";
+	    }
+
+	    return "/admin/adminStoreApprove";
+	}
+
+	@RequestMapping("/admin/qnaAnswer.do") 
+	public String adminQnaAnswer(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+	    HttpSession session = request.getSession();
+	    String role = (String) session.getAttribute("sessionRole");
+
+	    if (role == null || !role.equals("ADMIN")) {
+	        return "redirect:/admin/login.do";
+	    }
+
+	    return "/admin/adminQnaAnswer";
 	}
 	
 	@RequestMapping(value = "/admin/login.dox", method = RequestMethod.POST)

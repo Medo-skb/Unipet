@@ -20,24 +20,9 @@
         <div class="biz-page-wrap">
             <div class="biz-page-container">
 
-                <aside class="biz-sidebar">
-                    <div class="sidebar-title">사업자 마이페이지</div>
-
-                    <ul class="sidebar-menu">
-                        <li class="menu-item">
-                            <a href="/biz/MyPage.do">홈</a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="/biz/storeEdit.do">내 정보 및 업체 정보 수정</a>
-                        </li>
-                        <li class="menu-item active">
-                            <a href="/biz/reservation.do">예약 현황</a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="/biz/review.do">리뷰 관리</a>
-                        </li>
-                    </ul>
-                </aside>
+                <jsp:include page="/WEB-INF/bizMyPage/bizSidebar.jsp">
+                    <jsp:param name="activeMenu" value="reservation" />
+                </jsp:include>
 
                 <section class="biz-content">
                     <div class="content-header">

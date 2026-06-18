@@ -360,7 +360,6 @@ public class BizMyPageService {
 			List<Object> deleteMenuNoList =
 			        (List<Object>) map.get("deleteMenuNoList");
 
-			// 삭제할 메뉴 먼저 DELETE
 			if (deleteMenuNoList != null) {
 			    for (Object menuNo : deleteMenuNoList) {
 			        HashMap<String, Object> deleteMap = new HashMap<String, Object>();
@@ -370,7 +369,6 @@ public class BizMyPageService {
 			    }
 			}
 
-			// 남아있는 메뉴는 INSERT 또는 UPDATE
 			for (HashMap<String, Object> item : menuList) {
 			    Object menuNo = item.get("menuNo");
 

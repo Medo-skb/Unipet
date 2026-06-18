@@ -14,12 +14,6 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/header.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/footer.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/user/usermypage.css">
-
-    <style>
-        [v-cloak] { display:none; }
-        .health-tabs { display:flex; gap:10px; flex-wrap:wrap; }
-        .small-btn.active { background:var(--main); color:#fff; border-color:var(--main); }
-    </style>
 </head>
 
 <body>
