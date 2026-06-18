@@ -119,7 +119,12 @@
 
                 if (data.result === true || data.result === "success") {
                     alert(data.message);
-                    location.href = "/main.do";
+                    if (data.needPhoneVerify === true || data.needPhoneVerify === "true") {
+                        alert("휴대폰 번호 확인이 필요합니다.");
+                        location.href = "/user/phone-verify.do";
+                    } else {
+                        location.href = "/main.do";
+                    }
                 } else {
                     alert(data.message || "아이디 또는 비밀번호를 확인해주세요.");
  
