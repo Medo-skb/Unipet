@@ -26,13 +26,6 @@
         <!-- 마이페이지 CSS -->
         <link href="/css/user/usermypage.css" rel="stylesheet">
 
-        <style>
-            /* Vue 렌더링 전 화면 숨김 */
-            [v-cloak] {
-                display: none;
-            }
-        </style>
-
         <title>UNIPET - 구독 관리</title>
 
     </head>

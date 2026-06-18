@@ -17,6 +17,8 @@
     --image-soft: #f8f8f8;
 }
 
+[v-cloak] { display: none; }
+
 .site-header {
     position: sticky;
     top: 0;

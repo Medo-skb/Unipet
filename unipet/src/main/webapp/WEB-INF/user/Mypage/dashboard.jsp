@@ -14,12 +14,6 @@
 
         <link href="/css/user/usermypage.css" rel="stylesheet">
 
-        <style>
-            [v-cloak] {
-                display: none;
-            }
-        </style>
-
         <title>UNIPET - 홈</title>
     </head>
 

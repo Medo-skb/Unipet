@@ -12,12 +12,6 @@
     <script src="/js/page-change.js"></script>
 
     <link href="/css/user/usermypage.css" rel="stylesheet">
-
-    <style>
-        [v-cloak] {
-            display: none;
-        }
-    </style>
 </head>
 
 <body>

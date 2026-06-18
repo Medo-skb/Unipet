@@ -27,15 +27,6 @@
     <link href="/css/user/usermypage.css"
           rel="stylesheet">
 
-    <style>
-
-        /* Vue 렌더링 전 숨김 */
-        [v-cloak] {
-            display: none;
-        }
-
-    </style>
-
     <title>UNIPET - 커뮤니티 활동</title>
 
 </head>

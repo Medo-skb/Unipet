@@ -12,12 +12,6 @@
 
     <link href="/css/user/usermypage.css" rel="stylesheet">
 
-    <style>
-        [v-cloak] {
-            display: none;
-        }
-    </style>
-
     <title>UNIPET - 주문 내역</title>
 </head>
 
