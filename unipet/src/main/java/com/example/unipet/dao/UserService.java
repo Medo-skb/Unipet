@@ -1,13 +1,17 @@
 package com.example.unipet.dao;
 
 import java.util.HashMap;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import com.example.unipet.common.Message;
 import com.example.unipet.mapper.UserMapper;
+import com.example.unipet.model.Store;
 import com.example.unipet.model.User;
 
 @Service
@@ -55,7 +59,26 @@ public class UserService {
 		return result;
 	}
 
+	// 외부업체 검색
+	public HashMap<String, Object> getExternalStoreList(HashMap<String, Object> map) {
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+		try {
+			List<Store> list = userMapper.selectExternalStoreList(map);
+
+			resultMap.put("list", list);
+			resultMap.put("result", "success");
+			resultMap.put("message", Message.MSG_SEARCH);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			resultMap.put("result", "fail");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
+		}
+		return resultMap;
+	}
+
 	// 사용자 회원가입
+	@Transactional(rollbackFor = Exception.class)
 	public HashMap<String, Object> insertUser(HashMap<String, Object> map) {
 		HashMap<String, Object> result = new HashMap<>();
 
@@ -70,12 +93,14 @@ public class UserService {
 
 			String phone = (String) map.get("phone");
 			if (phone != null) {
-				phone = phone.replaceAll("[^0-9]", "");
-				map.put("phone", phone);
+				map.put("phone", normalizePhone(phone));
 			}
 
 			String rawPwd = (String) map.get("pwd");
 			map.put("pwd", passwordEncoder.encode(rawPwd));
+
+			// 휴대폰 번호를 새 가입자에게 귀속
+			clearPhoneOwner(map);
 
 			int count = userMapper.insertUser(map);
 			result.put("result", count > 0);
@@ -83,6 +108,7 @@ public class UserService {
 
 		} catch (Exception e) {
 			e.printStackTrace();
+			TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
 			result.put("result", false);
 			result.put("message", "회원가입 중 오류가 발생했습니다.");
 		}
@@ -91,10 +117,51 @@ public class UserService {
 	}
 
 	// 사업자 회원가입
+	@Transactional(rollbackFor = Exception.class)
 	public HashMap<String, Object> insertBizUser(HashMap<String, Object> map) {
 		HashMap<String, Object> result = new HashMap<>();
 
 		try {
+			int idCount = userMapper.checkUser(map);
+			if (idCount > 0) {
+				result.put("result", false);
+				result.put("message", "이미 사용중인 아이디입니다.");
+				return result;
+			}
+
+			if (map.get("storeNo") == null || String.valueOf(map.get("storeNo")).isBlank()) {
+				result.put("result", false);
+				result.put("message", "신청할 업체를 선택해주세요.");
+				return result;
+			}
+
+			int availableStoreCount = userMapper.selectAvailableStoreCount(map);
+			if (availableStoreCount == 0) {
+				result.put("result", false);
+				result.put("message", "신청할 수 없는 업체입니다.");
+				return result;
+			}
+
+			int pendingStoreCount = userMapper.selectPendingSubmitCountByStore(map);
+			if (pendingStoreCount > 0) {
+				result.put("result", false);
+				result.put("message", "이미 검토 중인 업체입니다.");
+				return result;
+			}
+
+			int pendingUserCount = userMapper.selectPendingSubmitCountByUser(map);
+			if (pendingUserCount > 0) {
+				result.put("result", false);
+				result.put("message", "이미 검토 중인 신청이 있습니다.");
+				return result;
+			}
+
+			if (map.get("originName") == null || String.valueOf(map.get("originName")).isBlank()) {
+				result.put("result", false);
+				result.put("message", "사업자등록증 파일을 첨부해주세요.");
+				return result;
+			}
+
 			String rawPwd = (String) map.get("pwd");
 			map.put("pwd", passwordEncoder.encode(rawPwd));
 
@@ -102,51 +169,24 @@ public class UserService {
 			int count = userMapper.insertBizUser(map);
 
 			if (count > 0) {
+				// 2. 사업자등록증 증빙 파일 저장
+				map.put("fileName", map.get("fileName") != null ? map.get("fileName") : map.get("bizFileName"));
+				map.put("originName", map.get("originName") != null ? map.get("originName") : map.get("bizFileName"));
+				map.put("filePath", map.get("filePath") != null ? map.get("filePath") : "/file/store/");
+				map.put("fileExt", map.get("fileExt") != null ? map.get("fileExt") : getFileExt(String.valueOf(map.get("bizFileName"))));
+				map.put("fileSize", map.get("fileSize") != null ? map.get("fileSize") : 0);
+				userMapper.insertStoreFile(map);
 
-				// 2. store 테이블 기본값 세팅
-				if (map.get("storeName") == null || String.valueOf(map.get("storeName")).isBlank()) {
-					map.put("storeName", "임시매장");
-				}
+				// 3. 사업자 업체 신청 내역 저장
+				userMapper.insertStoreSubmit(map);
 
-				if (map.get("sCategory") == null || String.valueOf(map.get("sCategory")).isBlank()) {
-					map.put("sCategory", "기타");
-				}
-
-				if (map.get("sAddr") == null) {
-					map.put("sAddr", "");
-				}
-
-				if (map.get("sFullAddr") == null) {
-					map.put("sFullAddr", "");
-				}
-
-				if (map.get("lat") == null || String.valueOf(map.get("lat")).isBlank()) {
-					map.put("lat", 0);
-				}
-
-				if (map.get("lng") == null || String.valueOf(map.get("lng")).isBlank()) {
-					map.put("lng", 0);
-				}
-
-				// 3. store 테이블 저장
-				userMapper.insertStore(map);
-
-				// 4. 방금 생성된 STORE_NO 조회
-				int storeNo = userMapper.selectStoreNoByUserId(map);
-
-				// 5. 사업자등록증 파일 정보가 있으면 store_file 저장
-				if (map.get("originName") != null && !String.valueOf(map.get("originName")).isBlank()) {
-					HashMap<String, Object> fileMap = new HashMap<>();
-
-					fileMap.put("storeNo", storeNo);
-					fileMap.put("fileName", map.get("fileName") != null ? map.get("fileName") : map.get("bizFileName"));
-					fileMap.put("originName", map.get("originName") != null ? map.get("originName") : map.get("bizFileName"));
-					fileMap.put("filePath", map.get("filePath") != null ? map.get("filePath") : "/file/store/");
-					fileMap.put("fileExt", map.get("fileExt") != null ? map.get("fileExt") : getFileExt(String.valueOf(map.get("bizFileName"))));
-					fileMap.put("fileSize", map.get("fileSize") != null ? map.get("fileSize") : 0);
-					fileMap.put("isProof", "Y");
-
-					userMapper.insertStoreFile(fileMap);
+				// 4. 신청한 업체 상태를 검토 대기 상태로 변경
+				int updatedStoreCount = userMapper.updateStoreStatusToPending(map);
+				if (updatedStoreCount == 0) {
+					TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+					result.put("result", false);
+					result.put("message", "신청할 수 없는 업체입니다.");
+					return result;
 				}
 			}
 
@@ -155,6 +195,7 @@ public class UserService {
 
 		} catch (Exception e) {
 			e.printStackTrace();
+			TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
 			result.put("result", false);
 			result.put("message", "사업자 회원가입 중 오류가 발생했습니다.");
 		}
@@ -168,6 +209,23 @@ public class UserService {
 			return "";
 		}
 		return fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+	}
+
+	// 휴대폰 번호 숫자만 추출
+	private String normalizePhone(String phone) {
+		if (phone == null) {
+			return "";
+		}
+		return phone.replaceAll("[^0-9]", "");
+	}
+
+	// 같은 휴대폰 번호를 가진 기존 일반 사용자 계정 해제
+	private void clearPhoneOwner(HashMap<String, Object> map) {
+		if (map.get("phone") == null || String.valueOf(map.get("phone")).isBlank()) {
+			return;
+		}
+
+		userMapper.clearUserPhoneOwner(map);
 	}
 
 	// 일반 로그인
@@ -363,15 +421,21 @@ public class UserService {
 		return result;
 	}
 
+	// 휴대폰 번호 저장
+	@Transactional(rollbackFor = Exception.class)
 	public HashMap<String, Object> updatePhone(HashMap<String, Object> map) {
 		HashMap<String, Object> result = new HashMap<>();
 
 		try {
+			map.put("phone", normalizePhone(String.valueOf(map.get("phone"))));
+			clearPhoneOwner(map);
+
 			int count = userMapper.updatePhone(map);
 			result.put("result", count > 0);
 			result.put("message", count > 0 ? "휴대폰 번호가 저장되었습니다." : "휴대폰 번호 저장 실패");
 		} catch (Exception e) {
 			e.printStackTrace();
+			TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
 			result.put("result", false);
 			result.put("message", "휴대폰 번호 저장 중 오류가 발생했습니다.");
 		}
@@ -381,16 +445,14 @@ public class UserService {
 
 	public void insertPhoneVerify(HashMap<String, Object> map) {
 		String phone = String.valueOf(map.get("phone"));
-		phone = phone.replace("-", "");
-		map.put("phone", phone);
+		map.put("phone", normalizePhone(phone));
 
 		userMapper.insertPhoneVerify(map);
 	}
 
 	public HashMap<String, Object> selectLatestPhoneVerify(HashMap<String, Object> map) {
 		String phone = String.valueOf(map.get("phone"));
-		phone = phone.replace("-", "");
-		map.put("phone", phone);
+		map.put("phone", normalizePhone(phone));
 
 		return userMapper.selectLatestPhoneVerify(map);
 	}
@@ -427,15 +489,21 @@ public class UserService {
 		return resultMap;
 	}
 
+	// 휴대폰 재인증 번호 저장
+	@Transactional(rollbackFor = Exception.class)
 	public HashMap<String, Object> updateSms(HashMap<String, Object> map) {
 		HashMap<String, Object> resultMap = new HashMap<>();
 		try {
+			map.put("phone", normalizePhone(String.valueOf(map.get("phone"))));
+			clearPhoneOwner(map);
+
 			userMapper.updateSms(map);
 
 			resultMap.put("result", true);
 			resultMap.put("message", Message.MSG_ADD);
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
+			TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
 			resultMap.put("result", false);
 			resultMap.put("message", Message.MSG_SERVER_ERR);
 		}
