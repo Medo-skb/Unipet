@@ -351,3 +351,7 @@
 	color: #ff7a00;
 	text-decoration: underline;
 }
+
+.comment-edit-btn-row {
+	margin-top: 10px;
+}

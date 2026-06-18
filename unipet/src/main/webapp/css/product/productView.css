@@ -964,6 +964,10 @@ button {
 	z-index: 10 !important;
 }
 
+.cart-badge-hidden {
+	display: none !important;
+}
+
 /* ============================= */
 /* 반응형 */
 /* ============================= */

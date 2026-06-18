@@ -814,10 +814,10 @@
 						if (badge != null) {
 							if (count > 0) {
 								badge.innerText = count;
-								badge.style.display = "inline-block";
+								badge.classList.remove("cart-badge-hidden");
 							} else {
 								badge.innerText = "";
-								badge.style.display = "none";
+								badge.classList.add("cart-badge-hidden");
 							}
 						}
 					},
