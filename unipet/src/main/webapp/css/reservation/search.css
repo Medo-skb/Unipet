@@ -166,7 +166,6 @@
     justify-content: space-between; 
     align-items: center;            
     padding: 15px 20px;
-    border-bottom: 1px solid #eee;
     background-color: #fff;
 }
 
@@ -220,6 +219,36 @@
     box-shadow: 0 0 0 2px rgba(255, 75, 130, 0.1);
 }
 
+/* 회원사 전용 체크박스 컨테이너 */
+.member-filter-wrap {
+    display: flex;
+    justify-content: flex-end; /* 오른쪽 배치 */
+    padding: 0px 20px;
+    padding-bottom: 10px;
+    background-color: #fff;
+    border-bottom: 1px solid var(--line-soft);
+}
+
+/* 체크박스 정렬 라벨 */
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-main);
+    cursor: pointer;
+    font-weight: 500;
+}
+
+/* 체크박스 본품에 포인트 컬러 할당 */
+.checkbox-label input[type="checkbox"] {
+    accent-color: #ff4b82; /* 유니펫 시그니처 컬러 */
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    margin: 0;
+}
+
 .name-wrap {
     display: flex;
     justify-content: space-between;
@@ -227,8 +256,6 @@
     gap: 12px;
     margin: 0 0 8px;
 }
-
-
 
 .title-area {
     display: flex;
@@ -513,6 +540,48 @@
 	padding: 0 !important;
 }
 
+/* 기존 display: none을 제거하고 화살표의 원래 레이아웃을 복구 */
 .flatpickr-time .numInputWrapper span {
-	display: none !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    opacity: 1 !important; /* 마우스를 올리지 않아도 항상 보이도록 설정 */
+    visibility: visible !important;
+    border: none !important;
+    background: transparent !important;
+}
+
+/* 위아래 화살표 각각의 위치와 크기 미세 조정 */
+.flatpickr-time .numInputWrapper span.arrowUp {
+    top: 2px !important;
+}
+
+.flatpickr-time .numInputWrapper span.arrowDown {
+    bottom: 2px !important;
+}
+
+/* 투박한 기본 화살표 내부 모양을 깔끔한 내장 삼각형 스타일로 유지 */
+.flatpickr-time .numInputWrapper span:after {
+    border-left: 4px solid transparent !important;
+    border-right: 4px solid transparent !important;
+    transition: border-color 0.2s ease;
+}
+
+.flatpickr-time .numInputWrapper span.arrowUp:after {
+    border-bottom: 4px solid #666 !important; /* 위쪽 화살표 색상 기본값 */
+    top: 30% !important;
+}
+
+.flatpickr-time .numInputWrapper span.arrowDown:after {
+    border-top: 4px solid #666 !important; /* 아래쪽 화살표 색상 기본값 */
+    top: 40% !important;
+}
+
+/* 마우스 호버 시 유니펫 포인트 핑크색으로 변화하여 직관성 제공 */
+.flatpickr-time .numInputWrapper span.arrowUp:hover:after {
+    border-bottom-color: #ff4b82 !important;
+}
+
+.flatpickr-time .numInputWrapper span.arrowDown:hover:after {
+    border-top-color: #ff4b82 !important;
 }

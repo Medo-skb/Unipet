@@ -33,9 +33,9 @@
                     <div class="input-group">
                         <label>시간</label>
                         <div class="input-box">
-                            <input type="text" id="start-time" placeholder="시작" style="width: 60px; text-align: center;">
+                            <input type="text" id="start-time" placeholder="시작">
                             <span style="margin: 0 5px;">~</span>
-                            <input type="text" id="end-time" placeholder="종료" style="width: 60px; text-align: center;">
+                            <input type="text" id="end-time" placeholder="종료">
                         </div>
                     </div>
                     <div id="search-area">
@@ -66,7 +66,13 @@
                                 <option value="rating">평점순</option>
                             </select>
                         </div>
+                    </div>
 
+                    <div class="member-filter-wrap">
+                        <label class="checkbox-label">
+                            <input type="checkbox" v-model="onlyMember" @change="sortList">
+                            유니펫 회원사만 보기
+                        </label>
                     </div>
 
                     <div v-for="(item, index) in list.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)" 
@@ -103,7 +109,7 @@
                     </div>
 
                     <div v-if="list.length === 0" class="no-result">
-                        현재 지도 영역 내에<br>등록된 업체가 없습니다.
+                        현재 조건에 부합하는<br>등록된 업체가 없습니다.
                     </div>
 
                     <div class="pagination-wrap" v-if="totalPages > 1">
@@ -152,9 +158,11 @@
                 map: null,
                 markers: [],
                 list: [],
+                rawList: [],         // 🎯 [추가] 필터링 전 원본 데이터를 안전하게 보관할 배열
                 infowindow: null,
                 selectedType: '',
                 selectedSort: 'distance',
+                onlyMember: false,   // 🎯 [추가] 회원사만 보기 체크박스 상태값
                 myMarker: null,
                 searchDate: { start: '', end: '' },
                 searchTime: { start: '', end: '' },
@@ -216,14 +224,14 @@
 
             getDistance(lat1, lng1, lat2, lng2) {
                 function deg2rad(deg) { return deg * (Math.PI / 180); }
-                const R = 6371; // 지구 반지름 (km)
+                const R = 6371; 
                 const dLat = deg2rad(lat2 - lat1);
                 const dLon = deg2rad(lng2 - lng1);
                 const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
                         Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
                         Math.sin(dLon/2) * Math.sin(dLon/2);
                 const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-                return R * c; // 계산된 거리 (km)
+                return R * c; 
             },
 
             showMyMarker(lat, lng) {
@@ -241,8 +249,19 @@
                 this.selectedType = type;
                 this.fnStoreList();
             },
+            
+            // 🎯 [고도화] 필터링과 정렬을 동시에 처리하는 정적 제어 로직
             sortList() {
-                this.list.sort((a, b) => {
+                // 1) 원본 데이터 복제
+                let tempArray = [...this.rawList];
+
+                // 2) 체크박스가 체크되어 있다면 회원사(GEN)만 필터링
+                if (this.onlyMember) {
+                    tempArray = tempArray.filter(item => item.sStatus && item.sStatus.toUpperCase() === 'GEN');
+                }
+
+                // 3) 정렬 기준 적용 (1순위 회원사 상단 고정, 2순위 정렬 옵션)
+                tempArray.sort((a, b) => {
                     const aS = a.sStatus ? a.sStatus.toLowerCase() : '';
                     const bS = b.sStatus ? b.sStatus.toLowerCase() : '';
                     
@@ -260,7 +279,10 @@
                     }
                 });
 
+                // 4) 최적화 결과물을 가시 목록(list)에 바인딩 후 페이징 초기화
+                this.list = tempArray;
                 this.currentPage = 1;
+                
                 const listContainer = document.querySelector('#left');
                 if (listContainer) listContainer.scrollTop = 0;
             },
@@ -314,7 +336,8 @@
                             }
                         });
                         
-                        this.list = uniqueData;
+                        // 🎯 [수정] 수신된 원본 가공 리스트를 rawList에 안전하게 대입 후 정렬/필터 호출
+                        this.rawList = uniqueData;
                         this.sortList(); 
 
                         this.$nextTick(() => {
@@ -328,6 +351,7 @@
                 this.searchDate = { start: '', end: '' };
                 this.searchTime = { start: '', end: '' };
                 this.selectedType = '';
+                this.onlyMember = false; // 🎯 초기화 시 체크박스 해제 추가
 
                 document.getElementById('date-range')._flatpickr.clear();
                 document.getElementById('start-time')._flatpickr.clear();
