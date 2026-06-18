@@ -62,7 +62,7 @@
 
         <script src="${pageContext.request.contextPath}/js/main/main.js"></script>
 
-        <div id="app">
+        <div id="app" v-cloak>
 
             <div class="basic-info-modal-wrap" v-if="showBasicInfoModal">
                 <div class="basic-info-modal-box">

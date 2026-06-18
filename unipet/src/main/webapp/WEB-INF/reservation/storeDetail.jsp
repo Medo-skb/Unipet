@@ -47,6 +47,13 @@
                     <hr>
                     <div class="sContents">{{ storeInfo.sContents }}</div>
                 </div>
+                <div class="time">
+                    <div class="time-header">
+                        <span class="label">영업시간:</span>
+                        <span class="value">{{ formatStoreTime(storeInfo.openTime) }} ~ {{ formatStoreTime(storeInfo.closeTime) }}</span>
+                    </div>
+                    <hr>
+                </div>
                 <div class="menu">
                     <div>가격표</div>
                     <hr>
@@ -109,6 +116,11 @@
             };
         },
         methods: {
+            formatStoreTime(time) {
+                if (!time) return '';
+                return time.substring(0, 5); // 앞에서부터 5글자만 추출
+            },
+            
             fnGetStoreDetail() {
                 const self = this;
                 $.ajax({

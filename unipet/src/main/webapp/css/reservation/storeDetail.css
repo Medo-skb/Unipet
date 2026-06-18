@@ -133,7 +133,8 @@
 
 .intro hr,
 .menu hr,
-.review hr {
+.review hr,
+.time hr {
     border: 0;
     border-top: 1px solid var(--line-soft);
     margin: 0 0 18px;
@@ -143,6 +144,25 @@
     font-size: 15px;
     color: var(--text-sub);
     line-height: 1.8;
+}
+
+.time-header {
+    display: flex;
+    align-items: center; /* 높이 중앙 정렬 */
+    gap: 10px; /* 라벨과 시간 사이 간격 */
+    margin-bottom: 14px;
+}
+
+.time-header .label {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.time-header .value {
+    font-size: 20px;
+    font-weight: 600;
+    color: #555;
 }
 
 #MenuList {
