@@ -14,17 +14,13 @@ button {
     padding: 40px 0 80px;
 }
 
-
-	.user-page-container {
-	    width: 100%;
-	    max-width: 1200px;
-	    margin: 0 auto;
-	    display: flex;
-	    gap: 40px;
-	    align-items: flex-start;
-	}
-   
-
+.user-page-container {
+    width: 100%;
+    max-width: 1500px;   /* 1200 → 1500 */
+    margin: 0 auto;
+    display: flex;
+    gap: 40px;
+}
 
 .user-sidebar {
     width: 240px;
@@ -98,10 +94,6 @@ button {
     color: var(--text-main);
 }
 
-.page-inner {
-    padding: 0;
-}
-
 .section-box {
     background: #fff;
     border: 1px solid var(--line-soft);
@@ -126,6 +118,66 @@ button {
     padding-bottom: 14px;
     margin-bottom: 20px;
     border-bottom: 1px solid var(--line-soft);
+}
+
+.section-header .section-title {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.dashboard-new {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1.6fr) minmax(320px, 1fr) !important;
+    gap: 24px !important;
+    align-items: start !important;
+}
+
+.dashboard-new .dash-left,
+.dashboard-new .dash-right {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 24px !important;
+}
+
+.community-wide-section {
+    grid-column: 1 / 3 !important;
+}
+
+.profile-info-box,
+.info-card {
+    border: 1px solid var(--line-soft);
+    border-radius: 18px;
+    background: #fff;
+}
+
+.profile-info-box {
+    padding: 22px;
+}
+
+.profile-info-row {
+    display: flex;
+    min-height: 46px;
+    border-bottom: 1px solid var(--line-soft);
+    font-size: 15px;
+}
+
+.profile-info-row:last-child {
+    border-bottom: none;
+}
+
+.profile-info-label {
+    width: 110px;
+    padding: 12px 0;
+    font-weight: 700;
+    color: var(--text-main);
+    flex-shrink: 0;
+}
+
+.profile-info-row > div:last-child {
+    flex: 1;
+    padding: 12px 0;
+    color: var(--text-main);
 }
 
 .grid-2 {
@@ -227,62 +279,6 @@ button {
     white-space: pre-line;
 }
 
-.mypage-dashboard {
-    display: grid;
-    grid-template-columns: 1.55fr 1fr;
-    gap: 18px;
-}
-
-.dash-left,
-.dash-right {
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-}
-
-.profile-summary {
-    display: block;
-}
-
-.profile-info-box,
-.info-card,
-.subscription-box,
-.mini-panel,
-.mini-action-card {
-    border: 1px solid var(--line-soft);
-    border-radius: 18px;
-    background: #fff;
-}
-
-.profile-info-box {
-    padding: 22px;
-}
-
-.profile-info-row {
-    display: flex;
-    min-height: 46px;
-    border-bottom: 1px solid var(--line-soft);
-    font-size: 15px;
-}
-
-.profile-info-row:last-child {
-    border-bottom: none;
-}
-
-.profile-info-label {
-    width: 110px;
-    padding: 12px 0;
-    font-weight: 700;
-    color: var(--text-main);
-    flex-shrink: 0;
-}
-
-.profile-info-row > div:last-child {
-    flex: 1;
-    padding: 12px 0;
-    color: var(--text-main);
-}
-
 .pet-list {
     display: flex;
     gap: 18px;
@@ -298,7 +294,6 @@ button {
     text-align: center;
     cursor: pointer;
     transition: transform 0.2s ease;
-
 }
 
 .pet-card.active {
@@ -316,16 +311,20 @@ button {
 }
 
 .pet-avatar {
-    width: 66px;
-    height: 66px;
+    width: 72px;
+    height: 72px;
     border-radius: 50%;
-    background: var(--main);
-    color: #fff;
-    font-size: 26px;
-    font-weight: 700;
+    background: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
+}
+
+.pet-avatar img {
+    width: 60%;
+    height: 60%;
+    object-fit: contain;
 }
 
 .pet-body {
@@ -347,9 +346,8 @@ button {
     margin-bottom: 10px;
 }
 
-
-
 .pet-btn {
+    min-width: 58px;
     height: 32px;
     padding: 0 10px;
     border: 1px solid var(--line-soft);
@@ -372,37 +370,22 @@ button {
     color: #fff;
 }
 
-.pet-btn.main.gray {
-    background: #eee;
-    border-color: #ddd;
-    color: #999;
-    cursor: default;
-}
-
 .pet-btn.delete {
     border-color: #ff6b7a;
     color: #ff4f6d;
 }
 
-.pet-add-card {
-    width: 170px;
-    min-height: 230px;
-    border: 1px dashed var(--main);
-    border-radius: 18px;
-    background: rgba(255, 79, 109, 0.04);
-    color: var(--main);
+.pet-sub-btn-row {
     display: flex;
-    align-items: center;
     justify-content: center;
-    flex-direction: column;
-    font-weight: 600;
-    gap: 10px;
-    cursor: pointer;
+    gap: 8px;
+    padding: 0 12px 14px;
 }
 
-.pet-add-plus {
-    font-size: 42px;
-    line-height: 1;
+.pet-sub-btn-row .pet-btn {
+    flex: 1;
+    max-width: 90px;
+    text-align: center;
 }
 
 .info-card {
@@ -439,108 +422,47 @@ button {
     margin-top: 4px;
 }
 
-.mini-dashboard {
-    display: grid;
-    /* ✅ 1:1 비율을 깨고 왼쪽(예약)을 1.5배 더 넓게 설정합니다 */
-    grid-template-columns: 1.5fr 1fr; 
-    gap: 18px;
-}
-
-/* 아래 .mini-action-grid는 그대로 1:1을 유지하고 싶다면 분리하는 것이 좋습니다 */
-.mini-action-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 18px;
-}
-
-.mini-panel {
-    overflow: hidden;
-}
-
-.mini-panel-head {
-    padding: 14px 18px;
-    background: rgba(255, 79, 109, 0.06);
-    color: var(--main);
-    font-size: 15px;
-    font-weight: 700;
-    border-bottom: 1px solid var(--line-soft);
-}
-
-.mini-panel-body {
-    padding: 18px;
-}
-
-.mini-action-card {
-    padding: 22px;
-}
-
-.subscription-box {
-    padding: 22px;
-}
-
-.sub-title {
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--text-main);
-    margin-bottom: 10px;
-}
-
-.sub-date,
-.sub-state {
-    font-size: 14px;
-    color: var(--text-sub);
-    margin-bottom: 10px;
-}
-
-.sub-btn {
-    width: 100%;
-    margin-top: 10px;
-    background: var(--main);
-    border-color: var(--main);
-    color: #fff;
-}
-
-.sub-btn:hover {
-    opacity: 0.9;
-}
-
 .main-order-item,
 .main-reserve-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 14px;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 14px !important;
     padding: 14px 0;
     border-top: 1px solid var(--line-soft);
 }
 
-.main-order-item:first-child,
-.main-reserve-item:first-child {
+.main-order-item:first-of-type,
+.main-reserve-item:first-of-type {
     border-top: none;
     padding-top: 0;
 }
 
-.order-item {
-    display: flex;
-    gap: 16px;
-    align-items: center;
-    padding: 14px 0;
-    border-top: 1px solid var(--line-soft);
+.main-order-left {
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+    flex: 1 !important;
+    min-width: 0 !important;
 }
 
-.order-item:first-child {
-    border-top: none;
-    padding-top: 0;
+.main-order-info {
+    flex: 1 !important;
+    min-width: 0 !important;
+}
+
+.order-product-name {
+    word-break: keep-all;
 }
 
 .order-img {
-    width: 76px;
-    height: 76px;
+    width: 64px !important;
+    height: 64px !important;
     border-radius: 16px;
     border: 1px solid var(--line-soft);
     background: #f7f7f7;
-    object-fit: cover;
-    flex-shrink: 0;
+    object-fit: contain !important;
+    flex-shrink: 0 !important;
 }
 
 .status-badge {
@@ -554,6 +476,8 @@ button {
     font-size: 12px;
     font-weight: 700;
     color: #fff;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .status-blue,
@@ -568,6 +492,139 @@ button {
 
 .status-red {
     background: #ff4f6d;
+}
+
+.reserve-store-name {
+    min-width: 0;
+    font-weight: 700;
+    word-break: keep-all;
+}
+
+.reserve-status-box {
+    white-space: nowrap;
+}
+
+.reserve-status-text {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    height: auto !important;
+    min-width: auto !important;
+    display: inline !important;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.reserve-status-text.status-blue {
+    color: #3b82f6;
+}
+
+.reserve-status-text.status-green {
+    color: #2ecc71;
+}
+
+.reserve-status-text.status-red {
+    color: #ff4f6d;
+}
+
+.reserve-status-text.status-orange {
+    color: #ff9800;
+}
+
+.reserve-status-text.status-gray {
+    color: #999;
+}
+
+.point-flex {
+    display: flex;
+    gap: 14px;
+}
+
+.point-flex .item {
+    flex: 1;
+    border: 1px solid var(--line-soft);
+    border-radius: 16px;
+    padding: 18px;
+    background: #fff;
+}
+
+.point-flex .label {
+    font-size: 14px;
+    color: var(--text-sub);
+    margin-bottom: 8px;
+}
+
+.point-flex .value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--main);
+}
+
+.community-summary {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 16px !important;
+    margin-bottom: 20px !important;
+}
+
+.community-stat-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 20px;
+    border-radius: 16px;
+    background: #fafafa;
+    border: 1px solid var(--line-soft);
+    cursor: pointer;
+}
+
+.community-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #fff0f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+}
+
+.community-label {
+    font-size: 14px;
+    color: #777;
+    margin-bottom: 4px;
+}
+
+.community-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.community-recent-list {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 18px !important;
+}
+
+.community-recent-box {
+    padding: 18px;
+    border-radius: 16px;
+    background: #fff;
+    border: 1px solid var(--line-soft);
+}
+
+.order-item {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    padding: 14px 0;
+    border-top: 1px solid var(--line-soft);
+}
+
+.order-item:first-child {
+    border-top: none;
+    padding-top: 0;
 }
 
 .coupon-tabs {
@@ -640,83 +697,6 @@ button {
     color: #fff !important;
 }
 
-
-
-.mini-panel-body .btn-box {
-    margin-top: 22px;
-}
-
-.mini-panel-body .btn-box button {
-    height: 40px;
-    padding: 0 18px;
-}
-
-
-.pet-btns {
-    min-height: 76px;
-    align-content: flex-start;
-}
-
-.pet-btn {
-    min-width: 58px;
-}
-
-.pet-btns {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-}
-
-.pet-main-btn-row,
-.pet-sub-btn-row {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-}
-
-.pet-main-btn-row .pet-btn,
-.pet-sub-btn-row .pet-btn {
-    flex: 1;
-    max-width: 90px;
-    text-align: center;
-}
-
-.pet-avatar.pet-icon-box {
-    width: 82px;
-    height: 82px;
-    background: #fff;
-    color: var(--main);
-}
-
-.pet-icon-box svg {
-    width: 62px;
-    height: 62px;
-    stroke: var(--main);
-    fill: none;
-    stroke-width: 2.4;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-}
-
-.pet-avatar {
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    background: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-}
-
-.pet-avatar img {
-    width: 60%;
-    height: 60%;
-    object-fit: contain;
-}
-
 .point-current {
     font-size: 20px;
     font-weight: 700;
@@ -776,46 +756,6 @@ button {
     color: var(--text-main);
 }
 
-
-
-.reserve-status-text {
-    background: none !important;
-    border: none !important;
-    padding: 0 !important;
-    height: auto !important;
-    min-width: auto !important;
-    display: inline !important;
-
-    font-size: 14px;
-    font-weight: 600;
-}
-
-.reserve-status-text.status-blue {
-    color: #3b82f6;
-}
-
-.reserve-status-text.status-green {
-    color: #2ecc71;
-}
-
-.reserve-status-text.status-red {
-    color: #ff4f6d;
-}
-
-.reserve-status-text.status-orange {
-    color: #ff9800;
-}
-
-.reserve-status-text.status-gray {
-    color: #999;
-}
-
-.section-header .section-title {
-    border-bottom: none;
-    margin-bottom: 0;
-    padding-bottom: 0;
-}
-
 .no-border {
     border: none !important;
 }
@@ -835,101 +775,89 @@ button {
         width: 100%;
     }
 
-    .mypage-dashboard,
-    .mini-dashboard,
-    .mini-action-grid,
-    .grid-2 {
-        grid-template-columns: 1fr;
+
+    .community-wide-section {
+        grid-column: 1 !important;
     }
-}
 
-
-
-/* 최근 예약 / 주문 최종 수정 */
-.mypage-dashboard > .mini-dashboard {
-    grid-column: 1 / -1 !important;
-    width: 100% !important;
-}
-
-.mini-dashboard {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    gap: 18px !important;
-    width: 100% !important;
-}
-
-.mini-panel {
-    min-width: 0 !important;
-    overflow: visible !important;
-}
-
-/* 최근 예약 */
-.main-reserve-item {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr auto !important;
-    gap: 12px !important;
-    align-items: center !important;
-}
-
-.reserve-store-name {
-    min-width: 0 !important;
-    font-weight: 700 !important;
-    word-break: keep-all !important;
-}
-
-.reserve-status-box {
-    white-space: nowrap !important;
-}
-
-/* 최근 주문 */
-.main-order-item {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    gap: 16px !important;
-    width: 100% !important;
-}
-
-.main-order-left {
-    display: flex !important;
-    align-items: center !important;
-    gap: 14px !important;
-    flex: 1 !important;
-    min-width: 0 !important;
-}
-
-.main-order-info {
-    flex: 1 !important;
-    min-width: 0 !important;
-}
-
-.main-order-info .list-title,
-.main-order-info .list-sub {
-    white-space: normal !important;
-    word-break: keep-all !important;
-    line-height: 1.45 !important;
-}
-
-.main-order-item .order-img {
-    width: 64px !important;
-    height: 64px !important;
-    object-fit: contain !important;
-    flex-shrink: 0 !important;
-}
-
-.main-order-item .status-badge {
-    flex-shrink: 0 !important;
-    min-width: 82px !important;
-    margin: 0 !important;
-    white-space: nowrap !important;
-}
-
-@media screen and (max-width: 1024px) {
-    .mini-dashboard {
+    .community-summary,
+    .community-recent-list,
+    .grid-2 {
         grid-template-columns: 1fr !important;
     }
 
     .main-reserve-item {
-        grid-template-columns: 1fr !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
     }
+
+    .point-flex {
+        flex-direction: column;
+    }
+	/* 대표동물 카드 */
+	.main-pet-card{
+	    border:2px solid #ff5c7c !important;
+	    background:#fff7fa !important;
+	}
+
+	/* 대표동물 배지 */
+	.main-badge{
+	    display:inline-block;
+	    margin-left:8px;
+	    padding:3px 10px;
+	    background:#ff5c7c;
+	    color:#fff;
+	    border-radius:20px;
+	    font-size:11px;
+	    font-weight:700;
+	}
+
+	/* 대표버튼 비활성 */
+	.pet-btn:disabled{
+	    background:#ddd !important;
+	    border-color:#ddd !important;
+	    color:#777 !important;
+	    cursor:not-allowed !important;
+	}
+	
+	.main-badge{
+	    display: block;
+	    width: fit-content;
+	    margin: 6px auto 0;
+	    padding: 3px 10px;
+	    background: #ff5c7c;
+	    color: #fff;
+	    border-radius: 20px;
+	    font-size: 11px;
+	    font-weight: 700;
+	}
+
+	.main-pet-card{
+	    border: 2px solid #ff5c7c !important;
+	    background: #fff7fa !important;
+	}
+
+	.pet-btn:disabled{
+	    background: #ddd !important;
+	    border-color: #ddd !important;
+	    color: #777 !important;
+	    cursor: not-allowed !important;
+	}	
+	
+	.main-badge {
+	    display: inline-block;
+	    margin-left: 10px;
+	    padding: 4px 12px;
+	    background: #ff5c7c;
+	    color: #fff;
+	    border-radius: 20px;
+	    font-size: 12px;
+	    font-weight: bold;
+	    vertical-align: middle;
+	}
+
+	.main-pet-card {
+	    border: 2px solid #ff5c7c !important;
+	    background: #fff8fa !important;
+	}
 }

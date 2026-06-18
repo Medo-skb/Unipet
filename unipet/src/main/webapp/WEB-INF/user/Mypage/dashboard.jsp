@@ -39,9 +39,11 @@
                     </div>
 
                     <div class="page-inner">
-                        <div class="mypage-dashboard">
+                        <div class="mypage-dashboard dashboard-new">
 
+                            <!-- 왼쪽 영역 : 내 프로필 + 반려동물 프로필 -->
                             <div class="dash-left">
+
                                 <!-- 내 프로필 -->
                                 <div class="section-box">
                                     <div class="section-title">내 프로필</div>
@@ -135,7 +137,10 @@
                                     </div>
 
                                     <div class="pet-list">
-                                        <div class="pet-card" v-for="pet in petList" :key="pet.petNo">
+                                        <div class="pet-card" v-for="pet in petList" :key="pet.petNo" :class="{
+                                            'main-pet-card': String(pet.isMain || pet.IS_MAIN).trim().toUpperCase() === 'Y'
+                                            }">
+
                                             <div class="pet-thumb">
                                                 <div class="pet-avatar">
                                                     <img :src="fnGetPetImage(pet)" alt="펫이미지">
@@ -143,7 +148,15 @@
                                             </div>
 
                                             <div class="pet-body">
-                                                <div class="pet-name">{{ pet.petName }}</div>
+                                                <div class="pet-name">
+                                                    {{ pet.petName }}
+                                                </div>
+
+                                                <div v-if="String(pet.isMain || pet.IS_MAIN).trim().toUpperCase() === 'Y'"
+                                                    class="main-badge">
+                                                    대표동물
+                                                </div>
+
 
                                                 <button
                                                     :disabled="String(pet.isMain || pet.IS_MAIN).trim().toUpperCase() === 'Y'"
@@ -164,43 +177,82 @@
                                 </div>
                             </div>
 
+                            <!-- 오른쪽 영역 : 최근 주문 + 최근 예약 + 포인트 / 쿠폰 -->
                             <div class="dash-right">
-                                <!-- 커뮤니티 정보 -->
+
+                                <!-- 최근 주문 내역 -->
                                 <div class="section-box">
-                                    <div class="section-title">커뮤니티 정보</div>
+                                    <div class="section-title">최근 주문 내역</div>
 
-                                    <div class="info-card">
-                                        <div class="list-title">내 게시글</div>
-                                        <div class="list-sub">총 {{ myPostList.length }}건</div>
+                                    <div v-if="groupedOrderList.length === 0" class="empty-text">
+                                        주문 내역이 없습니다.
+                                    </div>
 
-                                        <div v-if="myPostList.length === 0" class="empty-text">
-                                            작성한 게시글이 없습니다.
+                                    <div class="main-order-item" v-for="group in groupedOrderList.slice(0, 2)"
+                                        :key="group.orderNo">
+                                        <div class="main-order-left">
+                                            <img class="order-img"
+                                                :src="group.items && group.items.length > 0 && group.items[0].productImg ? group.items[0].productImg : '/img/no-image.png'"
+                                                alt="상품이미지">
+
+                                            <div class="main-order-info">
+                                                <div class="list-title">{{ (group.orderDate || '').substring(0, 10) }}
+                                                </div>
+                                                <div class="list-sub">{{ (group.orderDate || '').substring(11, 16) }}
+                                                </div>
+                                                <div class="list-sub order-product-name">
+                                                    {{ group.items[0]?.productName || '-' }}
+                                                    <span v-if="group.items.length > 1">
+                                                        외 {{ group.items.length - 1 }}건
+                                                    </span>
+                                                </div>
+                                            </div>
                                         </div>
 
-                                        <div v-for="item in recentPostList.slice(0, 2)" :key="'post-' + item.id"
-                                            class="list-item">
-                                            <div class="post-title" @click="fnGoPostDetail(item.id)">
-                                                [{{ item.boardName }}] {{ item.title }}
-                                            </div>
-                                            <div class="list-sub">{{ fnFormatDateTime(item.cdate) }}</div>
+                                        <div class="status-badge"
+                                            :class="fnGetDeliStatusClass(group.items[0]?.deliStatus || group.items[0]?.DELI_STATUS)">
+                                            {{ fnGetDeliStatusText(group.items[0]?.deliStatus ||
+                                            group.items[0]?.DELI_STATUS) }}
                                         </div>
                                     </div>
 
-                                    <div class="info-card">
-                                        <div class="list-title">내 댓글</div>
-                                        <div class="list-sub">총 {{ myCommentList.length }}건</div>
+                                    <div class="btn-box">
+                                        <button @click="fnChangeMenu('orderList')">주문 내역 보기</button>
+                                    </div>
+                                </div>
 
-                                        <div v-if="myCommentList.length === 0" class="empty-text">
-                                            작성한 댓글이 없습니다.
+                                <!-- 최근 예약 현황 -->
+                                <div class="section-box">
+                                    <div class="section-title">최근 예약 현황</div>
+
+                                    <div v-if="reservationList.length === 0" class="empty-text">
+                                        예약 내역이 없습니다.
+                                    </div>
+
+                                    <div class="main-reserve-item" v-for="item in reservationList.slice(0, 2)"
+                                        :key="item.rsvNo">
+                                        <div class="reserve-store-name">
+                                            {{ item.storeName || item.STORE_NAME || '업체명 없음' }}
                                         </div>
 
-                                        <div v-for="item in myCommentList.slice(0, 2)" :key="'comment-' + item.id"
-                                            class="list-item">
-                                            <div class="list-title">
-                                                [{{ item.boardName }}] {{ item.content }}
+                                        <div>
+                                            <div class="list-title">{{ item.rsvDate || '-' }}</div>
+                                            <div class="list-sub">
+                                                {{ item.rsvStartTime || '-' }} ~ {{ item.rsvEndTime || '-' }}
                                             </div>
-                                            <div class="list-sub">{{ fnFormatDateTime(item.cdate) }}</div>
                                         </div>
+
+                                        <div class="list-sub reserve-status-box">
+                                            상태 :
+                                            <span class="reserve-status-text"
+                                                :class="fnGetReserveStatusClass(item.rsvStatus || item.RSV_STATUS)">
+                                                {{ fnGetReservationStatusText(item.rsvStatus || item.RSV_STATUS) }}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="btn-box">
+                                        <button @click="fnChangeMenu('reserveList')">예약 내역 보기</button>
                                     </div>
                                 </div>
 
@@ -222,82 +274,66 @@
                                 </div>
                             </div>
 
-                            <!-- 최근 예약 / 주문 -->
-                            <div class="mini-dashboard">
-                                <div class="mini-panel">
-                                    <div class="mini-panel-head">최근 예약 현황</div>
+                            <!-- 아래 전체 영역 : 커뮤니티 정보 -->
+                            <div class="section-box community-wide-section">
+                                <div class="section-title">커뮤니티 정보</div>
 
-                                    <div class="mini-panel-body">
-                                        <div v-if="reservationList.length === 0" class="empty-text">
-                                            예약 내역이 없습니다.
+                                <div class="community-summary">
+                                    <div class="community-stat-card">
+                                        <div class="community-icon">✏️</div>
+                                        <div>
+                                            <div class="community-label">내 게시글</div>
+                                            <div class="community-value">{{ myPostList.length }}건</div>
                                         </div>
+                                    </div>
 
-                                        <div class="main-reserve-item" v-for="item in reservationList.slice(0, 2)"
-                                            :key="item.rsvNo">
-                                            <div class="list-title">
-                                                {{ item.storeName || item.STORE_NAME || '업체명 없음' }}
-                                            </div>
-
-                                            <div>
-                                                <div class="list-title">{{ item.rsvDate || '-' }}</div>
-                                                <div class="list-sub">
-                                                    {{ item.rsvStartTime || '-' }} ~ {{ item.rsvEndTime || '-' }}
-                                                </div>
-                                            </div>
-
-                                            <div class="list-sub">
-                                                상태 :
-                                                <span class="reserve-status-text"
-                                                    :class="fnGetReserveStatusClass(item.rsvStatus || item.RSV_STATUS)">
-                                                    {{ fnGetReservationStatusText(item.rsvStatus || item.RSV_STATUS) }}
-                                                </span>
-                                            </div>
+                                    <div class="community-stat-card">
+                                        <div class="community-icon">💬</div>
+                                        <div>
+                                            <div class="community-label">내 댓글</div>
+                                            <div class="community-value">{{ myCommentList.length }}건</div>
                                         </div>
+                                    </div>
 
-                                        <div class="btn-box">
-                                            <button @click="fnChangeMenu('reserveList')">예약 내역 보기</button>
+                                    <div class="community-stat-card">
+                                        <div class="community-icon">📝</div>
+                                        <div>
+                                            <div class="community-label">최근 게시글</div>
+                                            <div class="community-value">{{ recentPostList.length }}건</div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div class="mini-panel">
-                                    <div class="mini-panel-head">최근 주문 내역</div>
+                                <div class="community-recent-list">
+                                    <div class="community-recent-box">
+                                        <div class="list-title">최근 내 게시글</div>
 
-                                    <div class="mini-panel-body">
-                                        <div v-if="groupedOrderList.length === 0" class="empty-text">
-                                            주문 내역이 없습니다.
+                                        <div v-if="myPostList.length === 0" class="empty-text">
+                                            작성한 게시글이 없습니다.
                                         </div>
 
-                                        <div class="main-order-item" v-for="group in groupedOrderList.slice(0, 2)"
-                                            :key="group.orderNo">
-                                            <div style="display:flex; gap:10px; align-items:center;">
-                                                <img class="order-img"
-                                                    :src="group.items && group.items.length > 0 && group.items[0].productImg ? group.items[0].productImg : '/img/no-image.png'"
-                                                    alt="상품이미지">
-
-                                                <div>
-                                                    <div class="list-title">{{ (group.orderDate || '').substring(0, 10)
-                                                        }}</div>
-                                                    <div class="list-sub">{{ (group.orderDate || '').substring(11, 16)
-                                                        }}</div>
-                                                    <div class="list-sub">
-                                                        {{ group.items[0]?.productName || '-' }}
-                                                        <span v-if="group.items.length > 1">
-                                                            외 {{ group.items.length - 1 }}건
-                                                        </span>
-                                                    </div>
-                                                </div>
+                                        <div v-for="item in recentPostList.slice(0, 2)" :key="'post-' + item.id"
+                                            class="list-item">
+                                            <div class="post-title" @click="fnGoPostDetail(item.id)">
+                                                [{{ item.boardName }}] {{ item.title }}
                                             </div>
+                                            <div class="list-sub">{{ fnFormatDateTime(item.cdate) }}</div>
+                                        </div>
+                                    </div>
 
-                                            <div class="status-badge"
-                                                :class="fnGetDeliStatusClass(group.items[0]?.deliStatus || group.items[0]?.DELI_STATUS)">
-                                                {{ fnGetDeliStatusText(group.items[0]?.deliStatus ||
-                                                group.items[0]?.DELI_STATUS) }}
-                                            </div>
+                                    <div class="community-recent-box">
+                                        <div class="list-title">최근 내 댓글</div>
+
+                                        <div v-if="myCommentList.length === 0" class="empty-text">
+                                            작성한 댓글이 없습니다.
                                         </div>
 
-                                        <div class="btn-box">
-                                            <button @click="fnChangeMenu('orderList')">주문 내역 보기</button>
+                                        <div v-for="item in myCommentList.slice(0, 2)" :key="'comment-' + item.id"
+                                            class="list-item">
+                                            <div class="list-title">
+                                                [{{ item.boardName }}] {{ item.content }}
+                                            </div>
+                                            <div class="list-sub">{{ fnFormatDateTime(item.cdate) }}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -571,7 +607,12 @@
                         data: param,
                         success: function (data) {
                             self.petList = data.result === "success"
-                                ? (data.petList || [])
+                                ? (data.petList || []).sort((a, b) => {
+                                    const aMain = String(a.isMain || a.IS_MAIN).trim().toUpperCase() === "Y";
+                                    const bMain = String(b.isMain || b.IS_MAIN).trim().toUpperCase() === "Y";
+
+                                    return Number(bMain) - Number(aMain);
+                                })
                                 : [];
                         },
                         error: function () {
