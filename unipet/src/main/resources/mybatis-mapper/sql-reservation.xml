@@ -155,10 +155,11 @@
 	
 	<select id="selectStoreInfo" parameterType="hashmap" resultType="com.example.unipet.model.Store">
 	    SELECT S.STORE_NO, STORE_NAME, S_ADDR, S_STATUS, LAT, LNG, C.KOR AS STORE_TYPE,
-	    		SUB_TITLE, S_CONTENTS
+	    		SUB_TITLE, S_CONTENTS, OPEN_TIME, CLOSE_TIME
 	    FROM STORE S
 	    LEFT JOIN CODE C ON S.S_CATEGORY = C.VALUE
 	    LEFT JOIN STORE_DETAIL D ON S.STORE_NO = D.STORE_NO
+	    LEFT JOIN STORE_POLICY P ON S.STORE_NO = P.STORE_NO
 	    WHERE
 	    	TYPE = 'S_CATEGORY'
 		    AND S.STORE_NO = #{storeNo}

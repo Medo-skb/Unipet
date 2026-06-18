@@ -285,6 +285,10 @@
                 
                 const listContainer = document.querySelector('#left');
                 if (listContainer) listContainer.scrollTop = 0;
+
+                this.$nextTick(() => {
+                    this.createMarkers();
+                });
             },
 
             fnStoreList() {
