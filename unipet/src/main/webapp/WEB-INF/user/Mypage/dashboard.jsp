@@ -143,12 +143,13 @@
 
                                             <div class="pet-body">
                                                 <div class="pet-name">
-                                                    {{ pet.petName }}
-                                                </div>
+                                                    {{ pet.petName || pet.PET_NAME || '-' }}
 
-                                                <div v-if="String(pet.isMain || pet.IS_MAIN).trim().toUpperCase() === 'Y'"
-                                                    class="main-badge">
-                                                    대표동물
+                                                    <span
+                                                        v-if="String(pet.isMain || pet.IS_MAIN || '').trim().toUpperCase() === 'Y'"
+                                                        class="main-badge">
+                                                        대표동물
+                                                    </span>
                                                 </div>
 
 
@@ -948,7 +949,12 @@
 
                 // 대표 반려동물 변경
                 fnChangeMainPet: function (petNo) {
+
                     let self = this;
+
+                    if (!confirm("선택한 반려동물을 대표동물로 변경하시겠습니까?")) {
+                        return;
+                    }
 
                     $.ajax({
                         url: "/user/change-main-pet.dox",
@@ -958,17 +964,27 @@
                             petNo: petNo
                         },
                         success: function (data) {
+
                             if (data.result === "success") {
+
+                                alert("대표동물이 변경되었습니다.");
+
                                 self.fnLoadPetList();
+
                             } else {
-                                alert(data.message || "대표 반려동물 변경 실패");
+
+                                alert(data.message || "대표동물 변경에 실패했습니다.");
+
                             }
+
                         },
                         error: function () {
-                            alert("대표 반려동물 변경 중 오류가 발생했습니다.");
+                            alert("대표동물 변경 중 오류가 발생했습니다.");
                         }
                     });
+
                 },
+
 
                 // 게시글 상세 이동
                 fnGoPostDetail: function (boardNo) {
