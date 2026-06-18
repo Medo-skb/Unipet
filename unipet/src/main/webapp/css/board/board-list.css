@@ -453,4 +453,19 @@ th {
 	min-width: 0;
 }
 
+.col-no {
+	width: 90px;
+}
+
+.col-writer {
+	width: 120px;
+}
+
+.col-count {
+	width: 90px;
+}
+
+.col-date {
+	width: 150px;
+}
 

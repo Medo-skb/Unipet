@@ -167,13 +167,13 @@
 				<table>
 					<thead>
 						<tr>
-							<th width="90">번호</th>
+							<th class="col-no">번호</th>
 							<th>제목</th>
-							<th width="120">작성자</th>
-							<th width="90">조회수</th>
-							<th width="90">추천수</th>
-							<th width="90">댓글수</th>
-							<th width="150">작성일</th>
+							<th class="col-writer">작성자</th>
+							<th class="col-count">조회수</th>
+							<th class="col-count">추천수</th>
+							<th class="col-count">댓글수</th>
+							<th class="col-date">작성일</th>
 						</tr>
 					</thead>
 
