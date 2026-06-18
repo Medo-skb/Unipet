@@ -17,7 +17,7 @@
 <body>
     <jsp:include page="/WEB-INF/header/header.jsp" />
 
-    <div id="app">
+    <div id="app" v-cloak>
         <div class="biz-page-wrap">
             <div class="biz-page-container">
 
