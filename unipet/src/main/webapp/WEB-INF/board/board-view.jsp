@@ -76,12 +76,11 @@
 									신고
 								</button>
 
-								<button type="button" class="report-btn" v-if="fnCanManageBoard()"
-									@click="fnMoveEdit()">
+								<button type="button" class="report-btn" v-if="fnCanEditBoard()" @click="fnMoveEdit()">
 									수정
 								</button>
 
-								<button type="button" class="report-btn" v-if="fnCanManageBoard()"
+								<button type="button" class="report-btn" v-if="fnCanDeleteBoard()"
 									@click="fnRemoveBoard()">
 									삭제
 								</button>
@@ -96,8 +95,7 @@
 							<div class="comment-write">
 								<div class="comment-textarea-wrap">
 									<textarea v-model="commentContents" placeholder="댓글을 입력하세요"
-										:maxlength="maxCommentLength">
-						</textarea>
+										:maxlength="maxCommentLength"></textarea>
 
 									<div class="comment-text-count"
 										:class="{danger : commentContents.length >= maxCommentLength}">
@@ -125,8 +123,7 @@
 								<div v-if="comment.editMode">
 									<div class="comment-textarea-wrap">
 										<textarea v-model="comment.editContents" class="comment-edit-textarea"
-											:maxlength="maxCommentLength">
-							</textarea>
+											:maxlength="maxCommentLength"></textarea>
 
 										<div class="comment-text-count"
 											:class="{danger : comment.editContents.length >= maxCommentLength}">
@@ -170,8 +167,7 @@
 									<div v-if="replyTargetNo == comment.commentNo" class="reply-write-box">
 										<div class="comment-textarea-wrap">
 											<textarea v-model="replyContents" class="reply-textarea"
-												:maxlength="maxCommentLength" placeholder="답글을 입력하세요">
-								</textarea>
+												:maxlength="maxCommentLength" placeholder="답글을 입력하세요"></textarea>
 
 											<div class="comment-text-count"
 												:class="{danger : replyContents.length >= maxCommentLength}">
@@ -242,6 +238,8 @@
 								boardNo: '<%=request.getAttribute("boardNo")%>',
 								currentUserId: '<%=session.getAttribute("sessionId") == null ? "" : session.getAttribute("sessionId")%>',
 								currentUserRole: '<%=session.getAttribute("sessionRole") == null ? "" : session.getAttribute("sessionRole")%>',
+								adminId: '<%=session.getAttribute("adminId") == null ? "" : session.getAttribute("adminId")%>',
+								adminName: '<%=session.getAttribute("adminName") == null ? "" : session.getAttribute("adminName")%>',
 								board: null,
 								fileList: [],
 								commentList: [],
@@ -263,7 +261,15 @@
 						},
 						methods: {
 							fnIsAdmin: function () {
+								if (this.adminId != "") {
+									return true;
+								}
+
 								if (this.currentUserRole == "A") {
+									return true;
+								}
+
+								if (this.currentUserRole == "ADMIN") {
 									return true;
 								}
 
@@ -444,7 +450,15 @@
 								});
 							},
 
-							fnCanManageBoard() {
+							fnCanEditBoard() {
+								if (this.board != null && this.currentUserId != "" && String(this.board.userId) == String(this.currentUserId)) {
+									return true;
+								}
+
+								return false;
+							},
+
+							fnCanDeleteBoard() {
 								if (this.fnIsAdmin()) {
 									return true;
 								}

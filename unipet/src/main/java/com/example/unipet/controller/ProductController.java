@@ -179,7 +179,8 @@ public class ProductController {
 	@ResponseBody
 	public String updateQna(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
 		String userId = session.getAttribute("sessionId") == null ? "" : (String) session.getAttribute("sessionId");
-		String userRole = session.getAttribute("sessionRole") == null ? "" : (String) session.getAttribute("sessionRole");
+		String userRole = session.getAttribute("sessionRole") == null ? ""
+				: (String) session.getAttribute("sessionRole");
 
 		map.put("userId", userId);
 		map.put("userRole", userRole);
@@ -195,7 +196,8 @@ public class ProductController {
 	@ResponseBody
 	public String deleteQna(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
 		String userId = session.getAttribute("sessionId") == null ? "" : (String) session.getAttribute("sessionId");
-		String userRole = session.getAttribute("sessionRole") == null ? "" : (String) session.getAttribute("sessionRole");
+		String userRole = session.getAttribute("sessionRole") == null ? ""
+				: (String) session.getAttribute("sessionRole");
 
 		map.put("userId", userId);
 		map.put("userRole", userRole);
@@ -205,18 +207,21 @@ public class ProductController {
 
 		return new Gson().toJson(resultMap);
 	}
-	
-	@RequestMapping(value = "/review/report.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+
+	// ajax가 호출하는 주소
+	// 상품리뷰 삭제 - 관리자만 가능
+	@RequestMapping(value = "/review/delete.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
-	public String reviewReport(@RequestParam HashMap<String, Object> map, HttpSession session) throws Exception {
+	public String reviewDelete(@RequestParam HashMap<String, Object> map, HttpSession session) throws Exception {
 		String sessionId = session.getAttribute("sessionId") == null ? "" : (String) session.getAttribute("sessionId");
-		String sessionRole = session.getAttribute("sessionRole") == null ? "" : (String) session.getAttribute("sessionRole");
+		String sessionRole = session.getAttribute("sessionRole") == null ? ""
+				: (String) session.getAttribute("sessionRole");
 
 		map.put("sessionId", sessionId);
 		map.put("sessionRole", sessionRole);
 
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
-		resultMap = productService.reportReview(map);
+		resultMap = productService.deleteReview(map);
 
 		return new Gson().toJson(resultMap);
 	}

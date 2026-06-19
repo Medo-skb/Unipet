@@ -193,8 +193,8 @@
 									</div>
 
 									<button v-if="fnIsAdmin()" type="button" class="review-report-btn"
-										@click="fnReviewReport(review)">
-										신고
+										@click="fnReviewDelete(review)">
+										삭제
 									</button>
 								</div>
 
@@ -646,15 +646,16 @@
 							}
 						});
 					},
-					fnReviewReport: function (review) {
+
+					fnReviewDelete: function (review) {
 						let self = this;
 
 						if (!self.fnIsAdmin()) {
-							alert("관리자만 신고 처리할 수 있습니다.");
+							alert("관리자만 리뷰를 삭제할 수 있습니다.");
 							return;
 						}
 
-						if (!confirm("이 리뷰를 신고 처리하시겠습니까?")) {
+						if (!confirm("이 리뷰를 삭제하시겠습니까?")) {
 							return;
 						}
 
@@ -665,27 +666,26 @@
 						};
 
 						$.ajax({
-							url: "/review/report.dox",
+							url: "/review/delete.dox",
 							dataType: "json",
 							type: "POST",
 							data: param,
 							success: function (data) {
 								if (data.result == "success") {
-									alert("리뷰가 신고 처리되었습니다.");
+									alert("리뷰가 삭제되었습니다.");
 									self.fnGetReviewList();
 								} else if (data.result == "login") {
 									alert("로그인이 필요한 서비스입니다.");
 									location.href = "/user/login.do";
 								} else {
-									alert(data.message == null ? "리뷰 신고 처리 실패" : data.message);
+									alert(data.message == null ? "리뷰 삭제 실패" : data.message);
 								}
 							},
 							error: function () {
-								alert("리뷰 신고 처리 중 오류가 발생했습니다.");
+								alert("리뷰 삭제 중 오류가 발생했습니다.");
 							}
 						});
 					},
-
 
 					fnChangeMainImage: function (img) {
 						this.mainImage = img;
