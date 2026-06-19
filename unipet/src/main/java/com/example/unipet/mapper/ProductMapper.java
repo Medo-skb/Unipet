@@ -32,7 +32,6 @@ public interface ProductMapper {
 	public List<Product> selectQnaList(HashMap<String, Object> map);
 
 	public List<Product> selectCartList(HashMap<String, Object> map);
-	
 
 	// 한개 리턴 -> selectXXX
 	public Product selectProductView(HashMap<String, Object> map);
@@ -46,16 +45,21 @@ public interface ProductMapper {
 	public Product selectCartOne(HashMap<String, Object> map);
 
 	public int selectCartCount(HashMap<String, Object> map);
-	
+
+	// 기존 신고 관련 메서드
+	// 지금은 화면에서 삭제로 바꿨기 때문에 사용하지 않지만,
+	// 기존 XML과 충돌 안 나게 남겨둠
 	public Product selectReviewReportCheck(HashMap<String, Object> map);
 
-	// 리뷰 신고 등록
 	public int insertReviewReport(HashMap<String, Object> map);
 
 	// 삭제
 	public int deleteQna(HashMap<String, Object> map);
 
 	public int deleteCart(HashMap<String, Object> map);
+
+	// 상품리뷰 삭제
+	public int deleteReview(HashMap<String, Object> map);
 
 	// 수정
 	public int updateQna(HashMap<String, Object> map);

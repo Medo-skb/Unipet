@@ -1,120 +1,89 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.example.unipet.mapper.ProductMapper">
 
 	<!-- 여러개 검색 -->
-	<select id="selectAnimalMainList" parameterType="hashmap" resultType="com.example.unipet.model.Product">
+	<select id="selectAnimalMainList" parameterType="hashmap"
+		resultType="com.example.unipet.model.Product">
 		SELECT
-			A_MAIN_NO AS aMainNo,
-			A_MAIN_TYPE AS aMainType
+		A_MAIN_NO AS aMainNo,
+		A_MAIN_TYPE AS aMainType
 		FROM PC_ANIMAL_MAIN
 		ORDER BY A_MAIN_NO
 	</select>
 
 	<!-- 여러개 검색 -->
-	<select id="selectAnimalSubList" parameterType="hashmap" resultType="com.example.unipet.model.Product">
+	<select id="selectAnimalSubList" parameterType="hashmap"
+		resultType="com.example.unipet.model.Product">
 		SELECT
-			A_SUB_NO AS aSubNo,
-			A_MAIN_NO AS aMainNo,
-			A_SUB_TYPE AS aSubType
+		A_SUB_NO AS aSubNo,
+		A_MAIN_NO AS aMainNo,
+		A_SUB_TYPE AS aSubType
 		FROM PC_ANIMAL_SUB
 		ORDER BY A_MAIN_NO, A_SUB_NO
 	</select>
 
 	<!-- 여러개 검색 -->
-	<select id="selectItemMainList" parameterType="hashmap" resultType="com.example.unipet.model.Product">
+	<select id="selectItemMainList" parameterType="hashmap"
+		resultType="com.example.unipet.model.Product">
 		SELECT
-			I_MAIN_NO AS iMainNo,
-			I_MAIN_TYPE AS iMainType
+		I_MAIN_NO AS iMainNo,
+		I_MAIN_TYPE AS iMainType
 		FROM PC_ITEM_MAIN
 		ORDER BY I_MAIN_NO
 	</select>
 
 	<!-- 여러개 검색 -->
-	<select id="selectItemSubList" parameterType="hashmap" resultType="com.example.unipet.model.Product">
+	<select id="selectItemSubList" parameterType="hashmap"
+		resultType="com.example.unipet.model.Product">
 		SELECT
-			I_SUB_NO AS iSubNo,
-			I_MAIN_NO AS iMainNo,
-			I_SUB_TYPE AS iSubType
+		I_SUB_NO AS iSubNo,
+		I_MAIN_NO AS iMainNo,
+		I_SUB_TYPE AS iSubType
 		FROM PC_ITEM_SUB
 		ORDER BY I_MAIN_NO, I_SUB_NO
 	</select>
 
 	<!-- 여러개 검색 -->
 	<select id="selectProductList" parameterType="hashmap" resultType="hashmap">
-		SELECT
-			P.PRODUCT_NO AS productNo,
-			P.PRODUCT_NAME AS productName,
-			P.BRAND AS brand,
-			P.PRODUCT_PRICE AS productPrice,
-			P.STOCK_QTY AS stockQty,
-			P.PRODUCT_STATUS AS productStatus,
-			DATE_FORMAT(P.CDATE, '%Y-%m-%d') AS cdate,
-	
-			ASM.A_MAIN_NO AS aMainNo,
-			ASM.A_MAIN_TYPE AS aMainType,
-			ASB.A_SUB_NO AS aSubNo,
-			ASB.A_SUB_TYPE AS aSubType,
-	
-			IM.I_MAIN_NO AS iMainNo,
-			IM.I_MAIN_TYPE AS iMainType,
-			ISB.I_SUB_NO AS iSubNo,
-			ISB.I_SUB_TYPE AS iSubType,
-	
-			CONCAT(F.FILE_PATH, F.FILE_NAME) AS img,
-	
-			IFNULL(R.avgRating, 0) AS avgRating,
-			IFNULL(R.reviewCnt, 0) AS reviewCount
-	
-		FROM PRODUCT P
-	
-		LEFT JOIN PC_ANIMAL_SUB ASB
-			ON P.A_SUB_NO = ASB.A_SUB_NO
-	
-		LEFT JOIN PC_ANIMAL_MAIN ASM
-			ON ASB.A_MAIN_NO = ASM.A_MAIN_NO
-	
-		LEFT JOIN PC_ITEM_SUB ISB
-			ON P.I_SUB_NO = ISB.I_SUB_NO
-	
-		LEFT JOIN PC_ITEM_MAIN IM
-			ON ISB.I_MAIN_NO = IM.I_MAIN_NO
-	
-		LEFT JOIN PRODUCT_FILE F
-			ON P.PRODUCT_NO = F.PRODUCT_NO
-			AND F.IS_MAIN = 'Y'
-	
-		LEFT JOIN (
-			SELECT
-				PRODUCT_NO,
-				ROUND(AVG(RATING), 1) AS avgRating,
-				COUNT(*) AS reviewCnt
-			FROM `REVIEW`
-			WHERE PRODUCT_NO IS NOT NULL
-			GROUP BY PRODUCT_NO
-		) R ON P.PRODUCT_NO = R.PRODUCT_NO
-	
-		WHERE P.PRODUCT_STATUS = 'Y'
-	
-		<if test="keyword != null and keyword != ''">
+		SELECT P.PRODUCT_NO AS productNo, P.PRODUCT_NAME AS productName, P.BRAND
+		AS brand, P.PRODUCT_PRICE AS productPrice, P.STOCK_QTY AS stockQty,
+		P.PRODUCT_STATUS AS productStatus, DATE_FORMAT(P.CDATE, '%Y-%m-%d') AS
+		cdate, ASM.A_MAIN_NO AS aMainNo, ASM.A_MAIN_TYPE AS aMainType,
+		ASB.A_SUB_NO AS aSubNo, ASB.A_SUB_TYPE AS aSubType, IM.I_MAIN_NO AS
+		iMainNo, IM.I_MAIN_TYPE AS iMainType, ISB.I_SUB_NO AS iSubNo,
+		ISB.I_SUB_TYPE AS iSubType, CONCAT(F.FILE_PATH, F.FILE_NAME) AS img,
+		IFNULL(R.avgRating, 0) AS avgRating, IFNULL(R.reviewCnt, 0) AS
+		reviewCount FROM PRODUCT P LEFT JOIN PC_ANIMAL_SUB ASB ON P.A_SUB_NO =
+		ASB.A_SUB_NO LEFT JOIN PC_ANIMAL_MAIN ASM ON ASB.A_MAIN_NO =
+		ASM.A_MAIN_NO LEFT JOIN PC_ITEM_SUB ISB ON P.I_SUB_NO = ISB.I_SUB_NO
+		LEFT JOIN PC_ITEM_MAIN IM ON ISB.I_MAIN_NO = IM.I_MAIN_NO LEFT JOIN
+		PRODUCT_FILE F ON P.PRODUCT_NO = F.PRODUCT_NO AND F.IS_MAIN = 'Y' LEFT
+		JOIN ( SELECT PRODUCT_NO, ROUND(AVG(RATING), 1) AS avgRating, COUNT(*)
+		AS reviewCnt FROM `REVIEW` WHERE PRODUCT_NO IS NOT NULL GROUP BY
+		PRODUCT_NO ) R ON P.PRODUCT_NO = R.PRODUCT_NO WHERE P.PRODUCT_STATUS =
+		'Y' <if test="keyword != null and keyword != ''">
 			AND P.PRODUCT_NAME LIKE CONCAT('%', #{keyword}, '%')
 		</if>
 	
-		<if test="aMainNo != null and aMainNo != ''">
+		<if
+			test="aMainNo != null and aMainNo != ''">
 			AND ASM.A_MAIN_NO = #{aMainNo}
 		</if>
 	
-		<if test="aSubNo != null and aSubNo != ''">
+		<if
+			test="aSubNo != null and aSubNo != ''">
 			AND P.A_SUB_NO = #{aSubNo}
 		</if>
 	
-		<if test="iMainNo != null and iMainNo != ''">
+		<if
+			test="iMainNo != null and iMainNo != ''">
 			AND IM.I_MAIN_NO = #{iMainNo}
 		</if>
 	
-		<if test="iSubNo != null and iSubNo != ''">
+		<if
+			test="iSubNo != null and iSubNo != ''">
 			AND P.I_SUB_NO = #{iSubNo}
 		</if>
 	
@@ -122,50 +91,54 @@
 			<when test="sort == 'reviewDesc'">
 				ORDER BY IFNULL(R.reviewCnt, 0) DESC, P.PRODUCT_NO DESC
 			</when>
-	
+
 			<when test="sort == 'ratingDesc'">
-				ORDER BY IFNULL(R.avgRating, 0) DESC, IFNULL(R.reviewCnt, 0) DESC, P.PRODUCT_NO DESC
+				ORDER BY IFNULL(R.avgRating, 0) DESC, IFNULL(R.reviewCnt, 0)
+		DESC, P.PRODUCT_NO DESC
 			</when>
-	
+
 			<when test="sort == 'priceAsc'">
 				ORDER BY P.PRODUCT_PRICE ASC, P.PRODUCT_NO DESC
 			</when>
-	
+
 			<when test="sort == 'priceDesc'">
 				ORDER BY P.PRODUCT_PRICE DESC, P.PRODUCT_NO DESC
 			</when>
-	
+
 			<otherwise>
 				ORDER BY P.PRODUCT_NO DESC
 			</otherwise>
 		</choose>
 	</select>
+
 	<!-- 여러개 검색 -->
-	<select id="selectProductFileList" parameterType="hashmap" resultType="com.example.unipet.model.Product">
+	<select id="selectProductFileList" parameterType="hashmap"
+		resultType="com.example.unipet.model.Product">
 		SELECT
-			FILE_NO AS fileNo,
-			PRODUCT_NO AS productNo,
-			FILE_PATH AS filePath,
-			FILE_NAME AS fileName,
-			ORIGIN_NAME AS originName,
-			FILE_SIZE AS fileSize,
-			FILE_EXT AS fileExt,
-			CONCAT(FILE_PATH, FILE_NAME) AS fileUrl,
-			CONCAT(FILE_PATH, FILE_NAME) AS img
+		FILE_NO AS fileNo,
+		PRODUCT_NO AS productNo,
+		FILE_PATH AS filePath,
+		FILE_NAME AS fileName,
+		ORIGIN_NAME AS originName,
+		FILE_SIZE AS fileSize,
+		FILE_EXT AS fileExt,
+		CONCAT(FILE_PATH, FILE_NAME) AS fileUrl,
+		CONCAT(FILE_PATH, FILE_NAME) AS img
 		FROM PRODUCT_FILE
 		WHERE PRODUCT_NO = #{productNo}
 		ORDER BY FILE_NO
 	</select>
 
 	<!-- 여러개 검색 -->
-	<select id="selectProductImageList" parameterType="hashmap" resultType="com.example.unipet.model.Product">
+	<select id="selectProductImageList" parameterType="hashmap"
+		resultType="com.example.unipet.model.Product">
 		SELECT
-			FILE_NO AS fileNo,
-			PRODUCT_NO AS productNo,
-			FILE_PATH AS filePath,
-			FILE_NAME AS fileName,
-			CONCAT(FILE_PATH, FILE_NAME) AS fileUrl,
-			CONCAT(FILE_PATH, FILE_NAME) AS img
+		FILE_NO AS fileNo,
+		PRODUCT_NO AS productNo,
+		FILE_PATH AS filePath,
+		FILE_NAME AS fileName,
+		CONCAT(FILE_PATH, FILE_NAME) AS fileUrl,
+		CONCAT(FILE_PATH, FILE_NAME) AS img
 		FROM PRODUCT_FILE
 		WHERE PRODUCT_NO = #{productNo}
 		AND IS_MAIN = 'Y'
@@ -173,19 +146,20 @@
 	</select>
 
 	<!-- 여러개 검색 -->
-	<select id="selectProductDetailImageList" parameterType="hashmap" resultType="com.example.unipet.model.Product">
+	<select id="selectProductDetailImageList" parameterType="hashmap"
+		resultType="com.example.unipet.model.Product">
 		SELECT
-			FILE_NO AS fileNo,
-			PRODUCT_NO AS productNo,
-			FILE_PATH AS filePath,
-			FILE_NAME AS fileName,
-			ORIGIN_NAME AS originName,
-			FILE_SIZE AS fileSize,
-			FILE_EXT AS fileExt,
-			IS_DETAIL AS isDetail,
-			IS_MAIN AS isMain,
-			DATE_FORMAT(CDATE, '%Y-%m-%d %H:%i:%s') AS cdate,
-			CONCAT(FILE_PATH, FILE_NAME) AS img
+		FILE_NO AS fileNo,
+		PRODUCT_NO AS productNo,
+		FILE_PATH AS filePath,
+		FILE_NAME AS fileName,
+		ORIGIN_NAME AS originName,
+		FILE_SIZE AS fileSize,
+		FILE_EXT AS fileExt,
+		IS_DETAIL AS isDetail,
+		IS_MAIN AS isMain,
+		DATE_FORMAT(CDATE, '%Y-%m-%d %H:%i:%s') AS cdate,
+		CONCAT(FILE_PATH, FILE_NAME) AS img
 		FROM PRODUCT_FILE
 		WHERE PRODUCT_NO = #{productNo}
 		AND IS_DETAIL = 'Y'
@@ -195,199 +169,208 @@
 	<!-- 여러개 검색 -->
 	<select id="selectReviewList" parameterType="hashmap" resultType="hashmap">
 		SELECT
-			R.REVIEW_NO AS reviewNo,
-			R.PRODUCT_NO AS productNo,
-			R.USER_ID AS userId,
-			IFNULL(NULLIF(U.NICKNAME, ''), R.USER_ID) AS writerNickname,
-			R.R_CONTENTS AS reviewContents,
-			R.RATING AS rating,
-			DATE_FORMAT(R.CDATE, '%Y-%m-%d') AS reviewCdate,
-	
-			P.PRODUCT_NAME AS productName,
-			P.PRODUCT_PRICE AS productPrice,
-	
-			(
-				SELECT CONCAT(PF.FILE_PATH, PF.FILE_NAME)
-				FROM PRODUCT_FILE PF
-				WHERE PF.PRODUCT_NO = P.PRODUCT_NO
-				AND PF.IS_MAIN = 'Y'
-				ORDER BY PF.FILE_NO ASC
-				LIMIT 1
-			) AS img
-	
+		R.REVIEW_NO AS reviewNo,
+		R.PRODUCT_NO AS productNo,
+		R.USER_ID AS userId,
+		IFNULL(NULLIF(U.NICKNAME, ''), R.USER_ID) AS writerNickname,
+		R.R_CONTENTS AS reviewContents,
+		R.RATING AS rating,
+		DATE_FORMAT(R.CDATE, '%Y-%m-%d') AS reviewCdate,
+
+		P.PRODUCT_NAME AS productName,
+		P.PRODUCT_PRICE AS productPrice,
+
+		(
+		SELECT CONCAT(PF.FILE_PATH, PF.FILE_NAME)
+		FROM PRODUCT_FILE PF
+		WHERE PF.PRODUCT_NO = P.PRODUCT_NO
+		AND PF.IS_MAIN = 'Y'
+		ORDER BY PF.FILE_NO ASC
+		LIMIT 1
+		) AS img
+
 		FROM `REVIEW` R
-	
+
 		INNER JOIN PRODUCT P
-			ON R.PRODUCT_NO = P.PRODUCT_NO
-	
+		ON R.PRODUCT_NO = P.PRODUCT_NO
+
 		LEFT JOIN USERS U
-			ON R.USER_ID = U.USER_ID
-	
+		ON R.USER_ID = U.USER_ID
+
 		WHERE R.PRODUCT_NO = #{productNo}
-	
+
 		ORDER BY R.REVIEW_NO DESC
 	</select>
+
 	<!-- 여러개 검색 -->
-	<select id="selectQnaList" parameterType="hashmap" resultType="com.example.unipet.model.Product">
+	<select id="selectQnaList" parameterType="hashmap"
+		resultType="com.example.unipet.model.Product">
 		SELECT
-			Q.QNA_NO AS qnaNo,
-			Q.PRODUCT_NO AS productNo,
-			Q.USER_ID AS userId,
-			IFNULL(NULLIF(U.NICKNAME, ''), Q.USER_ID) AS writerNickname,
-			Q.QNA_TITLE AS qnaTitle,
-			Q.Q_CONTENTS AS qnaContents,
-			Q.A_CONTENTS AS qnaAnswer,
-			Q.ANS_STATUS AS qnaStatus,
-			Q.IS_SECRET AS privateYn,
-			DATE_FORMAT(Q.CDATE, '%Y-%m-%d %H:%i:%s') AS qnaCdate,
-			CASE
-				WHEN Q.ADATE IS NULL THEN ''
-				ELSE DATE_FORMAT(Q.ADATE, '%Y-%m-%d %H:%i:%s')
-			END AS updateTime
+		Q.QNA_NO AS qnaNo,
+		Q.PRODUCT_NO AS productNo,
+		Q.USER_ID AS userId,
+		IFNULL(NULLIF(U.NICKNAME, ''), Q.USER_ID) AS writerNickname,
+		Q.QNA_TITLE AS qnaTitle,
+		Q.Q_CONTENTS AS qnaContents,
+		Q.A_CONTENTS AS qnaAnswer,
+		Q.ANS_STATUS AS qnaStatus,
+		Q.IS_SECRET AS privateYn,
+		DATE_FORMAT(Q.CDATE, '%Y-%m-%d %H:%i:%s') AS qnaCdate,
+		CASE
+		WHEN Q.ADATE IS NULL THEN ''
+		ELSE DATE_FORMAT(Q.ADATE, '%Y-%m-%d %H:%i:%s')
+		END AS updateTime
 		FROM QNA Q
 		LEFT JOIN USERS U
-			ON Q.USER_ID = U.USER_ID
+		ON Q.USER_ID = U.USER_ID
 		WHERE Q.PRODUCT_NO = #{productNo}
 		ORDER BY Q.QNA_NO DESC
 	</select>
+
 	<!-- 여러개 검색 -->
-	<select id="selectCartList" parameterType="hashmap" resultType="com.example.unipet.model.Product">
+	<select id="selectCartList" parameterType="hashmap"
+		resultType="com.example.unipet.model.Product">
 		SELECT
-			C.CART_NO AS cartNo,
-			C.PRODUCT_NO AS productNo,
-			C.QTY AS qty,
-			C.QTY AS cartQty,
-			DATE_FORMAT(C.CDATE, '%Y-%m-%d %H:%i:%s') AS cdate,
+		C.CART_NO AS cartNo,
+		C.PRODUCT_NO AS productNo,
+		C.QTY AS qty,
+		C.QTY AS cartQty,
+		DATE_FORMAT(C.CDATE, '%Y-%m-%d %H:%i:%s') AS cdate,
 
-			P.PRODUCT_NAME AS productName,
-			P.PRODUCT_PRICE AS productPrice,
-			P.STOCK_QTY AS stockQty,
+		P.PRODUCT_NAME AS productName,
+		P.PRODUCT_PRICE AS productPrice,
+		P.STOCK_QTY AS stockQty,
 
-			(C.QTY * P.PRODUCT_PRICE) AS totalPrice,
+		(C.QTY * P.PRODUCT_PRICE) AS totalPrice,
 
-			F.FILE_NO AS fileNo,
-			F.FILE_PATH AS filePath,
-			F.FILE_NAME AS fileName,
-			CONCAT(F.FILE_PATH, F.FILE_NAME) AS img
+		F.FILE_NO AS fileNo,
+		F.FILE_PATH AS filePath,
+		F.FILE_NAME AS fileName,
+		CONCAT(F.FILE_PATH, F.FILE_NAME) AS img
 		FROM CART C
 		JOIN PRODUCT P
-			ON C.PRODUCT_NO = P.PRODUCT_NO
+		ON C.PRODUCT_NO = P.PRODUCT_NO
 		LEFT JOIN PRODUCT_FILE F
-			ON C.PRODUCT_NO = F.PRODUCT_NO
-			AND F.IS_MAIN = 'Y'
+		ON C.PRODUCT_NO = F.PRODUCT_NO
+		AND F.IS_MAIN = 'Y'
 		WHERE C.USER_ID = #{userId}
 		ORDER BY C.CART_NO DESC
 	</select>
 
 	<!-- 한개 검색 -->
-	<select id="selectProductView" parameterType="hashmap" resultType="com.example.unipet.model.Product">
+	<select id="selectProductView" parameterType="hashmap"
+		resultType="com.example.unipet.model.Product">
 		SELECT
-			P.PRODUCT_NO AS productNo,
-			P.STORE_NO AS storeNo,
-			P.PRODUCT_NAME AS productName,
-			P.BRAND AS brand,
-			P.PRODUCT_PRICE AS productPrice,
-			P.STOCK_QTY AS stockQty,
-			P.A_SUB_NO AS aSubNo,
-			P.I_SUB_NO AS iSubNo,
-			P.PRODUCT_STATUS AS productStatus,
-			DATE_FORMAT(P.CDATE, '%Y-%m-%d %H:%i:%s') AS cdate,
+		P.PRODUCT_NO AS productNo,
+		P.STORE_NO AS storeNo,
+		P.PRODUCT_NAME AS productName,
+		P.BRAND AS brand,
+		P.PRODUCT_PRICE AS productPrice,
+		P.STOCK_QTY AS stockQty,
+		P.A_SUB_NO AS aSubNo,
+		P.I_SUB_NO AS iSubNo,
+		P.PRODUCT_STATUS AS productStatus,
+		DATE_FORMAT(P.CDATE, '%Y-%m-%d %H:%i:%s') AS cdate,
 
-			AM.A_MAIN_NO AS aMainNo,
-			AM.A_MAIN_TYPE AS aMainType,
-			ASUB.A_SUB_TYPE AS aSubType,
-			IM.I_MAIN_NO AS iMainNo,
-			IM.I_MAIN_TYPE AS iMainType,
-			ISUB.I_SUB_TYPE AS iSubType,
+		AM.A_MAIN_NO AS aMainNo,
+		AM.A_MAIN_TYPE AS aMainType,
+		ASUB.A_SUB_TYPE AS aSubType,
+		IM.I_MAIN_NO AS iMainNo,
+		IM.I_MAIN_TYPE AS iMainType,
+		ISUB.I_SUB_TYPE AS iSubType,
 
-			CONCAT(F.FILE_PATH, F.FILE_NAME) AS img
+		CONCAT(F.FILE_PATH, F.FILE_NAME) AS img
 		FROM PRODUCT P
 		LEFT JOIN PC_ANIMAL_SUB ASUB
-			ON P.A_SUB_NO = ASUB.A_SUB_NO
+		ON P.A_SUB_NO = ASUB.A_SUB_NO
 		LEFT JOIN PC_ANIMAL_MAIN AM
-			ON ASUB.A_MAIN_NO = AM.A_MAIN_NO
+		ON ASUB.A_MAIN_NO = AM.A_MAIN_NO
 		LEFT JOIN PC_ITEM_SUB ISUB
-			ON P.I_SUB_NO = ISUB.I_SUB_NO
+		ON P.I_SUB_NO = ISUB.I_SUB_NO
 		LEFT JOIN PC_ITEM_MAIN IM
-			ON ISUB.I_MAIN_NO = IM.I_MAIN_NO
+		ON ISUB.I_MAIN_NO = IM.I_MAIN_NO
 		LEFT JOIN PRODUCT_FILE F
-			ON P.PRODUCT_NO = F.PRODUCT_NO
-			AND F.IS_MAIN = 'Y'
+		ON P.PRODUCT_NO = F.PRODUCT_NO
+		AND F.IS_MAIN = 'Y'
 		WHERE P.PRODUCT_NO = #{productNo}
 	</select>
 
 	<!-- 한개 검색 -->
-	<select id="selectProductDetail" parameterType="hashmap" resultType="com.example.unipet.model.Product">
+	<select id="selectProductDetail" parameterType="hashmap"
+		resultType="com.example.unipet.model.Product">
 		SELECT
-			P.PRODUCT_NO AS productNo,
-			P.STORE_NO AS storeNo,
-			P.PRODUCT_NAME AS productName,
-			P.BRAND AS brand,
-			P.PRODUCT_PRICE AS productPrice,
-			P.STOCK_QTY AS stockQty,
-			P.A_SUB_NO AS aSubNo,
-			P.I_SUB_NO AS iSubNo,
-			P.PRODUCT_STATUS AS productStatus,
-			DATE_FORMAT(P.CDATE, '%Y-%m-%d %H:%i:%s') AS cdate,
+		P.PRODUCT_NO AS productNo,
+		P.STORE_NO AS storeNo,
+		P.PRODUCT_NAME AS productName,
+		P.BRAND AS brand,
+		P.PRODUCT_PRICE AS productPrice,
+		P.STOCK_QTY AS stockQty,
+		P.A_SUB_NO AS aSubNo,
+		P.I_SUB_NO AS iSubNo,
+		P.PRODUCT_STATUS AS productStatus,
+		DATE_FORMAT(P.CDATE, '%Y-%m-%d %H:%i:%s') AS cdate,
 
-			AM.A_MAIN_NO AS aMainNo,
-			AM.A_MAIN_TYPE AS aMainType,
-			ASUB.A_SUB_TYPE AS aSubType,
+		AM.A_MAIN_NO AS aMainNo,
+		AM.A_MAIN_TYPE AS aMainType,
+		ASUB.A_SUB_TYPE AS aSubType,
 
-			IM.I_MAIN_NO AS iMainNo,
-			IM.I_MAIN_TYPE AS iMainType,
-			ISUB.I_SUB_TYPE AS iSubType,
+		IM.I_MAIN_NO AS iMainNo,
+		IM.I_MAIN_TYPE AS iMainType,
+		ISUB.I_SUB_TYPE AS iSubType,
 
-			CONCAT(F.FILE_PATH, F.FILE_NAME) AS img
+		CONCAT(F.FILE_PATH, F.FILE_NAME) AS img
 		FROM PRODUCT P
 		LEFT JOIN PC_ANIMAL_SUB ASUB
-			ON P.A_SUB_NO = ASUB.A_SUB_NO
+		ON P.A_SUB_NO = ASUB.A_SUB_NO
 		LEFT JOIN PC_ANIMAL_MAIN AM
-			ON ASUB.A_MAIN_NO = AM.A_MAIN_NO
+		ON ASUB.A_MAIN_NO = AM.A_MAIN_NO
 		LEFT JOIN PC_ITEM_SUB ISUB
-			ON P.I_SUB_NO = ISUB.I_SUB_NO
+		ON P.I_SUB_NO = ISUB.I_SUB_NO
 		LEFT JOIN PC_ITEM_MAIN IM
-			ON ISUB.I_MAIN_NO = IM.I_MAIN_NO
+		ON ISUB.I_MAIN_NO = IM.I_MAIN_NO
 		LEFT JOIN PRODUCT_FILE F
-			ON P.PRODUCT_NO = F.PRODUCT_NO
-			AND F.IS_MAIN = 'Y'
+		ON P.PRODUCT_NO = F.PRODUCT_NO
+		AND F.IS_MAIN = 'Y'
 		WHERE P.PRODUCT_NO = #{productNo}
 	</select>
 
 	<!-- 한개 검색 -->
-	<select id="selectReviewSummary" parameterType="hashmap" resultType="com.example.unipet.model.Product">
+	<select id="selectReviewSummary" parameterType="hashmap"
+		resultType="com.example.unipet.model.Product">
 		SELECT
-			COUNT(*) AS reviewCount,
-			IFNULL(ROUND(AVG(RATING), 1), 0) AS avgRating
-		FROM REVIEW
+		COUNT(*) AS reviewCount,
+		IFNULL(ROUND(AVG(RATING), 1), 0) AS avgRating
+		FROM `REVIEW`
 		WHERE PRODUCT_NO = #{productNo}
 	</select>
 
 	<!-- 한개 검색 -->
-	<select id="selectQnaOne" parameterType="hashmap" resultType="com.example.unipet.model.Product">
+	<select id="selectQnaOne" parameterType="hashmap"
+		resultType="com.example.unipet.model.Product">
 		SELECT
-			QNA_NO AS qnaNo,
-			PRODUCT_NO AS productNo,
-			USER_ID AS userId,
-			QNA_TITLE AS qnaTitle,
-			Q_CONTENTS AS qnaContents,
-			A_CONTENTS AS qnaAnswer,
-			ANS_STATUS AS qnaStatus,
-			IS_SECRET AS privateYn,
-			DATE_FORMAT(CDATE, '%Y-%m-%d %H:%i:%s') AS qnaCdate
+		QNA_NO AS qnaNo,
+		PRODUCT_NO AS productNo,
+		USER_ID AS userId,
+		QNA_TITLE AS qnaTitle,
+		Q_CONTENTS AS qnaContents,
+		A_CONTENTS AS qnaAnswer,
+		ANS_STATUS AS qnaStatus,
+		IS_SECRET AS privateYn,
+		DATE_FORMAT(CDATE, '%Y-%m-%d %H:%i:%s') AS qnaCdate
 		FROM QNA
 		WHERE QNA_NO = #{qnaNo}
 	</select>
 
 	<!-- 한개 검색 -->
-	<select id="selectCartOne" parameterType="hashmap" resultType="com.example.unipet.model.Product">
+	<select id="selectCartOne" parameterType="hashmap"
+		resultType="com.example.unipet.model.Product">
 		SELECT
-			CART_NO AS cartNo,
-			USER_ID AS userId,
-			PRODUCT_NO AS productNo,
-			QTY AS qty,
-			QTY AS cartQty,
-			DATE_FORMAT(CDATE, '%Y-%m-%d %H:%i:%s') AS cdate
+		CART_NO AS cartNo,
+		USER_ID AS userId,
+		PRODUCT_NO AS productNo,
+		QTY AS qty,
+		QTY AS cartQty,
+		DATE_FORMAT(CDATE, '%Y-%m-%d %H:%i:%s') AS cdate
 		FROM CART
 		WHERE USER_ID = #{userId}
 		AND PRODUCT_NO = #{productNo}
@@ -403,36 +386,36 @@
 	<!-- 삽입 -->
 	<insert id="insertQna" parameterType="hashmap">
 		INSERT INTO QNA (
-			PRODUCT_NO,
-			USER_ID,
-			QNA_TITLE,
-			Q_CONTENTS,
-			ANS_STATUS,
-			IS_SECRET,
-			CDATE
+		PRODUCT_NO,
+		USER_ID,
+		QNA_TITLE,
+		Q_CONTENTS,
+		ANS_STATUS,
+		IS_SECRET,
+		CDATE
 		) VALUES (
-			#{productNo},
-			#{userId},
-			#{title},
-			#{contents},
-			'N',
-			#{secretYn},
-			NOW()
+		#{productNo},
+		#{userId},
+		#{title},
+		#{contents},
+		'N',
+		#{secretYn},
+		NOW()
 		)
 	</insert>
 
 	<!-- 삽입 -->
 	<insert id="insertCart" parameterType="hashmap">
 		INSERT INTO CART (
-			USER_ID,
-			PRODUCT_NO,
-			QTY,
-			CDATE
+		USER_ID,
+		PRODUCT_NO,
+		QTY,
+		CDATE
 		) VALUES (
-			#{userId},
-			#{productNo},
-			#{qty},
-			NOW()
+		#{userId},
+		#{productNo},
+		#{qty},
+		NOW()
 		)
 	</insert>
 
@@ -449,12 +432,20 @@
 		AND USER_ID = #{userId}
 	</delete>
 
+	<!-- 상품리뷰 삭제 -->
+	<delete id="deleteReview" parameterType="hashmap"> DELETE FROM `REVIEW`
+		WHERE REVIEW_NO = #{reviewNo} <if
+			test="productNo != null and productNo != ''">
+			AND PRODUCT_NO = #{productNo}
+		</if>
+	</delete>
+
 	<!-- 수정 -->
 	<update id="updateQna" parameterType="hashmap">
 		UPDATE QNA
 		SET
-			QNA_TITLE = #{title},
-			Q_CONTENTS = #{contents}
+		QNA_TITLE = #{title},
+		Q_CONTENTS = #{contents}
 		WHERE QNA_NO = #{qnaNo}
 	</update>
 
@@ -473,34 +464,35 @@
 		WHERE USER_ID = #{userId}
 		AND PRODUCT_NO = #{productNo}
 	</update>
-	
+
 
 	<!-- 한개 검색 : 리뷰 신고 중복 확인 -->
-	<select id="selectReviewReportCheck" parameterType="hashmap" resultType="com.example.unipet.model.Product">
+	<select id="selectReviewReportCheck" parameterType="hashmap"
+		resultType="com.example.unipet.model.Product">
 		SELECT
-			REVIEW_NO AS reviewNo
+		REVIEW_NO AS reviewNo
 		FROM REVIEW_REPORT
 		WHERE REVIEW_NO = #{reviewNo}
 		LIMIT 1
 	</select>
-	
+
 	<!-- 리뷰 신고 등록 -->
 	<insert id="insertReviewReport" parameterType="hashmap">
 		INSERT INTO REVIEW_REPORT
 		(
-			REVIEW_NO,
-			REPORTER_ID,
-			REPORT_REASON,
-			REP_STATUS,
-			CDATE
+		REVIEW_NO,
+		REPORTER_ID,
+		REPORT_REASON,
+		REP_STATUS,
+		CDATE
 		)
 		VALUES
 		(
-			#{reviewNo},
-			#{reporterId},
-			#{reportReason},
-			'WAI',
-			NOW()
+		#{reviewNo},
+		#{reporterId},
+		#{reportReason},
+		'WAI',
+		NOW()
 		)
 	</insert>
 </mapper>

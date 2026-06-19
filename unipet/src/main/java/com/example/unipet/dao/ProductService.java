@@ -436,9 +436,9 @@ public class ProductService {
 
 		return resultMap;
 	}
-	
-	// 리뷰 신고 등록
-	public HashMap<String, Object> reportReview(HashMap<String, Object> map) {
+
+	// 상품리뷰 삭제 - 관리자만 가능
+	public HashMap<String, Object> deleteReview(HashMap<String, Object> map) {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
 		try {
@@ -455,7 +455,7 @@ public class ProductService {
 
 			if (!isAdmin) {
 				resultMap.put("result", "fail");
-				resultMap.put("message", "관리자만 신고 처리할 수 있습니다.");
+				resultMap.put("message", "관리자만 리뷰를 삭제할 수 있습니다.");
 				return resultMap;
 			}
 
@@ -465,24 +465,14 @@ public class ProductService {
 				return resultMap;
 			}
 
-			Product check = productMapper.selectReviewReportCheck(map);
+			int result = productMapper.deleteReview(map);
 
-			if (check != null) {
-				resultMap.put("result", "fail");
-				resultMap.put("message", "이미 신고 처리된 리뷰입니다.");
-				return resultMap;
-			}
-
-			map.put("reporterId", sessionId);
-
-			int num = productMapper.insertReviewReport(map);
-
-			if (num > 0) {
+			if (result > 0) {
 				resultMap.put("result", "success");
-				resultMap.put("message", "리뷰가 신고 처리되었습니다.");
+				resultMap.put("message", "리뷰가 삭제되었습니다.");
 			} else {
 				resultMap.put("result", "fail");
-				resultMap.put("message", "리뷰 신고 처리에 실패했습니다.");
+				resultMap.put("message", "리뷰 삭제에 실패했습니다.");
 			}
 
 		} catch (Exception e) {

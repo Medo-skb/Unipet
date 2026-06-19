@@ -16,6 +16,8 @@ import com.example.unipet.model.Board;
 @Service
 public class BoardService {
 
+	private static final String ADMIN_BOARD_WRITER_ID = "abcd1234";
+
 	@Autowired
 	BoardMapper boardMapper;
 
@@ -26,6 +28,30 @@ public class BoardService {
 	// 여러개 리턴 -> selectXXXList
 	// 한개 리턴 -> selectXXX
 	// 수정, 삭제, 삽입 -> updateXXX, deleteXXX, insertXXX
+
+	private boolean isAdminLogin(String sessionId, String sessionRole, String adminId) {
+		if (adminId != null && !adminId.equals("")) {
+			return true;
+		}
+
+		if ("A".equals(sessionRole)) {
+			return true;
+		}
+
+		if ("ADMIN".equals(sessionRole)) {
+			return true;
+		}
+
+		if ("admin".equals(sessionId)) {
+			return true;
+		}
+
+		return false;
+	}
+
+	private String getAdminBoardWriterId() {
+		return ADMIN_BOARD_WRITER_ID;
+	}
 
 	public HashMap<String, Object> getBoardList(HashMap<String, Object> map) {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
@@ -92,10 +118,11 @@ public class BoardService {
 
 			String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
 			String sessionRole = map.get("sessionRole") == null ? "" : map.get("sessionRole").toString();
+			String adminId = map.get("adminId") == null ? "" : map.get("adminId").toString();
 			String writerId = info.getUserId() == null ? "" : info.getUserId();
 			String privateYn = info.getPrivateYn() == null ? "N" : info.getPrivateYn();
 
-			boolean isAdmin = "A".equals(sessionRole) || "admin".equals(sessionId);
+			boolean isAdmin = isAdminLogin(sessionId, sessionRole, adminId);
 
 			if ("Y".equals(privateYn) && !isAdmin && !sessionId.equals(writerId)) {
 				resultMap.put("result", "private");
@@ -363,25 +390,86 @@ public class BoardService {
 		return result;
 	}
 
+	// 게시판 첨부파일 DB 저장 경로
+	private String getBoardUploadFolder() {
+		return "/img/board/";
+	}
+
+	// 게시판 첨부파일 실제 저장 경로
+	// Git에 같이 올릴 수 있도록 프로젝트 내부 src/main/webapp/img/board 폴더에 저장한다.
+	private File getBoardUploadDir() {
+		String projectRoot = System.getProperty("user.dir");
+		return new File(projectRoot, "src/main/webapp/img/board");
+	}
+
+	// 게시판 첨부파일 저장 공통 처리
+	private void saveBoardFiles(int boardNo, MultipartFile[] files) throws Exception {
+		String uploadFolder = getBoardUploadFolder();
+		File folder = getBoardUploadDir();
+
+		if (!folder.exists()) {
+			folder.mkdirs();
+		}
+
+		if (files != null) {
+			for (int i = 0; i < files.length; i++) {
+				MultipartFile file = files[i];
+
+				if (file != null && !file.isEmpty()) {
+					String originName = file.getOriginalFilename();
+					String fileExt = "";
+
+					if (originName != null && originName.lastIndexOf(".") > -1) {
+						fileExt = originName.substring(originName.lastIndexOf(".") + 1);
+					}
+
+					String fileName = UUID.randomUUID().toString();
+
+					if (!fileExt.equals("")) {
+						fileName = fileName + "." + fileExt;
+					}
+
+					File dest = new File(folder, fileName);
+					file.transferTo(dest);
+
+					HashMap<String, Object> fileMap = new HashMap<String, Object>();
+					fileMap.put("boardNo", boardNo);
+					fileMap.put("filePath", uploadFolder);
+					fileMap.put("fileName", fileName);
+					fileMap.put("originName", originName);
+					fileMap.put("fileSize", file.getSize());
+					fileMap.put("fileExt", fileExt);
+
+					boardMapper.insertBoardFile(fileMap);
+				}
+			}
+		}
+	}
+
 	public HashMap<String, Object> addBoard(HashMap<String, Object> map, MultipartFile[] files) {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
 		try {
 			String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
 			String sessionRole = map.get("sessionRole") == null ? "" : map.get("sessionRole").toString();
+			String adminId = map.get("adminId") == null ? "" : map.get("adminId").toString();
+
 			String title = map.get("title") == null ? "" : map.get("title").toString();
 			String bContent = map.get("bContent") == null ? "" : map.get("bContent").toString();
 			String bSubNo = map.get("bSubNo") == null ? "" : map.get("bSubNo").toString();
 			String privateYn = map.get("privateYn") == null ? "N" : map.get("privateYn").toString();
 			String bStatus = map.get("bStatus") == null ? "Y" : map.get("bStatus").toString();
 
-			if (sessionId.equals("")) {
+			boolean isAdmin = isAdminLogin(sessionId, sessionRole, adminId);
+
+			if (sessionId.equals("") && !isAdmin) {
 				resultMap.put("result", "login");
 				resultMap.put("message", "로그인이 필요합니다.");
 				return resultMap;
 			}
 
-			if ("1".equals(bSubNo) && !"A".equals(sessionRole) && !"BIZ".equals(sessionRole)) {
+			// 공지사항은 관리자 페이지 로그인한 관리자만 작성 가능
+			if ("1".equals(bSubNo) && !isAdmin) {
 				resultMap.put("result", "fail");
 				resultMap.put("message", "공지사항은 관리자만 작성할 수 있습니다.");
 				return resultMap;
@@ -411,7 +499,21 @@ public class BoardService {
 				return resultMap;
 			}
 
-			map.put("userId", sessionId);
+			String writerId = sessionId;
+
+			// 관리자 페이지 로그인 상태에서 글을 작성하면
+			// BOARD.USER_ID FK 때문에 USERS에 실제 존재하는 abcd1234로 저장한다.
+			if (isAdmin && "1".equals(bSubNo)) {
+				writerId = getAdminBoardWriterId();
+			}
+
+			if (writerId.equals("")) {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "게시글 작성자 정보가 없습니다.");
+				return resultMap;
+			}
+
+			map.put("userId", writerId);
 			map.put("privateYn", privateYn);
 			map.put("bStatus", bStatus);
 
@@ -420,46 +522,7 @@ public class BoardService {
 			if (cnt > 0) {
 				int boardNo = Integer.parseInt(String.valueOf(map.get("boardNo")));
 
-				String uploadPath = "C:/upload/board/";
-				File folder = new File(uploadPath);
-
-				if (!folder.exists()) {
-					folder.mkdirs();
-				}
-
-				if (files != null) {
-					for (int i = 0; i < files.length; i++) {
-						MultipartFile file = files[i];
-
-						if (file != null && !file.isEmpty()) {
-							String originName = file.getOriginalFilename();
-							String fileExt = "";
-
-							if (originName != null && originName.lastIndexOf(".") > -1) {
-								fileExt = originName.substring(originName.lastIndexOf(".") + 1);
-							}
-
-							String fileName = UUID.randomUUID().toString();
-
-							if (!fileExt.equals("")) {
-								fileName = fileName + "." + fileExt;
-							}
-
-							File dest = new File(uploadPath + fileName);
-							file.transferTo(dest);
-
-							HashMap<String, Object> fileMap = new HashMap<String, Object>();
-							fileMap.put("boardNo", boardNo);
-							fileMap.put("filePath", "/upload/board/");
-							fileMap.put("fileName", fileName);
-							fileMap.put("originName", originName);
-							fileMap.put("fileSize", file.getSize());
-							fileMap.put("fileExt", fileExt);
-
-							boardMapper.insertBoardFile(fileMap);
-						}
-					}
-				}
+				saveBoardFiles(boardNo, files);
 
 				resultMap.put("result", "success");
 
@@ -600,46 +663,7 @@ public class BoardService {
 			if (cnt > 0) {
 				int boardNo = Integer.parseInt(String.valueOf(map.get("boardNo")));
 
-				String uploadPath = "C:/upload/board/";
-				File folder = new File(uploadPath);
-
-				if (!folder.exists()) {
-					folder.mkdirs();
-				}
-
-				if (files != null) {
-					for (int i = 0; i < files.length; i++) {
-						MultipartFile file = files[i];
-
-						if (file != null && !file.isEmpty()) {
-							String originName = file.getOriginalFilename();
-							String fileExt = "";
-
-							if (originName != null && originName.lastIndexOf(".") > -1) {
-								fileExt = originName.substring(originName.lastIndexOf(".") + 1);
-							}
-
-							String fileName = UUID.randomUUID().toString();
-
-							if (!fileExt.equals("")) {
-								fileName = fileName + "." + fileExt;
-							}
-
-							File dest = new File(uploadPath + fileName);
-							file.transferTo(dest);
-
-							HashMap<String, Object> fileMap = new HashMap<String, Object>();
-							fileMap.put("boardNo", boardNo);
-							fileMap.put("filePath", "/upload/board/");
-							fileMap.put("fileName", fileName);
-							fileMap.put("originName", originName);
-							fileMap.put("fileSize", file.getSize());
-							fileMap.put("fileExt", fileExt);
-
-							boardMapper.insertBoardFile(fileMap);
-						}
-					}
-				}
+				saveBoardFiles(boardNo, files);
 
 				resultMap.put("result", "success");
 				resultMap.put("message", "게시글이 수정되었습니다.");
@@ -664,8 +688,11 @@ public class BoardService {
 		try {
 			String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
 			String sessionRole = map.get("sessionRole") == null ? "" : map.get("sessionRole").toString();
+			String adminId = map.get("adminId") == null ? "" : map.get("adminId").toString();
 
-			if (sessionId.equals("")) {
+			boolean isAdmin = isAdminLogin(sessionId, sessionRole, adminId);
+
+			if (sessionId.equals("") && !isAdmin) {
 				resultMap.put("result", "login");
 				resultMap.put("message", "로그인이 필요합니다.");
 				return resultMap;
@@ -681,7 +708,9 @@ public class BoardService {
 
 			String writerId = board.getUserId() == null ? "" : board.getUserId();
 
-			if (!sessionId.equals(writerId) && !sessionRole.equals("A")) {
+			// 일반 회원은 본인 글만 삭제 가능
+			// 관리자 페이지 로그인한 관리자는 모든 게시글 삭제 가능
+			if (!sessionId.equals(writerId) && !isAdmin) {
 				resultMap.put("result", "deny");
 				resultMap.put("message", "삭제 권한이 없습니다.");
 				return resultMap;
@@ -726,10 +755,19 @@ public class BoardService {
 				return resultMap;
 			}
 
-			String filePath = fileInfo.getFilePath();
-			String fileName = fileInfo.getFileName();
+			String filePath = fileInfo.getFilePath() == null ? "" : fileInfo.getFilePath();
+			String fileName = fileInfo.getFileName() == null ? "" : fileInfo.getFileName();
 
-			File file = new File("C:" + filePath + fileName);
+			File file;
+
+			// 새 방식: src/main/webapp/img/board 안에 저장된 파일 삭제
+			if (getBoardUploadFolder().equals(filePath)) {
+				file = new File(getBoardUploadDir(), fileName);
+
+				// 예전 방식: C:/upload/board 안에 저장된 파일 삭제
+			} else {
+				file = new File("C:" + filePath + fileName);
+			}
 
 			if (file.exists()) {
 				file.delete();
@@ -755,9 +793,12 @@ public class BoardService {
 		try {
 			String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
 			String sessionRole = map.get("sessionRole") == null ? "" : map.get("sessionRole").toString();
+			String adminId = map.get("adminId") == null ? "" : map.get("adminId").toString();
 			String contents = map.get("contents") == null ? "" : map.get("contents").toString();
 
-			if (sessionId.equals("")) {
+			boolean isAdmin = isAdminLogin(sessionId, sessionRole, adminId);
+
+			if (sessionId.equals("") && !isAdmin) {
 				resultMap.put("result", "login");
 				resultMap.put("message", "로그인이 필요합니다.");
 				return resultMap;
@@ -779,7 +820,7 @@ public class BoardService {
 
 			String writerId = commentInfo.getUserId() == null ? "" : commentInfo.getUserId();
 
-			if (!sessionId.equals(writerId) && !sessionRole.equals("A")) {
+			if (!sessionId.equals(writerId) && !isAdmin) {
 				resultMap.put("result", "deny");
 				resultMap.put("message", "수정 권한이 없습니다.");
 				return resultMap;
@@ -813,8 +854,11 @@ public class BoardService {
 		try {
 			String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
 			String sessionRole = map.get("sessionRole") == null ? "" : map.get("sessionRole").toString();
+			String adminId = map.get("adminId") == null ? "" : map.get("adminId").toString();
 
-			if (sessionId.equals("")) {
+			boolean isAdmin = isAdminLogin(sessionId, sessionRole, adminId);
+
+			if (sessionId.equals("") && !isAdmin) {
 				resultMap.put("result", "login");
 				resultMap.put("message", "로그인이 필요합니다.");
 				return resultMap;
@@ -830,7 +874,7 @@ public class BoardService {
 
 			String writerId = commentInfo.getUserId() == null ? "" : commentInfo.getUserId();
 
-			if (!sessionId.equals(writerId) && !sessionRole.equals("A")) {
+			if (!sessionId.equals(writerId) && !isAdmin) {
 				resultMap.put("result", "deny");
 				resultMap.put("message", "삭제 권한이 없습니다.");
 				return resultMap;
