@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -346,13 +347,8 @@ public class BoardService {
 			String commentNo = map.get("commentNo") == null ? "" : map.get("commentNo").toString();
 
 			if (commentNo.equals("")) {
-				// 게시글 신고
 				map.put("commentNo", null);
-
 			} else {
-				// 댓글 신고
-				// DB UNIQUE 때문에 댓글 신고할 때는 boardNo를 null로 넣는다.
-				// 댓글 번호만으로 어떤 댓글인지 알 수 있음
 				map.put("boardNo", null);
 			}
 
@@ -380,14 +376,36 @@ public class BoardService {
 			return "";
 		}
 
-		String[] badWords = { "씨발", "병신", "미친", "개새끼", "지랄", "꺼져" };
 		String result = text;
 
+		// 여기에 금칙어를 추가하면 게시글 제목, 게시글 본문, 댓글에 모두 적용된다.
+		String[] badWords = { "씨발", "병신", "미친", "개새끼", "지랄", "꺼져" };
+
 		for (int i = 0; i < badWords.length; i++) {
-			result = result.replaceAll(badWords[i], "***");
+			String pattern = makeBadWordPattern(badWords[i]);
+			result = result.replaceAll(pattern, "***");
 		}
 
 		return result;
+	}
+
+	private String makeBadWordPattern(String badWord) {
+		StringBuilder pattern = new StringBuilder();
+
+		// 글자 사이에 띄어쓰기, 특수문자, 자음/모음을 넣어도 잡기 위한 처리
+		// 예: 미친, 미 친, 미!친, 미.친 같은 입력도 필터링
+		String betweenPattern = "[\\s\\p{Punct}ㄱ-ㅎㅏ-ㅣ]*";
+
+		for (int i = 0; i < badWord.length(); i++) {
+			String ch = String.valueOf(badWord.charAt(i));
+			pattern.append(Pattern.quote(ch));
+
+			if (i < badWord.length() - 1) {
+				pattern.append(betweenPattern);
+			}
+		}
+
+		return pattern.toString();
 	}
 
 	// 게시판 첨부파일 DB 저장 경로
@@ -396,7 +414,6 @@ public class BoardService {
 	}
 
 	// 게시판 첨부파일 실제 저장 경로
-	// Git에 같이 올릴 수 있도록 프로젝트 내부 src/main/webapp/img/board 폴더에 저장한다.
 	private File getBoardUploadDir() {
 		String projectRoot = System.getProperty("user.dir");
 		return new File(projectRoot, "src/main/webapp/img/board");
@@ -501,8 +518,6 @@ public class BoardService {
 
 			String writerId = sessionId;
 
-			// 관리자 페이지 로그인 상태에서 글을 작성하면
-			// BOARD.USER_ID FK 때문에 USERS에 실제 존재하는 abcd1234로 저장한다.
 			if (isAdmin && "1".equals(bSubNo)) {
 				writerId = getAdminBoardWriterId();
 			}
@@ -513,6 +528,12 @@ public class BoardService {
 				return resultMap;
 			}
 
+			// 게시글 저장 전 제목과 본문 욕설 필터링
+			title = badWordFilter(title);
+			bContent = badWordFilter(bContent);
+
+			map.put("title", title);
+			map.put("bContent", bContent);
 			map.put("userId", writerId);
 			map.put("privateYn", privateYn);
 			map.put("bStatus", bStatus);
@@ -656,6 +677,12 @@ public class BoardService {
 				return resultMap;
 			}
 
+			// 게시글 수정 전 제목과 본문 욕설 필터링
+			title = badWordFilter(title);
+			bContent = badWordFilter(bContent);
+
+			map.put("title", title);
+			map.put("bContent", bContent);
 			map.put("privateYn", privateYn);
 
 			int cnt = boardMapper.updateBoard(map);
@@ -708,8 +735,6 @@ public class BoardService {
 
 			String writerId = board.getUserId() == null ? "" : board.getUserId();
 
-			// 일반 회원은 본인 글만 삭제 가능
-			// 관리자 페이지 로그인한 관리자는 모든 게시글 삭제 가능
 			if (!sessionId.equals(writerId) && !isAdmin) {
 				resultMap.put("result", "deny");
 				resultMap.put("message", "삭제 권한이 없습니다.");
@@ -760,11 +785,8 @@ public class BoardService {
 
 			File file;
 
-			// 새 방식: src/main/webapp/img/board 안에 저장된 파일 삭제
 			if (getBoardUploadFolder().equals(filePath)) {
 				file = new File(getBoardUploadDir(), fileName);
-
-				// 예전 방식: C:/upload/board 안에 저장된 파일 삭제
 			} else {
 				file = new File("C:" + filePath + fileName);
 			}

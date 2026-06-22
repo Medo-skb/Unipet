@@ -466,6 +466,14 @@ th {
 }
 
 .col-date {
-	width: 150px;
+	width: 170px;
 }
+
+.date-cell {
+	white-space: nowrap;
+	font-size: 14px;
+	color: var(--text-main);
+}
+
+
 

@@ -40,37 +40,37 @@ public interface ProductMapper {
 
 	public Product selectReviewSummary(HashMap<String, Object> map);
 
+	public Product selectReviewOne(HashMap<String, Object> map);
+
 	public Product selectQnaOne(HashMap<String, Object> map);
 
 	public Product selectCartOne(HashMap<String, Object> map);
 
+	public Product selectReviewReportCheck(HashMap<String, Object> map);
+
 	public int selectCartCount(HashMap<String, Object> map);
 
-	// 기존 신고 관련 메서드
-	// 지금은 화면에서 삭제로 바꿨기 때문에 사용하지 않지만,
-	// 기존 XML과 충돌 안 나게 남겨둠
-	public Product selectReviewReportCheck(HashMap<String, Object> map);
+	// 삽입 -> insertXXX
+	public int insertQna(HashMap<String, Object> map);
+
+	public int insertCart(HashMap<String, Object> map);
 
 	public int insertReviewReport(HashMap<String, Object> map);
 
-	// 삭제
-	public int deleteQna(HashMap<String, Object> map);
-
-	public int deleteCart(HashMap<String, Object> map);
-
-	// 상품리뷰 삭제
-	public int deleteReview(HashMap<String, Object> map);
-
-	// 수정
+	// 수정 -> updateXXX
 	public int updateQna(HashMap<String, Object> map);
 
 	public int updateCartPlusQty(HashMap<String, Object> map);
 
 	public int updateCartQty(HashMap<String, Object> map);
 
-	// 삽입
-	public int insertQna(HashMap<String, Object> map);
+	public int updateReview(HashMap<String, Object> map);
 
-	public int insertCart(HashMap<String, Object> map);
+	// 삭제 -> deleteXXX
+	public int deleteQna(HashMap<String, Object> map);
+
+	public int deleteCart(HashMap<String, Object> map);
+
+	public int deleteReview(HashMap<String, Object> map);
 
 }

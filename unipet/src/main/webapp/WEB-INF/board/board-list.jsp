@@ -225,11 +225,10 @@
 							<td>{{item.likeCnt}}</td>
 							<td>{{item.commentCnt}}</td>
 
-							<td>
-								<div class="date-box" v-if="item.createTime != null && item.createTime != ''">
-									<div>{{item.createTime.substring(0,10)}}</div>
-									<div>{{item.createTime.substring(11,16)}}</div>
-								</div>
+							<td class="date-cell">
+								<span v-if="item.createTime != null && item.createTime != ''">
+									{{fnFormatCreateTime(item.createTime)}}
+								</span>
 							</td>
 						</tr>
 					</tbody>
@@ -599,6 +598,27 @@
 					}
 
 					return "지역";
+				},
+				
+				fnFormatCreateTime: function (createTime) {
+					if (createTime == null || createTime == "") {
+						return "";
+					}
+
+					let value = String(createTime).trim();
+					value = value.replace("T", " ");
+
+					// yyyy-MM-dd HH:mm 형태가 제대로 있으면 날짜+시간 표시
+					if (value.length >= 16 && value.substring(13, 16).indexOf(":") == 0) {
+						return value.substring(0, 16);
+					}
+
+					// 시간이 01: 처럼 깨져 있으면 날짜만 표시
+					if (value.length >= 10) {
+						return value.substring(0, 10);
+					}
+
+					return value;
 				},
 
 				fnShowLocalBadge: function (item) {

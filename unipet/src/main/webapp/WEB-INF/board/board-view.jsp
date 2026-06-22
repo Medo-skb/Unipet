@@ -5,9 +5,11 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>UNIPET</title>
+
 		<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
 		<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 		<script src="/js/page-change.js"></script>
+
 		<link rel="stylesheet" href="/css/board/board-view.css">
 	</head>
 
@@ -26,6 +28,7 @@
 
 						<div v-if="resultType == 'private'" class="private-box">
 							비공개 게시글입니다.
+
 							<div class="private-btn-wrap">
 								<button class="list-btn" @click="fnMoveList()">목록으로</button>
 							</div>
@@ -41,10 +44,12 @@
 										@click="fnMoveMypage()">
 										{{board.writerNickname ? board.writerNickname : board.userId}}
 									</a>
+
 									<span v-else class="profile-text">
 										{{board.writerNickname ? board.writerNickname : board.userId}}
 									</span>
 								</div>
+
 								<div>카테고리 : {{board.bMainType}} / {{board.bSubType}}</div>
 								<div>지역 : {{board.localName == null ? '-' : board.localName}}</div>
 								<div>조회수 : {{board.viewCount}}</div>
@@ -52,14 +57,16 @@
 								<div>작성일 : {{board.createTime}}</div>
 							</div>
 
-							<div class="content">{{board.bContent}}</div>
+							<div class="content" v-html="board.bContent"></div>
 
 							<div class="file-list" v-if="fileList.length > 0">
 								<div v-for="file in fileList" :key="file.fileNo">
 									<img v-if="fnIsImage(file.fileExt)" :src="fnGetFileUrl(file)"
 										@error="fnFileImageError($event)">
-									<video v-else-if="fnIsVideo(file.fileExt)" :src="fnGetFileUrl(file)"
-										controls></video>
+
+									<video v-else-if="fnIsVideo(file.fileExt)" :src="fnGetFileUrl(file)" controls>
+									</video>
+
 									<div v-else>
 										<a :href="fnGetFileUrl(file)" download>{{file.originName}}</a>
 									</div>
@@ -71,7 +78,7 @@
 									{{myLike == 'Y' ? '추천취소' : '추천'}} ({{likeCnt}})
 								</button>
 
-								<button type="button" class="report-btn" v-if="!fnIsAdmin()"
+								<button type="button" class="report-btn" v-if="fnCanReportBoard()"
 									@click="fnOpenReportModal()">
 									신고
 								</button>
@@ -111,12 +118,19 @@
 							<div v-if="commentList.length == 0">등록된 댓글이 없습니다.</div>
 
 							<div v-for="comment in commentList" :key="comment.commentNo"
-								:class="comment.parentNo == null ? 'comment-item' : 'comment-item reply'">
+								:class="fnGetCommentClass(comment)">
 
 								<div class="comment-head">
-									<div class="comment-user">
-										{{comment.writerNickname ? comment.writerNickname : comment.userId}}
+									<div class="comment-left">
+										<span v-if="comment.replyDepth > 0" class="reply-depth-badge">
+											{{fnGetReplyDepthText(comment)}}
+										</span>
+
+										<span class="comment-user">
+											{{comment.writerNickname ? comment.writerNickname : comment.userId}}
+										</span>
 									</div>
+
 									<div>{{comment.createTime}}</div>
 								</div>
 
@@ -148,7 +162,7 @@
 											답글
 										</button>
 
-										<button type="button" class="report-btn" v-if="!fnIsAdmin()"
+										<button type="button" class="report-btn" v-if="fnCanReportComment(comment)"
 											@click="fnOpenCommentReportModal(comment.commentNo)">
 											신고
 										</button>
@@ -180,6 +194,7 @@
 												@click="fnAddReply(comment.commentNo)">
 												등록
 											</button>
+
 											<button type="button" class="report-btn" @click="replyTargetNo = null">
 												취소
 											</button>
@@ -191,7 +206,9 @@
 
 						<div v-if="board != null && resultType == 'success'" class="board-move-box">
 							<div class="board-move-row" :class="{empty : prevBoardNo == ''}" @click="fnMovePrevBoard()">
+
 								<div class="board-move-label">이전글</div>
+
 								<div class="board-move-title">
 									{{prevBoardNo == '' ? '이전글이 없습니다.' : (prevBoardTitle == '' ? '이전글로 이동' :
 									prevBoardTitle)}}
@@ -199,7 +216,9 @@
 							</div>
 
 							<div class="board-move-row" :class="{empty : nextBoardNo == ''}" @click="fnMoveNextBoard()">
+
 								<div class="board-move-label">다음글</div>
+
 								<div class="board-move-title">
 									{{nextBoardNo == '' ? '다음글이 없습니다.' : (nextBoardTitle == '' ? '다음글로 이동' :
 									nextBoardTitle)}}
@@ -280,7 +299,7 @@
 								return false;
 							},
 
-							fnGetBoardDetail() {
+							fnGetBoardDetail: function () {
 								let self = this;
 
 								$.ajax({
@@ -328,7 +347,7 @@
 								});
 							},
 
-							fnGetCommentList() {
+							fnGetCommentList: function () {
 								let self = this;
 
 								$.ajax({
@@ -341,17 +360,73 @@
 									success: function (data) {
 										if (data.result == "success") {
 											self.commentList = data.list || [];
-
-											for (let i = 0; i < self.commentList.length; i++) {
-												self.commentList[i].editMode = false;
-												self.commentList[i].editContents = self.commentList[i].cContent;
-											}
+											self.fnSetCommentDepth();
 										}
 									}
 								});
 							},
 
-							fnAddComment() {
+							fnSetCommentDepth: function () {
+								let self = this;
+								let commentMap = {};
+
+								for (let i = 0; i < self.commentList.length; i++) {
+									self.commentList[i].editMode = false;
+									self.commentList[i].editContents = self.commentList[i].cContent;
+									self.commentList[i].replyDepth = 0;
+
+									commentMap[String(self.commentList[i].commentNo)] = self.commentList[i];
+								}
+
+								for (let i = 0; i < self.commentList.length; i++) {
+									self.commentList[i].replyDepth = self.fnFindCommentDepth(self.commentList[i], commentMap);
+								}
+							},
+
+							fnFindCommentDepth: function (comment, commentMap) {
+								let depth = 0;
+								let parentNo = comment.parentNo;
+								let loopCount = 0;
+
+								while (parentNo != null && parentNo != "" && loopCount < 5) {
+									depth++;
+
+									let parentComment = commentMap[String(parentNo)];
+
+									if (parentComment == null) {
+										break;
+									}
+
+									parentNo = parentComment.parentNo;
+									loopCount++;
+								}
+
+								if (depth > 3) {
+									depth = 3;
+								}
+
+								return depth;
+							},
+
+							fnGetCommentClass: function (comment) {
+								let className = "comment-item";
+
+								if (comment.replyDepth > 0) {
+									className += " reply reply-depth-" + comment.replyDepth;
+								}
+
+								return className;
+							},
+
+							fnGetReplyDepthText: function (comment) {
+								if (comment.replyDepth == 1) {
+									return "답글";
+								}
+
+								return "대댓글";
+							},
+
+							fnAddComment: function () {
 								let self = this;
 
 								if (self.commentContents == "") {
@@ -390,13 +465,13 @@
 								});
 							},
 
-							fnMoveEdit() {
+							fnMoveEdit: function () {
 								pageChange("/board/edit.do", {
 									boardNo: this.boardNo
 								});
 							},
 
-							fnRemoveBoard() {
+							fnRemoveBoard: function () {
 								let self = this;
 
 								if (!confirm("게시글을 삭제하시겠습니까?")) {
@@ -426,7 +501,7 @@
 								});
 							},
 
-							fnBoardLike() {
+							fnBoardLike: function () {
 								let self = this;
 
 								$.ajax({
@@ -450,7 +525,7 @@
 								});
 							},
 
-							fnCanEditBoard() {
+							fnCanEditBoard: function () {
 								if (this.board != null && this.currentUserId != "" && String(this.board.userId) == String(this.currentUserId)) {
 									return true;
 								}
@@ -458,7 +533,7 @@
 								return false;
 							},
 
-							fnCanDeleteBoard() {
+							fnCanDeleteBoard: function () {
 								if (this.fnIsAdmin()) {
 									return true;
 								}
@@ -470,7 +545,39 @@
 								return false;
 							},
 
-							fnReportBoard() {
+							fnCanReportBoard: function () {
+								if (this.board == null) {
+									return false;
+								}
+
+								if (this.fnIsAdmin()) {
+									return false;
+								}
+
+								if (this.currentUserId != "" && String(this.board.userId) == String(this.currentUserId)) {
+									return false;
+								}
+
+								return true;
+							},
+
+							fnCanReportComment: function (comment) {
+								if (comment == null) {
+									return false;
+								}
+
+								if (this.fnIsAdmin()) {
+									return false;
+								}
+
+								if (this.currentUserId != "" && String(comment.userId) == String(this.currentUserId)) {
+									return false;
+								}
+
+								return true;
+							},
+
+							fnReportBoard: function () {
 								let self = this;
 
 								if (self.reportReason == "") {
@@ -505,26 +612,32 @@
 								});
 							},
 
-							fnMoveMypage() {
+							fnMoveMypage: function () {
 								location.href = "/user/mypage.do";
 							},
 
-							fnMoveList() {
+							fnMoveList: function () {
 								if (this.board != null && this.board.bMainType == '통합') {
-									pageChange("/board/list.do", {bMainNo: 1});
+									pageChange("/board/list.do", {
+										bMainNo: 1
+									});
 
 								} else if (this.board != null && this.board.bMainType == '지역') {
-									pageChange("/board/list.do", {bMainNo: 2});
+									pageChange("/board/list.do", {
+										bMainNo: 2
+									});
 
 								} else if (this.board != null && this.board.bMainType == '전문가 Q&A') {
-									pageChange("/board/list.do", {bMainNo: 3});
+									pageChange("/board/list.do", {
+										bMainNo: 3
+									});
 
 								} else {
 									pageChange("/board/list.do", {});
 								}
 							},
 
-							fnMovePrevBoard() {
+							fnMovePrevBoard: function () {
 								if (this.prevBoardNo == "") {
 									return;
 								}
@@ -534,7 +647,7 @@
 								});
 							},
 
-							fnMoveNextBoard() {
+							fnMoveNextBoard: function () {
 								if (this.nextBoardNo == "") {
 									return;
 								}
@@ -544,7 +657,7 @@
 								});
 							},
 
-							fnGetFileUrl(file) {
+							fnGetFileUrl: function (file) {
 								if (file == null) {
 									return "/img/board/unipet_logo.png";
 								}
@@ -574,7 +687,7 @@
 								return "/upload/board/" + url;
 							},
 
-							fnFileImageError(event) {
+							fnFileImageError: function (event) {
 								if (event == null || event.target == null) {
 									return;
 								}
@@ -583,7 +696,7 @@
 								event.target.src = "/img/board/unipet_logo.png";
 							},
 
-							fnIsImage(ext) {
+							fnIsImage: function (ext) {
 								if (!ext) {
 									return false;
 								}
@@ -593,7 +706,7 @@
 								return ext == 'jpg' || ext == 'jpeg' || ext == 'png' || ext == 'gif' || ext == 'webp';
 							},
 
-							fnIsVideo(ext) {
+							fnIsVideo: function (ext) {
 								if (!ext) {
 									return false;
 								}
@@ -603,7 +716,7 @@
 								return ext == 'mp4' || ext == 'webm' || ext == 'ogg';
 							},
 
-							fnCanManageComment(comment) {
+							fnCanManageComment: function (comment) {
 								if (this.fnIsAdmin()) {
 									return true;
 								}
@@ -615,17 +728,17 @@
 								return false;
 							},
 
-							fnEditComment(comment) {
+							fnEditComment: function (comment) {
 								comment.editMode = true;
 								comment.editContents = comment.cContent;
 							},
 
-							fnCancelEditComment(comment) {
+							fnCancelEditComment: function (comment) {
 								comment.editMode = false;
 								comment.editContents = comment.cContent;
 							},
 
-							fnUpdateComment(comment) {
+							fnUpdateComment: function (comment) {
 								let self = this;
 
 								if (comment.editContents == "") {
@@ -662,7 +775,7 @@
 								});
 							},
 
-							fnRemoveComment(commentNo) {
+							fnRemoveComment: function (commentNo) {
 								let self = this;
 
 								if (!confirm("댓글을 삭제하시겠습니까?")) {
@@ -692,7 +805,7 @@
 								});
 							},
 
-							fnShowReply(commentNo) {
+							fnShowReply: function (commentNo) {
 								if (this.replyTargetNo == commentNo) {
 									this.replyTargetNo = null;
 									this.replyContents = "";
@@ -703,7 +816,7 @@
 								}
 							},
 
-							fnAddReply(parentNo) {
+							fnAddReply: function (parentNo) {
 								let self = this;
 
 								if (self.replyContents == "") {
@@ -743,12 +856,12 @@
 								});
 							},
 
-							fnOpenReportModal() {
+							fnOpenReportModal: function () {
 								this.reportCommentNo = "";
 								this.showReportModal = true;
 							},
 
-							fnOpenCommentReportModal(commentNo) {
+							fnOpenCommentReportModal: function (commentNo) {
 								this.reportCommentNo = commentNo;
 								this.showReportModal = true;
 							}
