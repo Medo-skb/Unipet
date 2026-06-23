@@ -526,10 +526,9 @@ button {
 }
 
 .review-rating {
-	display: flex;
-	align-items: center;
-	gap: 2px;
 	margin-bottom: 12px;
+	color: #f1c40f;
+	font-size: 14px;
 }
 
 .star-filled {
@@ -609,6 +608,42 @@ button {
 	box-shadow: none !important;
 	opacity: 1 !important;
 	outline: none !important;
+}
+
+.review-pagination {
+	display: flex;
+	justify-content: center;
+	gap: 8px;
+	margin-top: 24px;
+}
+
+.review-pagination button {
+	width: 36px;
+	height: 36px;
+	border: 1px solid var(--line-soft);
+	background: var(--bg);
+	border-radius: 8px;
+	cursor: pointer;
+	color: var(--text-main);
+	font-weight: 700;
+	transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.review-pagination button.active {
+	background: var(--main);
+	color: #fff;
+	border-color: var(--main);
+}
+
+.review-pagination button:hover {
+	color: var(--main);
+	border-color: var(--main);
+}
+
+.review-pagination button.active:hover {
+	background: var(--main);
+	color: #fff;
+	border-color: var(--main);
 }
 
 /* ============================= */
@@ -1001,6 +1036,299 @@ button {
 
 .cart-badge-hidden {
 	display: none !important;
+}
+
+/* ============================= */
+/* 상품 상세 상단 깨짐 복구 */
+/* ============================= */
+
+.main-img-wrap {
+	position: relative;
+	width: 100%;
+}
+
+.image-sale-badge {
+	position: absolute;
+	top: 16px;
+	left: 16px;
+	z-index: 2;
+	display: inline-flex;
+	align-items: center;
+	height: 32px;
+	padding: 0 12px;
+	border-radius: 999px;
+	background: var(--main);
+	color: #fff;
+	font-size: 13px;
+	font-weight: 900;
+}
+
+.shopping-benefit-line {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 12px;
+}
+
+.shopping-benefit-line span {
+	display: inline-flex;
+	align-items: center;
+	height: 28px;
+	padding: 0 10px;
+	border-radius: 999px;
+	background: var(--soft-pink);
+	color: var(--main);
+	font-size: 12px;
+	font-weight: 800;
+}
+
+.product-title-row {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 14px;
+	margin-bottom: 8px;
+}
+
+.product-title-row h3 {
+	flex: 1;
+	min-width: 0;
+	margin: 0;
+}
+
+.wish-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 5px;
+	height: 38px;
+	padding: 0 13px;
+	border-radius: 999px;
+	border: 1px solid var(--line-soft);
+	background: #fff;
+	color: var(--text-main);
+	font-size: 13px;
+	font-weight: 800;
+	white-space: nowrap;
+}
+
+.wish-btn:hover {
+	border-color: var(--main);
+	color: var(--main);
+	background: var(--soft-pink-2);
+}
+
+.wish-btn.active {
+	border-color: var(--main);
+	background: var(--soft-pink);
+	color: var(--main);
+}
+
+.wish-btn span {
+	font-size: 15px;
+	line-height: 1;
+}
+
+.wish-btn em {
+	font-style: normal;
+	font-size: 12px;
+	font-weight: 900;
+}
+
+.price-box {
+	border: 1px solid var(--line-soft);
+	border-radius: 16px;
+	padding: 20px;
+	background: #fff;
+	margin-bottom: 18px;
+}
+
+.original-price {
+	margin-bottom: 5px;
+	color: #999;
+	font-size: 14px;
+	text-decoration: line-through;
+}
+
+.sale-line {
+	display: flex;
+	align-items: baseline;
+	gap: 8px;
+	margin-bottom: 5px;
+}
+
+.discount-rate {
+	color: var(--main);
+	font-size: 26px;
+	font-weight: 900;
+}
+
+.sale-price {
+	color: var(--text-main);
+	font-size: 30px;
+	font-weight: 900;
+	letter-spacing: -0.8px;
+}
+
+.save-price {
+	margin-bottom: 12px;
+	color: var(--main);
+	font-size: 13px;
+	font-weight: 800;
+}
+
+.coupon-line {
+	padding-top: 12px;
+	border-top: 1px solid var(--line-soft);
+	color: var(--text-sub);
+	font-size: 14px;
+	line-height: 1.6;
+}
+
+.point-line {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 8px;
+	color: var(--text-main);
+	font-size: 14px;
+	font-weight: 700;
+}
+
+.point-label {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	height: 24px;
+	padding: 0 8px;
+	border-radius: 999px;
+	background: var(--soft-pink);
+	color: var(--main);
+	font-size: 12px;
+	font-weight: 800;
+}
+
+.benefit-list {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+	margin-bottom: 18px;
+}
+
+.benefit-pill {
+	display: inline-flex;
+	align-items: center;
+	height: 30px;
+	padding: 0 12px;
+	border-radius: 999px;
+	background: #fafafa;
+	border: 1px solid var(--line-soft);
+	color: var(--text-sub);
+	font-size: 13px;
+	font-weight: 700;
+}
+
+/* ============================= */
+/* 상품평 이미지 + 모달 */
+/* ============================= */
+
+.review-rating-img-row {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	flex-wrap: wrap;
+	min-height: 60px;
+	margin: 8px 0 14px;
+}
+
+.review-rating-img-row .review-rating {
+	display: flex;
+	align-items: center;
+	height: 60px;
+	margin-bottom: 0;
+	color: #f1c40f;
+	font-size: 16px;
+	white-space: nowrap;
+}
+
+.review-rating-img-row .review-score {
+	margin-left: 6px;
+	font-size: 14px;
+	font-weight: 700;
+	color: #555555;
+}
+
+.review-rating-img-row .review-img-list {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+	margin-top: 0;
+}
+
+.review-rating-img-row .review-img {
+	width: 60px;
+	height: 60px;
+	object-fit: cover;
+	border-radius: 8px;
+	border: 1px solid var(--line-soft);
+	background: #fafafa;
+	cursor: pointer;
+}
+
+.review-rating-img-row .review-img:hover {
+	opacity: 0.85;
+}
+
+.review-img-modal-wrap {
+	position: fixed;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(0, 0, 0, 0.65);
+	z-index: 9999;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 30px;
+	box-sizing: border-box;
+}
+
+.review-img-modal-box {
+	position: relative;
+	max-width: 90vw;
+	max-height: 90vh;
+	background: #fff;
+	border-radius: 14px;
+	padding: 16px;
+	box-sizing: border-box;
+}
+
+.review-img-modal-img {
+	display: block;
+	max-width: 82vw;
+	max-height: 78vh;
+	object-fit: contain;
+	border-radius: 10px;
+}
+
+.review-img-modal-close {
+	position: absolute;
+	right: -12px;
+	top: -12px;
+	width: 34px;
+	height: 34px;
+	border: none;
+	border-radius: 50%;
+	background: #fff;
+	color: #333;
+	font-size: 24px;
+	font-weight: 700;
+	line-height: 30px;
+	cursor: pointer;
+	box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
 }
 
 /* ============================= */

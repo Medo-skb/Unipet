@@ -82,7 +82,7 @@
                         </div>
 
                         <div class="table-wrap">
-                            <table class="menu-table">
+                            <table class="menu-table reservation-table">
                                 <thead>
                                     <tr>
                                         <th>예약번호</th>

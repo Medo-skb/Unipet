@@ -33,6 +33,8 @@ public interface ProductMapper {
 
 	public List<Product> selectCartList(HashMap<String, Object> map);
 
+	public List<Product> selectProductWishList(HashMap<String, Object> map);
+
 	// 한개 리턴 -> selectXXX
 	public Product selectProductView(HashMap<String, Object> map);
 
@@ -50,12 +52,19 @@ public interface ProductMapper {
 
 	public int selectCartCount(HashMap<String, Object> map);
 
+	// 상품 찜하기
+	public int selectProductWishCount(HashMap<String, Object> map);
+
+	public int selectMyProductWish(HashMap<String, Object> map);
+
 	// 삽입 -> insertXXX
 	public int insertQna(HashMap<String, Object> map);
 
 	public int insertCart(HashMap<String, Object> map);
 
 	public int insertReviewReport(HashMap<String, Object> map);
+
+	public int insertProductWish(HashMap<String, Object> map);
 
 	// 수정 -> updateXXX
 	public int updateQna(HashMap<String, Object> map);
@@ -72,5 +81,7 @@ public interface ProductMapper {
 	public int deleteCart(HashMap<String, Object> map);
 
 	public int deleteReview(HashMap<String, Object> map);
+
+	public int deleteProductWish(HashMap<String, Object> map);
 
 }

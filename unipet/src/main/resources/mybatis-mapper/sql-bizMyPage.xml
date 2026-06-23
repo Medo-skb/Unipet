@@ -544,8 +544,11 @@
 		    R.RATING AS rating,
 		    R.R_CONTENTS AS rContents,
 		    R.CDATE AS reviewDate,
-		    RF.FILE_PATH AS filePath,
-		    RF.FILE_NAME AS fileName,
+			(
+			    SELECT GROUP_CONCAT(CONCAT(RF.FILE_PATH, RF.FILE_NAME) ORDER BY RF.FILE_NO ASC SEPARATOR '|')
+			    FROM REVIEW_FILE RF
+			    WHERE RF.REVIEW_NO = R.REVIEW_NO
+			) AS filePath,
 		    RR.REP_STATUS AS repStatus,
 		    R.RSV_NO AS rsvNo
 		FROM REVIEW R
@@ -557,13 +560,6 @@
 		LEFT JOIN REVIEW_REPORT RR 
 		    ON R.REVIEW_NO = RR.REVIEW_NO
 		    AND RR.REPORTER_ID = #{sUserId}
-		LEFT JOIN REVIEW_FILE RF
-		    ON RF.REVIEW_NO = R.REVIEW_NO
-		    AND RF.FILE_NO = (
-		        SELECT MIN(RF2.FILE_NO)
-		        FROM REVIEW_FILE RF2
-		        WHERE RF2.REVIEW_NO = R.REVIEW_NO
-		    )
 		WHERE S.S_USER_ID = #{sUserId}
 		  AND S.S_STATUS IN ('GEN', 'AFF')
 		  AND SU.U_STATUS = 'APR'

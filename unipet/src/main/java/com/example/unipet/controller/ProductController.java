@@ -40,6 +40,12 @@ public class ProductController {
 		return "/product/cart";
 	}
 
+	// 웹브라우저로 접속하는 주소, return은 jsp파일
+	@RequestMapping("/product/wish.do")
+	public String productWish(HttpServletRequest request, @RequestParam HashMap<String, Object> map) throws Exception {
+		return "/product/productWish";
+	}
+
 	// 관리자 로그인 여부 확인
 	private boolean isAdminSession(HttpSession session) {
 		String sessionId = session.getAttribute("sessionId") == null ? ""
@@ -93,6 +99,83 @@ public class ProductController {
 	public String detail(@RequestParam HashMap<String, Object> map) throws Exception {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 		resultMap = productService.getProductDetail(map);
+
+		return new Gson().toJson(resultMap);
+	}
+
+	// ajax가 호출하는 주소
+	// 상품 찜하기 정보 조회
+	@RequestMapping(value = "/product/wish/info.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String productWishInfo(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
+		String userId = session.getAttribute("sessionId") == null ? "" : (String) session.getAttribute("sessionId");
+
+		map.put("userId", userId);
+
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+		resultMap = productService.getProductWishInfo(map);
+
+		return new Gson().toJson(resultMap);
+	}
+
+	// ajax가 호출하는 주소
+	// 찜한 상품 목록 조회
+	@RequestMapping(value = "/product/wish/list.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String productWishList(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+		if (isAdminSession(session)) {
+			resultMap.put("result", "fail");
+			resultMap.put("message", "일반회원만 이용 가능한 기능입니다.");
+			return new Gson().toJson(resultMap);
+		}
+
+		String userId = session.getAttribute("sessionId") == null ? "" : (String) session.getAttribute("sessionId");
+
+		if ("".equals(userId)) {
+			resultMap.put("result", "login");
+			resultMap.put("message", "로그인이 필요한 서비스입니다.");
+			return new Gson().toJson(resultMap);
+		}
+
+		map.put("userId", userId);
+
+		resultMap = productService.getProductWishList(map);
+
+		return new Gson().toJson(resultMap);
+	}
+
+	// ajax가 호출하는 주소
+	// 상품 찜하기 등록/해제
+	@RequestMapping(value = "/product/wish/toggle.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String productWishToggle(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+		if (isAdminSession(session)) {
+			resultMap.put("result", "fail");
+			resultMap.put("message", "일반회원만 이용 가능한 기능입니다.");
+			return new Gson().toJson(resultMap);
+		}
+
+		String userId = session.getAttribute("sessionId") == null ? "" : (String) session.getAttribute("sessionId");
+
+		if ("".equals(userId)) {
+			resultMap.put("result", "login");
+			resultMap.put("message", "로그인이 필요한 서비스입니다.");
+			return new Gson().toJson(resultMap);
+		}
+
+		if (map.get("productNo") == null || "".equals(String.valueOf(map.get("productNo")))) {
+			resultMap.put("result", "fail");
+			resultMap.put("message", "상품 번호가 없습니다.");
+			return new Gson().toJson(resultMap);
+		}
+
+		map.put("userId", userId);
+
+		resultMap = productService.toggleProductWish(map);
 
 		return new Gson().toJson(resultMap);
 	}

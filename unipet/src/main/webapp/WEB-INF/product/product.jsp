@@ -19,6 +19,18 @@
 		<div id="app">
 
 			<div class="wrap">
+
+				<div class="shop-top-menu">
+					<button type="button" class="shop-top-menu-btn active" @click="fnMoveProductList()">
+						상품 목록
+					</button>
+
+					<button type="button" class="shop-top-menu-btn" @click="fnMoveWish()">
+						찜한 상품
+					</button>
+
+				</div>
+
 				<div class="container">
 
 					<div class="sidebar">
@@ -130,6 +142,10 @@
 								@click="fnMoveDetail(item.productNo)">
 
 								<div class="product-image-box">
+									<div class="product-sale-badge" v-if="fnHasDiscount(item)">
+										{{fnDiscountRate(item)}}%
+									</div>
+
 									<img v-if="item.img != null && item.img != ''" :src="item.img"
 										class="product-image">
 
@@ -137,22 +153,55 @@
 								</div>
 
 								<div class="product-card-body">
-									<div class="product-name">{{item.productName}}</div>
-									<div class="product-info">브랜드 : {{item.brand == null ? '-' : item.brand}}</div>
-									<div class="product-info">동물 : {{item.aSubType}}</div>
-									<div class="product-info">상품 : {{item.iSubType}}</div>
+									<div class="product-title-line">
+										<div class="product-name">{{item.productName}}</div>
 
-									<div class="product-review-row" v-if="fnGetReviewCnt(item) > 0">
-										<span class="product-star">★</span>
-										<span>{{fnFormatRating(item.avgRating)}}점</span>
-										<span class="product-review-count">리뷰 {{fnGetReviewCnt(item)}}개</span>
+										<div class="product-title-rating" v-if="fnGetReviewCnt(item) > 0">
+											<span class="product-star">★</span>
+											<span>{{fnFormatRating(item.avgRating)}}</span>
+											<span class="product-review-count">({{fnGetReviewCnt(item)}})</span>
+										</div>
 									</div>
 
-									<div class="product-review-row no-review" v-else>
-										리뷰 없음
+									<div class="product-tag-row">
+										<span class="product-tag">{{item.brand == null ? '브랜드 미등록' : item.brand}}</span>
+										<span class="product-tag">{{item.aSubType}}</span>
+										<span class="product-tag">{{item.iSubType}}</span>
 									</div>
 
-									<div class="product-price">{{fnFormatPrice(item.productPrice)}}원</div>
+									<div class="product-price-wrap">
+										<div class="product-original-price" v-if="fnHasDiscount(item)">
+											{{fnFormatPrice(fnOriginalPrice(item))}}원
+										</div>
+
+										<div class="product-sale-row">
+											<span class="product-discount-rate" v-if="fnHasDiscount(item)">
+												{{fnDiscountRate(item)}}%
+											</span>
+											<span class="product-price">
+												{{fnFormatPrice(fnSalePrice(item))}}원
+											</span>
+										</div>
+
+										<div class="product-save-price" v-if="fnHasDiscount(item)">
+											{{fnFormatPrice(fnDiscountAmount(item))}}원 할인
+										</div>
+									</div>
+
+									<div class="product-benefit-row">
+										<span>적립 {{fnFormatPrice(fnPointAmount(item))}}원</span>
+										<span v-if="fnIsFreeDelivery(item)">무료배송</span>
+										<span v-else>3만원 이상 무료배송</span>
+									</div>
+
+									<div class="product-wish-row" v-if="fnGetWishCount(item) > 0">
+										♡ {{fnGetWishCount(item)}}명이 찜했어요
+									</div>
+
+									<div class="product-stock-row"
+										v-if="fnGetStockQty(item) > 0 && fnGetStockQty(item) < 10">
+										품절임박 · 남은 수량 {{fnGetStockQty(item)}}개
+									</div>
 								</div>
 							</div>
 						</div>
@@ -221,6 +270,10 @@
 
 						// 장바구니
 						cartCount: 0,
+
+						// 쇼핑 혜택 표시
+						defaultDiscountRateList: [7, 9, 12, 15, 18, 20, 23, 25],
+						pointRate: 1,
 
 						// 페이징
 						currentPage: 1,
@@ -448,7 +501,6 @@
 						});
 					},
 
-					// 페이징 계산
 					fnSetPaging: function () {
 						let self = this;
 
@@ -470,7 +522,6 @@
 						self.fnSetPageList();
 					},
 
-					// 화면에 보여줄 페이지 번호 만들기
 					fnSetPageList: function () {
 						let self = this;
 
@@ -488,7 +539,6 @@
 						}
 					},
 
-					// 페이지 이동
 					fnGoPage: function (page) {
 						let self = this;
 
@@ -515,11 +565,19 @@
 						});
 					},
 
-					fnMoveCart: function () {
-						location.href = "/cart.do";
+					fnMoveProductList: function () {
+						location.href = "/product.do";
+					},
+
+					fnMoveWish: function () {
+						location.href = "/product/wish.do";
 					},
 
 					fnFormatPrice: function (price) {
+						if (price == null || price == undefined || price == "") {
+							return "0";
+						}
+
 						return Number(price).toLocaleString();
 					},
 
@@ -535,6 +593,130 @@
 							return 0;
 						}
 						return Number(item.reviewCount);
+					},
+
+					fnDiscountRate: function (item) {
+						if (item == null) {
+							return 0;
+						}
+
+						if (item.discountRate != null && item.discountRate != "") {
+							return Number(item.discountRate);
+						}
+
+						if (item.saleRate != null && item.saleRate != "") {
+							return Number(item.saleRate);
+						}
+
+						let productNo = item.productNo == null || item.productNo == "" ? 0 : Number(item.productNo);
+						let index = productNo % this.defaultDiscountRateList.length;
+
+						return Number(this.defaultDiscountRateList[index]);
+					},
+
+					fnSalePrice: function (item) {
+						if (item == null) {
+							return 0;
+						}
+
+						if (item.salePrice != null && item.salePrice != "") {
+							return Number(item.salePrice);
+						}
+
+						if (item.discountPrice != null && item.discountPrice != "") {
+							return Number(item.discountPrice);
+						}
+
+						if (item.finalPrice != null && item.finalPrice != "") {
+							return Number(item.finalPrice);
+						}
+
+						return Number(item.productPrice);
+					},
+
+					fnOriginalPrice: function (item) {
+						if (item == null) {
+							return 0;
+						}
+
+						if (item.originalPrice != null && item.originalPrice != "") {
+							return Number(item.originalPrice);
+						}
+
+						if (item.consumerPrice != null && item.consumerPrice != "") {
+							return Number(item.consumerPrice);
+						}
+
+						if (item.listPrice != null && item.listPrice != "") {
+							return Number(item.listPrice);
+						}
+
+						let salePrice = this.fnSalePrice(item);
+						let rate = this.fnDiscountRate(item);
+
+						if (rate <= 0 || rate >= 100) {
+							return salePrice;
+						}
+
+						return Math.round((salePrice / (1 - rate / 100)) / 10) * 10;
+					},
+
+					fnHasDiscount: function (item) {
+						let salePrice = this.fnSalePrice(item);
+						let originalPrice = this.fnOriginalPrice(item);
+						let rate = this.fnDiscountRate(item);
+
+						if (rate <= 0) {
+							return false;
+						}
+
+						if (originalPrice <= salePrice) {
+							return false;
+						}
+
+						return true;
+					},
+
+					fnDiscountAmount: function (item) {
+						let amount = this.fnOriginalPrice(item) - this.fnSalePrice(item);
+
+						if (amount < 0) {
+							return 0;
+						}
+
+						return amount;
+					},
+
+					fnPointAmount: function (item) {
+						return Math.floor(Number(this.fnSalePrice(item)) * Number(this.pointRate) / 100);
+					},
+
+					fnIsFreeDelivery: function (item) {
+						return this.fnSalePrice(item) >= 30000;
+					},
+
+					fnGetWishCount: function (item) {
+						if (item == null) {
+							return 0;
+						}
+
+						if (item.wishCount == null || item.wishCount == "") {
+							return 0;
+						}
+
+						return Number(item.wishCount);
+					},
+
+					fnGetStockQty: function (item) {
+						if (item == null) {
+							return 0;
+						}
+
+						if (item.stockQty == null || item.stockQty == "") {
+							return 0;
+						}
+
+						return Number(item.stockQty);
 					},
 
 					fnMoveMain: function () {
@@ -553,10 +735,9 @@
 							}
 						});
 					}
-				}, // methods
+				},
 
 				mounted() {
-					// 처음 시작할 때 실행되는 부분
 					let self = this;
 					self.fnLoadProductFilter();
 					self.fnGetCategoryList();
