@@ -5,12 +5,16 @@
     <div class="sidebar-title">관리자 페이지</div>
 
     <ul class="sidebar-menu">
-        <li class="menu-item ${param.activeMenu eq 'report' ? 'active' : ''}">
-            <a href="/admin/report.do">커뮤니티 및 리뷰 신고 관리</a>
+        <li class="menu-item ${param.activeMenu eq 'userManage' ? 'active' : ''}">
+            <a href="/admin/userManage.do">회원조회 및 관리</a>
         </li>
 
         <li class="menu-item ${param.activeMenu eq 'storeApprove' ? 'active' : ''}">
             <a href="/admin/storeApprove.do">사업자 입점 승인 관리</a>
+        </li>
+
+        <li class="menu-item ${param.activeMenu eq 'report' ? 'active' : ''}">
+            <a href="/admin/report.do">커뮤니티 및 리뷰 신고 관리</a>
         </li>
 
         <li class="menu-item ${param.activeMenu eq 'qnaAnswer' ? 'active' : ''}">

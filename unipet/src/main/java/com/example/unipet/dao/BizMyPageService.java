@@ -102,6 +102,30 @@ public class BizMyPageService {
 	    return resultMap;
 	}
 	
+	// 승인된 업체 존재 여부
+	public boolean hasApprovedStore(HashMap<String, Object> map) {
+	    return bizMyPageMapper.selectApprovedStoreCount(map) > 0;
+	}
+
+	// 사업자 신청 상태 조회
+	public HashMap<String, Object> getBizApplyStatus(HashMap<String, Object> map) {
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+	    try {
+	        BizMyPage info = bizMyPageMapper.selectBizApplyStatus(map);
+
+	        resultMap.put("info", info);
+	        resultMap.put("result", "success");
+	        resultMap.put("message", Message.MSG_SEARCH);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        resultMap.put("result", "fail");
+	        resultMap.put("message", Message.MSG_SERVER_ERR);
+	    }
+
+	    return resultMap;
+	}
+	
 	// 사업자 회원 탈퇴
 	@Transactional
 	public Map<String, Object> withdrawRequest(Map<String, Object> map) {
