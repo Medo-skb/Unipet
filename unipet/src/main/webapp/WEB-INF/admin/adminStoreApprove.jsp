@@ -74,11 +74,11 @@
                                     </tbody>
                                 </table>
 
-                                <div class="approve-card-actions">
-                                    <button type="button" class="admin-action-btn reject-btn" @click="fnOpenRejectModal(item)">
+                                <div class="report-btn-box">
+                                    <button type="button" class="btn-reject" @click="fnOpenRejectModal(item)">
                                         반려
                                     </button>
-                                    <button type="button" class="admin-action-btn approve-btn" @click="fnOpenApproveModal(item)">
+                                    <button type="button" class="btn-approve" @click="fnOpenApproveModal(item)">
                                         승인
                                     </button>
                                 </div>

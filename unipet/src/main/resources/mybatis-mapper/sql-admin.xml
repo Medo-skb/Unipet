@@ -160,9 +160,10 @@
 		RR.REP_STATUS AS repStatus,
 		R.R_CONTENTS AS rContents,
 		(
-		SELECT RF.FILE_PATH
+		SELECT CONCAT(RF.FILE_PATH, RF.FILE_NAME)
 		FROM REVIEW_FILE RF
 		WHERE RF.REVIEW_NO = R.REVIEW_NO
+		ORDER BY RF.FILE_NO ASC
 		LIMIT 1
 		) AS filePath,
 		P.PRODUCT_NAME AS productName,
@@ -462,43 +463,239 @@
 	      AND S_USER_ID = #{oldSUserId}
 	      AND SUBMIT_STATUS = 'REJ'
 	</update>
+	
+	
 
+	<!-- 사업자 회원조회 및 관리 리스트 -->
+	<select id="selectAdminBusinessUserList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        SU.S_USER_ID AS sUserId,
+	        SU.CEO_NAME AS ceoName,
+	        SU.U_STATUS AS uStatus,
+	        S.STORE_NO AS storeNo,
+	        S.STORE_NAME AS storeName,
+	        S.S_STATUS AS sStatus,
+	        S.IS_OPEN AS isOpen,
+	
+	        IFNULL(ROUND(AVG(R.RATING), 1), 0) AS avgRating,
+	
+	        (
+	            SELECT COUNT(*)
+	            FROM REVIEW_REPORT RR
+	            INNER JOIN REVIEW RV
+	                ON RR.REVIEW_NO = RV.REVIEW_NO
+	            WHERE RV.STORE_NO = S.STORE_NO
+	              AND RR.REP_STATUS = 'ACC'
+	        ) AS accReportCount,
+	
+	        (
+	            SELECT COUNT(*)
+	            FROM REVIEW_REPORT RR
+	            INNER JOIN REVIEW RV
+	                ON RR.REVIEW_NO = RV.REVIEW_NO
+	            WHERE RV.STORE_NO = S.STORE_NO
+	              AND RR.REP_STATUS = 'REJ'
+	        ) AS rejReportCount,
+	
+	        (
+	            SELECT COUNT(*)
+	            FROM RESERVATION RSV
+	            WHERE RSV.STORE_NO = S.STORE_NO
+	        ) AS totalReservationCount,
+	
+	        (
+	            SELECT COUNT(*)
+	            FROM RESERVATION RSV
+	            WHERE RSV.STORE_NO = S.STORE_NO
+	              AND RSV.RSV_STATUS != 'CAN'
+	        ) AS activeReservationCount,
+	
+	        (
+	            SELECT COUNT(*)
+	            FROM RESERVATION RSV
+	            WHERE RSV.STORE_NO = S.STORE_NO
+	              AND RSV.RSV_STATUS = 'CAN'
+	        ) AS cancelReservationCount
+	
+	    FROM STORE_USER SU
+	    INNER JOIN STORE S
+	        ON SU.S_USER_ID = S.S_USER_ID
+	    LEFT JOIN REVIEW R
+	        ON S.STORE_NO = R.STORE_NO
+	    WHERE S.S_STATUS != 'EXT'
+	    <if test="keyword != null and keyword != ''">
+	        AND (
+	            SU.S_USER_ID LIKE CONCAT('%', #{keyword}, '%')
+	            OR SU.CEO_NAME LIKE CONCAT('%', #{keyword}, '%')
+	            OR S.STORE_NAME LIKE CONCAT('%', #{keyword}, '%')
+	        )
+	    </if>
+	    <if test="sStatus != null and sStatus != ''">
+	        AND S.S_STATUS = #{sStatus}
+	    </if>
+	    <if test="isOpen != null and isOpen != ''">
+	        AND S.IS_OPEN = #{isOpen}
+	    </if>
+	    GROUP BY
+		    SU.S_USER_ID,
+		    SU.CEO_NAME,
+		    SU.U_STATUS,
+		    S.STORE_NO,
+		    S.STORE_NAME,
+		    S.S_STATUS,
+		    S.IS_OPEN
+		
+		<choose>
+		    <when test="sortType == 'ratingDesc'">
+		        ORDER BY avgRating DESC, S.STORE_NO DESC
+		    </when>
+		    <when test="sortType == 'ratingAsc'">
+		        ORDER BY avgRating ASC, S.STORE_NO DESC
+		    </when>
+		    <when test="sortType == 'reservationDesc'">
+		        ORDER BY activeReservationCount DESC, S.STORE_NO DESC
+		    </when>
+		    <when test="sortType == 'reservationAsc'">
+		        ORDER BY activeReservationCount ASC, S.STORE_NO DESC
+		    </when>
+		    <otherwise>
+		        ORDER BY S.STORE_NO DESC
+		    </otherwise>
+		</choose>
+	</select>
+	
+	<!-- 사업자 기본 정보 상세 -->
+	<select id="selectAdminBusinessUserBasic" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        S_USER_ID AS sUserId,
+	        CEO_NAME AS ceoName,
+	        BIZ_FILE_NAME AS bizFileName,
+	        U_STATUS AS uStatus
+	    FROM STORE_USER
+	    WHERE S_USER_ID = #{sUserId}
+	</select>
+	
+	<!-- 사업자 업체 상세 -->
+	<select id="selectAdminBusinessUserStoreDetail" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        S.STORE_NO AS storeNo,
+	        S.STORE_NAME AS storeName,
+	        S.S_CATEGORY AS sCategory,
+	        S.BIZNUM AS biznum,
+	        S.IS_OPEN AS isOpen,
+	        S.ACC_NAME AS accName,
+	        S.ACC_NO AS accNo,
+	        S.ACC_HOLDER AS accHolder,
+	        S.S_ADDR AS sAddr,
+	        S.S_FULL_ADDR AS sFullAddr,
+	        S.LAT AS lat,
+	        S.LNG AS lng,
+	        S.S_STATUS AS sStatus,
+	
+	        SP.SLOT AS slot,
+	        SP.CAPACITY AS capacity,
+	        SP.OPEN_TIME AS openTime,
+	        SP.CLOSE_TIME AS closeTime,
+	        SP.BREAK_START AS breakStart,
+	        SP.BREAK_END AS breakEnd,
+	
+	        SD.SUB_TITLE AS subTitle,
+	        SD.S_CONTENTS AS sContents
+	
+	    FROM STORE S
+	    LEFT JOIN STORE_POLICY SP
+	        ON S.STORE_NO = SP.STORE_NO
+	    LEFT JOIN STORE_DETAIL SD
+	        ON S.STORE_NO = SD.STORE_NO
+	    WHERE S.STORE_NO = #{storeNo}
+	</select>
+	
+	<!-- 사업자 업체 메뉴 목록 -->
+	<select id="selectAdminBusinessUserMenuList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        MENU_NO AS menuNo,
+	        MENU_NAME AS menuName,
+	        MENU_PRICE AS menuPrice,
+	        M_STATUS AS menuStatus
+	    FROM STORE_MENU
+	    WHERE STORE_NO = #{storeNo}
+	    ORDER BY MENU_NO DESC
+	</select>
+	
+	<!-- 사업자 업체 이미지 목록 -->
+	<select id="selectAdminBusinessUserStoreFileList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        FILE_PATH AS filePath,
+	        FILE_NAME AS fileName,
+	        ORIGIN_NAME AS originName,
+	        IS_PROOF AS isProof,
+	        IS_MAIN AS isMain
+	    FROM STORE_FILE
+	    WHERE STORE_NO = #{storeNo}
+	      AND IS_PROOF = 'N'
+	    ORDER BY
+	        CASE WHEN IS_MAIN = 'Y' THEN 0 ELSE 1 END,
+	        FILE_NO DESC
+	</select>
+	
+	<!-- 사업자 리뷰 상세 -->
+	<select id="selectAdminBusinessUserReviewList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        USER_ID AS userId,
+	        RATING AS rating,
+	        R_CONTENTS AS rContents,
+	        CDATE AS cdate
+	    FROM REVIEW
+	    WHERE STORE_NO = #{storeNo}
+	    ORDER BY CDATE DESC
+	</select>
+	
+	<!-- 사업자 리뷰 신고 상세 -->
+	<select id="selectAdminBusinessUserReportList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        RR.REVIEW_NO AS reviewNo,
+	        RR.REP_STATUS AS repStatus,
+	        RR.REPORTER_ID AS reporterId,
+	        R.USER_ID AS userId,
+	        RR.REPORT_REASON AS reportReason,
+	        RR.CDATE AS cdate
+	    FROM REVIEW_REPORT RR
+	    INNER JOIN REVIEW R
+	        ON RR.REVIEW_NO = R.REVIEW_NO
+	    WHERE R.STORE_NO = #{storeNo}
+	      AND RR.REP_STATUS IN ('ACC', 'REJ')
+	    ORDER BY RR.CDATE DESC
+	</select>
+	
+	<!-- 사업자 예약 상세 -->
+	<select id="selectAdminBusinessUserReservationList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        RSV.RSV_NO AS rsvNo,
+	        RSV.RSV_DATE AS rsvDate,
+	        RSV.RSV_START_TIME AS rsvStartTime,
+	        RSV.RSV_END_TIME AS rsvEndTime,
+	        RSV.USER_ID AS userId,
+	        RSV.RSV_STATUS AS rsvStatus,
+	        RSV.CDATE AS cdate
+	    FROM RESERVATION RSV
+	    WHERE RSV.STORE_NO = #{storeNo}
+	    ORDER BY RSV.RSV_DATE DESC, RSV.RSV_START_TIME DESC
+	</select>
+	
 	<!-- 회원조회 및 관리 리스트 -->
 	<select id="selectAdminUserList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
-		SELECT
-		    U.USER_ID AS userId,
-		    U.USER_NAME AS userName,
-		    U.NICKNAME AS nickname,
-		    U.USER_STATUS AS userStatus,
+	SELECT
+	    U.USER_ID AS userId,
+	    U.USER_NAME AS userName,
+	    U.NICKNAME AS nickname,
+	    U.USER_STATUS AS userStatus,
+	    U.REP_COUNT AS repCount,
 
-			(
-				SELECT COUNT(*)
-				FROM REVIEW_REPORT RR
-				INNER JOIN REVIEW R
-					ON RR.REVIEW_NO = R.REVIEW_NO
-				WHERE R.USER_ID = U.USER_ID
-				  AND RR.REP_STATUS = 'ACC'
-			)
-			+
-			(
-				SELECT COUNT(*)
-				FROM BOARD_REPORT BR
-				LEFT JOIN BOARD B
-					ON BR.BOARD_NO = B.BOARD_NO
-				LEFT JOIN COMMENT C
-					ON BR.COMMENT_NO = C.COMMENT_NO
-				WHERE BR.REP_STATUS = 'ACC'
-				  AND (
-						B.USER_ID = U.USER_ID
-						OR C.USER_ID = U.USER_ID
-				  )
-			) AS reportCount,
-
-			(
-				SELECT COUNT(*)
-				FROM PET P
-				WHERE P.USER_ID = U.USER_ID
-			) AS petCount,
+		(
+			SELECT COUNT(*)
+			FROM PET P
+			WHERE P.USER_ID = U.USER_ID
+		) AS petCount,
 
 			CASE
 				WHEN EXISTS (
@@ -564,7 +761,15 @@
 		<if test="userStatus != null and userStatus != ''">
 		    AND U.USER_STATUS = #{userStatus}
 		</if>
-		ORDER BY U.CDATE DESC
+		
+		<choose>
+		    <when test="sortType == 'reportDesc'">
+		        ORDER BY U.REP_COUNT DESC, U.CDATE DESC
+		    </when>
+		    <otherwise>
+		        ORDER BY U.CDATE DESC
+		    </otherwise>
+		</choose>
 	</select>
 
 	<!-- 회원 기본 정보 상세 -->
@@ -584,6 +789,20 @@
 		FROM USERS
 		WHERE USER_ID = #{userId}
 	</select>
+	
+	<!-- 회원 상태 수정 -->
+	<update id="updateAdminUserStatus" parameterType="hashmap">
+	    UPDATE USERS
+	    SET USER_STATUS = #{userStatus}
+	    WHERE USER_ID = #{userId}
+	</update>
+	
+	<!-- 회원 닉네임 수정 -->
+	<update id="updateAdminUserNickname" parameterType="hashmap">
+	    UPDATE USERS
+	    SET NICKNAME = #{nickname}
+	    WHERE USER_ID = #{userId}
+	</update>
 
 	<!-- 회원 반려동물 상세 -->
 	<select id="selectAdminUserPetList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
@@ -783,5 +1002,180 @@
 		WHERE C.USER_ID = #{userId}
 		ORDER BY C.COMMENT_NO DESC
 	</select>
+	
+	<!-- 회원 신고 누적 증가 -->
+	<update id="updateUserRepCount" parameterType="map">
+	    UPDATE USERS
+	    SET REP_COUNT = REP_COUNT + #{repCount}
+	    WHERE USER_ID = #{reportedUserId}
+	</update>
+	
+	<!-- 예약 리뷰 신고 업체별 그룹 -->
+	<select id="selectReservationReviewReportGroupList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        S.STORE_NO AS storeNo,
+	        S.STORE_NAME AS storeName,
+	        COUNT(*) AS reportCount
+	    FROM REVIEW_REPORT RR
+	    INNER JOIN REVIEW R ON RR.REVIEW_NO = R.REVIEW_NO
+	    LEFT JOIN STORE S ON R.STORE_NO = S.STORE_NO
+	    WHERE R.PRODUCT_NO IS NULL
+	      AND R.ORD_NO IS NULL
+	      AND RR.REP_STATUS = 'WAI'
+	    GROUP BY S.STORE_NO, S.STORE_NAME
+	    ORDER BY reportCount DESC, S.STORE_NO DESC
+	</select>
+	
+	<!-- 예약 리뷰 신고 업체별 상세 -->
+	<select id="selectReservationReviewReportDetailList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        RR.REPORT_NO AS reportNo,
+	        RR.REVIEW_NO AS reviewNo,
+	        RR.REPORTER_ID AS reporterId,
+	        RR.REPORT_REASON AS reportReason,
+	        RR.REP_STATUS AS repStatus,
+	        R.USER_ID AS userId,
+	        R.R_CONTENTS AS rContents,
+	        R.RSV_NO AS rsvNo,
+	        S.STORE_NO AS storeNo,
+	        S.STORE_NAME AS storeName,
+	        IFNULL(SM.MENU_NAME, '삭제된 메뉴') AS menuName,
+	        (
+			    SELECT GROUP_CONCAT(CONCAT(RF.FILE_PATH, RF.FILE_NAME) ORDER BY RF.FILE_NO ASC SEPARATOR '|')
+			    FROM REVIEW_FILE RF
+			    WHERE RF.REVIEW_NO = R.REVIEW_NO
+			) AS filePath
+	    FROM REVIEW_REPORT RR
+	    INNER JOIN REVIEW R ON RR.REVIEW_NO = R.REVIEW_NO
+	    LEFT JOIN STORE S ON R.STORE_NO = S.STORE_NO
+	    LEFT JOIN RESERVATION RSV ON R.RSV_NO = RSV.RSV_NO
+	    LEFT JOIN STORE_MENU SM ON RSV.MENU_NO = SM.MENU_NO
+	    WHERE R.STORE_NO = #{storeNo}
+	      AND R.PRODUCT_NO IS NULL
+	      AND R.ORD_NO IS NULL
+	      AND RR.REP_STATUS = 'WAI'
+	    ORDER BY RR.REPORT_NO DESC
+	</select>
+	
+	<!-- 커뮤니티 글 신고 글별 그룹 -->
+	<select id="selectCommunityPostReportGroupList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        BR.BOARD_NO AS targetNo,
+	        BR.BOARD_NO AS boardNo,
+	        B.TITLE AS title,
+	        B.USER_ID AS reportedUserId,
+	        COUNT(*) AS reportCount
+	    FROM BOARD_REPORT BR
+	    INNER JOIN BOARD B ON BR.BOARD_NO = B.BOARD_NO
+	    WHERE BR.REP_STATUS = 'WAI'
+	      AND BR.BOARD_NO IS NOT NULL
+	    GROUP BY BR.BOARD_NO, B.TITLE, B.USER_ID
+	    ORDER BY reportCount DESC, BR.BOARD_NO DESC
+	</select>
+	
+	<!-- 커뮤니티 글 신고 글별 상세 -->
+	<select id="selectCommunityPostReportDetailList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        BR.REPORT_NO AS reportNo,
+	        BR.BOARD_NO AS targetNo,
+	        BR.BOARD_NO AS boardNo,
+	        BR.REPORTER_ID AS reporterId,
+	        B.USER_ID AS reportedUserId,
+	        BR.REPORT_REASON AS reportReason,
+	        BR.REP_STATUS AS repStatus,
+	        B.TITLE AS title
+	    FROM BOARD_REPORT BR
+	    INNER JOIN BOARD B ON BR.BOARD_NO = B.BOARD_NO
+	    WHERE BR.BOARD_NO = #{targetNo}
+	      AND BR.REP_STATUS = 'WAI'
+	    ORDER BY BR.REPORT_NO DESC
+	</select>
+	
+	<!-- 커뮤니티 댓글 신고 댓글별 그룹 -->
+	<select id="selectCommunityCommentReportGroupList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	    BR.COMMENT_NO AS targetNo,
+	    B.BOARD_NO AS boardNo,
+	    B.TITLE AS title,
+	    C.C_CONTENT AS contents,
+	    C.USER_ID AS reportedUserId,
+	    COUNT(*) AS reportCount
+	    FROM BOARD_REPORT BR
+	    INNER JOIN COMMENT C ON BR.COMMENT_NO = C.COMMENT_NO
+	    INNER JOIN BOARD B ON C.BOARD_NO = B.BOARD_NO
+	    WHERE BR.REP_STATUS = 'WAI'
+	      AND BR.COMMENT_NO IS NOT NULL
+	    GROUP BY BR.COMMENT_NO, B.BOARD_NO, B.TITLE, C.C_CONTENT, C.USER_ID
+	    ORDER BY reportCount DESC, BR.COMMENT_NO DESC
+	</select>
+	
+	<!-- 커뮤니티 댓글 신고 댓글별 상세 -->
+	<select id="selectCommunityCommentReportDetailList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        BR.REPORT_NO AS reportNo,
+	        BR.COMMENT_NO AS targetNo,
+	        B.BOARD_NO AS boardNo,
+	        BR.REPORTER_ID AS reporterId,
+	        C.USER_ID AS reportedUserId,
+	        BR.REPORT_REASON AS reportReason,
+	        BR.REP_STATUS AS repStatus,
+	        B.TITLE AS title
+	    FROM BOARD_REPORT BR
+	    INNER JOIN COMMENT C ON BR.COMMENT_NO = C.COMMENT_NO
+	    INNER JOIN BOARD B ON C.BOARD_NO = B.BOARD_NO
+	    WHERE BR.COMMENT_NO = #{targetNo}
+	      AND BR.REP_STATUS = 'WAI'
+	    ORDER BY BR.REPORT_NO DESC
+	</select>
+	
+	<!-- 예약 리뷰 신고 업체별 전체 승인 -->
+	<update id="updateReservationReviewReportBatchApprove" parameterType="hashmap">
+	    UPDATE REVIEW_REPORT RR
+	    INNER JOIN REVIEW R ON RR.REVIEW_NO = R.REVIEW_NO
+	    SET RR.REP_STATUS = 'ACC'
+	    WHERE R.STORE_NO = #{storeNo}
+	      AND RR.REP_STATUS = 'WAI'
+	</update>
+	
+	<!-- 예약 리뷰 신고 업체별 전체 반려 -->
+	<update id="updateReservationReviewReportBatchReject" parameterType="hashmap">
+	    UPDATE REVIEW_REPORT RR
+	    INNER JOIN REVIEW R ON RR.REVIEW_NO = R.REVIEW_NO
+	    SET RR.REP_STATUS = 'REJ'
+	    WHERE R.STORE_NO = #{storeNo}
+	      AND RR.REP_STATUS = 'WAI'
+	</update>
+	
+	<!-- 커뮤니티 글 신고 전체 승인 -->
+	<update id="updateCommunityPostReportBatchApprove" parameterType="hashmap">
+	    UPDATE BOARD_REPORT
+	    SET REP_STATUS = 'ACC'
+	    WHERE BOARD_NO = #{targetNo}
+	      AND REP_STATUS = 'WAI'
+	</update>
+	
+	<!-- 커뮤니티 글 신고 전체 반려 -->
+	<update id="updateCommunityPostReportBatchReject" parameterType="hashmap">
+	    UPDATE BOARD_REPORT
+	    SET REP_STATUS = 'REJ'
+	    WHERE BOARD_NO = #{targetNo}
+	      AND REP_STATUS = 'WAI'
+	</update>
+	
+	<!-- 커뮤니티 댓글 신고 전체 승인 -->
+	<update id="updateCommunityCommentReportBatchApprove" parameterType="hashmap">
+	    UPDATE BOARD_REPORT
+	    SET REP_STATUS = 'ACC'
+	    WHERE COMMENT_NO = #{targetNo}
+	      AND REP_STATUS = 'WAI'
+	</update>
+	
+	<!-- 커뮤니티 댓글 신고 전체 반려 -->
+	<update id="updateCommunityCommentReportBatchReject" parameterType="hashmap">
+	    UPDATE BOARD_REPORT
+	    SET REP_STATUS = 'REJ'
+	    WHERE COMMENT_NO = #{targetNo}
+	      AND REP_STATUS = 'WAI'
+	</update>
 
 </mapper>

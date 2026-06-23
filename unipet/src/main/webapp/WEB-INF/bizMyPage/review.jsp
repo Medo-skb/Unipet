@@ -93,8 +93,12 @@
 
                                 <div class="review-menu">메뉴 : {{item.menuName}}</div>
 
-                                <div class="review-image-box" v-if="item.filePath && item.fileName">
-                                    <img :src="item.filePath + item.fileName" alt="리뷰 이미지" class="review-image">
+                                <div class="review-image-box" v-if="item.filePath">
+                                    <img v-for="imagePath in fnReviewImageList(item.filePath)"
+                                        :key="imagePath"
+                                        :src="imagePath"
+                                        alt="리뷰 이미지"
+                                        class="review-image">
                                 </div>
 
                                 <div class="review-text">{{item.rContents}}</div>
@@ -312,10 +316,17 @@
                         alert("리뷰 신고 중 오류가 발생했습니다.");
                     }
                 });
-            }
+            },
 
+            fnReviewImageList: function (filePath) {
+                if (!filePath) {
+                    return [];
+                }
 
-
+                return filePath.split("|").filter(function (item) {
+                    return item;
+                });
+            },
 
         }, // methods
         mounted() {
