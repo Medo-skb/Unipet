@@ -105,18 +105,23 @@
    
    <select id="selectStoreReviewList" parameterType="hashmap" resultType="com.example.unipet.model.Review">
 	    SELECT 
+	        R.REVIEW_NO,
 	        R.USER_ID,
-	        NICKNAME,
-	        RATING,
-	        R_CONTENTS,
+	        U.NICKNAME,
+	        R.RATING,
+	        R.R_CONTENTS,
 	        DATE_FORMAT(R.CDATE, '%Y-%m-%d %H:%i') AS cdate,
-	        RSV_NO
+	        R.RSV_NO,
+	        -- 🎯 핵심 수정: FILE_PATH와 FILE_NAME을 합친(CONCAT) 후 쉼표로 묶습니다.
+	        GROUP_CONCAT(CONCAT(RF.FILE_PATH, RF.FILE_NAME) SEPARATOR ',') AS filePaths
 	    FROM REVIEW R
 	    JOIN USERS U ON R.USER_ID = U.USER_ID
-	    WHERE STORE_NO = #{storeNo}
+	    LEFT JOIN REVIEW_FILE RF ON R.REVIEW_NO = RF.REVIEW_NO
+	    WHERE R.STORE_NO = #{storeNo}
 	    <if test="rsvNo != null and rsvNo != ''">
-	        AND RSV_NO = #{rsvNo}
+	        AND R.RSV_NO = #{rsvNo}
 	    </if>
+	    GROUP BY R.REVIEW_NO
 	    ORDER BY R.CDATE DESC
 	</select>
 	

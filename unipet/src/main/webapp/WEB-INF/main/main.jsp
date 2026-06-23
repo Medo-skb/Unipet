@@ -88,10 +88,10 @@
                     </a>
                 </div>
                 
-                <section class="main-ai-section scroll-fade-up" v-if="aiStoreList.length > 0">
+                <section class="main-ai-section" v-if="aiStoreList.length > 0">
                     <div class="section-header">
-                        <h2 class="section-title" style="color: #6C5CE7;">✨ AI 맞춤 추천 업체</h2>
-                        <p style="font-size: 14px; color: #666; margin-top: 5px;">회원님의 최근 활동과 지역을 분석하여 선별했어요.</p>
+                        <h2 class="section-title title-store">✨ AI 맞춤 추천 업체</h2>
+                        <p class="section-desc">회원님의 최근 활동과 지역을 분석하여 선별했어요.</p>
                     </div>
 
                     <div class="store-card-list">
@@ -100,24 +100,24 @@
                             :key="'ai-store-' + index"
                             @click="fnGoStoreDetail(item.storeNo)">
 
-                            <div class="store-card-body" style="padding-top: 20px;">
+                            <div class="store-card-body ai-card-body">
                                 <div class="store-name-row">
                                     <div class="store-name">{{ item.name }}</div>
                                     <div class="store-category">{{ item.type }}</div>
                                 </div>
 
-                                <div class="ai-reason-box" style="background-color: #F8F9FA; padding: 12px; border-radius: 8px; margin-top: 15px; font-size: 13px; color: #2D3436; border-left: 4px solid #6C5CE7;">
+                                <div class="ai-reason-box box-store">
                                     <strong>💬 AI 큐레이터:</strong><br>
-                                    {{ item.reason }}
+                                    회원님의 취향을 저격할 최고의 <strong>{{ item.type }}</strong> 업체로 선별해 보았어요!
                                 </div>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <section class="main-ai-section scroll-fade-up" v-if="aiProductList.length > 0" style="margin-top: 40px;">
+                <section class="main-ai-section product-ai-section" v-if="aiProductList.length > 0">
                     <div class="section-header">
-                        <h2 class="section-title" style="color: #00B894;">🎁 AI 맞춤 추천 상품</h2>
+                        <h2 class="section-title title-product">🎁 AI 맞춤 추천 상품</h2>
                     </div>
 
                     <div class="product-card-list">
@@ -126,12 +126,12 @@
                             :key="'ai-product-' + index"
                             @click="fnGoProductDetail(item.productNo)">
 
-                            <div class="product-card-body" style="padding-top: 20px;">
-                                <div class="product-name" style="font-weight: bold; font-size: 16px;">{{ item.name }}</div>
+                            <div class="product-card-body ai-card-body">
+                                <div class="product-name ai-product-name">{{ item.name }}</div>
                                 
-                                <div class="ai-reason-box" style="background-color: #F8F9FA; padding: 12px; border-radius: 8px; margin-top: 15px; font-size: 13px; color: #2D3436; border-left: 4px solid #00B894;">
+                                <div class="ai-reason-box box-product">
                                     <strong>💬 AI 큐레이터:</strong><br>
-                                    {{ item.reason }}
+                                    우리 아이에게 딱 맞는 <strong>{{ item.name }}</strong> 상품을 강력 추천합니다!
                                 </div>
                             </div>
                         </div>

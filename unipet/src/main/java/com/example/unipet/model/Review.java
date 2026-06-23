@@ -10,5 +10,7 @@ public class Review {
 	private String rContents;
 	private String cdate;
 	private String rsvNo;
+	private String filePaths;
+	private String fileNames;
 		
 }

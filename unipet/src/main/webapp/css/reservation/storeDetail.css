@@ -253,6 +253,82 @@
     margin-bottom: 6px;
 }
 
+/* 상단 레이아웃 (좌우 분할) */
+.rev-top-layout {
+    display: flex;
+    /* justify-content: space-between; */
+    justify-content: flex-start;
+    align-items: flex-start; /* 내용물들을 위쪽 기준으로 정렬 */
+    margin-bottom: 12px; /* 본문 텍스트와의 간격 */
+}
+
+/* 왼쪽 정보 그룹 (헤더 + 별점) */
+.info-group {
+    /* flex: 1;  */
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column; /* 세로로 배치 (1행: 헤더, 2행: 별점) */
+    gap: 8px; /* 헤더와 별점 사이의 간격 */
+}
+
+/* 오른쪽 썸네일 그룹 */
+.thumb-group {
+    display: flex;
+    gap: 8px;
+    margin-left: 20px; /* 좌측 정보 박스와의 간격 */
+}
+
+/* 🎯 시원하게 커진 썸네일 이미지 */
+.thumb-img-large {
+    width: 60px; /* 원하는 만큼 더 키우셔도 됩니다 (예: 70px, 80px) */
+    height: 60px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid #e0e0e0;
+    cursor: pointer;
+    transition: filter 0.2s;
+}
+
+.thumb-img-large:hover {
+    filter: brightness(0.8);
+}
+
+/* 화살표 내비게이션 버튼 공통 스타일 */
+.modal-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.3); /* 배경에 자연스럽게 묻히는 반투명 블랙 */
+    color: #ffffff;
+    border: none;
+    font-size: 30px;
+    padding: 16px;
+    cursor: pointer;
+    user-select: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background 0.2s, color 0.2s;
+}
+
+.modal-nav-btn:hover {
+    background: rgba(255, 255, 255, 0.9);
+    color: #333333; /* 마우스 올리면 반전 효과 */
+}
+
+/* 왼쪽 버튼 위치 */
+.btn-left {
+    left: 40px;
+}
+
+/* 오른쪽 버튼 위치 */
+.btn-right {
+    right: 40px;
+}
+
 .header-left {
     display: flex;
     align-items: center;
@@ -270,10 +346,70 @@
     color: #999;
 }
 
+.rev-thumbnails {
+    display: flex;
+    gap: 6px;
+    margin-left: 4px; /* 날짜와 사진 그룹 사이의 약간의 여백 */
+}
+
+.thumb-img {
+    width: 32px; /* 썸네일 크기 (디자인에 맞게 조절하세요) */
+    height: 32px;
+    border-radius: 6px;
+    object-fit: cover; /* 이미지가 찌그러지지 않고 꽉 차게 */
+    border: 1px solid #e0e0e0;
+    cursor: pointer;
+    transition: filter 0.2s;
+}
+
+.thumb-img:hover {
+    filter: brightness(0.8); /* 마우스 올렸을 때 살짝 어두워지는 클릭 유도 효과 */
+}
+
+/* 모달 영역 전체 덮기 */
+.img-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.387); /* 반투명 검은 배경 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* 화면 최상단으로 올리기 */
+}
+
+/* 띄워지는 큰 이미지 */
+.modal-large-img {
+    max-width: 90vw; /* 화면을 넘지 않도록 제한 */
+    max-height: 90vh;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* 닫기 (X) 버튼 */
+.modal-close-btn {
+    position: absolute;
+    top: 20px;
+    right: 40px;
+    color: #ffffff;
+    font-size: 40px;
+    font-weight: 300;
+    cursor: pointer;
+    user-select: none;
+}
+
+.modal-close-btn:hover {
+    color: #cccccc;
+}
+
 /* 리뷰 액션 버튼 (수정/삭제) */
 .rev-actions {
     display: flex;
-    gap: 8px;
+    gap: 6px;
+    margin-left: auto; 
+    align-self: center; 
 }
 
 .rev-actions button {

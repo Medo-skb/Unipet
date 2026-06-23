@@ -90,22 +90,36 @@
                                 :key="rev.rsvNo" 
                                 class="rev-cont">
                                 
-                                <div class="rev-header">
-                                    <div class="header-left">
-                                        <span class="nickname">{{ rev.nickname }}</span>
-                                        <span class="date">{{ formatReviewTime(rev.cdate) }}</span>
+                                <div class="rev-top-layout">
+                                    <div class="info-group">
+                                        <div class="rev-header">
+                                            <div class="header-left">
+                                                <span class="nickname">{{ rev.nickname }}</span>
+                                                <span class="date">{{ formatReviewTime(rev.cdate) }}</span>
+                                            </div>
+                                            </div>
+                                        
+                                        <div class="rev-star" v-if="!rev.isEditing">
+                                            {{ fnConvertStar(rev.rating) }}
+                                            <span class="review-score">{{rev.rating}}점</span>
+                                        </div>
                                     </div>
-                                    
+
+                                    <div class="thumb-group" v-if="rev.filePaths && !rev.isEditing">
+                                        <img v-for="(path, index) in rev.filePaths.split(',')" 
+                                            :key="index" 
+                                            :src="path" 
+                                            class="thumb-img-large" 
+                                            @click="fnOpenImageModal(path, rev.filePaths)"
+                                            alt="리뷰 첨부사진">
+                                    </div>
+
                                     <div class="rev-actions" v-if="fnCanManageReview(rev) && !rev.isEditing">
                                         <button type="button" v-if="currentUserId != '' && currentUserId == rev.userId" @click="fnEditMode(rev)">수정</button>
                                         <button type="button" @click="fnDeleteReview(rev.rsvNo)" class="btn-delete">삭제</button>
                                     </div>
-                                </div>
-                                
-                                <div class="rev-star" v-if="!rev.isEditing">
-                                    {{ fnConvertStar(rev.rating) }}
-                                    <span class="review-score">{{rev.rating}}점</span>
-                                </div>
+
+                                </div> 
                                 <div class="rev-text" v-if="!rev.isEditing">
                                     {{ rev.rContents }}
                                 </div>
@@ -117,10 +131,28 @@
                                         <button type="button" class="btn-save" @click="fnSaveReview(rev)">저장</button>
                                     </div>
                                 </div>
+                                
+                            <div class="img-modal-overlay" v-if="showImageModal" @click="fnCloseImageModal">
+                                <span class="modal-close-btn" @click.stop="fnCloseImageModal">&times;</span>
+                                
+                                <button type="button" 
+                                        class="modal-nav-btn btn-left" 
+                                        v-if="currentImgIndex > 0" 
+                                        @click.stop="fnPrevImage">
+                                    &#10094;
+                                </button>
+                                
+                                <img :src="modalImages[currentImgIndex]" class="modal-large-img" @click.stop>
+                                
+                                <button type="button" 
+                                        class="modal-nav-btn btn-right" 
+                                        v-if="currentImgIndex < modalImages.length - 1" 
+                                        @click.stop="fnNextImage">
+                                    &#10095;
+                                </button>
                             </div>
-                        </div>
-
-                        <div class="pagination-wrap" v-if="totalPages > 1">
+                            
+                        </div> <div class="pagination-wrap" v-if="totalPages > 1">
                             <button class="btn-prev" 
                                     @click="fnChangePage(currentPage - 1)" 
                                     :disabled="currentPage === 1">
@@ -128,8 +160,8 @@
                             </button>
                             
                             <span v-for="page in totalPages" :key="page" 
-                                  :class="['page-num', { 'active': currentPage === page }]"
-                                  @click="fnChangePage(page)">
+                                :class="['page-num', { 'active': currentPage === page }]"
+                                @click="fnChangePage(page)">
                                 {{ page }}
                             </span>
                             
@@ -163,6 +195,10 @@
                 reviewAvg: 0,
                 currentPage: 1,      
                 itemsPerPage: 5,
+                showImageModal: false,  
+                selectedImageUrl: '',
+                modalImages: [],     
+                currentImgIndex: 0,        
                 currentUserId: '<%=session.getAttribute("sessionId") == null ? "" : session.getAttribute("sessionId")%>',
                 currentUserRole: '<%=session.getAttribute("sessionRole") == null ? "" : session.getAttribute("sessionRole")%>',
                 adminId: '<%=session.getAttribute("adminId") == null ? "" : session.getAttribute("adminId")%>',
@@ -368,8 +404,33 @@
                         alert("리뷰 삭제 중 오류가 발생했습니다.");
                     }
                 });
+            },
+            fnOpenImageModal(currentPath, allPaths) {
+                this.modalImages = allPaths.split(',');
+                this.currentImgIndex = this.modalImages.indexOf(currentPath);
+                this.showImageModal = true;
+                
+                document.body.style.overflow = 'hidden'; 
+            },
+            fnCloseImageModal() {
+                this.showImageModal = false;
+                this.modalImages = [];
+                this.currentImgIndex = 0;
+                document.body.style.overflow = ''; 
+            },
+            fnPrevImage() {
+                if (this.currentImgIndex > 0) {
+                    this.currentImgIndex--;
+                }
+            },
+            
+            fnNextImage() {
+                if (this.currentImgIndex < this.modalImages.length - 1) {
+                    this.currentImgIndex++;
+                }
             }
         }, 
+        
         mounted() {
             if (!this.storeNo) {
                 alert("업체 선택이 필요합니다.");
