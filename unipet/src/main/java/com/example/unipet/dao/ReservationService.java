@@ -139,6 +139,22 @@ public class ReservationService {
 	    return resultMap;
 	}
 	
+	public void updateReview(HashMap<String, Object> map) throws Exception {
+	    int res = reservationMapper.updateReview(map);
+	    
+	    if (res <= 0) {
+	        throw new Exception("리뷰 수정 중 오류가 발생했습니다.");
+	    }
+	}
+
+	public void removeReview(HashMap<String, Object> map) throws Exception {
+	    int res = reservationMapper.removeReview(map);
+	    
+	    if (res <= 0) {
+	        throw new Exception("리뷰 삭제 중 오류가 발생했습니다.");
+	    }
+	}
+	
 	public HashMap<String, Object> getStoreSlotList(HashMap<String, Object> map){
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 		try {

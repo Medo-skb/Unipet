@@ -1,6 +1,8 @@
 package com.example.unipet.controller;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -10,8 +12,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.example.unipet.dao.AiRecommendService;
 import com.example.unipet.dao.MainService;
+import com.example.unipet.model.AiRecommend;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -21,6 +26,9 @@ public class MainController {
 
 	@Autowired 
     MainService mainService;
+	
+	@Autowired
+    private AiRecommendService aiRecommendService;
 
 	// 메인페이지
     @RequestMapping("/main.do")
@@ -199,5 +207,45 @@ public class MainController {
  
 		return new Gson().toJson(resultMap);
 	}
+    
+    // 🎯 추가: AI 맞춤 추천 데이터 가져오기
+    @RequestMapping(value = "/getAiRecommendation.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+    @ResponseBody
+    public String getAiRecommendation(HttpSession session) throws Exception {
+        HashMap<String, Object> resultMap = new HashMap<String, Object>();
+        
+        String userId = (String) session.getAttribute("sessionId");
+        
+        if (userId == null) {
+            resultMap.put("result", "fail");
+            return new Gson().toJson(resultMap);
+        }
+
+        try {
+            // 🎯 매퍼 대신 서비스를 호출하여 규칙을 준수합니다.
+            AiRecommend aiData =aiRecommendService.getRecommendationByUserId(userId);
+            
+            if (aiData != null) {
+                Gson gson = new Gson();
+                
+                List<Map<String, Object>> serviceList = gson.fromJson(aiData.getRecServices(), new TypeToken<List<Map<String, Object>>>(){}.getType());
+                List<Map<String, Object>> productList = gson.fromJson(aiData.getRecProducts(), new TypeToken<List<Map<String, Object>>>(){}.getType());
+                
+                resultMap.put("aiServices", serviceList);
+                resultMap.put("aiProducts", productList);
+                resultMap.put("result", "success");
+            } else {
+                resultMap.put("result", "empty");
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            resultMap.put("result", "error");
+        }
+        
+        return new Gson().toJson(resultMap);
+    }
+    
+    
 
 }

@@ -75,6 +75,40 @@ public class ReservationController {
 	    return new Gson().toJson(resultMap); 
 	}
 	
+	// 리뷰 수정
+	@RequestMapping(value = "/reservation/review-update.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String updateReview(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+	    
+	    try {
+	        reservationService.updateReview(map);
+	        resultMap.put("result", "success");
+	    } catch (Exception e) {
+	        resultMap.put("result", "fail");
+	        resultMap.put("message", e.getMessage());
+	    }
+	    
+	    return new Gson().toJson(resultMap); 
+	}
+
+	// 리뷰 삭제
+	@RequestMapping(value = "/reservation/review-remove.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String removeReview(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+	    
+	    try {
+	        reservationService.removeReview(map);
+	        resultMap.put("result", "success");
+	    } catch (Exception e) {
+	        resultMap.put("result", "fail");
+	        resultMap.put("message", e.getMessage());
+	    }
+	    
+	    return new Gson().toJson(resultMap); 
+	}
+	
 	@RequestMapping("/reservation/book.do")
 	public String book(HttpServletRequest request, Model model,  @RequestParam HashMap<String, Object> map) throws Exception{
 		request.setAttribute("map", map);

@@ -88,6 +88,56 @@
                     </a>
                 </div>
                 
+                <section class="main-ai-section scroll-fade-up" v-if="aiStoreList.length > 0">
+                    <div class="section-header">
+                        <h2 class="section-title" style="color: #6C5CE7;">✨ AI 맞춤 추천 업체</h2>
+                        <p style="font-size: 14px; color: #666; margin-top: 5px;">회원님의 최근 활동과 지역을 분석하여 선별했어요.</p>
+                    </div>
+
+                    <div class="store-card-list">
+                        <div class="store-card"
+                            v-for="(item, index) in aiStoreList"
+                            :key="'ai-store-' + index"
+                            @click="fnGoStoreDetail(item.storeNo)">
+
+                            <div class="store-card-body" style="padding-top: 20px;">
+                                <div class="store-name-row">
+                                    <div class="store-name">{{ item.name }}</div>
+                                    <div class="store-category">{{ item.type }}</div>
+                                </div>
+
+                                <div class="ai-reason-box" style="background-color: #F8F9FA; padding: 12px; border-radius: 8px; margin-top: 15px; font-size: 13px; color: #2D3436; border-left: 4px solid #6C5CE7;">
+                                    <strong>💬 AI 큐레이터:</strong><br>
+                                    {{ item.reason }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="main-ai-section scroll-fade-up" v-if="aiProductList.length > 0" style="margin-top: 40px;">
+                    <div class="section-header">
+                        <h2 class="section-title" style="color: #00B894;">🎁 AI 맞춤 추천 상품</h2>
+                    </div>
+
+                    <div class="product-card-list">
+                        <div class="product-card"
+                            v-for="(item, index) in aiProductList"
+                            :key="'ai-product-' + index"
+                            @click="fnGoProductDetail(item.productNo)">
+
+                            <div class="product-card-body" style="padding-top: 20px;">
+                                <div class="product-name" style="font-weight: bold; font-size: 16px;">{{ item.name }}</div>
+                                
+                                <div class="ai-reason-box" style="background-color: #F8F9FA; padding: 12px; border-radius: 8px; margin-top: 15px; font-size: 13px; color: #2D3436; border-left: 4px solid #00B894;">
+                                    <strong>💬 AI 큐레이터:</strong><br>
+                                    {{ item.reason }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 <section class="main-store-section scroll-fade-up">
                     <div class="section-header">
                         <h2 class="section-title">최근 예약이 많은 업체</h2>
@@ -318,7 +368,10 @@
 
                 selectedCategory: "HOS",
                 categoryStoreCache: {},
-                isCategoryStoreLoaded: false
+                isCategoryStoreLoaded: false,
+
+                aiStoreList: [],
+                aiProductList: []
             };
         },
         methods: {
@@ -359,6 +412,24 @@
                     },
                     error: function (xhr, status, error) {
                 }
+                });
+            },
+
+            fnGetAiRecommendation: function() {
+                let self = this;
+                $.ajax({
+                    url: "/getAiRecommendation.dox",
+                    dataType: "json",
+                    type: "POST",
+                    success: function (data) {
+                        if (data.result === "success") {
+                            self.aiStoreList = data.aiServices || [];
+                            self.aiProductList = data.aiProducts || [];
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("AI 추천 데이터를 불러오는데 실패했습니다.");
+                    }
                 });
             },
 
@@ -468,6 +539,7 @@
             self.fnCategoryStoreList(self.selectedCategory);
             <c:if test="${not empty sessionScope.sessionId and sessionScope.sessionRole eq 'USER'}">
                 self.fnCheckSocialBasicInfo();
+                self.fnGetAiRecommendation();
             </c:if>
             
         }

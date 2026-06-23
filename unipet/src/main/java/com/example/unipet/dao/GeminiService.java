@@ -119,7 +119,7 @@ public class GeminiService {
         return callGemini(finalPrompt);
     }
 
-    private String callGemini(String prompt) {
+   public String callGemini(String prompt) {
 
         if (isOverLimit()) {
             return "오늘 사용량이 초과되었습니다. 내일 다시 이용해주세요.";

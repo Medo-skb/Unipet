@@ -1,5 +1,8 @@
 @charset "UTF-8";
 
+/* ==========================================
+   1. 기본 레이아웃 및 컨테이너
+   ========================================== */
 #container {
     width: 1000px;
     margin: 40px auto 80px;
@@ -10,18 +13,33 @@
     border-radius: 22px;
 }
 
-#top {
-    padding-bottom: 22px;
-    border-bottom: 1px solid var(--line-soft);
+#contents {
+    padding-top: 24px;
 }
 
-#top > div:first-child {
-    font-size: 28px;
+/* [공통 요소] 각 섹션 타이틀 및 구분선 */
+.intro > div:first-child,
+.menu > div:first-child,
+.review-title {
+    font-size: 20px;
     font-weight: 700;
     color: var(--text-main);
-    margin-bottom: 12px;
+    margin-bottom: 14px;
 }
 
+.intro hr,
+.menu hr,
+.review hr,
+.time hr {
+    border: 0;
+    border-top: 1px solid var(--line-soft);
+    margin: 0 0 18px;
+}
+
+
+/* ==========================================
+   2. 상단 영역 (#top)
+   ========================================== */
 .top-wrapper {
     display: flex;       
     align-items: center; 
@@ -33,16 +51,18 @@
     font-weight: bold;
 }
 
-#top-sub {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
 .s-type {
     font-size: 15px;
     line-height: 28px;
     color: var(--text-sub);
+}
+
+#top-sub {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--line-soft);
 }
 
 .button {
@@ -64,14 +84,10 @@
     color: #fff;
 }
 
-#contents {
-    padding-top: 24px;
-}
 
-.sContents{
-    white-space: pre-wrap;
-}
-
+/* ==========================================
+   3. 이미지 슬라이드 영역 (.img-area)
+   ========================================== */
 .img-area {
     display: flex;
     overflow-x: auto;
@@ -116,40 +132,34 @@
     transform: scale(1.04);
 }
 
-.intro,
-.menu {
-    margin: 34px 0;
-    padding-top: 4px;
+
+/* ==========================================
+   4. 중단 그리드 영역 (#middle-section)
+   ========================================== */
+#middle-section {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 400px;
+    gap: 30px;
+    margin-top: 20px;
 }
 
-.intro > div:first-child,
-.menu > div:first-child,
-.review-title {
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--text-main);
-    margin-bottom: 14px;
+/* 소개 (intro) */
+.intro {
+    margin-bottom: 30px;
 }
 
-.intro hr,
-.menu hr,
-.review hr,
-.time hr {
-    border: 0;
-    border-top: 1px solid var(--line-soft);
-    margin: 0 0 18px;
-}
-
-.intro > div:last-child {
+.sContents {
+    white-space: pre-wrap;
     font-size: 15px;
     color: var(--text-sub);
     line-height: 1.8;
 }
 
+/* 영업시간 (time) */
 .time-header {
     display: flex;
-    align-items: center; /* 높이 중앙 정렬 */
-    gap: 10px; /* 라벨과 시간 사이 간격 */
+    align-items: center; 
+    gap: 10px; 
     margin-bottom: 14px;
 }
 
@@ -165,6 +175,25 @@
     color: #555;
 }
 
+/* 카카오 맵 (#map) */
+#map {
+    width: 100%;
+    max-width: 100%;
+    height: 300px; 
+    border: 1px solid var(--line-soft);
+    border-radius: 18px;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+
+/* ==========================================
+   5. 가격표 영역 (.menu)
+   ========================================== */
+.menu {
+    margin: 20px 0;
+}
+
 #MenuList {
     display: flex;
     list-style: none;
@@ -173,26 +202,19 @@
 
 #MenuList li {
     padding: 0 15px;
-    border-right: 1px solid #ccc; /* 메뉴 사이에 구분선 추가 */
+    border-right: 1px solid #ccc;
 }
 
 #MenuList li:last-child {
-    border-right: none; /* 마지막 메뉴는 선을 제거 */
-}
-
-#bottom {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 380px;
-    gap: 28px;
-    margin-top: 36px;
-    padding-top: 34px;
-    border-top: 1px solid var(--line-soft);
-    overflow: hidden;
+    border-right: none; 
 }
 
 
-.review {
-    min-width: 0;
+/* ==========================================
+   6. 리뷰 영역 (.review-section)
+   ========================================== */
+.review-section {
+    margin-top: 40px;
 }
 
 .title-stats {
@@ -206,10 +228,14 @@
     color: var(--text-sub);
 }
 
-.review-list-container {
-    /* border-top: 1px solid var(--line-soft); */
+.no-review {
+    padding: 36px 0;
+    text-align: center;
+    color: #bbb;
+    font-size: 14px;
 }
 
+/* 리뷰 개별 카드 (.rev-cont) */
 .rev-cont {
     padding: 18px 4px;
     border-bottom: 1px solid var(--line-soft);
@@ -219,11 +245,18 @@
     border-bottom: none;
 }
 
+/* 리뷰 헤더 및 정렬 */
 .rev-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 6px;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px; 
 }
 
 .rev-header .nickname {
@@ -237,38 +270,161 @@
     color: #999;
 }
 
+/* 리뷰 액션 버튼 (수정/삭제) */
+.rev-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.rev-actions button {
+    height: 40px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    padding: 0 16px;
+    font-weight: 700;
+    background: var(--bg);
+    color: var(--text-main);
+    border: 1px solid var(--line-soft) !important;
+}
+
+.rev-actions button:hover {
+    color: var(--main);
+    border-color: var(--main) !important;
+}
+
+/* 별점 및 텍스트 본문 */
 .rev-star {
-    margin: 6px 0;
+    margin-bottom: 12px;
     color: #f1c40f;
     font-size: 14px;
 }
 
+.review-score {
+    margin-left: 6px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #555555;
+}
+
 .rev-text {
+    padding: 14px 16px;
+    border-radius: 12px;
+    background-color: #fafafa;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #333333;
+    white-space: pre-wrap;
+}
+
+
+/* ==========================================
+   7. 리뷰 인라인 수정 영역 (.rev-edit-area)
+   ========================================== */
+.rev-edit-area {
+    margin-top: 10px;
+}
+
+.edit-textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 12px;
+    border: 1px solid var(--line-soft);
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--text-main);
+    box-sizing: border-box;
+    resize: vertical;
+    outline: none;
+    margin-bottom: 8px;
+}
+
+.edit-textarea:focus {
+    border-color: var(--main);
+}
+
+.edit-btns {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.edit-btns button {
+    padding: 6px 16px;
+    font-size: 13px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-cancel {
+    background: #fff;
+    border: 1px solid var(--line-soft);
+    color: #666;
+}
+
+.btn-save {
+    background: var(--main);
+    border: 1px solid var(--main);
+    color: #fff;
+}
+
+
+/* ==========================================
+   8. 페이징 영역 (.pagination-wrap)
+   ========================================== */
+.pagination-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    padding: 30px 0 10px; 
+}
+
+.pagination-wrap button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--line-soft);
+    background-color: #fff;
+    color: #666;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.pagination-wrap button:hover:not(:disabled) {
+    background-color: #f8f9fb;
+    border-color: #bbb;
+}
+
+.pagination-wrap button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.page-num {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    cursor: pointer;
     font-size: 14px;
     color: var(--text-sub);
-    line-height: 1.7;
-    word-break: break-all;
+    transition: all 0.2s ease;
 }
 
-.sub-text {
-    font-size: 13px;
-    color: #aaa;
-    margin: 14px 0 0;
+.page-num:hover:not(.active) {
+    background-color: #f8f9fb;
 }
 
-.no-review {
-    padding: 36px 0;
-    text-align: center;
-    color: #bbb;
-    font-size: 14px;
-}
-
-#map {
-    width: 100%;
-    max-width: 100%;
-    height: 100%;
-    border: 1px solid var(--line-soft);
-    border-radius: 18px;
-    overflow: hidden;
-    box-sizing: border-box;
+.page-num.active {
+    background-color: #ff4b82;
+    color: #fff;
+    font-weight: bold;
 }
