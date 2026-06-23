@@ -145,31 +145,27 @@
                                                 <div class="pet-name">
                                                     {{ pet.petName || pet.PET_NAME || '-' }}
 
-                                                    <span
-                                                        v-if="String(pet.isMain || pet.IS_MAIN || '').trim().toUpperCase() === 'Y'"
-                                                        class="main-badge">
+                                                    <span v-if="(pet.isMain || pet.IS_MAIN) === 'Y'" class="main-badge">
                                                         대표동물
+                                                    </span>
+
+                                                    <span v-else class="change-main-badge"
+                                                        @click.stop="fnChangeMainPet(pet.petNo || pet.PET_NO)">
+                                                        대표로 변경
                                                     </span>
                                                 </div>
 
-
-                                                <button
-                                                    :disabled="String(pet.isMain || pet.IS_MAIN).trim().toUpperCase() === 'Y'"
-                                                    class="pet-btn main" @click="fnChangeMainPet(pet.petNo)">
-                                                    {{ String(pet.isMain || pet.IS_MAIN).trim().toUpperCase() === 'Y' ?
-                                                    '대표' : '대표로 변경' }}
-                                                </button>
-                                            </div>
-
-                                            <div class="pet-sub-btn-row">
-                                                <button class="pet-btn edit"
-                                                    @click="fnOpenEditPetModal(pet)">수정</button>
-                                                <button class="pet-btn delete"
-                                                    @click="fnDeletePet(pet.petNo)">삭제</button>
+                                                <div class="pet-sub-btn-row">
+                                                    <button class="pet-btn edit"
+                                                        @click="fnOpenEditPetModal(pet)">수정</button>
+                                                    <button class="pet-btn delete"
+                                                        @click="fnDeletePet(pet.petNo)">삭제</button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+
                             </div>
 
                             <!-- 오른쪽 영역 : 최근 주문 + 최근 예약 + 포인트 / 쿠폰 -->
@@ -191,9 +187,11 @@
                                                 alt="상품이미지">
 
                                             <div class="main-order-info">
-                                                <div class="list-title">{{ (group.orderDate || '').substring(0, 10) }}
+                                                <div class="list-title">{{ (group.orderDate || '').substring(0, 10)
+                                                    }}
                                                 </div>
-                                                <div class="list-sub">{{ (group.orderDate || '').substring(11, 16) }}
+                                                <div class="list-sub">{{ (group.orderDate || '').substring(11, 16)
+                                                    }}
                                                 </div>
                                                 <div class="list-sub order-product-name">
                                                     {{ group.items[0]?.productName || '-' }}
@@ -309,7 +307,8 @@
 
                                         <div v-for="item in recentPostList.slice(0, 2)" :key="'post-' + item.id"
                                             class="list-item">
-                                            <div class="post-title" @click="fnGoPostDetail(item.id)">
+                                            <div class="post-title"
+                                                @click="fnGoPostDetail(item.boardNo || item.BOARD_NO || item.id)">
                                                 [{{ item.boardName }}] {{ item.title }}
                                             </div>
                                             <div class="list-sub">{{ fnFormatDateTime(item.cdate) }}</div>
@@ -325,7 +324,9 @@
 
                                         <div v-for="item in myCommentList.slice(0, 2)" :key="'comment-' + item.id"
                                             class="list-item">
-                                            <div class="list-title">
+                                            <div class="list-title post-title"
+                                                @click="fnGoPostDetail(item.boardNo || item.BOARD_NO || item.id)"
+                                                style="cursor:pointer;">
                                                 [{{ item.boardName }}] {{ item.content }}
                                             </div>
                                             <div class="list-sub">{{ fnFormatDateTime(item.cdate) }}</div>

@@ -144,7 +144,7 @@
 
                         </div>
 
-                    </div>
+                        </div>
 
                 </main>
 
@@ -178,9 +178,34 @@
 
                     <div class="form-row">
                         <label>품종</label>
-                        <input type="text" v-model="petForm.breed" placeholder="품종">
-                    </div>
+                        <select v-model="petForm.breed">
+                            <option value="">선택</option>
 
+                            <option v-if="petForm.species === '강아지'" value="말티즈">말티즈</option>
+                            <option v-if="petForm.species === '강아지'" value="푸들">푸들</option>
+                            <option v-if="petForm.species === '강아지'" value="포메라니안">포메라니안</option>
+                            <option v-if="petForm.species === '강아지'" value="시츄">시츄</option>
+                            <option v-if="petForm.species === '강아지'" value="진돗개">진돗개</option>
+                            <option v-if="petForm.species === '강아지'" value="기타견종">기타견종</option>
+
+                            <option v-if="petForm.species === '고양이'" value="코리안숏헤어">코리안숏헤어</option>
+                            <option v-if="petForm.species === '고양이'" value="러시안블루">러시안블루</option>
+                            <option v-if="petForm.species === '고양이'" value="페르시안">페르시안</option>
+                            <option v-if="petForm.species === '고양이'" value="샴">샴</option>
+                            <option v-if="petForm.species === '고양이'" value="기타묘종">기타묘종</option>
+
+                            <option v-if="petForm.species === '조류'" value="앵무새">앵무새</option>
+                            <option v-if="petForm.species === '조류'" value="카나리아">카나리아</option>
+                            <option v-if="petForm.species === '조류'" value="문조">문조</option>
+
+                            <option v-if="petForm.species === '어류'" value="금붕어">금붕어</option>
+                            <option v-if="petForm.species === '어류'" value="구피">구피</option>
+                            <option v-if="petForm.species === '어류'" value="베타">베타</option>
+
+                            <option v-if="petForm.species === '기타'" value="햄스터">햄스터</option>
+                            <option v-if="petForm.species === '기타'" value="토끼">토끼</option>
+                        </select>
+                    </div>
                     <div class="form-row">
                         <label>생년월일</label>
                         <input type="date" v-model="petForm.birthdate">
@@ -312,6 +337,8 @@
                     fnSavePet: function () {
                         let self = this;
 
+
+
                         if (!self.petForm.petName) {
                             alert("반려동물 이름을 입력해주세요.");
                             return;
@@ -322,9 +349,29 @@
                             return;
                         }
 
+
+                        // ★ 여기 추가
+                        if (!self.petForm.petNo) {
+
+                            const agree = confirm(
+                                "[반려동물 등록 안내]\n\n" +
+                                "회원은 등록하는 반려동물의 적법성 및 사육 가능 여부를 직접 확인해야 합니다.\n\n" +
+                                "사육이 제한되거나 허가가 필요한 동물을 등록하는 경우 발생하는 모든 책임은 등록한 회원에게 있습니다.\n\n" +
+                                "UniPet은 등록 정보의 적법성을 보증하지 않으며,\n" +
+                                "관련 법적 책임을 부담하지 않습니다.\n\n" +
+                                "확인을 누르면 등록을 계속 진행합니다."
+                            );
+
+                            if (!agree) {
+                                return;
+                            }
+                        }
+
+
                         const url = self.petForm.petNo
                             ? "/user/update-pet.dox"
                             : "/user/add-pet.dox";
+
 
                         $.ajax({
                             url: url,
@@ -344,6 +391,8 @@
                             }
                         });
                     },
+
+
 
                     fnChangeMainPet: function (petNo) {
                         let self = this;
