@@ -28,8 +28,14 @@
 				<div v-if="product" class="detail-box">
 					<div class="detail-wrap">
 						<div class="detail-left">
-							<img v-if="mainImage != ''" :src="mainImage" class="main-img">
-							<img v-else src="/img/product/no-image.png" class="main-img">
+							<div class="main-img-wrap">
+								<div class="image-sale-badge" v-if="fnHasDiscount()">
+									{{fnDiscountRate()}}% SALE
+								</div>
+
+								<img v-if="mainImage != ''" :src="mainImage" class="main-img">
+								<img v-else src="/img/product/no-image.png" class="main-img">
+							</div>
 
 							<div class="thumb-list">
 								<img v-for="file in fileList" :key="file.fileNo" :src="file.img" class="thumb-img"
@@ -38,7 +44,21 @@
 						</div>
 
 						<div class="detail-right">
-							<h3>{{product.productName}}</h3>
+							<div class="shopping-benefit-line">
+								<span>오늘의 특가</span>
+								<span>빠른출고</span>
+							</div>
+
+							<div class="product-title-row">
+								<h3>{{product.productName}}</h3>
+
+								<button type="button" class="wish-btn" :class="{active : wishYn == 'Y'}"
+									@click="fnToggleWish()">
+									<span>{{wishYn == 'Y' ? '♥' : '♡'}}</span>
+									{{wishYn == 'Y' ? '찜' : '찜하기'}}
+									<em>{{wishCount}}</em>
+								</button>
+							</div>
 
 							<div class="detail-rating">
 								⭐ {{reviewAvg}} / 5.0 ({{reviewCount}}개 리뷰)
@@ -54,14 +74,46 @@
 								이 상품은 {{product.aSubType}}를 위한 {{product.iSubType}} 상품으로 일상에서 편하게 사용할 수 있습니다.
 							</div>
 
+							<div class="price-box">
+								<div class="original-price" v-if="fnHasDiscount()">
+									정상가 {{formatPrice(fnOriginalPrice())}}원
+								</div>
+
+								<div class="sale-line">
+									<span class="discount-rate" v-if="fnHasDiscount()">
+										{{fnDiscountRate()}}%
+									</span>
+
+									<span class="sale-price">
+										{{formatPrice(fnSalePrice())}}원
+									</span>
+								</div>
+
+								<div class="save-price" v-if="fnHasDiscount()">
+									즉시할인 {{formatPrice(fnDiscountAmount())}}원
+								</div>
+
+								<div class="coupon-line">
+									회원 구매 시 구매금액의 {{pointRate}}% 적립
+								</div>
+
+								<div class="point-line">
+									<span class="point-label">적립</span>
+									<span>예상 적립금 {{formatPrice(fnPointAmount())}}원</span>
+								</div>
+							</div>
+
+							<div class="benefit-list">
+								<div class="benefit-pill">안전결제</div>
+								<div class="benefit-pill">UNIPET 추천상품</div>
+							</div>
+
 							<div class="detail-info">
 								브랜드 : {{product.brand == null ? '-' : product.brand}}<br>
 								동물분류 : {{product.aSubType}}<br>
 								상품분류 : {{product.iSubType}}<br>
 								재고 : {{product.stockQty}}개<br>
 							</div>
-
-							<div class="total-price">{{formatPrice(product && product.productPrice)}}원</div>
 
 							<div class="price">
 								총 금액 : {{formatPrice(fnTotalPrice())}}원
@@ -109,7 +161,6 @@
 					<button class="tab-btn" :class="{active : tab == 'qna'}" @click="tab='qna'">상품문의</button>
 				</div>
 
-				<!-- 상세설명 -->
 				<div v-if="product && tab == 'detail'" class="tab-box">
 					<div class="detail-desc-top">
 						<div class="detail-desc-badge">PRODUCT DETAIL</div>
@@ -119,7 +170,7 @@
 							{{product.aSubType}} ·
 							{{product.iSubType}}
 						</div>
-						<div class="detail-desc-price">{{formatPrice(product && product.productPrice)}}원</div>
+						<div class="detail-desc-price">{{formatPrice(fnSalePrice())}}원</div>
 					</div>
 
 					<div class="detail-point-wrap">
@@ -167,7 +218,6 @@
 					</div>
 				</div>
 
-				<!-- 상품평 -->
 				<div v-if="product && tab == 'review'" class="review-box">
 					<div class="review-top">
 						<div class="review-summary">
@@ -180,7 +230,7 @@
 					</div>
 
 					<div v-else>
-						<div class="review-item" v-for="review in reviewList" :key="review.reviewNo">
+						<div class="review-item" v-for="review in pagedReviewList" :key="review.reviewNo">
 							<div class="review-head">
 								<div class="review-user-area">
 									<span class="review-user">
@@ -203,18 +253,17 @@
 								</div>
 							</div>
 
-							<div class="review-rating">
-								<span v-for="n in Number(review.rating || 0)" :key="'star-' + review.reviewNo + '-' + n"
-									class="star-filled">
-									★
-								</span>
+							<div class="review-rating-img-row">
+								<div class="review-rating">
+									{{fnConvertStar(review.rating)}}
+									<span class="review-score">{{review.rating}}점</span>
+								</div>
 
-								<span v-for="n in 5 - Number(review.rating || 0)"
-									:key="'empty-star-' + review.reviewNo + '-' + n" class="star-empty">
-									★
-								</span>
-
-								<span class="review-score">{{review.rating}}점</span>
+								<div class="review-img-list" v-if="fnReviewImgArray(review).length > 0">
+									<img v-for="(img, index) in fnReviewImgArray(review)"
+										:key="'review-img-' + review.reviewNo + '-' + index" :src="img"
+										class="review-img" @click="fnOpenReviewImgModal(img)" @error="fnReviewImgError">
+								</div>
 							</div>
 
 							<div v-if="review.editMode" class="qna-edit-box">
@@ -238,11 +287,37 @@
 							<div v-else class="review-contents">
 								{{review.reviewContents}}
 							</div>
+
+						</div>
+
+						<div class="review-pagination" v-if="reviewList.length > reviewPageSize">
+							<button type="button" @click="fnGoReviewPage(1)" v-if="reviewCurrentPage > 1">
+								&lt;&lt;
+							</button>
+
+							<button type="button" @click="fnGoReviewPage(reviewCurrentPage - 1)"
+								v-if="reviewCurrentPage > 1">
+								&lt;
+							</button>
+
+							<button type="button" v-for="page in reviewPageList" :key="'reviewPage' + page"
+								:class="{active : reviewCurrentPage == page}" @click="fnGoReviewPage(page)">
+								{{page}}
+							</button>
+
+							<button type="button" @click="fnGoReviewPage(reviewCurrentPage + 1)"
+								v-if="reviewCurrentPage < reviewTotalPage">
+								&gt;
+							</button>
+
+							<button type="button" @click="fnGoReviewPage(reviewTotalPage)"
+								v-if="reviewCurrentPage < reviewTotalPage">
+								&gt;&gt;
+							</button>
 						</div>
 					</div>
 				</div>
 
-				<!-- 상품문의 -->
 				<div v-if="product && tab == 'qna'" class="tab-box">
 					<div class="qna-write-box">
 						<div class="qna-write-header">
@@ -369,6 +444,16 @@
 					상품 상세 조회 실패
 				</div>
 			</div>
+
+			<div class="review-img-modal-wrap" v-if="reviewModalOpen" @click="fnCloseReviewImgModal()">
+				<div class="review-img-modal-box" @click.stop>
+					<button type="button" class="review-img-modal-close" @click="fnCloseReviewImgModal()">
+						×
+					</button>
+
+					<img :src="reviewModalImg" class="review-img-modal-img">
+				</div>
+			</div>
 		</div>
 
 		<script>
@@ -385,10 +470,22 @@
 						mainImage: "",
 						qty: 1,
 						reviewList: [],
+						pagedReviewList: [],
 						reviewCount: 0,
 						reviewAvg: 0,
+						reviewCurrentPage: 1,
+						reviewPageSize: 5,
+						reviewTotalPage: 1,
+						reviewPageList: [],
+						reviewPageBlockSize: 5,
+						reviewModalOpen: false,
+						reviewModalImg: "",
 						qnaList: [],
 						cartCount: 0,
+						wishYn: "N",
+						wishCount: 0,
+						defaultDiscountRateList: [7, 9, 12, 15, 18, 20, 23, 25],
+						pointRate: 1,
 						tab: "detail",
 						qnaTitleMax: 50,
 						qnaContentsMax: 500,
@@ -422,6 +519,9 @@
 									} else {
 										self.mainImage = "";
 									}
+
+									self.fnGetWishInfo();
+
 								} else {
 									self.product = null;
 								}
@@ -430,6 +530,115 @@
 								alert("상품 상세 조회 중 오류가 발생했습니다.");
 							}
 						});
+					},
+
+					fnGetWishInfo: function () {
+						let self = this;
+
+						if (self.productNo == null || self.productNo == "") {
+							return;
+						}
+
+						let param = {
+							productNo: self.productNo
+						};
+
+						$.ajax({
+							url: "/product/wish/info.dox",
+							dataType: "json",
+							type: "POST",
+							data: param,
+							success: function (data) {
+								if (data.result == "success") {
+									self.wishYn = data.wishYn == "Y" ? "Y" : "N";
+									self.wishCount = data.wishCount == null ? 0 : Number(data.wishCount);
+								}
+							}
+						});
+					},
+
+					fnToggleWish: function () {
+						let self = this;
+
+						if (!self.fnCheckUserOnly()) {
+							return;
+						}
+
+						let param = {
+							productNo: self.productNo
+						};
+
+						$.ajax({
+							url: "/product/wish/toggle.dox",
+							dataType: "json",
+							type: "POST",
+							data: param,
+							success: function (data) {
+								if (data.result == "success") {
+									self.wishYn = data.wishYn == "Y" ? "Y" : "N";
+									self.wishCount = data.wishCount == null ? 0 : Number(data.wishCount);
+
+									if (self.wishYn == "Y") {
+										alert("찜한 상품에 추가되었습니다.");
+									} else {
+										alert("찜한 상품에서 삭제되었습니다.");
+									}
+
+								} else if (data.result == "login") {
+									alert("로그인이 필요한 서비스입니다.");
+									location.href = "/user/login.do";
+
+								} else {
+									alert(data.message == null ? "찜하기 처리 실패" : data.message);
+								}
+							},
+							error: function () {
+								alert("찜하기 처리 중 오류가 발생했습니다.");
+							}
+						});
+					},
+
+					fnConvertStar: function (rating) {
+						const num = Math.floor(Number(rating || 0));
+						return "⭐️".repeat(num);
+					},
+
+					fnReviewImgArray: function (review) {
+						if (review == null) {
+							return [];
+						}
+
+						if (review.reviewImgList == null || review.reviewImgList == "") {
+							return [];
+						}
+
+						return String(review.reviewImgList)
+							.split("||")
+							.map(function (img) {
+								return img.replaceAll("\\", "/").trim();
+							})
+							.filter(function (img) {
+								return img != "";
+							});
+					},
+
+					fnReviewImgError: function (event) {
+						console.log("리뷰 이미지 로드 실패:", event.target.src);
+						event.target.style.display = "none";
+					},
+
+					fnOpenReviewImgModal: function (img) {
+						if (img == null || img == "") {
+							return;
+						}
+
+						this.reviewModalImg = img;
+						this.reviewModalOpen = true;
+					},
+
+					fnCloseReviewImgModal: function () {
+						this.reviewModalOpen = false;
+						this.reviewModalImg = "";
 					},
 
 					fnGetReviewList: function () {
@@ -455,16 +664,73 @@
 										self.reviewList[i].editRating = self.reviewList[i].rating;
 									}
 
+									self.reviewCurrentPage = 1;
+									self.fnSetReviewPaging();
+
 								} else {
 									self.reviewList = [];
+									self.pagedReviewList = [];
 									self.reviewCount = 0;
 									self.reviewAvg = 0;
+									self.reviewCurrentPage = 1;
+									self.fnSetReviewPaging();
 								}
 							},
 							error: function () {
 								alert("리뷰 조회 중 오류가 발생했습니다.");
 							}
 						});
+					},
+
+					fnSetReviewPaging: function () {
+						let self = this;
+
+						self.reviewTotalPage = Math.ceil(self.reviewList.length / self.reviewPageSize);
+
+						if (self.reviewTotalPage == 0) {
+							self.reviewTotalPage = 1;
+						}
+
+						if (self.reviewCurrentPage > self.reviewTotalPage) {
+							self.reviewCurrentPage = self.reviewTotalPage;
+						}
+
+						let start = (self.reviewCurrentPage - 1) * self.reviewPageSize;
+						let end = start + self.reviewPageSize;
+
+						self.pagedReviewList = self.reviewList.slice(start, end);
+
+						self.fnSetReviewPageList();
+					},
+
+					fnSetReviewPageList: function () {
+						let self = this;
+
+						self.reviewPageList = [];
+
+						let startPage = Math.floor((self.reviewCurrentPage - 1) / self.reviewPageBlockSize) * self.reviewPageBlockSize + 1;
+						let endPage = startPage + self.reviewPageBlockSize - 1;
+
+						if (endPage > self.reviewTotalPage) {
+							endPage = self.reviewTotalPage;
+						}
+
+						for (let i = startPage; i <= endPage; i++) {
+							self.reviewPageList.push(i);
+						}
+					},
+
+					fnGoReviewPage: function (page) {
+						if (page < 1) {
+							page = 1;
+						}
+
+						if (page > this.reviewTotalPage) {
+							page = this.reviewTotalPage;
+						}
+
+						this.reviewCurrentPage = page;
+						this.fnSetReviewPaging();
 					},
 
 					fnCanEditReview: function (review) {
@@ -1025,6 +1291,102 @@
 						return Number(price).toLocaleString();
 					},
 
+					fnDiscountRate: function () {
+						if (this.product == null) {
+							return 0;
+						}
+
+						if (this.product.discountRate != null && this.product.discountRate != "") {
+							return Number(this.product.discountRate);
+						}
+
+						if (this.product.saleRate != null && this.product.saleRate != "") {
+							return Number(this.product.saleRate);
+						}
+
+						let productNo = this.product.productNo == null || this.product.productNo == "" ? Number(this.productNo) : Number(this.product.productNo);
+						let index = productNo % this.defaultDiscountRateList.length;
+
+						return Number(this.defaultDiscountRateList[index]);
+					},
+
+					fnSalePrice: function () {
+						if (this.product == null) {
+							return 0;
+						}
+
+						if (this.product.salePrice != null && this.product.salePrice != "") {
+							return Number(this.product.salePrice);
+						}
+
+						if (this.product.discountPrice != null && this.product.discountPrice != "") {
+							return Number(this.product.discountPrice);
+						}
+
+						if (this.product.finalPrice != null && this.product.finalPrice != "") {
+							return Number(this.product.finalPrice);
+						}
+
+						return Number(this.product.productPrice);
+					},
+
+					fnOriginalPrice: function () {
+						if (this.product == null) {
+							return 0;
+						}
+
+						if (this.product.originalPrice != null && this.product.originalPrice != "") {
+							return Number(this.product.originalPrice);
+						}
+
+						if (this.product.consumerPrice != null && this.product.consumerPrice != "") {
+							return Number(this.product.consumerPrice);
+						}
+
+						if (this.product.listPrice != null && this.product.listPrice != "") {
+							return Number(this.product.listPrice);
+						}
+
+						let salePrice = this.fnSalePrice();
+						let rate = this.fnDiscountRate();
+
+						if (rate <= 0 || rate >= 100) {
+							return salePrice;
+						}
+
+						return Math.round((salePrice / (1 - rate / 100)) / 10) * 10;
+					},
+
+					fnHasDiscount: function () {
+						let salePrice = this.fnSalePrice();
+						let originalPrice = this.fnOriginalPrice();
+						let rate = this.fnDiscountRate();
+
+						if (rate <= 0) {
+							return false;
+						}
+
+						if (originalPrice <= salePrice) {
+							return false;
+						}
+
+						return true;
+					},
+
+					fnDiscountAmount: function () {
+						let amount = this.fnOriginalPrice() - this.fnSalePrice();
+
+						if (amount < 0) {
+							return 0;
+						}
+
+						return amount;
+					},
+
+					fnPointAmount: function () {
+						return Math.floor(Number(this.fnTotalPrice()) * Number(this.pointRate) / 100);
+					},
+
 					fnMoveCart: function () {
 						if (!this.fnCheckUserOnly()) {
 							return;
@@ -1046,7 +1408,7 @@
 							return 0;
 						}
 
-						return Number(this.product.productPrice) * Number(this.qty);
+						return Number(this.fnSalePrice()) * Number(this.qty);
 					},
 
 					fnIsAdmin: function () {

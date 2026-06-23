@@ -111,6 +111,102 @@ public class ProductService {
 		return resultMap;
 	}
 
+	public HashMap<String, Object> getProductWishInfo(HashMap<String, Object> map) {
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+		try {
+			int wishCount = productMapper.selectProductWishCount(map);
+			int myWishCount = 0;
+
+			String userId = map.get("userId") == null ? "" : map.get("userId").toString();
+
+			if (!userId.equals("")) {
+				myWishCount = productMapper.selectMyProductWish(map);
+			}
+
+			resultMap.put("result", "success");
+			resultMap.put("wishYn", myWishCount > 0 ? "Y" : "N");
+			resultMap.put("wishCount", wishCount);
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			resultMap.put("result", "fail");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
+		}
+
+		return resultMap;
+	}
+
+	public HashMap<String, Object> getProductWishList(HashMap<String, Object> map) {
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+		try {
+			String userId = map.get("userId") == null ? "" : map.get("userId").toString();
+
+			if (userId.equals("")) {
+				resultMap.put("result", "login");
+				resultMap.put("message", "로그인이 필요합니다.");
+				return resultMap;
+			}
+
+			List<Product> list = productMapper.selectProductWishList(map);
+
+			resultMap.put("list", list);
+			resultMap.put("result", "success");
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			resultMap.put("result", "fail");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
+		}
+
+		return resultMap;
+	}
+
+	public HashMap<String, Object> toggleProductWish(HashMap<String, Object> map) {
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+		try {
+			String userId = map.get("userId") == null ? "" : map.get("userId").toString();
+
+			if (userId.equals("")) {
+				resultMap.put("result", "login");
+				resultMap.put("message", "로그인이 필요합니다.");
+				return resultMap;
+			}
+
+			if (map.get("productNo") == null || map.get("productNo").toString().equals("")) {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "상품 번호가 없습니다.");
+				return resultMap;
+			}
+
+			int myWishCount = productMapper.selectMyProductWish(map);
+
+			if (myWishCount > 0) {
+				productMapper.deleteProductWish(map);
+				resultMap.put("wishYn", "N");
+				resultMap.put("message", "찜한 상품에서 삭제되었습니다.");
+			} else {
+				productMapper.insertProductWish(map);
+				resultMap.put("wishYn", "Y");
+				resultMap.put("message", "찜한 상품에 추가되었습니다.");
+			}
+
+			int wishCount = productMapper.selectProductWishCount(map);
+
+			resultMap.put("result", "success");
+			resultMap.put("wishCount", wishCount);
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			resultMap.put("result", "fail");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
+		}
+
+		return resultMap;
+	}
+
 	public HashMap<String, Object> getReviewList(HashMap<String, Object> map) {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 

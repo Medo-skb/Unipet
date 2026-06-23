@@ -47,43 +47,83 @@
 
 	<!-- 여러개 검색 -->
 	<select id="selectProductList" parameterType="hashmap" resultType="hashmap">
-		SELECT P.PRODUCT_NO AS productNo, P.PRODUCT_NAME AS productName, P.BRAND
-		AS brand, P.PRODUCT_PRICE AS productPrice, P.STOCK_QTY AS stockQty,
-		P.PRODUCT_STATUS AS productStatus, DATE_FORMAT(P.CDATE, '%Y-%m-%d') AS
-		cdate, ASM.A_MAIN_NO AS aMainNo, ASM.A_MAIN_TYPE AS aMainType,
-		ASB.A_SUB_NO AS aSubNo, ASB.A_SUB_TYPE AS aSubType, IM.I_MAIN_NO AS
-		iMainNo, IM.I_MAIN_TYPE AS iMainType, ISB.I_SUB_NO AS iSubNo,
-		ISB.I_SUB_TYPE AS iSubType, CONCAT(F.FILE_PATH, F.FILE_NAME) AS img,
-		IFNULL(R.avgRating, 0) AS avgRating, IFNULL(R.reviewCnt, 0) AS
-		reviewCount FROM PRODUCT P LEFT JOIN PC_ANIMAL_SUB ASB ON P.A_SUB_NO =
-		ASB.A_SUB_NO LEFT JOIN PC_ANIMAL_MAIN ASM ON ASB.A_MAIN_NO =
-		ASM.A_MAIN_NO LEFT JOIN PC_ITEM_SUB ISB ON P.I_SUB_NO = ISB.I_SUB_NO
-		LEFT JOIN PC_ITEM_MAIN IM ON ISB.I_MAIN_NO = IM.I_MAIN_NO LEFT JOIN
-		PRODUCT_FILE F ON P.PRODUCT_NO = F.PRODUCT_NO AND F.IS_MAIN = 'Y' LEFT
-		JOIN ( SELECT PRODUCT_NO, ROUND(AVG(RATING), 1) AS avgRating, COUNT(*)
-		AS reviewCnt FROM `REVIEW` WHERE PRODUCT_NO IS NOT NULL GROUP BY
-		PRODUCT_NO ) R ON P.PRODUCT_NO = R.PRODUCT_NO WHERE P.PRODUCT_STATUS =
-		'Y' <if test="keyword != null and keyword != ''">
+		SELECT
+		P.PRODUCT_NO AS productNo,
+		P.PRODUCT_NAME AS productName,
+		P.BRAND AS brand,
+		P.PRODUCT_PRICE AS productPrice,
+		P.STOCK_QTY AS stockQty,
+		P.PRODUCT_STATUS AS productStatus,
+		DATE_FORMAT(P.CDATE, '%Y-%m-%d') AS cdate,
+		ASM.A_MAIN_NO AS aMainNo,
+		ASM.A_MAIN_TYPE AS aMainType,
+		ASB.A_SUB_NO AS aSubNo,
+		ASB.A_SUB_TYPE AS aSubType,
+		IM.I_MAIN_NO AS iMainNo,
+		IM.I_MAIN_TYPE AS iMainType,
+		ISB.I_SUB_NO AS iSubNo,
+		ISB.I_SUB_TYPE AS iSubType,
+		CONCAT(F.FILE_PATH, F.FILE_NAME) AS img,
+		IFNULL(R.avgRating, 0) AS avgRating,
+		IFNULL(R.reviewCnt, 0) AS reviewCount,
+		IFNULL(W.wishCount, 0) AS wishCount
+		FROM PRODUCT P
+
+		LEFT JOIN PC_ANIMAL_SUB ASB
+		ON P.A_SUB_NO = ASB.A_SUB_NO
+
+		LEFT JOIN PC_ANIMAL_MAIN ASM
+		ON ASB.A_MAIN_NO = ASM.A_MAIN_NO
+
+		LEFT JOIN PC_ITEM_SUB ISB
+		ON P.I_SUB_NO = ISB.I_SUB_NO
+
+		LEFT JOIN PC_ITEM_MAIN IM
+		ON ISB.I_MAIN_NO = IM.I_MAIN_NO
+
+		LEFT JOIN PRODUCT_FILE F
+		ON P.PRODUCT_NO = F.PRODUCT_NO
+		AND F.IS_MAIN = 'Y'
+
+		LEFT JOIN (
+			SELECT
+			PRODUCT_NO,
+			ROUND(AVG(RATING), 1) AS avgRating,
+			COUNT(*) AS reviewCnt
+			FROM `REVIEW`
+			WHERE PRODUCT_NO IS NOT NULL
+			GROUP BY PRODUCT_NO
+		) R
+		ON P.PRODUCT_NO = R.PRODUCT_NO
+
+		LEFT JOIN (
+			SELECT
+			PRODUCT_NO,
+			COUNT(*) AS wishCount
+			FROM PRODUCT_WISH
+			GROUP BY PRODUCT_NO
+		) W
+		ON P.PRODUCT_NO = W.PRODUCT_NO
+
+		WHERE P.PRODUCT_STATUS = 'Y'
+
+		<if test="keyword != null and keyword != ''">
 			AND P.PRODUCT_NAME LIKE CONCAT('%', #{keyword}, '%')
 		</if>
 
-		<if
-			test="aMainNo != null and aMainNo != ''">
+		<if test="aMainNo != null and aMainNo != ''">
 			AND ASM.A_MAIN_NO = #{aMainNo}
 		</if>
 
-		<if
-			test="aSubNo != null and aSubNo != ''">
+		<if test="aSubNo != null and aSubNo != ''">
 			AND P.A_SUB_NO = #{aSubNo}
 		</if>
 
-		<if
-			test="iMainNo != null and iMainNo != ''">
+		<if test="iMainNo != null and iMainNo != ''">
 			AND IM.I_MAIN_NO = #{iMainNo}
 		</if>
 
-		<if
-			test="iSubNo != null and iSubNo != ''">
+		<if test="iSubNo != null and iSubNo != ''">
 			AND P.I_SUB_NO = #{iSubNo}
 		</if>
 
@@ -93,8 +133,7 @@
 			</when>
 
 			<when test="sort == 'ratingDesc'">
-				ORDER BY IFNULL(R.avgRating, 0) DESC, IFNULL(R.reviewCnt, 0)
-		DESC, P.PRODUCT_NO DESC
+				ORDER BY IFNULL(R.avgRating, 0) DESC, IFNULL(R.reviewCnt, 0) DESC, P.PRODUCT_NO DESC
 			</when>
 
 			<when test="sort == 'priceAsc'">
@@ -166,9 +205,9 @@
 		ORDER BY FILE_NO ASC
 	</select>
 
-	<!-- 여러개 검색 -->
-	<select id="selectReviewList" parameterType="hashmap" resultType="hashmap">
-		SELECT
+	<!-- 여러개 검색 : 상품 리뷰 목록 -->
+<select id="selectReviewList" parameterType="hashmap" resultType="hashmap">
+	SELECT
 		R.REVIEW_NO AS reviewNo,
 		R.PRODUCT_NO AS productNo,
 		R.USER_ID AS userId,
@@ -181,26 +220,46 @@
 		P.PRODUCT_PRICE AS productPrice,
 
 		(
-		SELECT CONCAT(PF.FILE_PATH, PF.FILE_NAME)
-		FROM PRODUCT_FILE PF
-		WHERE PF.PRODUCT_NO = P.PRODUCT_NO
-		AND PF.IS_MAIN = 'Y'
-		ORDER BY PF.FILE_NO ASC
-		LIMIT 1
-		) AS img
+			SELECT CONCAT(PF.FILE_PATH, PF.FILE_NAME)
+			FROM PRODUCT_FILE PF
+			WHERE PF.PRODUCT_NO = P.PRODUCT_NO
+			AND PF.IS_MAIN = 'Y'
+			ORDER BY PF.FILE_NO ASC
+			LIMIT 1
+		) AS img,
 
-		FROM `REVIEW` R
+		GROUP_CONCAT(
+			CONCAT(RF.FILE_PATH, RF.FILE_NAME)
+			ORDER BY RF.FILE_NO
+			SEPARATOR '||'
+		) AS reviewImgList
 
-		INNER JOIN PRODUCT P
-		ON R.PRODUCT_NO = P.PRODUCT_NO
+	FROM `REVIEW` R
 
-		LEFT JOIN USERS U
-		ON R.USER_ID = U.USER_ID
+	INNER JOIN PRODUCT P
+	ON R.PRODUCT_NO = P.PRODUCT_NO
 
-		WHERE R.PRODUCT_NO = #{productNo}
+	LEFT JOIN USERS U
+	ON R.USER_ID = U.USER_ID
 
-		ORDER BY R.REVIEW_NO DESC
-	</select>
+	LEFT JOIN REVIEW_FILE RF
+	ON R.REVIEW_NO = RF.REVIEW_NO
+
+	WHERE R.PRODUCT_NO = #{productNo}
+
+	GROUP BY
+		R.REVIEW_NO,
+		R.PRODUCT_NO,
+		R.USER_ID,
+		U.NICKNAME,
+		R.R_CONTENTS,
+		R.RATING,
+		R.CDATE,
+		P.PRODUCT_NAME,
+		P.PRODUCT_PRICE
+
+	ORDER BY R.REVIEW_NO DESC
+</select>
 
 	<!-- 여러개 검색 -->
 	<select id="selectQnaList" parameterType="hashmap"
@@ -217,8 +276,8 @@
 		Q.IS_SECRET AS privateYn,
 		DATE_FORMAT(Q.CDATE, '%Y-%m-%d %H:%i:%s') AS qnaCdate,
 		CASE
-		WHEN Q.ADATE IS NULL THEN ''
-		ELSE DATE_FORMAT(Q.ADATE, '%Y-%m-%d %H:%i:%s')
+			WHEN Q.ADATE IS NULL THEN ''
+			ELSE DATE_FORMAT(Q.ADATE, '%Y-%m-%d %H:%i:%s')
 		END AS updateTime
 		FROM QNA Q
 
@@ -416,6 +475,21 @@
 		WHERE USER_ID = #{userId}
 	</select>
 
+	<!-- 상품 찜하기 수 -->
+	<select id="selectProductWishCount" parameterType="hashmap" resultType="int">
+		SELECT COUNT(*)
+		FROM PRODUCT_WISH
+		WHERE PRODUCT_NO = #{productNo}
+	</select>
+
+	<!-- 내가 찜한 상품인지 확인 -->
+	<select id="selectMyProductWish" parameterType="hashmap" resultType="int">
+		SELECT COUNT(*)
+		FROM PRODUCT_WISH
+		WHERE USER_ID = #{userId}
+		AND PRODUCT_NO = #{productNo}
+	</select>
+
 	<!-- 삽입 -->
 	<insert id="insertQna" parameterType="hashmap">
 		INSERT INTO QNA (
@@ -452,6 +526,25 @@
 		)
 	</insert>
 
+	<!-- 상품 찜하기 등록 -->
+	<insert id="insertProductWish" parameterType="hashmap">
+		INSERT INTO PRODUCT_WISH (
+		USER_ID,
+		PRODUCT_NO,
+		CDATE
+		)
+		SELECT
+		#{userId},
+		#{productNo},
+		NOW()
+		WHERE NOT EXISTS (
+			SELECT 1
+			FROM PRODUCT_WISH
+			WHERE USER_ID = #{userId}
+			AND PRODUCT_NO = #{productNo}
+		)
+	</insert>
+
 	<!-- 삭제 -->
 	<delete id="deleteQna" parameterType="hashmap">
 		DELETE FROM QNA
@@ -465,10 +558,18 @@
 		AND USER_ID = #{userId}
 	</delete>
 
+	<!-- 상품 찜하기 해제 -->
+	<delete id="deleteProductWish" parameterType="hashmap">
+		DELETE FROM PRODUCT_WISH
+		WHERE USER_ID = #{userId}
+		AND PRODUCT_NO = #{productNo}
+	</delete>
+
 	<!-- 상품리뷰 삭제 -->
-	<delete id="deleteReview" parameterType="hashmap"> DELETE FROM `REVIEW`
-		WHERE REVIEW_NO = #{reviewNo} <if
-			test="productNo != null and productNo != ''">
+	<delete id="deleteReview" parameterType="hashmap">
+		DELETE FROM `REVIEW`
+		WHERE REVIEW_NO = #{reviewNo}
+		<if test="productNo != null and productNo != ''">
 			AND PRODUCT_NO = #{productNo}
 		</if>
 	</delete>
@@ -501,10 +602,15 @@
 	</update>
 
 	<!-- 상품리뷰 수정 -->
-	<update id="updateReview" parameterType="hashmap"> UPDATE `REVIEW` SET
-		R_CONTENTS = #{contents} <if test="rating != null and rating != ''">
+	<update id="updateReview" parameterType="hashmap">
+		UPDATE `REVIEW`
+		SET
+		R_CONTENTS = #{contents}
+		<if test="rating != null and rating != ''">
 			, RATING = #{rating}
-		</if> WHERE REVIEW_NO = #{reviewNo} </update>
+		</if>
+		WHERE REVIEW_NO = #{reviewNo}
+	</update>
 
 	<!-- 한개 검색 : 리뷰 신고 중복 확인 -->
 	<select id="selectReviewReportCheck" parameterType="hashmap"
@@ -532,5 +638,82 @@
 		NOW()
 		)
 	</insert>
+	
+		<!-- 여러개 검색 : 찜한 상품 목록 -->
+	<select id="selectProductWishList" parameterType="hashmap" resultType="hashmap">
+		SELECT
+		W.WISH_NO AS wishNo,
+		W.USER_ID AS userId,
+		W.PRODUCT_NO AS productNo,
+		DATE_FORMAT(W.CDATE, '%Y-%m-%d') AS wishCdate,
+
+		P.PRODUCT_NAME AS productName,
+		P.BRAND AS brand,
+		P.PRODUCT_PRICE AS productPrice,
+		P.STOCK_QTY AS stockQty,
+		P.PRODUCT_STATUS AS productStatus,
+
+		ASM.A_MAIN_NO AS aMainNo,
+		ASM.A_MAIN_TYPE AS aMainType,
+		ASB.A_SUB_NO AS aSubNo,
+		ASB.A_SUB_TYPE AS aSubType,
+
+		IM.I_MAIN_NO AS iMainNo,
+		IM.I_MAIN_TYPE AS iMainType,
+		ISB.I_SUB_NO AS iSubNo,
+		ISB.I_SUB_TYPE AS iSubType,
+
+		CONCAT(F.FILE_PATH, F.FILE_NAME) AS img,
+
+		IFNULL(R.avgRating, 0) AS avgRating,
+		IFNULL(R.reviewCnt, 0) AS reviewCount,
+		IFNULL(WC.wishCount, 0) AS wishCount
+
+		FROM PRODUCT_WISH W
+
+		INNER JOIN PRODUCT P
+		ON W.PRODUCT_NO = P.PRODUCT_NO
+
+		LEFT JOIN PC_ANIMAL_SUB ASB
+		ON P.A_SUB_NO = ASB.A_SUB_NO
+
+		LEFT JOIN PC_ANIMAL_MAIN ASM
+		ON ASB.A_MAIN_NO = ASM.A_MAIN_NO
+
+		LEFT JOIN PC_ITEM_SUB ISB
+		ON P.I_SUB_NO = ISB.I_SUB_NO
+
+		LEFT JOIN PC_ITEM_MAIN IM
+		ON ISB.I_MAIN_NO = IM.I_MAIN_NO
+
+		LEFT JOIN PRODUCT_FILE F
+		ON P.PRODUCT_NO = F.PRODUCT_NO
+		AND F.IS_MAIN = 'Y'
+
+		LEFT JOIN (
+			SELECT
+			PRODUCT_NO,
+			ROUND(AVG(RATING), 1) AS avgRating,
+			COUNT(*) AS reviewCnt
+			FROM `REVIEW`
+			WHERE PRODUCT_NO IS NOT NULL
+			GROUP BY PRODUCT_NO
+		) R
+		ON P.PRODUCT_NO = R.PRODUCT_NO
+
+		LEFT JOIN (
+			SELECT
+			PRODUCT_NO,
+			COUNT(*) AS wishCount
+			FROM PRODUCT_WISH
+			GROUP BY PRODUCT_NO
+		) WC
+		ON P.PRODUCT_NO = WC.PRODUCT_NO
+
+		WHERE W.USER_ID = #{userId}
+		AND P.PRODUCT_STATUS = 'Y'
+
+		ORDER BY W.WISH_NO DESC
+	</select>
 
 </mapper>
