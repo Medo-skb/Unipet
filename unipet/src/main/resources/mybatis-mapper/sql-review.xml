@@ -5,6 +5,68 @@
 	<!-- 여러개 검색 -->
 	<select id="selectUserList" parameterType="hashmap" resultType="com.example.unipet.model.Default">
 	</select>
+	
+		<!-- 초기 업체 리뷰 요약 대상 조회 -->
+	<select id="selectStoreReviewSummaryTargetList" parameterType="hashmap" resultType="com.example.unipet.model.Review">
+	    SELECT
+	        'STO' AS TARGET_TYPE,
+	        R.STORE_NO AS TARGET_NO,
+	        MAX(R.REVIEW_NO) AS LAST_REVIEW_NO
+	    FROM review R
+	    LEFT JOIN review_summary RS
+	        ON RS.TARGET_TYPE = 'STO'
+	       AND RS.TARGET_NO = R.STORE_NO
+	    WHERE R.STORE_NO IS NOT NULL
+	      AND RS.SUMMARY_NO IS NULL
+	    GROUP BY R.STORE_NO
+	    HAVING COUNT(*) >= #{minReviewCount}
+	</select>
+
+	<!-- 초기 상품 리뷰 요약 대상 조회 -->
+	<select id="selectProductReviewSummaryTargetList" parameterType="hashmap" resultType="com.example.unipet.model.Review">
+	    SELECT
+	        'PRD' AS TARGET_TYPE,
+	        R.PRODUCT_NO AS TARGET_NO,
+	        MAX(R.REVIEW_NO) AS LAST_REVIEW_NO
+	    FROM review R
+	    LEFT JOIN review_summary RS
+	        ON RS.TARGET_TYPE = 'PRD'
+	       AND RS.TARGET_NO = R.PRODUCT_NO
+	    WHERE R.PRODUCT_NO IS NOT NULL
+	      AND RS.SUMMARY_NO IS NULL
+	    GROUP BY R.PRODUCT_NO
+	    HAVING COUNT(*) >= #{minReviewCount}
+	</select>
+
+	<!-- 업체 리뷰 요약용 리뷰 목록 조회 -->
+	<select id="selectStoreReviewSummaryList" parameterType="hashmap" resultType="com.example.unipet.model.Review">
+	    SELECT
+	        REVIEW_NO,
+	        STORE_NO,
+	        USER_ID,
+	        RATING,
+	        R_CONTENTS,
+	        CDATE
+	    FROM review
+	    WHERE STORE_NO = #{targetNo}
+	    ORDER BY REVIEW_NO DESC
+	    LIMIT #{reviewLimit}
+	</select>
+
+	<!-- 상품 리뷰 요약용 리뷰 목록 조회 -->
+	<select id="selectProductReviewSummaryList" parameterType="hashmap" resultType="com.example.unipet.model.Review">
+	    SELECT
+	        REVIEW_NO,
+	        PRODUCT_NO,
+	        USER_ID,
+	        RATING,
+	        R_CONTENTS,
+	        CDATE
+	    FROM review
+	    WHERE PRODUCT_NO = #{targetNo}
+	    ORDER BY REVIEW_NO DESC
+	    LIMIT #{reviewLimit}
+	</select>
 
 	<!-- 한개 검색 -->
 	<select id="selectUser" parameterType="hashmap" resultType="com.example.unipet.model.Default">
@@ -44,6 +106,23 @@
 	    WHERE R.RSV_NO = #{rsvNo}
 	</select>
 	
+	<!-- 리뷰 요약 조회 -->
+	<select id="selectReviewSummary" parameterType="hashmap" resultType="com.example.unipet.model.Review">
+	    SELECT
+	        SUMMARY_NO,
+	        TARGET_TYPE,
+	        TARGET_NO,
+	        SUMMARY_TEXT,
+	        LAST_REVIEW_NO,
+	        SUMMARY_STATUS,
+	        CDATE,
+	        UDATE
+	    FROM review_summary
+	    WHERE TARGET_TYPE = #{targetType}
+	      AND TARGET_NO = #{targetNo}
+	</select>
+
+	
 	<!-- 삽입 -->
 	<insert id="insertUser" parameterType="hashmap">
 	</insert>
@@ -63,6 +142,27 @@
 	    VALUES (#{reviewNo}, #{filePath}, #{fileName}, #{originName}, #{fileSize}, #{fileExt})
 	</insert>
 	
+	<!-- 리뷰 요약 삽입 -->
+	<insert id="insertReviewSummary" parameterType="hashmap">
+	    INSERT INTO review_summary (
+	        TARGET_TYPE,
+	        TARGET_NO,
+	        SUMMARY_TEXT,
+	        LAST_REVIEW_NO,
+	        SUMMARY_STATUS,
+	        CDATE,
+	        UDATE
+	    ) VALUES (
+	        #{targetType},
+	        #{targetNo},
+	        #{summaryText},
+	        #{lastReviewNo},
+	        #{summaryStatus},
+	        NOW(),
+	        NOW()
+	    )
+	</insert>
+	
 	<!-- 삭제 -->
 	<delete id="deleteUser" parameterType="hashmap">
 	</delete>
@@ -71,4 +171,17 @@
 	<update id="updateUser" parameterType="hashmap">
 	</update>
 	
+	<!-- 리뷰 요약 수정 -->
+	<update id="updateReviewSummary" parameterType="hashmap">
+	    UPDATE review_summary
+	    SET
+	        SUMMARY_TEXT = #{summaryText},
+	        LAST_REVIEW_NO = #{lastReviewNo},
+	        SUMMARY_STATUS = #{summaryStatus},
+	        UDATE = NOW()
+	    WHERE TARGET_TYPE = #{targetType}
+	      AND TARGET_NO = #{targetNo}
+	</update>
+
+
 </mapper>

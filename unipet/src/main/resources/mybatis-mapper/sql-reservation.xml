@@ -99,6 +99,8 @@
         STORE_FILE
     WHERE 
         STORE_NO = #{storeNo}
+    And
+    	IS_PROOF = 'N'
     ORDER BY 
         IS_MAIN DESC, FILE_NO ASC
    </select>
@@ -145,11 +147,6 @@
 	        * FROM RESERVATION 
 	    WHERE RSV_STATUS = 'WAI'
 	      AND CDATE &lt; DATE_SUB(NOW(), INTERVAL #{minutes} MINUTE)
-	</select>
-
-	
-	<!-- 한개 검색 -->
-	<select id="selectUser" parameterType="hashmap" resultType="com.example.unipet.model.Default">
 	</select>
 	
 	<select id="selectStoreInfo" parameterType="hashmap" resultType="com.example.unipet.model.Store">
