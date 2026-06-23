@@ -374,10 +374,10 @@
     UPDATE PET_HEALTH
     SET
         TITLE = #{title},
+        RECORD_DATE = #{date},
         MEMO = #{memo}
     WHERE HEALTH_NO = #{id}
 </update>
-
 <!-- 건강기록 삭제 -->
 <delete id="deleteHealth" parameterType="hashmap">
     DELETE FROM PET_HEALTH
@@ -416,23 +416,23 @@
         #{petNo},
         #{name},
         #{date},
-        #{nextDate},
+        NULLIF(#{nextDate}, ''),
         #{hospitalName},
         #{memo}
     )
 </insert>
 
-<!-- 접종 수정 : 접종일은 변경하지 않음 -->
+<!-- 접종 수정 -->
 <update id="updateVaccine" parameterType="hashmap">
     UPDATE PET_VACCINE
     SET
         VAC_NAME = #{name},
-        NEXT_VAC_DATE = #{nextDate},
+        VAC_DATE = #{date},
+        NEXT_VAC_DATE = NULLIF(#{nextDate}, ''),
         HOSPITAL_NAME = #{hospitalName},
         MEMO = #{memo}
     WHERE VAC_NO = #{id}
 </update>
-
 <!-- 접종 삭제 -->
 <delete id="deleteVaccine" parameterType="hashmap">
     DELETE FROM PET_VACCINE
