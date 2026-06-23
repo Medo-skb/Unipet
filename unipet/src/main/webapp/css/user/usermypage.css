@@ -1117,6 +1117,30 @@ button {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
+.mypage-dashboard .pet-card.main-pet-card {
+    border: 2px solid #ff5c7c !important;
+    background: #fff8fa !important;
+}
+
+.mypage-dashboard .pet-card .main-badge {
+    display: inline-block !important;
+    margin-left: 6px !important;
+    padding: 3px 8px !important;
+    background: #ff5c7c !important;
+    color: #fff !important;
+    border-radius: 20px !important;
+    font-size: 10px !important;
+    font-weight: bold !important;
+    vertical-align: middle !important;
+}
+.mypage-dashboard .pet-btn:disabled {
+    background: #bdbdbd !important;
+    border: 1px solid #bdbdbd !important;
+    color: #fff !important;
+    cursor: default !important;
+    opacity: 1 !important;
+}
+
 
 @media screen and (max-width: 768px) {
     .pet-profile-list {

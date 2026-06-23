@@ -180,36 +180,63 @@
 					</div>
 
 					<div v-else>
-						<div v-else>
-							<div class="review-item" v-for="review in reviewList" :key="review.reviewNo">
+						<div class="review-item" v-for="review in reviewList" :key="review.reviewNo">
+							<div class="review-head">
+								<div class="review-user-area">
+									<span class="review-user">
+										{{review.writerNickname ? review.writerNickname : review.userId}}
+									</span>
 
-								<div class="review-head">
-									<div class="review-user-area">
-										<span class="review-user">
-											{{review.writerNickname ? review.writerNickname : review.userId}}
-										</span>
+									<span class="review-date">{{review.reviewCdate}}</span>
+								</div>
 
-										<span class="review-date">{{review.reviewCdate}}</span>
-									</div>
+								<div class="review-action-area">
+									<button v-if="fnCanEditReview(review)" type="button" class="review-action-btn edit"
+										@click="fnReviewEdit(review)">
+										수정
+									</button>
 
-									<button v-if="fnIsAdmin()" type="button" class="review-report-btn"
-										@click="fnReviewReport(review)">
-										신고
+									<button v-if="fnCanDeleteReview(review)" type="button"
+										class="review-action-btn delete" @click="fnReviewDelete(review)">
+										삭제
 									</button>
 								</div>
+							</div>
 
-								<div class="review-rating">
-									<span v-for="n in Number(review.rating || 0)" :key="'star-' + n"
-										class="star-filled">★</span>
-									<span v-for="n in 5 - Number(review.rating || 0)" :key="'empty-star-' + n"
-										class="star-empty">★</span>
-									<span class="review-score">{{review.rating}}점</span>
+							<div class="review-rating">
+								<span v-for="n in Number(review.rating || 0)" :key="'star-' + review.reviewNo + '-' + n"
+									class="star-filled">
+									★
+								</span>
+
+								<span v-for="n in 5 - Number(review.rating || 0)"
+									:key="'empty-star-' + review.reviewNo + '-' + n" class="star-empty">
+									★
+								</span>
+
+								<span class="review-score">{{review.rating}}점</span>
+							</div>
+
+							<div v-if="review.editMode" class="qna-edit-box">
+								<select class="qna-edit-input" v-model="review.editRating">
+									<option value="5">5점</option>
+									<option value="4">4점</option>
+									<option value="3">3점</option>
+									<option value="2">2점</option>
+									<option value="1">1점</option>
+								</select>
+
+								<textarea class="qna-edit-textarea" v-model="review.editContents"
+									maxlength="500"></textarea>
+
+								<div class="qna-edit-btn-row">
+									<button class="qna-small-btn save" @click="fnReviewUpdate(review)">저장</button>
+									<button class="qna-small-btn cancel" @click="fnReviewCancel(review)">취소</button>
 								</div>
+							</div>
 
-								<div class="review-contents">
-									{{review.reviewContents}}
-								</div>
-
+							<div v-else class="review-contents">
+								{{review.reviewContents}}
 							</div>
 						</div>
 					</div>
@@ -351,6 +378,7 @@
 						productNo: '<%=request.getAttribute("productNo")%>',
 						currentUserId: '<%=session.getAttribute("sessionId") == null ? "" : session.getAttribute("sessionId")%>',
 						currentUserRole: '<%=session.getAttribute("sessionRole") == null ? "" : session.getAttribute("sessionRole")%>',
+						adminId: '<%=session.getAttribute("adminId") == null ? "" : session.getAttribute("adminId")%>',
 						product: null,
 						fileList: [],
 						detailImageList: [],
@@ -420,6 +448,13 @@
 									self.reviewList = data.list || [];
 									self.reviewCount = data.summary != null ? data.summary.reviewCount : 0;
 									self.reviewAvg = data.summary != null ? data.summary.avgRating : 0;
+
+									for (let i = 0; i < self.reviewList.length; i++) {
+										self.reviewList[i].editMode = false;
+										self.reviewList[i].editContents = self.reviewList[i].reviewContents;
+										self.reviewList[i].editRating = self.reviewList[i].rating;
+									}
+
 								} else {
 									self.reviewList = [];
 									self.reviewCount = 0;
@@ -428,6 +463,149 @@
 							},
 							error: function () {
 								alert("리뷰 조회 중 오류가 발생했습니다.");
+							}
+						});
+					},
+
+					fnCanEditReview: function (review) {
+						if (review == null) {
+							return false;
+						}
+
+						if (this.currentUserId == "") {
+							return false;
+						}
+
+						if (this.fnIsAdmin()) {
+							return false;
+						}
+
+						if (String(this.currentUserId) == String(review.userId)) {
+							return true;
+						}
+
+						return false;
+					},
+
+					fnCanDeleteReview: function (review) {
+						if (review == null) {
+							return false;
+						}
+
+						if (this.fnIsAdmin()) {
+							return true;
+						}
+
+						if (this.currentUserId != "" && String(this.currentUserId) == String(review.userId)) {
+							return true;
+						}
+
+						return false;
+					},
+
+					fnReviewEdit: function (review) {
+						if (!this.fnCanEditReview(review)) {
+							alert("리뷰 수정 권한이 없습니다.");
+							return;
+						}
+
+						review.editMode = true;
+						review.editContents = review.reviewContents;
+						review.editRating = review.rating;
+					},
+
+					fnReviewCancel: function (review) {
+						review.editMode = false;
+						review.editContents = review.reviewContents;
+						review.editRating = review.rating;
+					},
+
+					fnReviewUpdate: function (review) {
+						let self = this;
+
+						if (!self.fnCanEditReview(review)) {
+							alert("리뷰 수정 권한이 없습니다.");
+							return;
+						}
+
+						if (review.editContents == null || review.editContents.trim() == "") {
+							alert("리뷰 내용을 입력해주세요.");
+							return;
+						}
+
+						if (review.editContents.length > 500) {
+							alert("리뷰 내용은 500자 이하로 입력해주세요.");
+							return;
+						}
+
+						let param = {
+							reviewNo: review.reviewNo,
+							productNo: self.productNo,
+							contents: review.editContents,
+							rating: review.editRating
+						};
+
+						$.ajax({
+							url: "/review/update.dox",
+							dataType: "json",
+							type: "POST",
+							data: param,
+							success: function (data) {
+								if (data.result == "success") {
+									alert("리뷰가 수정되었습니다.");
+									self.fnGetReviewList();
+
+								} else if (data.result == "login") {
+									alert("로그인이 필요한 서비스입니다.");
+									location.href = "/user/login.do";
+
+								} else {
+									alert(data.message == null ? "리뷰 수정 실패" : data.message);
+								}
+							},
+							error: function () {
+								alert("리뷰 수정 중 오류가 발생했습니다.");
+							}
+						});
+					},
+
+					fnReviewDelete: function (review) {
+						let self = this;
+
+						if (!self.fnCanDeleteReview(review)) {
+							alert("리뷰 삭제 권한이 없습니다.");
+							return;
+						}
+
+						if (!confirm("이 리뷰를 삭제하시겠습니까?")) {
+							return;
+						}
+
+						let param = {
+							reviewNo: review.reviewNo,
+							productNo: self.productNo
+						};
+
+						$.ajax({
+							url: "/review/delete.dox",
+							dataType: "json",
+							type: "POST",
+							data: param,
+							success: function (data) {
+								if (data.result == "success") {
+									alert("리뷰가 삭제되었습니다.");
+									self.fnGetReviewList();
+
+								} else if (data.result == "login") {
+									alert("로그인이 필요한 서비스입니다.");
+									location.href = "/user/login.do";
+
+								} else {
+									alert(data.message == null ? "리뷰 삭제 실패" : data.message);
+								}
+							},
+							error: function () {
+								alert("리뷰 삭제 중 오류가 발생했습니다.");
 							}
 						});
 					},
@@ -447,16 +625,13 @@
 								if (data.result == "success") {
 									self.qnaList = data.list || [];
 
-									if (self.qnaList.length > 0) {
-
-									}
-
 									for (let i = 0; i < self.qnaList.length; i++) {
 										self.qnaList[i].open = false;
 										self.qnaList[i].editMode = false;
 										self.qnaList[i].editTitle = self.qnaList[i].qnaTitle;
 										self.qnaList[i].editContents = self.qnaList[i].qnaContents;
 									}
+
 								} else {
 									self.qnaList = [];
 								}
@@ -539,9 +714,11 @@
 								if (data.result == "success") {
 									alert("문의가 수정되었습니다.");
 									self.fnGetQnaList();
+
 								} else if (data.result == "login") {
 									alert("로그인이 필요한 서비스입니다.");
 									location.href = "/user/login.do";
+
 								} else {
 									alert(data.message == null ? "문의 수정 실패" : data.message);
 								}
@@ -572,9 +749,11 @@
 								if (data.result == "success") {
 									alert("문의가 삭제되었습니다.");
 									self.fnGetQnaList();
+
 								} else if (data.result == "login") {
 									alert("로그인이 필요한 서비스입니다.");
 									location.href = "/user/login.do";
+
 								} else {
 									alert(data.message == null ? "문의 삭제 실패" : data.message);
 								}
@@ -634,9 +813,11 @@
 									self.qnaForm.secretYn = "N";
 									self.fnGetQnaList();
 									self.tab = "qna";
+
 								} else if (data.result == "login") {
 									alert("로그인이 필요한 서비스입니다.");
 									location.href = "/user/login.do";
+
 								} else {
 									alert(data.message == null ? "문의 등록 실패" : data.message);
 								}
@@ -646,46 +827,6 @@
 							}
 						});
 					},
-					fnReviewReport: function (review) {
-						let self = this;
-
-						if (!self.fnIsAdmin()) {
-							alert("관리자만 신고 처리할 수 있습니다.");
-							return;
-						}
-
-						if (!confirm("이 리뷰를 신고 처리하시겠습니까?")) {
-							return;
-						}
-
-						let param = {
-							reviewNo: review.reviewNo,
-							productNo: self.productNo,
-							userId: review.userId
-						};
-
-						$.ajax({
-							url: "/review/report.dox",
-							dataType: "json",
-							type: "POST",
-							data: param,
-							success: function (data) {
-								if (data.result == "success") {
-									alert("리뷰가 신고 처리되었습니다.");
-									self.fnGetReviewList();
-								} else if (data.result == "login") {
-									alert("로그인이 필요한 서비스입니다.");
-									location.href = "/user/login.do";
-								} else {
-									alert(data.message == null ? "리뷰 신고 처리 실패" : data.message);
-								}
-							},
-							error: function () {
-								alert("리뷰 신고 처리 중 오류가 발생했습니다.");
-							}
-						});
-					},
-
 
 					fnChangeMainImage: function (img) {
 						this.mainImage = img;
@@ -726,8 +867,27 @@
 						self.qty = newQty;
 					},
 
+					fnCheckUserOnly: function () {
+						if (this.fnIsAdmin()) {
+							alert("일반회원만 이용 가능한 기능입니다.");
+							return false;
+						}
+
+						if (this.currentUserId == "") {
+							alert("로그인이 필요한 서비스입니다.");
+							location.href = "/user/login.do";
+							return false;
+						}
+
+						return true;
+					},
+
 					fnAddCart: function () {
 						let self = this;
+
+						if (!self.fnCheckUserOnly()) {
+							return;
+						}
 
 						if (self.qty > self.product.stockQty) {
 							alert("재고수량을 초과할 수 없습니다.");
@@ -768,6 +928,10 @@
 
 					fnDirectOrder: function () {
 						let self = this;
+
+						if (!self.fnCheckUserOnly()) {
+							return;
+						}
 
 						if (self.qty > self.product.stockQty) {
 							alert("재고수량을 초과할 수 없습니다.");
@@ -857,10 +1021,15 @@
 						if (price == null || price == undefined || price == "") {
 							return "0";
 						}
+
 						return Number(price).toLocaleString();
 					},
 
 					fnMoveCart: function () {
+						if (!this.fnCheckUserOnly()) {
+							return;
+						}
+
 						pageChange("/cart.do", {});
 					},
 
@@ -881,7 +1050,15 @@
 					},
 
 					fnIsAdmin: function () {
+						if (this.adminId != "") {
+							return true;
+						}
+
 						if (this.currentUserRole == "A") {
+							return true;
+						}
+
+						if (this.currentUserRole == "ADMIN") {
 							return true;
 						}
 
@@ -890,7 +1067,7 @@
 						}
 
 						return false;
-					},
+					}
 				},
 				mounted() {
 					let self = this;

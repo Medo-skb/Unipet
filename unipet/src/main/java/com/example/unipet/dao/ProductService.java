@@ -436,26 +436,28 @@ public class ProductService {
 
 		return resultMap;
 	}
-	
-	// 리뷰 신고 등록
-	public HashMap<String, Object> reportReview(HashMap<String, Object> map) {
+
+	// 상품리뷰 수정 - 작성자만 가능, 관리자는 수정 불가
+	public HashMap<String, Object> updateReview(HashMap<String, Object> map) {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
 		try {
 			String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
 			String sessionRole = map.get("sessionRole") == null ? "" : map.get("sessionRole").toString();
+			String adminId = map.get("adminId") == null ? "" : map.get("adminId").toString();
 
-			if (sessionId.equals("")) {
+			boolean isAdmin = "A".equals(sessionRole) || "ADMIN".equals(sessionRole) || "admin".equals(sessionId)
+					|| !adminId.equals("");
+
+			if (sessionId.equals("") && !isAdmin) {
 				resultMap.put("result", "login");
 				resultMap.put("message", "로그인이 필요합니다.");
 				return resultMap;
 			}
 
-			boolean isAdmin = "A".equals(sessionRole) || "admin".equals(sessionId);
-
-			if (!isAdmin) {
+			if (isAdmin) {
 				resultMap.put("result", "fail");
-				resultMap.put("message", "관리자만 신고 처리할 수 있습니다.");
+				resultMap.put("message", "관리자는 리뷰 수정이 불가능합니다.");
 				return resultMap;
 			}
 
@@ -465,24 +467,106 @@ public class ProductService {
 				return resultMap;
 			}
 
-			Product check = productMapper.selectReviewReportCheck(map);
+			String contents = "";
 
-			if (check != null) {
+			if (map.get("contents") != null) {
+				contents = map.get("contents").toString();
+			} else if (map.get("reviewContents") != null) {
+				contents = map.get("reviewContents").toString();
+			}
+
+			if (contents.trim().equals("")) {
 				resultMap.put("result", "fail");
-				resultMap.put("message", "이미 신고 처리된 리뷰입니다.");
+				resultMap.put("message", "리뷰 내용을 입력해주세요.");
 				return resultMap;
 			}
 
-			map.put("reporterId", sessionId);
+			map.put("contents", contents);
+			map.put("reviewContents", contents);
 
-			int num = productMapper.insertReviewReport(map);
+			Product reviewInfo = productMapper.selectReviewOne(map);
 
-			if (num > 0) {
+			if (reviewInfo == null) {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "존재하지 않는 리뷰입니다.");
+				return resultMap;
+			}
+
+			String writerId = reviewInfo.getUserId() == null ? "" : reviewInfo.getUserId();
+
+			if (!sessionId.equals(writerId)) {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "리뷰 수정 권한이 없습니다.");
+				return resultMap;
+			}
+
+			int result = productMapper.updateReview(map);
+
+			if (result > 0) {
 				resultMap.put("result", "success");
-				resultMap.put("message", "리뷰가 신고 처리되었습니다.");
+				resultMap.put("message", "리뷰가 수정되었습니다.");
 			} else {
 				resultMap.put("result", "fail");
-				resultMap.put("message", "리뷰 신고 처리에 실패했습니다.");
+				resultMap.put("message", "리뷰 수정에 실패했습니다.");
+			}
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			resultMap.put("result", "fail");
+			resultMap.put("message", Message.MSG_SERVER_ERR);
+		}
+
+		return resultMap;
+	}
+
+	// 상품리뷰 삭제 - 작성자 또는 관리자 가능
+	public HashMap<String, Object> deleteReview(HashMap<String, Object> map) {
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+		try {
+			String sessionId = map.get("sessionId") == null ? "" : map.get("sessionId").toString();
+			String sessionRole = map.get("sessionRole") == null ? "" : map.get("sessionRole").toString();
+			String adminId = map.get("adminId") == null ? "" : map.get("adminId").toString();
+
+			boolean isAdmin = "A".equals(sessionRole) || "ADMIN".equals(sessionRole) || "admin".equals(sessionId)
+					|| !adminId.equals("");
+
+			if (sessionId.equals("") && !isAdmin) {
+				resultMap.put("result", "login");
+				resultMap.put("message", "로그인이 필요합니다.");
+				return resultMap;
+			}
+
+			if (map.get("reviewNo") == null || map.get("reviewNo").equals("")) {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "리뷰 번호가 없습니다.");
+				return resultMap;
+			}
+
+			Product reviewInfo = productMapper.selectReviewOne(map);
+
+			if (reviewInfo == null) {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "존재하지 않는 리뷰입니다.");
+				return resultMap;
+			}
+
+			String writerId = reviewInfo.getUserId() == null ? "" : reviewInfo.getUserId();
+
+			if (!isAdmin && !sessionId.equals(writerId)) {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "리뷰 삭제 권한이 없습니다.");
+				return resultMap;
+			}
+
+			int result = productMapper.deleteReview(map);
+
+			if (result > 0) {
+				resultMap.put("result", "success");
+				resultMap.put("message", "리뷰가 삭제되었습니다.");
+			} else {
+				resultMap.put("result", "fail");
+				resultMap.put("message", "리뷰 삭제에 실패했습니다.");
 			}
 
 		} catch (Exception e) {

@@ -1,5 +1,6 @@
 package com.example.unipet.controller;
 
+import java.io.IOException;
 import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +15,8 @@ import com.example.unipet.dao.BoardService;
 import com.google.gson.Gson;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
-
-import java.io.IOException;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class BoardController {
@@ -25,13 +24,59 @@ public class BoardController {
 	@Autowired
 	BoardService boardService;
 
+	private String getSessionValue(HttpSession session, String key) {
+		return session.getAttribute(key) == null ? "" : session.getAttribute(key).toString();
+	}
+
+	private String getAdminId(HttpSession session) {
+		String adminId = getSessionValue(session, "adminId");
+
+		if (adminId.equals("")) {
+			adminId = getSessionValue(session, "sessionAdminId");
+		}
+
+		if (adminId.equals("")) {
+			String sessionId = getSessionValue(session, "sessionId");
+
+			if ("admin".equals(sessionId)) {
+				adminId = sessionId;
+			}
+		}
+
+		return adminId;
+	}
+
+	private String getAdminName(HttpSession session) {
+		String adminName = getSessionValue(session, "adminName");
+
+		if (adminName.equals("")) {
+			adminName = getSessionValue(session, "sessionAdminName");
+		}
+
+		return adminName;
+	}
+
+	private boolean isBoardLogin(HttpSession session) {
+		String sessionId = getSessionValue(session, "sessionId");
+		String adminId = getAdminId(session);
+
+		if (!sessionId.equals("")) {
+			return true;
+		}
+
+		if (!adminId.equals("")) {
+			return true;
+		}
+
+		return false;
+	}
+
 	// 웹브라우저로 접속하는 주소, return은 jsp파일
 	@RequestMapping("/board/list.do")
-	public String list(HttpServletRequest request, HttpSession session, HttpServletResponse response, @RequestParam HashMap<String, Object> map) throws Exception {
+	public String list(HttpServletRequest request, HttpSession session, HttpServletResponse response,
+			@RequestParam HashMap<String, Object> map) throws Exception {
 
-		String sessionId = (String) session.getAttribute("sessionId");
-
-		if (sessionId == null || sessionId.equals("")) {
+		if (!isBoardLogin(session)) {
 			return alertLogin(response);
 		}
 
@@ -48,11 +93,10 @@ public class BoardController {
 
 	// 웹브라우저로 접속하는 주소, return은 jsp파일
 	@RequestMapping("/board/view.do")
-	public String view(HttpServletRequest request, HttpSession session, HttpServletResponse response, @RequestParam HashMap<String, Object> map) throws Exception {
+	public String view(HttpServletRequest request, HttpSession session, HttpServletResponse response,
+			@RequestParam HashMap<String, Object> map) throws Exception {
 
-		String sessionId = (String) session.getAttribute("sessionId");
-
-		if (sessionId == null || sessionId.equals("")) {
+		if (!isBoardLogin(session)) {
 			return alertLogin(response);
 		}
 
@@ -62,21 +106,25 @@ public class BoardController {
 	}
 
 	@RequestMapping("/board/add.do")
-	public String boardAdd(HttpServletRequest request, HttpSession session, HttpServletResponse response) throws Exception {
+	public String boardAdd(HttpServletRequest request, HttpSession session, HttpServletResponse response)
+			throws Exception {
 
-		String sessionId = (String) session.getAttribute("sessionId");
-
-		if (sessionId == null || sessionId.equals("")) {
+		if (!isBoardLogin(session)) {
 			return alertLogin(response);
 		}
-		
+
 		request.setAttribute("bMainNo", request.getParameter("bMainNo"));
 		return "/board/board-add";
 	}
-	
+
 	// 웹브라우저로 접속하는 주소, return은 jsp파일
 	@RequestMapping("/board/edit.do")
-	public String edit(HttpServletRequest request, @RequestParam HashMap<String, Object> map) throws Exception {
+	public String edit(HttpServletRequest request, HttpSession session, HttpServletResponse response,
+			@RequestParam HashMap<String, Object> map) throws Exception {
+
+		if (!isBoardLogin(session)) {
+			return alertLogin(response);
+		}
 
 		request.setAttribute("boardNo", map.get("boardNo"));
 
@@ -89,7 +137,7 @@ public class BoardController {
 			@RequestParam HashMap<String, Object> map,
 			@RequestParam(value = "files", required = false) MultipartFile[] files) throws Exception {
 
-		String sessionId = session.getAttribute("sessionId") == null ? "" : (String) session.getAttribute("sessionId");
+		String sessionId = getSessionValue(session, "sessionId");
 
 		map.put("sessionId", sessionId);
 
@@ -121,9 +169,15 @@ public class BoardController {
 	@ResponseBody
 	public String list(@RequestParam HashMap<String, Object> map, HttpSession session) throws Exception {
 
-		String sessionId = session.getAttribute("sessionId") == null ? "" : (String) session.getAttribute("sessionId");
+		String sessionId = getSessionValue(session, "sessionId");
+		String sessionRole = getSessionValue(session, "sessionRole");
+		String adminId = getAdminId(session);
+		String adminName = getAdminName(session);
 
 		map.put("sessionId", sessionId);
+		map.put("sessionRole", sessionRole);
+		map.put("adminId", adminId);
+		map.put("adminName", adminName);
 
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 		resultMap = boardService.getBoardList(map);
@@ -136,18 +190,22 @@ public class BoardController {
 	@ResponseBody
 	public String getBoardDetail(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
 
-		String sessionId = session.getAttribute("sessionId") == null ? "" : (String) session.getAttribute("sessionId");
-		String sessionRole = session.getAttribute("sessionRole") == null ? "" : (String) session.getAttribute("sessionRole");
+		String sessionId = getSessionValue(session, "sessionId");
+		String sessionRole = getSessionValue(session, "sessionRole");
+		String adminId = getAdminId(session);
+		String adminName = getAdminName(session);
 
 		map.put("sessionId", sessionId);
 		map.put("sessionRole", sessionRole);
+		map.put("adminId", adminId);
+		map.put("adminName", adminName);
 
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 		resultMap = boardService.getBoardDetail(map);
 
 		return new Gson().toJson(resultMap);
 	}
-	
+
 	// ajax가 호출하는 주소
 	@RequestMapping(value = "/board/comment/list.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
@@ -164,7 +222,7 @@ public class BoardController {
 	@ResponseBody
 	public String addComment(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
 
-		String sessionId = session.getAttribute("sessionId") == null ? "" : (String) session.getAttribute("sessionId");
+		String sessionId = getSessionValue(session, "sessionId");
 
 		map.put("sessionId", sessionId);
 
@@ -179,7 +237,7 @@ public class BoardController {
 	@ResponseBody
 	public String boardLike(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
 
-		String sessionId = session.getAttribute("sessionId") == null ? "" : (String) session.getAttribute("sessionId");
+		String sessionId = getSessionValue(session, "sessionId");
 
 		map.put("sessionId", sessionId);
 
@@ -194,7 +252,7 @@ public class BoardController {
 	@ResponseBody
 	public String boardReport(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
 
-		String sessionId = session.getAttribute("sessionId") == null ? "" : (String) session.getAttribute("sessionId");
+		String sessionId = getSessionValue(session, "sessionId");
 
 		map.put("sessionId", sessionId);
 
@@ -210,12 +268,15 @@ public class BoardController {
 	public String addBoard(HttpSession session, @RequestParam HashMap<String, Object> map,
 			@RequestParam(value = "files", required = false) MultipartFile[] files) throws Exception {
 
-		String sessionId = session.getAttribute("sessionId") == null ? "" : (String) session.getAttribute("sessionId");
-		String sessionRole = session.getAttribute("sessionRole") == null ? ""
-				: (String) session.getAttribute("sessionRole");
+		String sessionId = getSessionValue(session, "sessionId");
+		String sessionRole = getSessionValue(session, "sessionRole");
+		String adminId = getAdminId(session);
+		String adminName = getAdminName(session);
 
 		map.put("sessionId", sessionId);
 		map.put("sessionRole", sessionRole);
+		map.put("adminId", adminId);
+		map.put("adminName", adminName);
 
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 		resultMap = boardService.addBoard(map, files);
@@ -228,7 +289,7 @@ public class BoardController {
 	@ResponseBody
 	public String getBoardEditInfo(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
 
-		String sessionId = session.getAttribute("sessionId") == null ? "" : (String) session.getAttribute("sessionId");
+		String sessionId = getSessionValue(session, "sessionId");
 
 		map.put("sessionId", sessionId);
 
@@ -243,12 +304,15 @@ public class BoardController {
 	@ResponseBody
 	public String removeBoard(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
 
-		String sessionId = session.getAttribute("sessionId") == null ? "" : (String) session.getAttribute("sessionId");
-		String sessionRole = session.getAttribute("sessionRole") == null ? ""
-				: (String) session.getAttribute("sessionRole");
+		String sessionId = getSessionValue(session, "sessionId");
+		String sessionRole = getSessionValue(session, "sessionRole");
+		String adminId = getAdminId(session);
+		String adminName = getAdminName(session);
 
 		map.put("sessionId", sessionId);
 		map.put("sessionRole", sessionRole);
+		map.put("adminId", adminId);
+		map.put("adminName", adminName);
 
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 		resultMap = boardService.removeBoard(map);
@@ -261,7 +325,7 @@ public class BoardController {
 	@ResponseBody
 	public String removeFile(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
 
-		String sessionId = session.getAttribute("sessionId") == null ? "" : (String) session.getAttribute("sessionId");
+		String sessionId = getSessionValue(session, "sessionId");
 
 		map.put("sessionId", sessionId);
 
@@ -276,12 +340,15 @@ public class BoardController {
 	@ResponseBody
 	public String updateComment(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
 
-		String sessionId = session.getAttribute("sessionId") == null ? "" : (String) session.getAttribute("sessionId");
-		String sessionRole = session.getAttribute("sessionRole") == null ? ""
-				: (String) session.getAttribute("sessionRole");
+		String sessionId = getSessionValue(session, "sessionId");
+		String sessionRole = getSessionValue(session, "sessionRole");
+		String adminId = getAdminId(session);
+		String adminName = getAdminName(session);
 
 		map.put("sessionId", sessionId);
 		map.put("sessionRole", sessionRole);
+		map.put("adminId", adminId);
+		map.put("adminName", adminName);
 
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 		resultMap = boardService.updateComment(map);
@@ -294,12 +361,15 @@ public class BoardController {
 	@ResponseBody
 	public String removeComment(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
 
-		String sessionId = session.getAttribute("sessionId") == null ? "" : (String) session.getAttribute("sessionId");
-		String sessionRole = session.getAttribute("sessionRole") == null ? ""
-				: (String) session.getAttribute("sessionRole");
+		String sessionId = getSessionValue(session, "sessionId");
+		String sessionRole = getSessionValue(session, "sessionRole");
+		String adminId = getAdminId(session);
+		String adminName = getAdminName(session);
 
 		map.put("sessionId", sessionId);
 		map.put("sessionRole", sessionRole);
+		map.put("adminId", adminId);
+		map.put("adminName", adminName);
 
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 		resultMap = boardService.removeComment(map);
@@ -323,7 +393,7 @@ public class BoardController {
 	@ResponseBody
 	public String getRecentTempBoard(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
 
-		String sessionId = session.getAttribute("sessionId") == null ? "" : (String) session.getAttribute("sessionId");
+		String sessionId = getSessionValue(session, "sessionId");
 
 		map.put("sessionId", sessionId);
 
@@ -338,7 +408,7 @@ public class BoardController {
 	@ResponseBody
 	public String getBoardAlarmList(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
 
-		String sessionId = session.getAttribute("sessionId") == null ? "" : (String) session.getAttribute("sessionId");
+		String sessionId = getSessionValue(session, "sessionId");
 
 		map.put("sessionId", sessionId);
 
@@ -353,7 +423,7 @@ public class BoardController {
 	@ResponseBody
 	public String readBoardAlarm(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
 
-		String sessionId = session.getAttribute("sessionId") == null ? "" : (String) session.getAttribute("sessionId");
+		String sessionId = getSessionValue(session, "sessionId");
 
 		map.put("sessionId", sessionId);
 
@@ -362,16 +432,15 @@ public class BoardController {
 
 		return new Gson().toJson(resultMap);
 	}
-	
+
 	private String alertLogin(HttpServletResponse response) throws IOException {
 		response.setContentType("text/html; charset=UTF-8");
 		response.getWriter().println("<script>");
-		response.getWriter().println("alert('로그인이 필요합니다.');");
+		response.getWriter().println("alert('로그인이 필요한 서비스입니다.');");
 		response.getWriter().println("location.href='/user/login.do';");
 		response.getWriter().println("</script>");
 		response.getWriter().flush();
 
 		return null;
 	}
-
 }
