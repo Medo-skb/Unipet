@@ -208,7 +208,7 @@
 
                                             <div v-for="item in recentPostList.slice(0, 2)" :key="'post-' + item.id"
                                                 class="list-item">
-                                                <div class="post-title" @click="fnGoPostDetail(item.id)">
+                                                <div class="post-title" @click="fnGoPostDetail(item.boardNo || item.BOARD_NO || item.id)">
                                                     [{{ item.boardName }}] {{ item.title }}
                                                 </div>
                                                 <div class="list-sub">
@@ -473,8 +473,8 @@
 
                             <div v-if="recentPostList.length === 0" class="empty-text">작성한 게시글이 없습니다.</div>
 
-                            <div class="list-item" v-for="item in recentPostList" :key="'post-page-' + item.id">
-                                <div class="post-title" @click="fnGoPostDetail(item.id)">
+                            <div class="list-item" v-for="item in recentPostList.slice(0, 3)" :key="'post-page-' + item.id">
+                                <div class="post-title" @click="fnGoPostDetail(item.boardNo || item.BOARD_NO || item.id)">
                                     [{{ item.boardName }}] {{ item.title }}
                                 </div>
                                 <div class="list-sub">{{ fnFormatDateTime(item.cdate) }}</div>
@@ -486,7 +486,7 @@
 
                             <div v-if="myCommentList.length === 0" class="empty-text">작성한 댓글이 없습니다.</div>
 
-                            <div class="list-item" v-for="item in myCommentList" :key="'comment-page-' + item.id">
+                            <div class="list-item" v-for="item in myCommentList.slice(0, 3)" :key="'comment-page-' + item.id">
                                 <div class="list-title">
                                     [{{ item.boardName }}] {{ item.content }}
                                 </div>
@@ -506,7 +506,7 @@
                             <div v-if="myPostList.length === 0" class="empty-text">작성한 게시글이 없습니다.</div>
 
                             <div class="list-item" v-for="item in myPostList" :key="'post-all-' + item.id">
-                                <div class="post-title" @click="fnGoPostDetail(item.id)">
+                                <div class="post-title" @click="fnGoPostDetail(item.boardNo || item.BOARD_NO || item.id)">
                                     [{{ item.boardName }}] {{ item.title }}
                                 </div>
                                 <div class="list-sub">{{ fnFormatDateTime(item.cdate) }}</div>
@@ -1047,6 +1047,15 @@
 
                         <div class="section-box">
                             <div class="section-title">포인트 사용내역</div>
+                            <div class="point-top-area">
+                                <div class="point-sort-box">
+                                    <input type="date" v-model="pointSearch.startDate">
+                                    <span>~</span>
+                                    <input type="date" v-model="pointSearch.endDate">
+                                    <button class="small-btn" @click="fnLoadPointUseList">조회</button>
+                                    <button class="small-btn" @click="fnResetPointSearch">초기화</button>
+                                </div>
+                            </div>
 
                             <div v-if="pointUseList.length === 0" class="empty-text">
                                 사용내역이 없습니다.
@@ -1070,6 +1079,8 @@
                             </div>
                         </div>
                     </div>
+
+
                     <!-- pointInfo 끝 -->
 
             </div>
@@ -1250,6 +1261,12 @@
 
                         showPointUseList: false,
                         pointUseList: [],
+                        pointSearch: {
+                            startDate: "",
+                            endDate: ""
+
+                        },
+
 
                         couponTab: "ALL",
                         couponList: [],
@@ -2675,8 +2692,6 @@
                         });
                     },
 
-                    // 포인트 사용내역 조회
-                    // 포인트 사용내역 조회
                     fnLoadPointUseList: function () {
                         const self = this;
 
@@ -2684,13 +2699,13 @@
                             url: "/user/point-use-list.dox",
                             type: "POST",
                             dataType: "json",
+                            data: {
+                                startDate: self.pointSearch.startDate,
+                                endDate: self.pointSearch.endDate
+                            },
                             success: function (res) {
                                 if (res.result === "success" || res.result === true) {
-                                    self.pointUseList =
-                                        res.pointUseList ||
-                                        res.list ||
-                                        res.useList ||
-                                        [];
+                                    self.pointUseList = res.pointUseList || res.list || res.useList || [];
                                 } else if (Array.isArray(res)) {
                                     self.pointUseList = res;
                                 } else {
@@ -2699,16 +2714,13 @@
 
                                 self.showPointUseList = true;
                             },
-                            error: function (xhr) {
-
-
+                            error: function () {
                                 self.pointUseList = [];
                                 self.showPointUseList = true;
                                 alert("포인트 사용내역 조회 실패");
                             }
                         });
                     },
-
 
                     // 쿠폰 목록 조회
                     fnLoadCouponList: function () {
