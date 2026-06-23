@@ -19,6 +19,11 @@ public class Admin {
 	String sStatus;
 	String lat;
 	String lng;
+	String biznum;
+	String isOpen;
+	String accName;
+	String accNo;
+	String accHolder;
 
 	// STORE_USER
 	String sUserId;
@@ -29,20 +34,23 @@ public class Admin {
 	// STORE_SUBMIT
 	String submitStatus;
 
-    // STORE_FILE / 공통 파일
-    String filePath;
-    String fileName;
-    String originName;
-
-    // 리뷰 신고 관련
-    int reportNo; 
-    int reviewNo;         
-    String userId;      
-    String reporterId;   
-    String repStatus;   
-    String rContents;
-    String reportReason;
-
+	// STORE_FILE / 공통 파일
+	String filePath;
+	String fileName;
+	String originName;
+	String isProof;
+	String isMain;
+	
+	// 리뷰 신고 관련
+	int reportNo; 
+	Integer reviewNo;         
+	String userId;      
+	String reporterId;   
+	String repStatus;   
+	String rContents;
+	String reportReason;
+	int reportCount;
+	
     String reviewType;
 
     // 상품 리뷰용
@@ -81,7 +89,7 @@ public class Admin {
     String cdate;
 
     // 관리자 회원조회 집계
-    int reportCount;
+    int repCount;
     int petCount;
     int pointTotal;
     int couponCount;
@@ -134,9 +142,13 @@ public class Admin {
     Integer menuNo;
     String menuName;
     String rsvStatus;
-
+    int totalReservationCount;
+    int activeReservationCount;
+    int cancelReservationCount;
+    
     // REVIEW
     String rating;
+    String avgRating;
 
     // 커뮤니티
     int commentNo;
@@ -147,4 +159,24 @@ public class Admin {
     String reportType;
     String targetTitle;
     String targetContent;
+    
+    // 사업자 회원조회 집계
+    int accReportCount;
+    int rejReportCount;
+
+    // STORE_MENU
+    Integer menuPrice;
+    String menuStatus;
+
+    // STORE_POLICY
+    Integer slot;
+    Integer capacity;
+    String openTime;
+    String closeTime;
+    String breakStart;
+    String breakEnd;
+
+    // STORE_DETAIL
+    String subTitle;
+    String sContents;
 }

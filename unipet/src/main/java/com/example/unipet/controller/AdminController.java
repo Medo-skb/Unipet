@@ -96,6 +96,20 @@ public class AdminController {
 	    return "/admin/adminUserCommunity";
 	}
 
+	@RequestMapping("/admin/businessUserManage.do") 
+	public String adminBusinessUserManage(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+	    HttpSession session = request.getSession();
+	    String role = (String) session.getAttribute("sessionRole");
+
+	    if (role == null || !role.equals("ADMIN")) {
+	        return "redirect:/admin/login.do";
+	    }
+
+	    model.addAttribute("kakaoMapApiKey", kakaoJavascriptKey);
+
+	    return "/admin/adminBusinessUserManage";
+	}
+
 	@RequestMapping("/admin/storeApprove.do") 
 	public String adminStoreApprove(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception {
 	    HttpSession session = request.getSession();
@@ -397,6 +411,20 @@ public class AdminController {
 	    return new Gson().toJson(resultMap);
 	}
 
+	@RequestMapping(value = "/admin/user/statusUpdate.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String updateAdminUserStatus(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.updateAdminUserStatus(map);
+	    return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/admin/user/nicknameUpdate.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String updateAdminUserNickname(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.updateAdminUserNickname(map);
+	    return new Gson().toJson(resultMap);
+	}
+
 	@RequestMapping(value = "/admin/user/petList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
 	public String getAdminUserPetList(@RequestParam HashMap<String, Object> map) throws Exception {
@@ -466,5 +494,103 @@ public class AdminController {
 	    HashMap<String, Object> resultMap = adminService.getAdminUserCommunityCommentList(map);
 	    return new Gson().toJson(resultMap);
 	}
-
+	
+	@RequestMapping(value = "/admin/businessUser/list.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getAdminBusinessUserList(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.getAdminBusinessUserList(map);
+	    return new Gson().toJson(resultMap);
 	}
+
+	@RequestMapping(value = "/admin/businessUser/basic.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getAdminBusinessUserBasic(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.getAdminBusinessUserBasic(map);
+	    return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/admin/businessUser/storeDetail.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getAdminBusinessUserStoreDetail(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.getAdminBusinessUserStoreDetail(map);
+	    return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/admin/businessUser/reviewList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getAdminBusinessUserReviewList(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.getAdminBusinessUserReviewList(map);
+	    return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/admin/businessUser/reportList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getAdminBusinessUserReportList(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.getAdminBusinessUserReportList(map);
+	    return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/admin/businessUser/reservationList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getAdminBusinessUserReservationList(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.getAdminBusinessUserReservationList(map);
+	    return new Gson().toJson(resultMap);
+	}
+	
+	@RequestMapping(value = "/admin/report/reservationGroupList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getReservationReviewReportGroupList(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.getReservationReviewReportGroupList(map);
+	    return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/admin/report/reservationDetailList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getReservationReviewReportDetailList(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.getReservationReviewReportDetailList(map);
+	    return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/admin/report/communityPostGroupList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getCommunityPostReportGroupList(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.getCommunityPostReportGroupList(map);
+	    return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/admin/report/communityPostDetailList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getCommunityPostReportDetailList(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.getCommunityPostReportDetailList(map);
+	    return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/admin/report/communityCommentGroupList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getCommunityCommentReportGroupList(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.getCommunityCommentReportGroupList(map);
+	    return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/admin/report/communityCommentDetailList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getCommunityCommentReportDetailList(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.getCommunityCommentReportDetailList(map);
+	    return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/admin/report/batchApprove.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String approveReportBatch(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.approveReportBatch(map);
+	    return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/admin/report/batchReject.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String rejectReportBatch(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.rejectReportBatch(map);
+	    return new Gson().toJson(resultMap);
+	}
+
+}

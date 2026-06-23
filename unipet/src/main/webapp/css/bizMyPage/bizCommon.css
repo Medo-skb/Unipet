@@ -770,6 +770,9 @@ table {
 .review-image-box {
     margin-top: 12px;
     margin-bottom: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .review-image {
@@ -1392,4 +1395,8 @@ table {
     font-weight: 600;
     cursor: pointer;
     text-decoration: underline;
+}
+
+.reservation-table th {
+    white-space: nowrap;
 }

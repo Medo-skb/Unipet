@@ -118,6 +118,12 @@ public interface AdminMapper {
 	// 회원 기본 정보 상세
 	Admin selectAdminUserBasic(HashMap<String, Object> map);
 
+	// 회원 상태 수정
+	int updateAdminUserStatus(HashMap<String, Object> map);
+
+	// 회원 닉네임 수정
+	int updateAdminUserNickname(HashMap<String, Object> map);
+
 	// 회원 반려동물 상세
 	List<Admin> selectAdminUserPetList(HashMap<String, Object> map);
 
@@ -147,5 +153,68 @@ public interface AdminMapper {
 
 	// 회원 커뮤니티 댓글 상세
 	List<Admin> selectAdminUserCommunityCommentList(HashMap<String, Object> map);
+
+	// 사업자 회원조회 및 관리 리스트
+	List<Admin> selectAdminBusinessUserList(HashMap<String, Object> map);
+
+	// 사업자 기본 정보 상세
+	Admin selectAdminBusinessUserBasic(HashMap<String, Object> map);
+
+	// 사업자 업체 상세
+	Admin selectAdminBusinessUserStoreDetail(HashMap<String, Object> map);
+
+	// 사업자 업체 메뉴 목록
+	List<Admin> selectAdminBusinessUserMenuList(HashMap<String, Object> map);
+
+	// 사업자 업체 이미지 목록
+	List<Admin> selectAdminBusinessUserStoreFileList(HashMap<String, Object> map);
+
+	// 사업자 리뷰 상세
+	List<Admin> selectAdminBusinessUserReviewList(HashMap<String, Object> map);
+
+	// 사업자 리뷰 신고 상세
+	List<Admin> selectAdminBusinessUserReportList(HashMap<String, Object> map);
+
+	// 사업자 예약 상세
+	List<Admin> selectAdminBusinessUserReservationList(HashMap<String, Object> map);
+	
+	// 예약 리뷰 신고 업체별 그룹
+	List<Admin> selectReservationReviewReportGroupList(HashMap<String, Object> map);
+
+	// 예약 리뷰 신고 업체별 상세
+	List<Admin> selectReservationReviewReportDetailList(HashMap<String, Object> map);
+
+	// 커뮤니티 글 신고 글별 그룹
+	List<Admin> selectCommunityPostReportGroupList(HashMap<String, Object> map);
+
+	// 커뮤니티 글 신고 글별 상세
+	List<Admin> selectCommunityPostReportDetailList(HashMap<String, Object> map);
+
+	// 커뮤니티 댓글 신고 댓글별 그룹
+	List<Admin> selectCommunityCommentReportGroupList(HashMap<String, Object> map);
+
+	// 커뮤니티 댓글 신고 댓글별 상세
+	List<Admin> selectCommunityCommentReportDetailList(HashMap<String, Object> map);
+
+	// 회원 신고 누적 증가
+	int updateUserRepCount(Map<String, Object> map);
+	
+	// 예약 리뷰 신고 일괄 승인
+	int updateReservationReviewReportBatchApprove(HashMap<String, Object> map);
+
+	// 예약 리뷰 신고 일괄 반려
+	int updateReservationReviewReportBatchReject(HashMap<String, Object> map);
+
+	// 커뮤니티 글 신고 일괄 승인
+	int updateCommunityPostReportBatchApprove(HashMap<String, Object> map);
+
+	// 커뮤니티 글 신고 일괄 반려
+	int updateCommunityPostReportBatchReject(HashMap<String, Object> map);
+
+	// 커뮤니티 댓글 신고 일괄 승인
+	int updateCommunityCommentReportBatchApprove(HashMap<String, Object> map);
+
+	// 커뮤니티 댓글 신고 일괄 반려
+	int updateCommunityCommentReportBatchReject(HashMap<String, Object> map);
 
 }

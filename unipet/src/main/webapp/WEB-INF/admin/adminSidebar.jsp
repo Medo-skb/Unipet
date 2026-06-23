@@ -6,7 +6,11 @@
 
     <ul class="sidebar-menu">
         <li class="menu-item ${param.activeMenu eq 'userManage' ? 'active' : ''}">
-            <a href="/admin/userManage.do">회원조회 및 관리</a>
+            <a href="/admin/userManage.do">회원 조회 및 관리</a>
+        </li>
+
+        <li class="menu-item ${param.activeMenu eq 'businessUserManage' ? 'active' : ''}">
+            <a href="/admin/businessUserManage.do">사업자 회원 조회 및 관리</a>
         </li>
 
         <li class="menu-item ${param.activeMenu eq 'storeApprove' ? 'active' : ''}">

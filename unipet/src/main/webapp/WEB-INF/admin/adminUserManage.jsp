@@ -35,6 +35,11 @@
                                 <option value="EXT">탈퇴</option>
                             </select>
 
+                            <select class="admin-search-select" v-model="sortType" @change="fnUserList">
+                                <option value="">기본순</option>
+                                <option value="reportDesc">신고 많은순</option>
+                            </select>
+
                             <input
                                 type="text"
                                 class="admin-search-input"
@@ -44,9 +49,36 @@
                             <button type="button" class="admin-search-btn" @click="fnUserList">검색</button>
                         </div>
 
+                        <div class="admin-user-sticky-area">
+                            <div class="admin-user-top-scroll">
+                                <div class="admin-user-scroll-inner"></div>
+                            </div>
+
+                            <div class="admin-user-head-wrap">
+                                <table class="admin-user-table admin-user-head-table">
+                                    <thead>
+                                        <tr>
+                                            <th>유저 아이디</th>
+                                            <th>유저 상태</th>
+                                            <th>기본 정보</th>
+                                            <th>신고 누적 횟수</th>
+                                            <th>반려동물</th>
+                                            <th>구독 여부</th>
+                                            <th>포인트</th>
+                                            <th>쿠폰 내역</th>
+                                            <th>주문 내역</th>
+                                            <th>예약 내역</th>
+                                            <th>리뷰 내역</th>
+                                            <th>커뮤니티 내역</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+
                         <div class="admin-user-table-wrap">
                             <table class="admin-user-table">
-                                <thead>
+                                <thead class="admin-user-hidden-thead">
                                     <tr>
                                         <th>유저 아이디</th>
                                         <th>유저 상태</th>
@@ -74,9 +106,7 @@
                                             <button type="button" class="detail-link-btn" @click="fnOpenBasic(item)">상세보기</button>
                                         </td>
                                         <td>
-                                            <button type="button" class="detail-link-btn" @click="fnOpenReport(item)">
-                                                {{ item.reportCount }}회
-                                            </button>
+                                            {{ item.repCount }}회
                                         </td>
                                         <td>
                                             <button type="button" class="detail-link-btn" @click="fnOpenPet(item)">
@@ -149,12 +179,51 @@
                             <tr><th>아이디</th><td>{{ fnEmpty(basicInfo.userId) }}</td></tr>
                             <tr><th>이메일</th><td>{{ fnEmpty(basicInfo.email) }}</td></tr>
                             <tr><th>이름</th><td>{{ fnEmpty(basicInfo.userName) }}</td></tr>
-                            <tr><th>닉네임</th><td>{{ fnEmpty(basicInfo.nickname) }}</td></tr>
+                            <tr>
+                                <th>
+                                    <div class="admin-basic-edit-th">
+                                        <span>닉네임</span>
+                                        <button type="button" class="admin-mini-btn" @click="fnEditNickname">수정</button>
+                                    </div>
+                                </th>
+                                <td>
+                                    <template v-if="nicknameEditMode">
+                                        <div class="admin-basic-edit-box">
+                                            <input type="text" class="admin-basic-edit-input" v-model="editNickname">
+                                            <button type="button" class="admin-mini-btn black" @click="fnUpdateNickname">확인</button>
+                                        </div>
+                                    </template>
+                                    <template v-else>
+                                        {{ fnEmpty(basicInfo.nickname) }}
+                                    </template>
+                                </td>
+                            </tr>
                             <tr><th>전화번호</th><td>{{ fnEmpty(basicInfo.phone) }}</td></tr>
                             <tr><th>주소</th><td>{{ fnEmpty(basicInfo.userAddr) }} {{ fnEmpty(basicInfo.fullAddr) }}</td></tr>
                             <tr><th>우편번호</th><td>{{ fnEmpty(basicInfo.zipcode) }}</td></tr>
                             <tr><th>소셜상태</th><td>{{ fnEmpty(basicInfo.socialtype) }}</td></tr>
-                            <tr><th>유저 상태</th><td>{{ fnUserStatus(basicInfo.userStatus) }}</td></tr>
+                            <tr>
+                                <th>
+                                    <div class="admin-basic-edit-th">
+                                        <span>유저 상태</span>
+                                        <button type="button" class="admin-mini-btn" @click="fnEditUserStatus">수정</button>
+                                    </div>
+                                </th>
+                                <td>
+                                    <template v-if="userStatusEditMode">
+                                        <div class="admin-basic-edit-box">
+                                            <select class="admin-basic-edit-select" v-model="editUserStatus">
+                                                <option value="NOR">일반</option>
+                                                <option value="BAN">정지</option>
+                                            </select>
+                                            <button type="button" class="admin-mini-btn black" @click="fnUpdateUserStatus">확인</button>
+                                        </div>
+                                    </template>
+                                    <template v-else>
+                                        {{ fnUserStatus(basicInfo.userStatus) }}
+                                    </template>
+                                </td>
+                            </tr>
                             <tr><th>가입일</th><td>{{ fnEmpty(basicInfo.cdate) }}</td></tr>
                         </tbody>
                     </table>
@@ -203,9 +272,9 @@
                         </thead>
                         <tbody>
                             <tr v-for="item in detailList" :key="item.pointNo">
-                                <td>{{ item.pointAmount === null ? '없음' : item.pointAmount }}</td>
-                                <td>{{ item.ordNo === null ? '-' : item.ordNo }}</td>
-                                <td>{{ item.reviewNo === null ? '-' : item.reviewNo }}</td>
+                                <td>{{ item.pointAmount === null ? '-' : item.pointAmount }}</td>
+                                <td>{{ fnEmpty(item.ordNo) }}</td>
+                                <td>{{ fnEmpty(item.reviewNo) }}</td>
                                 <td>{{ fnEmpty(item.cdate) }}</td>
                             </tr>
                         </tbody>
@@ -249,8 +318,8 @@
                         <tbody>
                             <tr v-for="item in detailList" :key="item.ordNo">
                                 <td>{{ item.ordNo }}</td>
-                                <td>{{ item.couponNo === null ? '-' : item.couponNo }}</td>
-                                <td>{{ item.pointNo === null || item.pointNo === 0 ? '-' : item.pointNo }}</td>
+                                <td>{{ fnEmptyNo(item.couponNo) }}</td>
+                                <td>{{ fnEmptyNo(item.pointNo) }}</td>
                                 <td>{{ fnEmpty(item.disPrice) }}</td>
                                 <td>{{ fnEmpty(item.totalPrice) }}</td>
                                 <td>{{ fnOrdStatus(item.ordStatus) }}</td>
@@ -280,7 +349,7 @@
                                 <td>{{ fnEmpty(item.rsvStartTime) }}</td>
                                 <td>{{ fnEmpty(item.rsvEndTime) }}</td>
                                 <td>{{ fnEmpty(item.storeName) }}</td>
-                                <td>{{ item.petNoObj === null ? '-' : item.petNoObj }}</td>
+                                <td>{{ fnEmptyNo(item.petNoObj) }}</td>
                                 <td>{{ fnEmpty(item.menuName) }}</td>
                                 <td>{{ fnRsvStatus(item.rsvStatus) }}</td>
                                 <td>{{ fnEmpty(item.cdate) }}</td>
@@ -348,6 +417,7 @@
                 return {
                     keyword: "",
                     userStatus: "",
+                    sortType: "",
                     userList: [],
 
                     modalOpen: false,
@@ -355,7 +425,12 @@
                     modalType: "",
                     basicInfo: null,
                     subscriptionInfo: null,
-                    detailList: []
+                    detailList: [],
+
+                    userStatusEditMode: false,
+                    nicknameEditMode: false,
+                    editUserStatus: "",
+                    editNickname: ""
                 };
             },
             methods: {
@@ -368,11 +443,16 @@
                         dataType: "json",
                         data: {
                             keyword: self.keyword,
-                            userStatus: self.userStatus
+                            userStatus: self.userStatus,
+                            sortType: self.sortType
                         },
                         success: function (data) {
                             if (data.result === "success") {
                                 self.userList = data.list || [];
+
+                                self.$nextTick(function () {
+                                    self.fnSyncUserTableScroll();
+                                });
                             } else {
                                 alert(data.message || "회원 목록을 불러오지 못했습니다.");
                             }
@@ -440,6 +520,10 @@
                             if (data.result === "success") {
                                 if (type === "basic") {
                                     self.basicInfo = data.info;
+                                    self.userStatusEditMode = false;
+                                    self.nicknameEditMode = false;
+                                    self.editUserStatus = data.info ? data.info.userStatus : "";
+                                    self.editNickname = data.info ? data.info.nickname : "";
                                 } else if (type === "subscription") {
                                     self.subscriptionInfo = data.info;
                                 }
@@ -490,6 +574,10 @@
                     this.basicInfo = null;
                     this.subscriptionInfo = null;
                     this.detailList = [];
+                    this.userStatusEditMode = false;
+                    this.nicknameEditMode = false;
+                    this.editUserStatus = "";
+                    this.editNickname = "";
                 },
 
                 fnMoveCommunity: function (item) {
@@ -567,10 +655,121 @@
 
                     return userId;
                 },
+
+                fnSyncUserTableScroll: function () {
+                    let topScroll = document.querySelector(".admin-user-top-scroll");
+                    let scrollInner = document.querySelector(".admin-user-scroll-inner");
+                    let tableWrap = document.querySelector(".admin-user-table-wrap");
+                    let headWrap = document.querySelector(".admin-user-head-wrap");
+                    let bodyTable = document.querySelector(".admin-user-table-wrap .admin-user-table");
+                    let headTable = document.querySelector(".admin-user-head-table");
+
+                    if (!topScroll || !scrollInner || !tableWrap || !headWrap || !bodyTable || !headTable) {
+                        return;
+                    }
+
+                    let tableWidth = bodyTable.scrollWidth;
+
+                    scrollInner.style.width = tableWidth + "px";
+                    headTable.style.width = tableWidth + "px";
+
+                    topScroll.onscroll = function () {
+                        tableWrap.scrollLeft = topScroll.scrollLeft;
+                        headWrap.scrollLeft = topScroll.scrollLeft;
+                    };
+                },
+                fnEmptyNo: function (value) {
+                    if (value === null || value === undefined || value === "" || value === 0) {
+                        return "-";
+                    }
+                    return value;
+                },
+                fnEditUserStatus: function () {
+                    this.userStatusEditMode = true;
+                    this.editUserStatus = this.basicInfo ? this.basicInfo.userStatus : "";
+                },
+
+                fnEditNickname: function () {
+                    this.nicknameEditMode = true;
+                    this.editNickname = this.basicInfo ? this.basicInfo.nickname : "";
+                },
+
+                fnUpdateUserStatus: function () {
+                    let self = this;
+
+                    if (!self.basicInfo || !self.basicInfo.userId) {
+                        alert("회원 정보가 없습니다.");
+                        return;
+                    }
+
+                    $.ajax({
+                        url: "/admin/user/statusUpdate.dox",
+                        type: "POST",
+                        dataType: "json",
+                        data: {
+                            userId: self.basicInfo.userId,
+                            userStatus: self.editUserStatus
+                        },
+                        success: function (data) {
+                            if (data.result === "success") {
+                                self.basicInfo.userStatus = self.editUserStatus;
+                                self.userStatusEditMode = false;
+                                self.fnUserList();
+                                alert("유저 상태가 변경되었습니다.");
+                            } else {
+                                alert(data.message || "유저 상태 변경에 실패했습니다.");
+                            }
+                        },
+                        error: function () {
+                            alert("서버 통신 중 오류가 발생했습니다.");
+                        }
+                    });
+                },
+
+                fnUpdateNickname: function () {
+                    let self = this;
+
+                    if (!self.basicInfo || !self.basicInfo.userId) {
+                        alert("회원 정보가 없습니다.");
+                        return;
+                    }
+
+                    if (!self.editNickname || self.editNickname.trim() === "") {
+                        alert("닉네임을 입력해주세요.");
+                        return;
+                    }
+
+                    $.ajax({
+                        url: "/admin/user/nicknameUpdate.dox",
+                        type: "POST",
+                        dataType: "json",
+                        data: {
+                            userId: self.basicInfo.userId,
+                            nickname: self.editNickname.trim()
+                        },
+                        success: function (data) {
+                            if (data.result === "success") {
+                                self.basicInfo.nickname = self.editNickname.trim();
+                                self.nicknameEditMode = false;
+                                self.fnUserList();
+                                alert("닉네임이 변경되었습니다.");
+                            } else {
+                                alert(data.message || "닉네임 변경에 실패했습니다.");
+                            }
+                        },
+                        error: function () {
+                            alert("서버 통신 중 오류가 발생했습니다.");
+                        }
+                    });
+                },
                 
             },
             mounted() {
                 this.fnUserList();
+
+                this.$nextTick(function () {
+                    this.fnSyncUserTableScroll();
+                });
             }
         });
 

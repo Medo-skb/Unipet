@@ -223,8 +223,8 @@ pageEncoding="UTF-8"%>
                                 :key="item.boardNo"
                                 class="search-card"
                                 @click="fnGoBoardDetail(item.boardNo)">
-                                <div class="search-card-title">{{ item.title }}</div>
-                                <div class="search-card-desc board-content">{{ item.bContent }}</div>
+                                <div class="search-card-title">{{ fnRemoveHtml(item.title) }}</div>
+                                <div class="search-card-desc board-content">{{ fnRemoveHtml(item.bContent) }}</div>
                             </div>
                             <div v-if="totalBoardCount > 4" class="search-more-wrap">
                                 <div class="search-more-btn" @click="fnGoBoardPage(1)">
@@ -246,8 +246,8 @@ pageEncoding="UTF-8"%>
                                 :key="item.boardNo"
                                 class="search-card"
                                 @click="fnGoBoardDetail(item.boardNo)">
-                                <div class="search-card-title">{{ item.title }}</div>
-                                <div class="search-card-desc board-content">{{ item.bContent }}</div>
+                                <div class="search-card-title">{{ fnRemoveHtml(item.title) }}</div>
+                                <div class="search-card-desc board-content">{{ fnRemoveHtml(item.bContent) }}</div>
                             </div>
                             <div v-if="localBoardCount > 4" class="search-more-wrap">
                                 <div class="search-more-btn" @click="fnGoBoardPage(2)">
@@ -513,6 +513,17 @@ pageEncoding="UTF-8"%>
                     return;
                 }
                 location.href = "/board/view.do?boardNo=" + boardNo;
+            },
+
+            fnRemoveHtml: function (value) {
+                if (!value) {
+                    return "";
+                }
+
+                let temp = document.createElement("div");
+                temp.innerHTML = value;
+
+                return temp.textContent || temp.innerText || "";
             },
 
         }, // methods
