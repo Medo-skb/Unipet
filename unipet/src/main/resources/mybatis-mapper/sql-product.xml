@@ -66,27 +66,27 @@
 		'Y' <if test="keyword != null and keyword != ''">
 			AND P.PRODUCT_NAME LIKE CONCAT('%', #{keyword}, '%')
 		</if>
-	
+
 		<if
 			test="aMainNo != null and aMainNo != ''">
 			AND ASM.A_MAIN_NO = #{aMainNo}
 		</if>
-	
+
 		<if
 			test="aSubNo != null and aSubNo != ''">
 			AND P.A_SUB_NO = #{aSubNo}
 		</if>
-	
+
 		<if
 			test="iMainNo != null and iMainNo != ''">
 			AND IM.I_MAIN_NO = #{iMainNo}
 		</if>
-	
+
 		<if
 			test="iSubNo != null and iSubNo != ''">
 			AND P.I_SUB_NO = #{iSubNo}
 		</if>
-	
+
 		<choose>
 			<when test="sort == 'reviewDesc'">
 				ORDER BY IFNULL(R.reviewCnt, 0) DESC, P.PRODUCT_NO DESC
@@ -221,9 +221,12 @@
 		ELSE DATE_FORMAT(Q.ADATE, '%Y-%m-%d %H:%i:%s')
 		END AS updateTime
 		FROM QNA Q
+
 		LEFT JOIN USERS U
 		ON Q.USER_ID = U.USER_ID
+
 		WHERE Q.PRODUCT_NO = #{productNo}
+
 		ORDER BY Q.QNA_NO DESC
 	</select>
 
@@ -248,12 +251,16 @@
 		F.FILE_NAME AS fileName,
 		CONCAT(F.FILE_PATH, F.FILE_NAME) AS img
 		FROM CART C
+
 		JOIN PRODUCT P
 		ON C.PRODUCT_NO = P.PRODUCT_NO
+
 		LEFT JOIN PRODUCT_FILE F
 		ON C.PRODUCT_NO = F.PRODUCT_NO
 		AND F.IS_MAIN = 'Y'
+
 		WHERE C.USER_ID = #{userId}
+
 		ORDER BY C.CART_NO DESC
 	</select>
 
@@ -281,17 +288,23 @@
 
 		CONCAT(F.FILE_PATH, F.FILE_NAME) AS img
 		FROM PRODUCT P
+
 		LEFT JOIN PC_ANIMAL_SUB ASUB
 		ON P.A_SUB_NO = ASUB.A_SUB_NO
+
 		LEFT JOIN PC_ANIMAL_MAIN AM
 		ON ASUB.A_MAIN_NO = AM.A_MAIN_NO
+
 		LEFT JOIN PC_ITEM_SUB ISUB
 		ON P.I_SUB_NO = ISUB.I_SUB_NO
+
 		LEFT JOIN PC_ITEM_MAIN IM
 		ON ISUB.I_MAIN_NO = IM.I_MAIN_NO
+
 		LEFT JOIN PRODUCT_FILE F
 		ON P.PRODUCT_NO = F.PRODUCT_NO
 		AND F.IS_MAIN = 'Y'
+
 		WHERE P.PRODUCT_NO = #{productNo}
 	</select>
 
@@ -320,17 +333,23 @@
 
 		CONCAT(F.FILE_PATH, F.FILE_NAME) AS img
 		FROM PRODUCT P
+
 		LEFT JOIN PC_ANIMAL_SUB ASUB
 		ON P.A_SUB_NO = ASUB.A_SUB_NO
+
 		LEFT JOIN PC_ANIMAL_MAIN AM
 		ON ASUB.A_MAIN_NO = AM.A_MAIN_NO
+
 		LEFT JOIN PC_ITEM_SUB ISUB
 		ON P.I_SUB_NO = ISUB.I_SUB_NO
+
 		LEFT JOIN PC_ITEM_MAIN IM
 		ON ISUB.I_MAIN_NO = IM.I_MAIN_NO
+
 		LEFT JOIN PRODUCT_FILE F
 		ON P.PRODUCT_NO = F.PRODUCT_NO
 		AND F.IS_MAIN = 'Y'
+
 		WHERE P.PRODUCT_NO = #{productNo}
 	</select>
 
@@ -342,6 +361,20 @@
 		IFNULL(ROUND(AVG(RATING), 1), 0) AS avgRating
 		FROM `REVIEW`
 		WHERE PRODUCT_NO = #{productNo}
+	</select>
+
+	<!-- 한개 검색 -->
+	<select id="selectReviewOne" parameterType="hashmap"
+		resultType="com.example.unipet.model.Product">
+		SELECT
+		REVIEW_NO AS reviewNo,
+		PRODUCT_NO AS productNo,
+		USER_ID AS userId,
+		R_CONTENTS AS reviewContents,
+		RATING AS rating,
+		DATE_FORMAT(CDATE, '%Y-%m-%d %H:%i:%s') AS reviewCdate
+		FROM `REVIEW`
+		WHERE REVIEW_NO = #{reviewNo}
 	</select>
 
 	<!-- 한개 검색 -->
@@ -452,7 +485,8 @@
 	<!-- 수정 -->
 	<update id="updateCartQty" parameterType="hashmap">
 		UPDATE CART
-		SET QTY = #{qty}
+		SET
+		QTY = #{qty}
 		WHERE CART_NO = #{cartNo}
 		AND USER_ID = #{userId}
 	</update>
@@ -460,11 +494,17 @@
 	<!-- 수정 -->
 	<update id="updateCartPlusQty" parameterType="hashmap">
 		UPDATE CART
-		SET QTY = #{qty}
+		SET
+		QTY = #{qty}
 		WHERE USER_ID = #{userId}
 		AND PRODUCT_NO = #{productNo}
 	</update>
 
+	<!-- 상품리뷰 수정 -->
+	<update id="updateReview" parameterType="hashmap"> UPDATE `REVIEW` SET
+		R_CONTENTS = #{contents} <if test="rating != null and rating != ''">
+			, RATING = #{rating}
+		</if> WHERE REVIEW_NO = #{reviewNo} </update>
 
 	<!-- 한개 검색 : 리뷰 신고 중복 확인 -->
 	<select id="selectReviewReportCheck" parameterType="hashmap"
@@ -478,16 +518,13 @@
 
 	<!-- 리뷰 신고 등록 -->
 	<insert id="insertReviewReport" parameterType="hashmap">
-		INSERT INTO REVIEW_REPORT
-		(
+		INSERT INTO REVIEW_REPORT (
 		REVIEW_NO,
 		REPORTER_ID,
 		REPORT_REASON,
 		REP_STATUS,
 		CDATE
-		)
-		VALUES
-		(
+		) VALUES (
 		#{reviewNo},
 		#{reporterId},
 		#{reportReason},
@@ -495,4 +532,5 @@
 		NOW()
 		)
 	</insert>
+
 </mapper>

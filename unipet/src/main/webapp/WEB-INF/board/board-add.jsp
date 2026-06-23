@@ -5,7 +5,13 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>UNIPET</title>
+
 		<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+
+		<!-- Jodit 에디터 -->
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jodit/4.6.13/es2015/jodit.fat.min.css">
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jodit/4.6.13/es2018/jodit.fat.min.js"></script>
+
 		<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 		<script src="/js/page-change.js"></script>
 
@@ -67,11 +73,10 @@
 						<div class="label">본문</div>
 
 						<div class="textarea-wrap">
-							<textarea v-model="bContent" :maxlength="maxContentLength"
-								placeholder="내용을 입력하세요"></textarea>
+							<textarea id="bContent" name="bContent"></textarea>
 
-							<div class="text-count" :class="{danger : bContent.length >= maxContentLength}">
-								{{bContent.length}} / {{maxContentLength}}
+							<div class="text-count" :class="{danger : contentTextLength >= maxContentLength}">
+								{{contentTextLength}} / {{maxContentLength}}
 							</div>
 						</div>
 					</div>
@@ -115,10 +120,13 @@
 						privateYn: "N",
 						title: "",
 						bContent: "",
+						contentTextLength: 0,
 						maxContentLength: 2000,
 						boardTitle: "게시글 작성",
 						isLocalBoard: false,
 						existingFileList: [],
+						editor: null,
+						editorTimer: null,
 						sessionId: '<%=session.getAttribute("sessionId") == null ? "" : session.getAttribute("sessionId")%>',
 						sessionRole: '<%=session.getAttribute("sessionRole") == null ? "" : session.getAttribute("sessionRole")%>',
 						adminId: '<%=session.getAttribute("adminId") == null ? "" : session.getAttribute("adminId")%>',
@@ -204,14 +212,116 @@
 									alert("카테고리 조회 실패");
 								}
 							},
-							error: function (xhr, status, error) {
+							error: function () {
 								alert("카테고리 조회 중 오류가 발생했습니다.");
 							}
 						});
 					},
 
+					fnInitEditor: function () {
+						let self = this;
+
+						if (typeof Jodit == "undefined") {
+							alert("Jodit 에디터 파일을 불러오지 못했습니다.");
+							return;
+						}
+
+						if (document.getElementById("bContent") == null) {
+							alert("본문 입력창을 찾지 못했습니다.");
+							return;
+						}
+
+						if (self.editor != null) {
+							self.editor.destruct();
+							self.editor = null;
+						}
+
+						if (self.editorTimer != null) {
+							clearInterval(self.editorTimer);
+							self.editorTimer = null;
+						}
+
+						$("#bContent").val(self.bContent);
+
+						self.editor = Jodit.make("#bContent", {
+							height: 430,
+							minHeight: 320,
+							toolbarAdaptive: false,
+							showCharsCounter: false,
+							showWordsCounter: false,
+							showXPathInStatusbar: false,
+							askBeforePasteHTML: false,
+							askBeforePasteFromWord: false,
+							defaultActionOnPaste: "insert_clear_html",
+							buttons: [
+								"source", "|",
+								"bold", "italic", "underline", "strikethrough", "|",
+								"font", "fontsize", "brush", "paragraph", "|",
+								"ul", "ol", "outdent", "indent", "|",
+								"left", "center", "right", "justify", "|",
+								"link", "image", "table", "hr", "|",
+								"eraser", "copyformat", "|",
+								"undo", "redo", "fullsize"
+							],
+							events: {
+								change: function () {
+									self.fnUpdateEditorValue();
+								},
+								keyup: function () {
+									self.fnUpdateEditorValue();
+								}
+							}
+						});
+
+						self.editor.value = self.bContent;
+						self.fnUpdateEditorValue();
+
+						self.editorTimer = setInterval(function () {
+							self.fnUpdateEditorValue();
+						}, 300);
+					},
+
+					fnUpdateEditorValue: function () {
+						if (this.editor == null) {
+							return;
+						}
+
+						let html = this.editor.value;
+						let text = this.fnGetOnlyText(html);
+
+						this.contentTextLength = text.length;
+
+						if (text == "") {
+							this.bContent = "";
+						} else {
+							this.bContent = html;
+						}
+
+						let bContentTextarea = document.getElementById("bContent");
+
+						if (bContentTextarea != null) {
+							bContentTextarea.value = this.bContent;
+						}
+					},
+
+					fnGetOnlyText: function (content) {
+						if (content == null) {
+							return "";
+						}
+
+						let div = document.createElement("div");
+						div.innerHTML = content;
+
+						return div.textContent
+							.replace(/\u00a0/g, "")
+							.replace(/\n/g, "")
+							.trim();
+					},
+
 					fnAddBoard: function (status) {
 						let self = this;
+
+						self.fnUpdateEditorValue();
 
 						if (self.selectedMainNo == "2" && self.localNo == "") {
 							alert("지역을 선택해주세요.");
@@ -233,12 +343,12 @@
 							return;
 						}
 
-						if (self.bContent == "") {
+						if (self.contentTextLength == 0) {
 							alert("본문을 입력해주세요.");
 							return;
 						}
 
-						if (self.bContent.length > self.maxContentLength) {
+						if (self.contentTextLength > self.maxContentLength) {
 							alert("본문은 " + self.maxContentLength + "자까지 입력할 수 있습니다.");
 							return;
 						}
@@ -287,7 +397,7 @@
 									alert(data.message);
 								}
 							},
-							error: function (xhr, status, error) {
+							error: function () {
 								alert("게시글 등록 중 오류가 발생했습니다.");
 							}
 						});
@@ -329,7 +439,7 @@
 									alert(data.message);
 								}
 							},
-							error: function (xhr, status, error) {
+							error: function () {
 								alert("임시저장 글 불러오기 중 오류가 발생했습니다.");
 							}
 						});
@@ -343,6 +453,10 @@
 					}
 
 					this.fnGetInitData();
+
+					this.$nextTick(function () {
+						this.fnInitEditor();
+					});
 				}
 			});
 
