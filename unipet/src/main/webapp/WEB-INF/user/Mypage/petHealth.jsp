@@ -101,7 +101,7 @@
 
                             <div class="row">
                                 <label>기록일</label>
-                                <input type="date" v-model="healthForm.date" >
+                                <input type="date" v-model="healthForm.date">
                             </div>
 
                             <div class="row">
@@ -210,7 +210,7 @@
 
                             <div class="row">
                                 <label>접종일</label>
-                               <input type="date" v-model="vacForm.date">
+                                <input type="date" v-model="vacForm.date">
                             </div>
 
                             <div class="row">
@@ -294,7 +294,7 @@
 
                         originHealthForm: {
                             title: "",
-                            date:"",
+                            date: "",
                             memo: ""
                         },
 
@@ -467,7 +467,7 @@
                             petNo: self.selectedPetNo,
                             title: self.healthForm.title,
                             memo: self.healthForm.memo,
-                              date: self.healthForm.id ? self.originHealthForm.date : self.healthForm.date
+                            date: self.healthForm.date
                         };
 
                         if (!self.healthForm.id) {
@@ -506,7 +506,7 @@
 
                         this.originHealthForm = {
                             title: title,
-                             date: this.fnFormatDate(item.date),
+                            date: this.fnFormatDate(item.date),
                             memo: memo
                         };
 
@@ -659,14 +659,12 @@
                             id: self.vacForm.id,
                             petNo: self.selectedPetNo,
                             name: self.vacForm.name,
-                            nextDate: self.vacForm.nextDate,
-                            hospitalName: self.vacForm.hospitalName,
-                            memo: self.vacForm.memo
+                            date: self.vacForm.date,
+                            nextDate: self.vacForm.nextDate ? self.vacForm.nextDate : null,
+                            hospitalName: self.vacForm.hospitalName || "",
+                            memo: self.vacForm.memo || ""
                         };
 
-                        if (!self.vacForm.id) {
-                            param.date = self.vacForm.date;
-                        }
 
                         $.ajax({
                             url: url,
@@ -805,21 +803,31 @@
                     fnGetPetAge: function (birthdate) {
                         if (!birthdate) return "-";
 
-                        const birth = new Date(birthdate);
+                        const str = String(birthdate).substring(0, 10);
+                        const parts = str.split("-");
+
+                        if (parts.length < 3) return "-";
+
+                        const birthYear = Number(parts[0]);
+                        const birthMonth = Number(parts[1]);
+                        const birthDay = Number(parts[2]);
+
+                        if (!birthYear || !birthMonth || !birthDay) return "-";
+
                         const today = new Date();
+                        let age = today.getFullYear() - birthYear;
 
-                        if (isNaN(birth.getTime())) return "-";
+                        const todayMonth = today.getMonth() + 1;
+                        const todayDay = today.getDate();
 
-                        let age = today.getFullYear() - birth.getFullYear();
-
-                        const monthDiff = today.getMonth() - birth.getMonth();
-                        const dayDiff = today.getDate() - birth.getDate();
-
-                        if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+                        if (
+                            todayMonth < birthMonth ||
+                            (todayMonth === birthMonth && todayDay < birthDay)
+                        ) {
                             age--;
                         }
 
-                        return age;
+                        return Math.max(age, 0);
                     }
                 },
 

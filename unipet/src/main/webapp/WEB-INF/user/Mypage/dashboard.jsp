@@ -179,7 +179,7 @@
                                         주문 내역이 없습니다.
                                     </div>
 
-                                    <div class="main-order-item" v-for="group in groupedOrderList.slice(0, 2)"
+                                    <div class="main-order-item" v-for="group in groupedOrderList.slice(0, 3)"
                                         :key="group.orderNo">
                                         <div class="main-order-left">
                                             <img class="order-img"
@@ -879,9 +879,26 @@
 
                 // 반려동물 수정 모달 열기
                 fnOpenEditPetModal: function (pet) {
-                    this.petForm = Object.assign({}, pet);
+
+                    this.petForm = {
+                        petNo: pet.petNo || pet.PET_NO,
+                        petName: pet.petName || pet.PET_NAME,
+                        species: pet.species || pet.SPECIES,
+                        breed: pet.breed || pet.BREED,
+                        birthdate: "",
+                        gender: pet.gender || pet.GENDER
+                    };
+
+                    const birth = pet.birthdate || pet.BIRTHDATE;
+
+                    if (birth) {
+                        this.petForm.birthdate = String(birth).substring(0, 10);
+                    }
+
                     this.showPetModal = true;
                 },
+
+
 
                 // 반려동물 모달 닫기
                 fnClosePetModal: function () {
