@@ -118,7 +118,6 @@
 	        AND RSV_NO = #{rsvNo}
 	    </if>
 	    ORDER BY R.CDATE DESC
-	    LIMIT 2
 	</select>
 	
 	<select id="selectStoreSlotList" parameterType="hashmap" resultType="com.example.unipet.model.Store">
@@ -255,6 +254,11 @@
 	<delete id="deleteUser" parameterType="hashmap">
 	</delete>
 	
+	<delete id="removeReview" parameterType="hashmap">
+	    DELETE FROM REVIEW 
+	    WHERE RSV_NO = #{rsvNo}
+	</delete>
+	
 	<!-- 수정 -->
 	<update id="updateUser" parameterType="hashmap">
 	</update>
@@ -316,6 +320,12 @@
 	    UPDATE RESERVATION 
 	    SET RSV_STATUS = 'CAN' 
 	    WHERE RSV_NO = #{rsvNo}
+	</update>
+	
+	<update id="updateReview" parameterType="hashmap">
+	    UPDATE REVIEW 
+	    SET R_CONTENTS = #{rContents} 
+	    WHERE RSV_NO = #{rsvNo} 
 	</update>
 	
 </mapper>

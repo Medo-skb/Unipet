@@ -41,8 +41,10 @@ public interface ReservationMapper {
 	HashMap<String, Object> selectStoreReviewSummary(HashMap<String, Object> map);
 	
 	
-	// 삭제 
-	public int deleteDefault(HashMap<String, Object> map);
+	// 삭제
+	// 업체 리뷰 삭제
+	public int removeReview(HashMap<String, Object> map);
+	
 	
 	// 수정
 	public int updateDefault(HashMap<String, Object> map);
@@ -62,6 +64,9 @@ public interface ReservationMapper {
 	public int updateRsvStatusToFin(HashMap<String, Object> map);
 	// 예약 결제 미결 시간 지남 CAN 처리
 	public int updateStatusToCancel(String rsvNo);
+	// 업체 리뷰 수정
+	public int updateReview(HashMap<String, Object> map);
+	
 	
 	
 	// 삽입 
