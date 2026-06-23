@@ -10,6 +10,9 @@ public class Review {
 	private String rContents;
 	private String cdate;
 	private String rsvNo;
+	private String filePaths;
+	private String fileNames;
+		
 
 	// 리뷰 기본 정보
 	private int reviewNo;

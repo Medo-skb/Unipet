@@ -448,3 +448,65 @@
     text-align: center;
     line-height: 1.5;
 }
+
+/* =========================================
+   [AI 맞춤 추천 섹션 공통 스타일]
+========================================= */
+
+/* 섹션 설명 텍스트 */
+.section-desc {
+    font-size: 14px;
+    color: #666;
+    margin-top: 5px;
+}
+
+/* 카드 내부 여백 */
+.ai-card-body {
+    padding-top: 20px;
+}
+
+/* AI 큐레이터 박스 (기본 베이스) */
+.ai-reason-box {
+    background-color: #F8F9FA;
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 15px;
+    font-size: 13px;
+    color: #2D3436;
+}
+
+
+/* =========================================
+   [AI 맞춤 추천 업체 전용 (보라색 테마)]
+========================================= */
+.title-store {
+    color: #6C5CE7;
+}
+
+.box-store {
+    border-left: 4px solid #6C5CE7;
+}
+
+
+/* =========================================
+   [AI 맞춤 추천 상품 전용 (민트색 테마)]
+========================================= */
+
+/* 상품 추천 섹션 상단 여백 (업체 섹션과 간격) */
+.product-ai-section {
+    margin-top: 40px;
+}
+
+.title-product {
+    color: #00B894;
+}
+
+.box-product {
+    border-left: 4px solid #00B894;
+}
+
+/* 상품명 강조 */
+.ai-product-name {
+    font-weight: bold;
+    font-size: 16px;
+}

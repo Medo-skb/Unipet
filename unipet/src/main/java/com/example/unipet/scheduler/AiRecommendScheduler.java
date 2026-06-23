@@ -17,7 +17,7 @@ public class AiRecommendScheduler {
      * cron = "초 분 시 일 월 요일"
      */
 //    @Scheduled(cron = "0 0 3 * * *")
-    @Scheduled(cron = "0/10 * * * * *")
+    @Scheduled(cron = "0 0/3 * * * *")
     public void makeDailyAiRecommendation() {
         System.out.println("[배치 작업 시작] AI 맞춤 추천 데이터 생성을 시작합니다.");
         
