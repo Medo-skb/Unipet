@@ -21,7 +21,6 @@ public class BizMyPage {
 	Double lat;
 	Double lng;
 	
-	
 	// DETAIL
 	String subTitle;
 	String sContents;
@@ -60,6 +59,10 @@ public class BizMyPage {
 	String sUserId;
 	String sUserPwd;
 	String ceoName;
+	String uStatus;
+
+	// STORE_SUBMIT
+	String submitStatus;
 	
 	// 예약 건수 조회
 	Integer todayReservationCount;

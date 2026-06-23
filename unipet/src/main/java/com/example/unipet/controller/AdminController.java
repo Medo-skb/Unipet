@@ -1,15 +1,18 @@
 package com.example.unipet.controller;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.unipet.dao.AdminService;
 import com.example.unipet.model.Admin;
@@ -23,6 +26,9 @@ public class AdminController {
 	
 	@Autowired
 	AdminService adminService;
+
+	@Value("${kakao.maps.apikey}")
+	private String kakaoJavascriptKey;
 	
 	@RequestMapping("/admin/login.do") 
 	public String adminlogin(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception{
@@ -38,7 +44,7 @@ public class AdminController {
 	        return "redirect:/admin/login.do";
 	    }
 
-	    return "redirect:/admin/report.do";
+	    return "redirect:/admin/userManage.do";
 	}
 	
 	@RequestMapping("/admin/logout.do")
@@ -64,6 +70,32 @@ public class AdminController {
 	    return "/admin/adminReport";
 	}
 
+	@RequestMapping("/admin/userManage.do") 
+	public String adminUserManage(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+	    HttpSession session = request.getSession();
+	    String role = (String) session.getAttribute("sessionRole");
+
+	    if (role == null || !role.equals("ADMIN")) {
+	        return "redirect:/admin/login.do";
+	    }
+
+	    return "/admin/adminUserManage";
+	}
+
+	@RequestMapping("/admin/userCommunity.do") 
+	public String adminUserCommunity(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+	    HttpSession session = request.getSession();
+	    String role = (String) session.getAttribute("sessionRole");
+
+	    if (role == null || !role.equals("ADMIN")) {
+	        return "redirect:/admin/login.do";
+	    }
+
+	    model.addAttribute("userId", map.get("userId"));
+
+	    return "/admin/adminUserCommunity";
+	}
+
 	@RequestMapping("/admin/storeApprove.do") 
 	public String adminStoreApprove(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception {
 	    HttpSession session = request.getSession();
@@ -72,6 +104,8 @@ public class AdminController {
 	    if (role == null || !role.equals("ADMIN")) {
 	        return "redirect:/admin/login.do";
 	    }
+
+	    model.addAttribute("kakaoJavascriptKey", kakaoJavascriptKey);
 
 	    return "/admin/adminStoreApprove";
 	}
@@ -158,6 +192,116 @@ public class AdminController {
  
 		return new Gson().toJson(resultMap); 
 	}
+
+	@RequestMapping(value = "/admin/biz/reapplyInfo.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getBizReapplyInfo(HttpServletRequest request, @RequestParam HashMap<String, Object> map) throws Exception {
+		HttpSession session = request.getSession();
+		String sessionId = (String) session.getAttribute("sessionId");
+		String role = (String) session.getAttribute("sessionRole");
+
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+		if (sessionId == null || !"BIZ".equals(role)) {
+			resultMap.put("result", "fail");
+			resultMap.put("message", "로그인이 필요합니다.");
+			return new Gson().toJson(resultMap);
+		}
+
+		map.put("oldSUserId", sessionId);
+		resultMap = adminService.getBizReapplyInfo(map);
+
+		return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/admin/biz/externalStoreList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getBizExternalStoreList(HttpServletRequest request, @RequestParam HashMap<String, Object> map) throws Exception {
+		HttpSession session = request.getSession();
+		String sessionId = (String) session.getAttribute("sessionId");
+		String role = (String) session.getAttribute("sessionRole");
+
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+		if (sessionId == null || !"BIZ".equals(role)) {
+			resultMap.put("result", "fail");
+			resultMap.put("message", "로그인이 필요합니다.");
+			return new Gson().toJson(resultMap);
+		}
+
+		map.put("oldSUserId", sessionId);
+		resultMap = adminService.getBizExternalStoreList(map);
+
+		return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/admin/biz/reapply.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String editBizReapply(HttpServletRequest request,
+			@RequestParam HashMap<String, Object> map,
+			@RequestParam(value = "bizFile", required = false) MultipartFile bizFile) throws Exception {
+
+		HttpSession session = request.getSession();
+		String sessionId = (String) session.getAttribute("sessionId");
+		String role = (String) session.getAttribute("sessionRole");
+
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+		if (sessionId == null || !"BIZ".equals(role)) {
+			resultMap.put("result", "fail");
+			resultMap.put("message", "로그인이 필요합니다.");
+			return new Gson().toJson(resultMap);
+		}
+
+		map.put("oldSUserId", sessionId);
+
+		if (bizFile != null && !bizFile.isEmpty()) {
+			try {
+				String originName = bizFile.getOriginalFilename();
+
+				String fileExt = "";
+				if (originName != null && originName.contains(".")) {
+					fileExt = originName.substring(originName.lastIndexOf(".") + 1).toLowerCase();
+				}
+
+				String saveName = System.currentTimeMillis() + "_" + originName;
+
+				String uploadPath = request.getServletContext().getRealPath("/img/bizfile/");
+				File dir = new File(uploadPath);
+
+				if (!dir.exists()) {
+					dir.mkdirs();
+				}
+
+				File saveFile = new File(uploadPath, saveName);
+				bizFile.transferTo(saveFile);
+
+				map.put("bizFileName", saveName);
+				map.put("fileName", saveName);
+				map.put("originName", originName);
+				map.put("filePath", "/img/bizfile/");
+				map.put("fileExt", fileExt);
+				map.put("fileSize", bizFile.getSize());
+				map.put("isProof", "Y");
+
+			} catch (Exception e) {
+				e.printStackTrace();
+
+				resultMap.put("result", "fail");
+				resultMap.put("message", "사업자등록증 파일 저장 중 오류가 발생했습니다.");
+				return new Gson().toJson(resultMap);
+			}
+		}
+
+		resultMap = adminService.editBizReapply(map);
+
+		if ("success".equals(resultMap.get("result"))) {
+			session.setAttribute("sessionName", map.get("ceoName"));
+			session.setAttribute("storeStatus", "PND");
+		}
+
+		return new Gson().toJson(resultMap);
+	}
 	
 	@RequestMapping(value = "/getReservationReviewReportList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
@@ -238,5 +382,89 @@ public class AdminController {
 
 	    return new Gson().toJson(result);
 	}
-	
-}
+
+	@RequestMapping(value = "/admin/user/list.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getAdminUserList(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.getAdminUserList(map);
+	    return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/admin/user/basic.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getAdminUserBasic(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.getAdminUserBasic(map);
+	    return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/admin/user/petList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getAdminUserPetList(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.getAdminUserPetList(map);
+	    return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/admin/user/subscription.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getAdminUserSubscription(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.getAdminUserSubscription(map);
+	    return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/admin/user/pointList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getAdminUserPointList(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.getAdminUserPointList(map);
+	    return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/admin/user/couponList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getAdminUserCouponList(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.getAdminUserCouponList(map);
+	    return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/admin/user/orderList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getAdminUserOrderList(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.getAdminUserOrderList(map);
+	    return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/admin/user/reservationList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getAdminUserReservationList(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.getAdminUserReservationList(map);
+	    return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/admin/user/reviewList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getAdminUserReviewList(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.getAdminUserReviewList(map);
+	    return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/admin/user/reportList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getAdminUserReportList(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.getAdminUserReportList(map);
+	    return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/admin/user/communityPostList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getAdminUserCommunityPostList(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.getAdminUserCommunityPostList(map);
+	    return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/admin/user/communityCommentList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getAdminUserCommunityCommentList(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.getAdminUserCommunityCommentList(map);
+	    return new Gson().toJson(resultMap);
+	}
+
+	}

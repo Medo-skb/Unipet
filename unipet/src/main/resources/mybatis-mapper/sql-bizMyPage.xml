@@ -56,27 +56,63 @@
 		ORDER BY R.RSV_DATE ASC
 	</select>
 	
-	<!-- 승인된 업체 1건 조회 -->
+	<!-- 승인된 업체 리스트 조회 -->
 	<select id="selectApprovedStore" parameterType="hashmap" resultType="com.example.unipet.model.BizMyPage">
-		SELECT
-		    S.STORE_NO AS storeNo,
-		    S.STORE_NAME AS storeName,
-		    S.S_CATEGORY AS sCategory,
-		    S.BIZNUM AS biznum,
-		    S.IS_OPEN AS isOpen,
-		    S.ACC_NAME AS accName,
-		    S.ACC_NO AS accNo,
-		    S.ACC_HOLDER AS accHolder,
-		    S.S_ADDR AS sAddr,
-		    S.S_FULL_ADDR AS sFullAddr,
-		    S.LAT AS lat,
-	    	S.LNG AS lng,
-		    S.S_STATUS AS sStatus,
-		    S.REJ_REASON AS rejReason
-		FROM STORE S
-		INNER JOIN STORE_USER SU
-		    ON S.S_USER_ID = SU.S_USER_ID
-		WHERE S.S_USER_ID = #{sUserId}
+	    SELECT
+	        S.STORE_NO AS storeNo,
+	        S.STORE_NAME AS storeName,
+	        S.S_CATEGORY AS sCategory,
+	        S.BIZNUM AS biznum,
+	        S.IS_OPEN AS isOpen,
+	        S.ACC_NAME AS accName,
+	        S.ACC_NO AS accNo,
+	        S.ACC_HOLDER AS accHolder,
+	        S.S_ADDR AS sAddr,
+	        S.S_FULL_ADDR AS sFullAddr,
+	        S.LAT AS lat,
+	        S.LNG AS lng,
+	        S.S_STATUS AS sStatus,
+	        S.REJ_REASON AS rejReason,
+	        SU.U_STATUS AS uStatus
+	    FROM STORE_USER SU
+	    INNER JOIN STORE S
+	        ON SU.S_USER_ID = S.S_USER_ID
+	    WHERE SU.S_USER_ID = #{sUserId}
+	</select>
+	
+	<!-- 승인된 업체 개수 조회 -->
+	<select id="selectApprovedStoreCount" parameterType="hashmap" resultType="int">
+	    SELECT COUNT(*)
+	    FROM STORE S
+	    INNER JOIN STORE_USER SU
+	        ON S.S_USER_ID = SU.S_USER_ID
+	    WHERE S.S_USER_ID = #{sUserId}
+	      AND S.S_STATUS IN ('GEN', 'AFF')
+	      AND SU.U_STATUS = 'APR'
+	</select>
+	
+	<!-- 사업자 신청 상태 조회 -->
+	<select id="selectBizApplyStatus" parameterType="hashmap" resultType="com.example.unipet.model.BizMyPage">
+	    SELECT
+	        S.STORE_NO AS storeNo,
+	        S.STORE_NAME AS storeName,
+	        S.S_CATEGORY AS sCategory,
+	        S.S_ADDR AS sAddr,
+	        S.S_FULL_ADDR AS sFullAddr,
+	        S.LAT AS lat,
+	        S.LNG AS lng,
+	        S.S_STATUS AS sStatus,
+	        S.REJ_REASON AS rejReason,
+	        SU.U_STATUS AS uStatus,
+	        SS.SUBMIT_STATUS AS submitStatus
+	    FROM STORE_SUBMIT SS
+	    INNER JOIN STORE S
+	        ON SS.STORE_NO = S.STORE_NO
+	    INNER JOIN STORE_USER SU
+	        ON SS.S_USER_ID = SU.S_USER_ID
+	    WHERE SS.S_USER_ID = #{sUserId}
+	    ORDER BY SS.STORE_NO DESC
+	    LIMIT 1
 	</select>
 	
 	<!-- 폐업 불가 예약 개수 조회 -->
@@ -142,6 +178,7 @@
 		WHERE S.S_USER_ID = #{sUserId}
 		  AND S.S_STATUS IN ('GEN', 'AFF')
 		  AND SU.U_STATUS = 'APR'
+		  AND SF.IS_PROOF = 'N'
 		ORDER BY SF.IS_MAIN DESC, SF.FILE_NO DESC
 	</select>
 

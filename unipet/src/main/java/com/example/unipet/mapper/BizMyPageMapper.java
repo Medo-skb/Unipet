@@ -21,6 +21,12 @@ public interface BizMyPageMapper {
 	
 	// 승인된 업체 리스트 조회
 	public List<BizMyPage> selectApprovedStore(HashMap<String, Object> map);
+
+	// 승인된 업체 개수 조회
+	public int selectApprovedStoreCount(HashMap<String, Object> map);
+
+	// 사업자 신청 상태 조회
+	public BizMyPage selectBizApplyStatus(HashMap<String, Object> map);
 	
 	// 폐업 불가 예약 개수 조회
 	public int selectCloseBlockedReservationCount(HashMap<String, Object> map);

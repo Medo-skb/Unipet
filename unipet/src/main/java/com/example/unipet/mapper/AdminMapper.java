@@ -27,10 +27,18 @@ public interface AdminMapper {
 	public List<Admin> selectAdminBiz(HashMap<String, Object> map);
 	
 	// 사업자 승인
-	public int updateBizStatusApr(HashMap<String, Object> map);
+	public int updateStoreUserStatusApr(HashMap<String, Object> map);
+
+	public int updateStoreStatusApr(HashMap<String, Object> map);
+
+	public int updateStoreSubmitStatusApr(HashMap<String, Object> map);
 	
-	// 사업자 거부
-	public int updateBizStatusRej(HashMap<String, Object> map);
+	// 사업자 반려
+	public int updateStoreUserStatusRej(HashMap<String, Object> map);
+
+	public int updateStoreStatusRej(HashMap<String, Object> map);
+
+	public int updateStoreSubmitStatusRej(HashMap<String, Object> map);
 	
 	// 예약 리뷰 신고 리스트
 	public List<Admin> selectReservationReviewReportList(HashMap<String, Object> map);
@@ -79,5 +87,65 @@ public interface AdminMapper {
 
 	// 승인 시 STORE_POLICY 기본 등록
 	void insertDefaultStorePolicy(HashMap<String, Object> map);
-	
+
+	// 사업자 재신청 정보 조회
+	Admin selectBizReapplyInfo(HashMap<String, Object> map);
+
+	// 사업자 재신청 업체 검색
+	List<Admin> selectBizExternalStoreList(HashMap<String, Object> map);
+
+	// 재신청 업체 선택 가능 여부
+	int selectBizReapplyStoreCount(HashMap<String, Object> map);
+
+	// 재신청 사업자등록증 파일 저장
+	int insertBizReapplyStoreFile(HashMap<String, Object> map);
+
+	// 재신청 STORE_USER 수정
+	int updateStoreUserReapply(HashMap<String, Object> map);
+
+	// 기존 반려 업체가 바뀐 경우 기존 업체 초기화
+	int updateOldStoreReapplyReset(HashMap<String, Object> map);
+
+	// 재신청 STORE 수정
+	int updateStoreReapplyPending(HashMap<String, Object> map);
+
+	// 재신청 STORE_SUBMIT 수정
+	int updateStoreSubmitReapplyPending(HashMap<String, Object> map);
+
+	// 회원조회 및 관리 리스트
+	List<Admin> selectAdminUserList(HashMap<String, Object> map);
+
+	// 회원 기본 정보 상세
+	Admin selectAdminUserBasic(HashMap<String, Object> map);
+
+	// 회원 반려동물 상세
+	List<Admin> selectAdminUserPetList(HashMap<String, Object> map);
+
+	// 회원 구독 상세
+	Admin selectAdminUserSubscription(HashMap<String, Object> map);
+
+	// 회원 포인트 상세
+	List<Admin> selectAdminUserPointList(HashMap<String, Object> map);
+
+	// 회원 쿠폰 상세
+	List<Admin> selectAdminUserCouponList(HashMap<String, Object> map);
+
+	// 회원 주문 상세
+	List<Admin> selectAdminUserOrderList(HashMap<String, Object> map);
+
+	// 회원 예약 상세
+	List<Admin> selectAdminUserReservationList(HashMap<String, Object> map);
+
+	// 회원 리뷰 상세
+	List<Admin> selectAdminUserReviewList(HashMap<String, Object> map);
+
+	// 회원 신고 상세
+	List<Admin> selectAdminUserReportList(HashMap<String, Object> map);
+
+	// 회원 커뮤니티 글 상세
+	List<Admin> selectAdminUserCommunityPostList(HashMap<String, Object> map);
+
+	// 회원 커뮤니티 댓글 상세
+	List<Admin> selectAdminUserCommunityCommentList(HashMap<String, Object> map);
+
 }

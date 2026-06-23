@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
+import java.io.File;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +33,7 @@ import com.example.unipet.dao.UserService;
 import com.example.unipet.model.User;
 import com.google.gson.Gson;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
@@ -216,34 +218,51 @@ public class UserController {
 	// =========================
 	@PostMapping("/user/signupBiz.dox")
 	@ResponseBody
-	public String signupBiz(@RequestParam HashMap<String, Object> map,
-			@RequestParam(value = "bizFile", required = false) MultipartFile bizFile) {
+	public String signupBiz(HttpServletRequest request,
+	        @RequestParam HashMap<String, Object> map,
+	        @RequestParam(value = "bizFile", required = false) MultipartFile bizFile) {
 
-		if (bizFile != null && !bizFile.isEmpty()) {
+	    if (bizFile != null && !bizFile.isEmpty()) {
+	        try {
+	            String originName = bizFile.getOriginalFilename();
 
-			String originName = bizFile.getOriginalFilename();
+	            String fileExt = "";
+	            if (originName != null && originName.contains(".")) {
+	                fileExt = originName.substring(originName.lastIndexOf(".") + 1).toLowerCase();
+	            }
 
-			String fileExt = "";
-			if (originName != null && originName.contains(".")) {
-				fileExt = originName.substring(originName.lastIndexOf(".") + 1).toLowerCase();
-			}
+	            String saveName = System.currentTimeMillis() + "_" + originName;
 
-			map.put("bizFileName", originName);
-			map.put("fileName", originName);
-			map.put("originName", originName);
+	            String uploadPath = request.getServletContext().getRealPath("/img/bizfile/");
+	            File dir = new File(uploadPath);
 
-			// 수정: /upload -> /file/store/
-			map.put("filePath", "/file/store/");
+	            if (!dir.exists()) {
+	                dir.mkdirs();
+	            }
 
-			map.put("fileExt", fileExt);
-			map.put("fileSize", bizFile.getSize());
+	            File saveFile = new File(uploadPath, saveName);
+	            bizFile.transferTo(saveFile);
 
-			// 추가: 사업자 증빙파일 여부
-			map.put("isProof", "Y");
-		}
+	            map.put("bizFileName", saveName);
+	            map.put("fileName", saveName);
+	            map.put("originName", originName);
+	            map.put("filePath", "/img/bizfile/");
+	            map.put("fileExt", fileExt);
+	            map.put("fileSize", bizFile.getSize());
+	            map.put("isProof", "Y");
 
-		HashMap<String, Object> resultMap = userService.insertBizUser(map);
-		return gson.toJson(resultMap);
+	        } catch (Exception e) {
+	            e.printStackTrace();
+
+	            HashMap<String, Object> resultMap = new HashMap<>();
+	            resultMap.put("result", false);
+	            resultMap.put("message", "사업자 등록증 파일 저장 중 오류가 발생했습니다.");
+	            return gson.toJson(resultMap);
+	        }
+	    }
+
+	    HashMap<String, Object> resultMap = userService.insertBizUser(map);
+	    return gson.toJson(resultMap);
 	}
 	
 	@PostMapping("/user/check.dox")
