@@ -463,105 +463,256 @@
 	      AND S_USER_ID = #{oldSUserId}
 	      AND SUBMIT_STATUS = 'REJ'
 	</update>
-	
-	
 
 	<!-- 사업자 회원조회 및 관리 리스트 -->
 	<select id="selectAdminBusinessUserList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
-	    SELECT
-	        SU.S_USER_ID AS sUserId,
-	        SU.CEO_NAME AS ceoName,
-	        SU.U_STATUS AS uStatus,
-	        S.STORE_NO AS storeNo,
-	        S.STORE_NAME AS storeName,
-	        S.S_STATUS AS sStatus,
-	        S.IS_OPEN AS isOpen,
+	    <choose>
+	        <when test="sStatus == 'PND'">
+	            SELECT
+	                SU.S_USER_ID AS sUserId,
+	                SU.CEO_NAME AS ceoName,
+	                SU.U_STATUS AS uStatus,
+	                S.STORE_NO AS storeNo,
+	                S.STORE_NAME AS storeName,
+	                S.S_STATUS AS sStatus,
+	                S.IS_OPEN AS isOpen,
 	
-	        IFNULL(ROUND(AVG(R.RATING), 1), 0) AS avgRating,
+	                IFNULL(ROUND(AVG(R.RATING), 1), 0) AS avgRating,
 	
-	        (
+	                (
+	                    SELECT COUNT(*)
+	                    FROM REVIEW_REPORT RR
+	                    INNER JOIN REVIEW RV
+	                        ON RR.REVIEW_NO = RV.REVIEW_NO
+	                    WHERE RV.STORE_NO = S.STORE_NO
+	                      AND RR.REP_STATUS = 'ACC'
+	                ) AS accReportCount,
+	
+	                (
+	                    SELECT COUNT(*)
+	                    FROM REVIEW_REPORT RR
+	                    INNER JOIN REVIEW RV
+	                        ON RR.REVIEW_NO = RV.REVIEW_NO
+	                    WHERE RV.STORE_NO = S.STORE_NO
+	                      AND RR.REP_STATUS = 'REJ'
+	                ) AS rejReportCount,
+	
+	                (
+	                    SELECT COUNT(*)
+	                    FROM RESERVATION RSV
+	                    WHERE RSV.STORE_NO = S.STORE_NO
+	                ) AS totalReservationCount,
+	
+	                (
+	                    SELECT COUNT(*)
+	                    FROM RESERVATION RSV
+	                    WHERE RSV.STORE_NO = S.STORE_NO
+	                      AND RSV.RSV_STATUS != 'CAN'
+	                ) AS activeReservationCount,
+	
+	                (
+	                    SELECT COUNT(*)
+	                    FROM RESERVATION RSV
+	                    WHERE RSV.STORE_NO = S.STORE_NO
+	                      AND RSV.RSV_STATUS = 'CAN'
+	                ) AS cancelReservationCount
+	
+	            FROM STORE_SUBMIT SS
+	            INNER JOIN STORE S
+	                ON SS.STORE_NO = S.STORE_NO
+	            INNER JOIN STORE_USER SU
+	                ON SS.S_USER_ID = SU.S_USER_ID
+	            LEFT JOIN REVIEW R
+	                ON S.STORE_NO = R.STORE_NO
+	            WHERE SS.SUBMIT_STATUS = 'PND'
+	              AND SU.U_STATUS = 'PND'
+	              AND S.S_STATUS = 'PND'
+	            <if test="keyword != null and keyword != ''">
+	                AND (
+	                    SU.S_USER_ID LIKE CONCAT('%', #{keyword}, '%')
+	                    OR SU.CEO_NAME LIKE CONCAT('%', #{keyword}, '%')
+	                    OR S.STORE_NAME LIKE CONCAT('%', #{keyword}, '%')
+	                )
+	            </if>
+	            <if test="isOpen != null and isOpen != ''">
+	                AND S.IS_OPEN = #{isOpen}
+	            </if>
+	            GROUP BY
+	                SU.S_USER_ID,
+	                SU.CEO_NAME,
+	                SU.U_STATUS,
+	                S.STORE_NO,
+	                S.STORE_NAME,
+	                S.S_STATUS,
+	                S.IS_OPEN
+	
+	            <choose>
+	                <when test="sortType == 'ratingDesc'">
+	                    ORDER BY avgRating DESC, S.STORE_NO DESC
+	                </when>
+	                <when test="sortType == 'ratingAsc'">
+	                    ORDER BY avgRating ASC, S.STORE_NO DESC
+	                </when>
+	                <when test="sortType == 'reservationDesc'">
+	                    ORDER BY activeReservationCount DESC, S.STORE_NO DESC
+	                </when>
+	                <when test="sortType == 'reservationAsc'">
+	                    ORDER BY activeReservationCount ASC, S.STORE_NO DESC
+	                </when>
+	                <otherwise>
+	                    ORDER BY S.STORE_NO DESC
+	                </otherwise>
+	            </choose>
+	
+	            LIMIT #{startIndex}, #{pageSize}
+	        </when>
+	
+	        <otherwise>
+	            SELECT
+	                SU.S_USER_ID AS sUserId,
+	                SU.CEO_NAME AS ceoName,
+	                SU.U_STATUS AS uStatus,
+	                S.STORE_NO AS storeNo,
+	                S.STORE_NAME AS storeName,
+	                S.S_STATUS AS sStatus,
+	                S.IS_OPEN AS isOpen,
+	
+	                IFNULL(ROUND(AVG(R.RATING), 1), 0) AS avgRating,
+	
+	                (
+	                    SELECT COUNT(*)
+	                    FROM REVIEW_REPORT RR
+	                    INNER JOIN REVIEW RV
+	                        ON RR.REVIEW_NO = RV.REVIEW_NO
+	                    WHERE RV.STORE_NO = S.STORE_NO
+	                      AND RR.REP_STATUS = 'ACC'
+	                ) AS accReportCount,
+	
+	                (
+	                    SELECT COUNT(*)
+	                    FROM REVIEW_REPORT RR
+	                    INNER JOIN REVIEW RV
+	                        ON RR.REVIEW_NO = RV.REVIEW_NO
+	                    WHERE RV.STORE_NO = S.STORE_NO
+	                      AND RR.REP_STATUS = 'REJ'
+	                ) AS rejReportCount,
+	
+	                (
+	                    SELECT COUNT(*)
+	                    FROM RESERVATION RSV
+	                    WHERE RSV.STORE_NO = S.STORE_NO
+	                ) AS totalReservationCount,
+	
+	                (
+	                    SELECT COUNT(*)
+	                    FROM RESERVATION RSV
+	                    WHERE RSV.STORE_NO = S.STORE_NO
+	                      AND RSV.RSV_STATUS != 'CAN'
+	                ) AS activeReservationCount,
+	
+	                (
+	                    SELECT COUNT(*)
+	                    FROM RESERVATION RSV
+	                    WHERE RSV.STORE_NO = S.STORE_NO
+	                      AND RSV.RSV_STATUS = 'CAN'
+	                ) AS cancelReservationCount
+	
+	            FROM STORE_USER SU
+	            INNER JOIN STORE S
+	                ON SU.S_USER_ID = S.S_USER_ID
+	            LEFT JOIN REVIEW R
+	                ON S.STORE_NO = R.STORE_NO
+	            WHERE S.S_STATUS != 'EXT'
+	            <if test="keyword != null and keyword != ''">
+	                AND (
+	                    SU.S_USER_ID LIKE CONCAT('%', #{keyword}, '%')
+	                    OR SU.CEO_NAME LIKE CONCAT('%', #{keyword}, '%')
+	                    OR S.STORE_NAME LIKE CONCAT('%', #{keyword}, '%')
+	                )
+	            </if>
+	            <if test="sStatus != null and sStatus != ''">
+	                AND S.S_STATUS = #{sStatus}
+	            </if>
+	            <if test="isOpen != null and isOpen != ''">
+	                AND S.IS_OPEN = #{isOpen}
+	            </if>
+	            GROUP BY
+	                SU.S_USER_ID,
+	                SU.CEO_NAME,
+	                SU.U_STATUS,
+	                S.STORE_NO,
+	                S.STORE_NAME,
+	                S.S_STATUS,
+	                S.IS_OPEN
+	
+	            <choose>
+	                <when test="sortType == 'ratingDesc'">
+	                    ORDER BY avgRating DESC, S.STORE_NO DESC
+	                </when>
+	                <when test="sortType == 'ratingAsc'">
+	                    ORDER BY avgRating ASC, S.STORE_NO DESC
+	                </when>
+	                <when test="sortType == 'reservationDesc'">
+	                    ORDER BY activeReservationCount DESC, S.STORE_NO DESC
+	                </when>
+	                <when test="sortType == 'reservationAsc'">
+	                    ORDER BY activeReservationCount ASC, S.STORE_NO DESC
+	                </when>
+	                <otherwise>
+	                    ORDER BY S.STORE_NO DESC
+	                </otherwise>
+	            </choose>
+	
+	            LIMIT #{startIndex}, #{pageSize}
+	        </otherwise>
+	    </choose>
+	</select>
+	
+	<select id="selectAdminBusinessUserCount" parameterType="hashmap" resultType="int">
+	    <choose>
+	        <when test="sStatus == 'PND'">
 	            SELECT COUNT(*)
-	            FROM REVIEW_REPORT RR
-	            INNER JOIN REVIEW RV
-	                ON RR.REVIEW_NO = RV.REVIEW_NO
-	            WHERE RV.STORE_NO = S.STORE_NO
-	              AND RR.REP_STATUS = 'ACC'
-	        ) AS accReportCount,
+	            FROM STORE_SUBMIT SS
+	            INNER JOIN STORE S
+	                ON SS.STORE_NO = S.STORE_NO
+	            INNER JOIN STORE_USER SU
+	                ON SS.S_USER_ID = SU.S_USER_ID
+	            WHERE SS.SUBMIT_STATUS = 'PND'
+	              AND SU.U_STATUS = 'PND'
+	              AND S.S_STATUS = 'PND'
+	            <if test="keyword != null and keyword != ''">
+	                AND (
+	                    SU.S_USER_ID LIKE CONCAT('%', #{keyword}, '%')
+	                    OR SU.CEO_NAME LIKE CONCAT('%', #{keyword}, '%')
+	                    OR S.STORE_NAME LIKE CONCAT('%', #{keyword}, '%')
+	                )
+	            </if>
+	            <if test="isOpen != null and isOpen != ''">
+	                AND S.IS_OPEN = #{isOpen}
+	            </if>
+	        </when>
 	
-	        (
+	        <otherwise>
 	            SELECT COUNT(*)
-	            FROM REVIEW_REPORT RR
-	            INNER JOIN REVIEW RV
-	                ON RR.REVIEW_NO = RV.REVIEW_NO
-	            WHERE RV.STORE_NO = S.STORE_NO
-	              AND RR.REP_STATUS = 'REJ'
-	        ) AS rejReportCount,
-	
-	        (
-	            SELECT COUNT(*)
-	            FROM RESERVATION RSV
-	            WHERE RSV.STORE_NO = S.STORE_NO
-	        ) AS totalReservationCount,
-	
-	        (
-	            SELECT COUNT(*)
-	            FROM RESERVATION RSV
-	            WHERE RSV.STORE_NO = S.STORE_NO
-	              AND RSV.RSV_STATUS != 'CAN'
-	        ) AS activeReservationCount,
-	
-	        (
-	            SELECT COUNT(*)
-	            FROM RESERVATION RSV
-	            WHERE RSV.STORE_NO = S.STORE_NO
-	              AND RSV.RSV_STATUS = 'CAN'
-	        ) AS cancelReservationCount
-	
-	    FROM STORE_USER SU
-	    INNER JOIN STORE S
-	        ON SU.S_USER_ID = S.S_USER_ID
-	    LEFT JOIN REVIEW R
-	        ON S.STORE_NO = R.STORE_NO
-	    WHERE S.S_STATUS != 'EXT'
-	    <if test="keyword != null and keyword != ''">
-	        AND (
-	            SU.S_USER_ID LIKE CONCAT('%', #{keyword}, '%')
-	            OR SU.CEO_NAME LIKE CONCAT('%', #{keyword}, '%')
-	            OR S.STORE_NAME LIKE CONCAT('%', #{keyword}, '%')
-	        )
-	    </if>
-	    <if test="sStatus != null and sStatus != ''">
-	        AND S.S_STATUS = #{sStatus}
-	    </if>
-	    <if test="isOpen != null and isOpen != ''">
-	        AND S.IS_OPEN = #{isOpen}
-	    </if>
-	    GROUP BY
-		    SU.S_USER_ID,
-		    SU.CEO_NAME,
-		    SU.U_STATUS,
-		    S.STORE_NO,
-		    S.STORE_NAME,
-		    S.S_STATUS,
-		    S.IS_OPEN
-		
-		<choose>
-		    <when test="sortType == 'ratingDesc'">
-		        ORDER BY avgRating DESC, S.STORE_NO DESC
-		    </when>
-		    <when test="sortType == 'ratingAsc'">
-		        ORDER BY avgRating ASC, S.STORE_NO DESC
-		    </when>
-		    <when test="sortType == 'reservationDesc'">
-		        ORDER BY activeReservationCount DESC, S.STORE_NO DESC
-		    </when>
-		    <when test="sortType == 'reservationAsc'">
-		        ORDER BY activeReservationCount ASC, S.STORE_NO DESC
-		    </when>
-		    <otherwise>
-		        ORDER BY S.STORE_NO DESC
-		    </otherwise>
-		</choose>
+	            FROM STORE_USER SU
+	            INNER JOIN STORE S
+	                ON SU.S_USER_ID = S.S_USER_ID
+	            WHERE S.S_STATUS != 'EXT'
+	            <if test="keyword != null and keyword != ''">
+	                AND (
+	                    SU.S_USER_ID LIKE CONCAT('%', #{keyword}, '%')
+	                    OR SU.CEO_NAME LIKE CONCAT('%', #{keyword}, '%')
+	                    OR S.STORE_NAME LIKE CONCAT('%', #{keyword}, '%')
+	                )
+	            </if>
+	            <if test="sStatus != null and sStatus != ''">
+	                AND S.S_STATUS = #{sStatus}
+	            </if>
+	            <if test="isOpen != null and isOpen != ''">
+	                AND S.IS_OPEN = #{isOpen}
+	            </if>
+	        </otherwise>
+	    </choose>
 	</select>
 	
 	<!-- 사업자 기본 정보 상세 -->
@@ -770,6 +921,8 @@
 		        ORDER BY U.CDATE DESC
 		    </otherwise>
 		</choose>
+		
+		LIMIT #{startIndex}, #{pageSize}
 	</select>
 
 	<!-- 회원 기본 정보 상세 -->
@@ -1176,6 +1329,42 @@
 	    SET REP_STATUS = 'REJ'
 	    WHERE COMMENT_NO = #{targetNo}
 	      AND REP_STATUS = 'WAI'
+	</update>
+	
+	<select id="selectAdminUserCount" parameterType="hashmap" resultType="int">
+	    SELECT COUNT(*)
+	    FROM USERS U
+	    WHERE 1 = 1
+	    <if test="keyword != null and keyword != ''">
+	        AND (
+	            U.USER_ID LIKE CONCAT('%', #{keyword}, '%')
+	            OR U.USER_NAME LIKE CONCAT('%', #{keyword}, '%')
+	            OR U.NICKNAME LIKE CONCAT('%', #{keyword}, '%')
+	        )
+	    </if>
+	    <if test="userStatus != null and userStatus != ''">
+	        AND U.USER_STATUS = #{userStatus}
+	    </if>
+	</select>
+	
+	<select id="selectBusinessActiveReservationCount" parameterType="hashmap" resultType="int">
+	    SELECT COUNT(*)
+	    FROM RESERVATION RSV
+	    INNER JOIN STORE S ON RSV.STORE_NO = S.STORE_NO
+	    WHERE S.S_USER_ID = #{sUserId}
+	      AND RSV.RSV_STATUS IN ('WAI', 'CNF')
+	</select>
+	
+	<update id="updateAdminBusinessUserStatus" parameterType="hashmap">
+	    UPDATE STORE_USER
+	    SET U_STATUS = #{uStatus}
+	    WHERE S_USER_ID = #{sUserId}
+	</update>
+	
+	<update id="updateAdminBusinessStoreStatus" parameterType="hashmap">
+	    UPDATE STORE
+	    SET S_STATUS = #{sStatus}
+	    WHERE STORE_NO = #{storeNo}
 	</update>
 
 </mapper>

@@ -378,9 +378,18 @@ public class AdminService {
 	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
 	    try {
+	        int page = Integer.parseInt(String.valueOf(map.getOrDefault("page", "1")));
+	        int pageSize = Integer.parseInt(String.valueOf(map.getOrDefault("pageSize", "10")));
+	        int startIndex = (page - 1) * pageSize;
+
+	        map.put("startIndex", startIndex);
+	        map.put("pageSize", pageSize);
+
+	        int totalCount = adminMapper.selectAdminUserCount(map);
 	        List<Admin> list = adminMapper.selectAdminUserList(map);
 
 	        resultMap.put("list", list);
+	        resultMap.put("totalCount", totalCount);
 	        resultMap.put("result", "success");
 	        resultMap.put("message", Message.MSG_SEARCH);
 	    } catch (Exception e) {
@@ -881,9 +890,18 @@ public class AdminService {
 	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
 	    try {
+	        int page = Integer.parseInt(String.valueOf(map.getOrDefault("page", "1")));
+	        int pageSize = Integer.parseInt(String.valueOf(map.getOrDefault("pageSize", "10")));
+	        int startIndex = (page - 1) * pageSize;
+
+	        map.put("startIndex", startIndex);
+	        map.put("pageSize", pageSize);
+
+	        int totalCount = adminMapper.selectAdminBusinessUserCount(map);
 	        List<Admin> list = adminMapper.selectAdminBusinessUserList(map);
 
 	        resultMap.put("list", list);
+	        resultMap.put("totalCount", totalCount);
 	        resultMap.put("result", "success");
 	        resultMap.put("message", Message.MSG_SEARCH);
 	    } catch (Exception e) {
@@ -985,6 +1003,66 @@ public class AdminService {
 	        resultMap.put("list", list);
 	        resultMap.put("result", "success");
 	        resultMap.put("message", Message.MSG_SEARCH);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        resultMap.put("result", "fail");
+	        resultMap.put("message", Message.MSG_SERVER_ERR);
+	    }
+
+	    return resultMap;
+	}
+	
+	public HashMap<String, Object> updateAdminBusinessUserStatus(HashMap<String, Object> map) {
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+	    try {
+	        String uStatus = String.valueOf(map.get("uStatus"));
+
+	        if (!"APR".equals(uStatus) && !"BAN".equals(uStatus)) {
+	            resultMap.put("result", "fail");
+	            resultMap.put("message", "사업자 유저 상태는 승인 또는 정지만 가능합니다.");
+	            return resultMap;
+	        }
+
+	        if ("BAN".equals(uStatus)) {
+	            int activeCount = adminMapper.selectBusinessActiveReservationCount(map);
+
+	            if (activeCount > 0) {
+	                resultMap.put("result", "fail");
+	                resultMap.put("message", "대기 또는 확정 예약이 있어 정지할 수 없습니다.");
+	                return resultMap;
+	            }
+	        }
+
+	        adminMapper.updateAdminBusinessUserStatus(map);
+
+	        resultMap.put("result", "success");
+	        resultMap.put("message", "사업자 유저 상태가 변경되었습니다.");
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        resultMap.put("result", "fail");
+	        resultMap.put("message", Message.MSG_SERVER_ERR);
+	    }
+
+	    return resultMap;
+	}
+
+	public HashMap<String, Object> updateAdminBusinessStoreStatus(HashMap<String, Object> map) {
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+	    try {
+	        String sStatus = String.valueOf(map.get("sStatus"));
+
+	        if (!"AFF".equals(sStatus) && !"GEN".equals(sStatus)) {
+	            resultMap.put("result", "fail");
+	            resultMap.put("message", "업체 상태는 제휴 또는 가입만 가능합니다.");
+	            return resultMap;
+	        }
+
+	        adminMapper.updateAdminBusinessStoreStatus(map);
+
+	        resultMap.put("result", "success");
+	        resultMap.put("message", "업체 상태가 변경되었습니다.");
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	        resultMap.put("result", "fail");

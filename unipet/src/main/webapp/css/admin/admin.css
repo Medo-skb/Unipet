@@ -65,7 +65,10 @@ body {
 }
 
 .approve-card {
-    padding-bottom: 20px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 22px;
+    background: var(--white);
 }
 
 .approve-table {
@@ -863,12 +866,8 @@ body {
 }
 
 .admin-user-sticky-area {
-    position: sticky;
-    top: 85px;
-    z-index: 300;
     background: #ffffff;
     border-top: 1px solid var(--line-dark, #bbbbbb);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
 .admin-user-top-scroll {
@@ -900,6 +899,7 @@ body {
     border-right: 1px solid var(--line, #e5e5e5);
     border-bottom: 1px solid var(--line-dark, #bbbbbb);
     background: #ffffff;
+    min-height: 520px;
 }
 
 .admin-user-hidden-thead {
@@ -1126,7 +1126,16 @@ body {
 }
 
 .business-user-table {
-    min-width: 900px;
+    min-width: 1050px;
+}
+
+.business-user-table th:nth-child(7),
+.business-user-table td:nth-child(7) {
+    width: 230px;
+}
+
+.business-user-scroll-inner {
+    width: 1050px;
 }
 
 .store-name-link {
@@ -1138,14 +1147,10 @@ body {
     vertical-align: middle;
 }
 
-.business-user-scroll-inner {
-    width: 900px;
-}
-
 .report-group-list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 22px;
     margin-bottom: 26px;
 }
 
@@ -1244,4 +1249,127 @@ body {
     height: 120px;
     object-fit: cover;
     border-radius: 8px;
+}
+
+.admin-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    margin-top: 20px;
+}
+
+.page-btn {
+    min-width: 34px;
+    height: 34px;
+    padding: 0 10px;
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--text-main);
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.page-btn:hover {
+    border-color: var(--main);
+    color: var(--main);
+}
+
+.page-btn.active {
+    background: var(--main);
+    border-color: var(--main);
+    color: #fff;
+}
+
+.page-btn:disabled {
+    background: #f3f3f3;
+    color: #aaa;
+    cursor: not-allowed;
+}
+
+.qna-product-card {
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 22px;
+    background: var(--white);
+}
+
+.qna-product-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+}
+
+.qna-product-count {
+    font-size: 14px;
+    color: var(--text-sub);
+    white-space: nowrap;
+}
+
+.qna-product-card .qna-card {
+    border-radius: 12px;
+}
+
+.qna-product-card .qna-card + .qna-card {
+    margin-top: 16px;
+}
+
+.qna-product-header {
+    cursor: pointer;
+}
+
+.qna-product-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.qna-toggle-icon {
+    font-size: 13px;
+    color: var(--text-sub);
+}
+
+.report-store-card {
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 22px;
+    background: var(--white);
+}
+
+.report-store-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+    cursor: pointer;
+}
+
+.report-store-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.report-store-count {
+    font-size: 14px;
+    color: var(--text-sub);
+    white-space: nowrap;
+}
+
+.report-store-card .report-card {
+    border-radius: 12px;
+}
+
+.report-store-card .report-card + .report-card {
+    margin-top: 16px;
 }

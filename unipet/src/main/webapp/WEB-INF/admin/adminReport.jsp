@@ -60,14 +60,22 @@
                             <div class="report-section-title">예약 리뷰 신고 목록</div>
 
                             <div class="report-group-list" v-if="bookingReviewGroupList.length > 0">
-                                <div class="report-group-box" v-for="item in bookingReviewGroupList" :key="item.storeNo">
-                                    <button type="button"
-                                        class="report-group-item"
-                                        :class="{ active: selectedBookingReviewGroup && selectedBookingReviewGroup.storeNo === item.storeNo }"
-                                        @click="fnSelectBookingReviewGroup(item)">
-                                        <span class="report-ellipsis">{{ item.storeName }}</span>
-                                        <strong>{{ item.reportCount }}개</strong>
-                                    </button>
+                                <div class="report-store-card" v-for="item in bookingReviewGroupList" :key="item.storeNo">
+                                    <div class="report-store-header" @click="fnSelectBookingReviewGroup(item)">
+                                        <div class="report-store-title">
+                                            <span class="qna-toggle-icon">
+                                                {{ selectedBookingReviewGroup && selectedBookingReviewGroup.storeNo === item.storeNo ? '▼' : '▶' }}
+                                            </span>
+
+                                            <span class="link-text" @click.stop="fnGoStoreDetail(item.storeNo)">
+                                                {{ item.storeName }}
+                                            </span>
+                                        </div>
+
+                                        <span class="report-store-count">
+                                            신고 {{ item.reportCount }}건
+                                        </span>
+                                    </div>
 
                                     <div class="report-detail-wrap" v-if="selectedBookingReviewGroup && selectedBookingReviewGroup.storeNo === item.storeNo">
                                         <div class="report-detail-top">
@@ -76,14 +84,11 @@
                                             </div>
 
                                             <div class="report-detail-actions">
-                                                <button type="button" class="btn-approve" @click="fnGoStoreDetail(item.storeNo)">
-                                                    해당 업체로 이동
+                                                <button type="button" class="btn-reject" @click="fnRejectBatch('bookingReview')">
+                                                    모두 반려
                                                 </button>
                                                 <button type="button" class="btn-approve" @click="fnApproveBatch('bookingReview')">
                                                     모두 승인
-                                                </button>
-                                                <button type="button" class="btn-reject" @click="fnRejectBatch('bookingReview')">
-                                                    모두 반려
                                                 </button>
                                             </div>
                                         </div>
@@ -126,11 +131,11 @@
                                                 </table>
 
                                                 <div class="report-btn-box">
-                                                    <button type="button" class="btn-reject" @click="fnRejectReport(detail)">
-                                                        반려
-                                                    </button>
                                                     <button type="button" class="btn-approve" @click="fnApproveReport(detail)">
                                                         승인
+                                                    </button>
+                                                    <button type="button" class="btn-reject" @click="fnRejectReport(detail)">
+                                                        반려
                                                     </button>
                                                 </div>
                                             </div>
@@ -149,14 +154,22 @@
                             <div class="report-section-title">커뮤니티 글 신고 목록</div>
 
                             <div class="report-group-list" v-if="communityPostGroupList.length > 0">
-                                <div class="report-group-box" v-for="item in communityPostGroupList" :key="item.targetNo">
-                                    <button type="button"
-                                        class="report-group-item"
-                                        :class="{ active: selectedCommunityPostGroup && selectedCommunityPostGroup.targetNo === item.targetNo }"
-                                        @click="fnSelectCommunityPostGroup(item)">
-                                        <span class="report-ellipsis">{{ item.title }}</span>
-                                        <strong>{{ item.reportCount }}개</strong>
-                                    </button>
+                                <div class="report-store-card" v-for="item in communityPostGroupList" :key="item.targetNo">
+                                    <div class="report-store-header" @click="fnSelectCommunityPostGroup(item)">
+                                        <div class="report-store-title">
+                                            <span class="qna-toggle-icon">
+                                                {{ selectedCommunityPostGroup && selectedCommunityPostGroup.targetNo === item.targetNo ? '▼' : '▶' }}
+                                            </span>
+
+                                            <span class="link-text report-ellipsis" @click.stop="fnGoBoardDetail(item.boardNo)">
+                                                {{ item.title }}
+                                            </span>
+                                        </div>
+
+                                        <span class="report-store-count">
+                                            신고 {{ item.reportCount }}건
+                                        </span>
+                                    </div>
 
                                     <div class="report-detail-wrap" v-if="selectedCommunityPostGroup && selectedCommunityPostGroup.targetNo === item.targetNo">
                                         <div class="report-detail-top">
@@ -165,14 +178,11 @@
                                             </div>
 
                                             <div class="report-detail-actions">
-                                                <button type="button" class="btn-approve" @click="fnGoBoardDetail(item.boardNo)">
-                                                    해당 글로 이동
+                                                <button type="button" class="btn-reject" @click="fnRejectBatch('communityPost')">
+                                                    모두 반려
                                                 </button>
                                                 <button type="button" class="btn-approve" @click="fnApproveBatch('communityPost')">
-                                                    승인
-                                                </button>
-                                                <button type="button" class="btn-reject" @click="fnRejectBatch('communityPost')">
-                                                    반려
+                                                    모두 승인
                                                 </button>
                                             </div>
                                         </div>
@@ -209,16 +219,22 @@
                             <div class="report-section-title">커뮤니티 댓글 신고 목록</div>
 
                             <div class="report-group-list" v-if="communityCommentGroupList.length > 0">
-                                <div class="report-group-box" v-for="item in communityCommentGroupList" :key="item.targetNo">
-                                    <button type="button"
-                                        class="report-group-item"
-                                        :class="{ active: selectedCommunityCommentGroup && selectedCommunityCommentGroup.targetNo === item.targetNo }"
-                                        @click="fnSelectCommunityCommentGroup(item)">
-                                        <span class="report-ellipsis">
-                                            {{ item.contents ? item.contents : item.title }}
+                                <div class="report-store-card" v-for="item in communityCommentGroupList" :key="item.targetNo">
+                                    <div class="report-store-header" @click="fnSelectCommunityCommentGroup(item)">
+                                        <div class="report-store-title">
+                                            <span class="qna-toggle-icon">
+                                                {{ selectedCommunityCommentGroup && selectedCommunityCommentGroup.targetNo === item.targetNo ? '▼' : '▶' }}
+                                            </span>
+
+                                            <span class="link-text report-ellipsis" @click.stop="fnGoBoardDetail(item.boardNo)">
+                                                {{ item.contents ? item.contents : item.title }}
+                                            </span>
+                                        </div>
+
+                                        <span class="report-store-count">
+                                            신고 {{ item.reportCount }}건
                                         </span>
-                                        <strong>{{ item.reportCount }}개</strong>
-                                    </button>
+                                    </div>
 
                                     <div class="report-detail-wrap" v-if="selectedCommunityCommentGroup && selectedCommunityCommentGroup.targetNo === item.targetNo">
                                         <div class="report-detail-top">
@@ -227,14 +243,11 @@
                                             </div>
 
                                             <div class="report-detail-actions">
-                                                <button type="button" class="btn-approve" @click="fnGoBoardDetail(item.boardNo)">
-                                                    해당 글로 이동
+                                                <button type="button" class="btn-reject" @click="fnRejectBatch('communityComment')">
+                                                    모두 반려
                                                 </button>
                                                 <button type="button" class="btn-approve" @click="fnApproveBatch('communityComment')">
-                                                    승인
-                                                </button>
-                                                <button type="button" class="btn-reject" @click="fnRejectBatch('communityComment')">
-                                                    반려
+                                                    모두 승인
                                                 </button>
                                             </div>
                                         </div>

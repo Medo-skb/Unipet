@@ -137,11 +137,17 @@
                             <button type="button" class="modal-close-btn" @click="fnCloseReportModal">X</button>
                         </div>
 
-                        <div class="modal-body">
-                            <div class="form-row">
+                        <div class="form-row">
+                            <div class="form-label-row">
                                 <label>신고 사유</label>
-                                <textarea v-model="reportForm.reportReason" placeholder="신고 사유를 입력해주세요."></textarea>
+                                <span class="text-count">
+                                    {{ reportForm.reportReason.length }} / 300
+                                </span>
                             </div>
+
+                            <textarea v-model="reportForm.reportReason"
+                                    maxlength="300"
+                                    placeholder="신고 사유를 입력해주세요."></textarea>
                         </div>
 
                         <div class="modal-footer">
@@ -290,6 +296,11 @@
 
                 if (!self.reportForm.reportReason.trim()) {
                     alert("신고 사유를 입력해주세요.");
+                    return;
+                }
+
+                if (self.reportForm.reportReason.length > 300) {
+                    alert("신고 사유는 300자까지 작성할 수 있습니다.");
                     return;
                 }
 

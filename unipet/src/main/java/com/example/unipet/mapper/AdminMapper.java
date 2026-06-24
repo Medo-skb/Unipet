@@ -216,5 +216,15 @@ public interface AdminMapper {
 
 	// 커뮤니티 댓글 신고 일괄 반려
 	int updateCommunityCommentReportBatchReject(HashMap<String, Object> map);
+	
+	int selectAdminUserCount(HashMap<String, Object> map);
+
+	int selectAdminBusinessUserCount(HashMap<String, Object> map);
+
+	int selectBusinessActiveReservationCount(HashMap<String, Object> map);
+
+	int updateAdminBusinessUserStatus(HashMap<String, Object> map);
+
+	int updateAdminBusinessStoreStatus(HashMap<String, Object> map);
 
 }
