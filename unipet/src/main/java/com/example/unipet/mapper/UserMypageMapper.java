@@ -100,5 +100,6 @@ public interface UserMypageMapper {
 	List<HashMap<String, Object>> selectCouponList(HashMap<String, Object> map);
 	// 주문 취소
 	int updateOrderRefund(HashMap<String, Object> map);
-	
+	// 품종 자동완성 목록 조회
+	List<HashMap<String, Object>> selectBreedList(HashMap<String, Object> map);
 }
