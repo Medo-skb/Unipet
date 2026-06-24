@@ -416,10 +416,15 @@
 	<select id="selectReviewSummary" parameterType="hashmap"
 		resultType="com.example.unipet.model.Product">
 		SELECT
-		COUNT(*) AS reviewCount,
-		IFNULL(ROUND(AVG(RATING), 1), 0) AS avgRating
-		FROM `REVIEW`
-		WHERE PRODUCT_NO = #{productNo}
+		COUNT(R.REVIEW_NO) AS reviewCount,
+		IFNULL(ROUND(AVG(R.RATING), 1), 0) AS avgRating,
+		MAX(RS.SUMMARY_TEXT) AS summaryText
+		FROM `REVIEW` R
+		LEFT JOIN review_summary RS
+		ON RS.TARGET_TYPE = 'PRD'
+		AND RS.TARGET_NO = R.PRODUCT_NO
+		AND RS.SUMMARY_STATUS = 'S'
+		WHERE R.PRODUCT_NO = #{productNo}
 	</select>
 
 	<!-- 한개 검색 -->

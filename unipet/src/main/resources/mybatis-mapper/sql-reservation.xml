@@ -175,13 +175,17 @@
 	      AND CUR_COUNT < CAPACITY
 	    ]]>
 	</select>
-
 	<select id="selectStoreReviewSummary" parameterType="hashmap" resultType="hashmap">
 	    SELECT 
-	        COUNT(*) AS REVIEW_COUNT,
-	        IFNULL(ROUND(AVG(RATING), 1), 0) AS REVIEW_AVG
-	    FROM REVIEW
-	    WHERE STORE_NO = #{storeNo}
+	        COUNT(R.REVIEW_NO) AS REVIEW_COUNT,
+	        IFNULL(ROUND(AVG(R.RATING), 1), 0) AS REVIEW_AVG,
+	        MAX(RS.SUMMARY_TEXT) AS REVIEW_SUMMARY_TEXT
+	    FROM REVIEW R
+	    LEFT JOIN review_summary RS
+	        ON RS.TARGET_TYPE = 'STO'
+	       AND RS.TARGET_NO = R.STORE_NO
+	       AND RS.SUMMARY_STATUS = 'S'
+	    WHERE R.STORE_NO = #{storeNo}
 	</select>
 
 	<select id="selectExpiredReservations" parameterType="hashmap" resultType="com.example.unipet.model.Reservation">
