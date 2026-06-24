@@ -519,4 +519,16 @@ public class UserMypageService {
 	public List<HashMap<String, Object>> getCouponList(HashMap<String, Object> map) {
 		return userMypageMapper.selectCouponList(map);
 	}
+	// 품종 자동완성 목록 조회
+	public HashMap<String, Object> selectBreedList(HashMap<String, Object> map) {
+
+	    HashMap<String, Object> resultMap = new HashMap<>();
+
+	    List<HashMap<String, Object>> list = userMypageMapper.selectBreedList(map);
+
+	    resultMap.put("list", list);
+	    resultMap.put("result", "success");
+
+	    return resultMap;
+	}
 }

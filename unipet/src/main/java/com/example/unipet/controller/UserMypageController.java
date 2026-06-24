@@ -559,5 +559,10 @@ public class UserMypageController {
 
 		return userMypageService.updateOrderRefund(map);
 	}
-
+	// 품종 자동완성 조회
+	@RequestMapping("user/breed-list.dox")
+	@ResponseBody
+	public HashMap<String, Object> breedList(@RequestParam HashMap<String, Object> map) {
+	    return userMypageService.selectBreedList(map);
+	}
 }

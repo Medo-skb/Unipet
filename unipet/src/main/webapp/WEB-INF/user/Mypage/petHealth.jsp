@@ -36,8 +36,8 @@
                         <div class="section-box">
                             <div class="section-title">반려동물 선택</div>
 
-                            <div class="pet-list">
-                                <div class="pet-card" v-for="pet in petList" :key="pet.petNo || pet.PET_NO" :class="{
+                            <div class="pet-list health-pet-list">
+                                <div class="pet-card health-pet-card" v-for="pet in petList" :key="pet.petNo || pet.PET_NO" :class="{
                                     active: String(selectedPetNo) === String(pet.petNo || pet.PET_NO),
                                          'main-pet-card': (pet.isMain || pet.IS_MAIN) === 'Y'
                                             }" @click="fnSelectPet(pet)">
@@ -271,573 +271,606 @@
 
         <jsp:include page="/WEB-INF/footer/footer.jsp" />
 
-        <script>
-            const app = Vue.createApp({
-                data() {
-                    return {
-                        petList: [],
-                        selectedPetNo: "",
-                        healthTab: "health",
+      <script>
+const app = Vue.createApp({
+    data() {
+        return {
+            petList: [],
+            selectedPetNo: "",
+            healthTab: "health",
 
-                        healthList: [],
-                        weightList: [],
-                        vacList: [],
+            healthList: [],
+            weightList: [],
+            vacList: [],
 
-                        weightChart: null,
+            weightChart: null,
 
-                        healthForm: {
-                            id: "",
-                            title: "",
-                            date: "",
-                            memo: ""
-                        },
+            healthForm: {
+                id: "",
+                title: "",
+                date: "",
+                memo: ""
+            },
 
-                        originHealthForm: {
-                            title: "",
-                            date: "",
-                            memo: ""
-                        },
+            originHealthForm: {
+                title: "",
+                date: "",
+                memo: ""
+            },
 
-                        weightForm: {
-                            id: "",
-                            weight: "",
-                            date: ""
-                        },
+            weightForm: {
+                id: "",
+                weight: "",
+                date: ""
+            },
 
-                        vacForm: {
-                            id: "",
-                            name: "",
-                            date: "",
-                            nextDate: "",
-                            hospitalName: "",
-                            memo: ""
-                        },
+            originWeightForm: {
+                weight: "",
+                date: ""
+            },
 
-                        originVacForm: {
-                            name: "",
-                            nextDate: "",
-                            hospitalName: "",
-                            memo: ""
-                        }
-                    };
-                },
+            vacForm: {
+                id: "",
+                name: "",
+                date: "",
+                nextDate: "",
+                hospitalName: "",
+                memo: ""
+            },
 
-                methods: {
-                    fnLoadPetList: function () {
-                        let self = this;
+            originVacForm: {
+                name: "",
+                date: "",
+                nextDate: "",
+                hospitalName: "",
+                memo: ""
+            }
+        };
+    },
 
-                        $.ajax({
-                            url: "/user/pet-list.dox",
-                            type: "POST",
-                            dataType: "json",
-                            data: {},
-                            success: function (data) {
-                                if (data.result === "success") {
+    methods: {
+        fnLoadPetList: function () {
+            let self = this;
 
-                                    self.petList = (data.petList || []).sort(function (a, b) {
+            $.ajax({
+                url: "/user/pet-list.dox",
+                type: "POST",
+                dataType: "json",
+                data: {},
+                success: function (data) {
+                    if (data.result === "success") {
+                        self.petList = (data.petList || []).sort(function (a, b) {
+                            const aMain = (a.isMain || a.IS_MAIN) === "Y";
+                            const bMain = (b.isMain || b.IS_MAIN) === "Y";
 
-                                        const aMain = (a.isMain || a.IS_MAIN) === "Y";
-                                        const bMain = (b.isMain || b.IS_MAIN) === "Y";
-
-                                        if (aMain && !bMain) return -1;
-                                        if (!aMain && bMain) return 1;
-
-                                        return 0;
-                                    });
-
-                                } else {
-                                    self.petList = [];
-                                }
-
-                                if (!self.selectedPetNo && self.petList.length > 0) {
-                                    self.selectedPetNo = self.petList[0].petNo || self.petList[0].PET_NO;
-                                }
-
-                                self.fnLoadHealthList();
-                                self.fnLoadWeightList();
-                                self.fnLoadVaccineList();
-                            },
-                            error: function () {
-                                self.petList = [];
-                            }
+                            if (aMain && !bMain) return -1;
+                            if (!aMain && bMain) return 1;
+                            return 0;
                         });
-                    },
-
-                    fnSelectPet: function (pet) {
-                        this.selectedPetNo = pet.petNo || pet.PET_NO;
-
-                        this.fnCancelHealthEdit();
-                        this.fnCancelWeightEdit();
-                        this.fnCancelVacEdit();
-
-                        this.fnLoadHealthList();
-                        this.fnLoadWeightList();
-                        this.fnLoadVaccineList();
-                    },
-
-                    fnLoadHealthList: function () {
-                        if (!this.selectedPetNo) return;
-
-                        let self = this;
-
-                        $.ajax({
-                            url: "/user/health-list.dox",
-                            type: "POST",
-                            dataType: "json",
-                            data: { petNo: self.selectedPetNo },
-                            success: function (data) {
-                                self.healthList = data.result === "success" ? (data.healthList || []) : [];
-                            },
-                            error: function () {
-                                self.healthList = [];
-                            }
-                        });
-                    },
-
-                    fnLoadWeightList: function () {
-                        if (!this.selectedPetNo) return;
-
-                        let self = this;
-
-                        $.ajax({
-                            url: "/user/weight-list.dox",
-                            type: "POST",
-                            dataType: "json",
-                            data: { petNo: self.selectedPetNo },
-                            success: function (data) {
-                                self.weightList = data.result === "success" ? (data.weightList || []) : [];
-
-                                setTimeout(function () {
-                                    self.fnDrawWeightChart();
-                                }, 100);
-                            },
-                            error: function () {
-                                self.weightList = [];
-                            }
-                        });
-                    },
-
-                    fnLoadVaccineList: function () {
-                        if (!this.selectedPetNo) return;
-
-                        let self = this;
-
-                        $.ajax({
-                            url: "/user/vaccine-list.dox",
-                            type: "POST",
-                            dataType: "json",
-                            data: { petNo: self.selectedPetNo },
-                            success: function (data) {
-                                self.vacList = data.result === "success" ? (data.vaccineList || data.vacList || []) : [];
-                            },
-                            error: function () {
-                                self.vacList = [];
-                            }
-                        });
-                    },
-
-                    fnSaveHealthRecord: function () {
-                        if (!this.selectedPetNo) {
-                            alert("반려동물을 선택해주세요.");
-                            return;
-                        }
-
-                        if (!this.healthForm.title) {
-                            alert("제목을 입력해주세요.");
-                            return;
-                        }
-
-                        if (!this.healthForm.date) {
-                            alert("기록일을 입력해주세요.");
-                            return;
-                        }
-
-                        if (this.healthForm.id
-                            && this.healthForm.title === this.originHealthForm.title
-                            && this.healthForm.memo === this.originHealthForm.memo) {
-                            alert("변경된 내용이 없습니다.");
-                            return;
-                        }
-
-                        let self = this;
-                        const url = self.healthForm.id ? "/user/update-health.dox" : "/user/add-health.dox";
-
-                        const param = {
-                            id: self.healthForm.id,
-                            petNo: self.selectedPetNo,
-                            title: self.healthForm.title,
-                            memo: self.healthForm.memo,
-                            date: self.healthForm.date
-                        };
-
-                        if (!self.healthForm.id) {
-                            param.date = self.healthForm.date;
-                        }
-
-                        $.ajax({
-                            url: url,
-                            type: "POST",
-                            dataType: "json",
-                            data: param,
-                            success: function (data) {
-                                alert(data.message || "저장되었습니다.");
-
-                                if (data.result === "success") {
-                                    self.fnCancelHealthEdit();
-                                    self.fnLoadHealthList();
-                                }
-                            },
-                            error: function () {
-                                alert("건강 기록 저장 실패");
-                            }
-                        });
-                    },
-
-                    fnEditHealth: function (item) {
-                        const title = item.title || "";
-                        const memo = item.memo || "";
-
-                        this.healthForm = {
-                            id: item.id || item.healthNo,
-                            title: title,
-                            date: this.fnFormatDate(item.date),
-                            memo: memo
-                        };
-
-                        this.originHealthForm = {
-                            title: title,
-                            date: this.fnFormatDate(item.date),
-                            memo: memo
-                        };
-
-                        window.scrollTo(0, 0);
-                    },
-
-                    fnCancelHealthEdit: function () {
-                        this.healthForm = {
-                            id: "",
-                            title: "",
-                            date: "",
-                            memo: ""
-                        };
-
-                        this.originHealthForm = {
-                            title: "",
-                            memo: ""
-                        };
-                    },
-
-                    fnDeleteHealth: function (id) {
-                        let self = this;
-
-                        if (!confirm("건강 기록을 삭제하시겠습니까?")) return;
-
-                        $.ajax({
-                            url: "/user/delete-health.dox",
-                            type: "POST",
-                            dataType: "json",
-                            data: { id: id },
-                            success: function (data) {
-                                alert(data.message || "삭제되었습니다.");
-                                self.fnLoadHealthList();
-                            },
-                            error: function () {
-                                alert("건강 기록 삭제 실패");
-                            }
-                        });
-                    },
-
-                    fnSaveWeightRecord: function () {
-                        if (!this.selectedPetNo) {
-                            alert("반려동물을 선택해주세요.");
-                            return;
-                        }
-
-                        if (!this.weightForm.weight) {
-                            alert("몸무게를 입력해주세요.");
-                            return;
-                        }
-
-                        if (!this.weightForm.date) {
-                            alert("기록일을 입력해주세요.");
-                            return;
-                        }
-
-                        let self = this;
-                        const url = self.weightForm.id ? "/user/update-weight.dox" : "/user/add-weight.dox";
-
-                        $.ajax({
-                            url: url,
-                            type: "POST",
-                            dataType: "json",
-                            data: {
-                                id: self.weightForm.id,
-                                petNo: self.selectedPetNo,
-                                weight: self.weightForm.weight,
-                                date: self.weightForm.date
-                            },
-                            success: function (data) {
-                                alert(data.message || "저장되었습니다.");
-
-                                if (data.result === "success") {
-                                    self.fnCancelWeightEdit();
-                                    self.fnLoadWeightList();
-                                }
-                            },
-                            error: function () {
-                                alert("몸무게 기록 저장 실패");
-                            }
-                        });
-                    },
-
-                    fnEditWeight: function (item) {
-                        this.weightForm = {
-                            id: item.id || item.weightNo,
-                            weight: item.weight || "",
-                            date: this.fnFormatDate(item.date)
-                        };
-                        window.scrollTo(0, 0);
-                    },
-
-                    fnCancelWeightEdit: function () {
-                        this.weightForm = {
-                            id: "",
-                            weight: "",
-                            date: ""
-                        };
-                    },
-
-                    fnDeleteWeight: function (id) {
-                        let self = this;
-
-                        if (!confirm("몸무게 기록을 삭제하시겠습니까?")) return;
-
-                        $.ajax({
-                            url: "/user/delete-weight.dox",
-                            type: "POST",
-                            dataType: "json",
-                            data: { id: id },
-                            success: function (data) {
-                                alert(data.message || "삭제되었습니다.");
-                                self.fnLoadWeightList();
-                            },
-                            error: function () {
-                                alert("몸무게 기록 삭제 실패");
-                            }
-                        });
-                    },
-
-                    fnSaveVacRecord: function () {
-                        if (!this.selectedPetNo) {
-                            alert("반려동물을 선택해주세요.");
-                            return;
-                        }
-
-                        if (!this.vacForm.name) {
-                            alert("백신명을 입력해주세요.");
-                            return;
-                        }
-
-                        if (!this.vacForm.date) {
-                            alert("접종일을 입력해주세요.");
-                            return;
-                        }
-
-                        if (this.vacForm.id
-                            && this.vacForm.name === this.originVacForm.name
-                            && this.vacForm.nextDate === this.originVacForm.nextDate
-                            && this.vacForm.hospitalName === this.originVacForm.hospitalName
-                            && this.vacForm.memo === this.originVacForm.memo) {
-                            alert("변경된 내용이 없습니다.");
-                            return;
-                        }
-
-                        let self = this;
-                        const url = self.vacForm.id ? "/user/update-vaccine.dox" : "/user/add-vaccine.dox";
-
-                        const param = {
-                            id: self.vacForm.id,
-                            petNo: self.selectedPetNo,
-                            name: self.vacForm.name,
-                            date: self.vacForm.date,
-                            nextDate: self.vacForm.nextDate ? self.vacForm.nextDate : null,
-                            hospitalName: self.vacForm.hospitalName || "",
-                            memo: self.vacForm.memo || ""
-                        };
-
-
-                        $.ajax({
-                            url: url,
-                            type: "POST",
-                            dataType: "json",
-                            data: param,
-                            success: function (data) {
-                                alert(data.message || "저장되었습니다.");
-
-                                if (data.result === "success") {
-                                    self.fnCancelVacEdit();
-                                    self.fnLoadVaccineList();
-                                }
-                            },
-                            error: function () {
-                                alert("백신 기록 저장 실패");
-                            }
-                        });
-                    },
-
-                    fnEditVaccine: function (item) {
-                        const name = item.name || item.vacName || "";
-                        const nextDate = this.fnFormatDate(item.nextDate || item.nextVacDate);
-                        const hospitalName = item.hospitalName || "";
-                        const memo = item.memo || "";
-
-                        this.vacForm = {
-                            id: item.id || item.vacNo,
-                            name: name,
-                            date: this.fnFormatDate(item.date || item.vacDate),
-                            nextDate: nextDate,
-                            hospitalName: hospitalName,
-                            memo: memo
-                        };
-
-                        this.originVacForm = {
-                            name: name,
-                            nextDate: nextDate,
-                            hospitalName: hospitalName,
-                            memo: memo
-                        };
-
-                        window.scrollTo(0, 0);
-                    },
-
-                    fnCancelVacEdit: function () {
-                        this.vacForm = {
-                            id: "",
-                            name: "",
-                            date: "",
-                            nextDate: "",
-                            hospitalName: "",
-                            memo: ""
-                        };
-
-                        this.originVacForm = {
-                            name: "",
-                            nextDate: "",
-                            hospitalName: "",
-                            memo: ""
-                        };
-                    },
-
-                    fnDeleteVaccine: function (id) {
-                        let self = this;
-
-                        if (!confirm("백신 기록을 삭제하시겠습니까?")) return;
-
-                        $.ajax({
-                            url: "/user/delete-vaccine.dox",
-                            type: "POST",
-                            dataType: "json",
-                            data: { id: id },
-                            success: function (data) {
-                                alert(data.message || "삭제되었습니다.");
-                                self.fnLoadVaccineList();
-                            },
-                            error: function () {
-                                alert("백신 기록 삭제 실패");
-                            }
-                        });
-                    },
-
-                    fnDrawWeightChart: function () {
-                        const canvas = document.getElementById("weightChart");
-
-                        if (!canvas || typeof Chart === "undefined") return;
-
-                        if (this.weightChart) {
-                            this.weightChart.destroy();
-                            this.weightChart = null;
-                        }
-
-                        const list = [...this.weightList].sort(function (a, b) {
-                            return String(a.date || "").localeCompare(String(b.date || ""));
-                        });
-
-                        const labels = list.map(item => this.fnFormatDate(item.date));
-                        const values = list.map(item => Number(item.weight || 0));
-
-                        this.weightChart = new Chart(canvas, {
-                            type: "line",
-                            data: {
-                                labels: labels,
-                                datasets: [{
-                                    label: "몸무게(kg)",
-                                    data: values,
-                                    tension: 0.3
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false
-                            }
-                        });
-                    },
-
-                    fnFormatDate: function (dateStr) {
-                        if (!dateStr || dateStr === "날짜 없음") return "";
-                        return String(dateStr).length >= 10 ? String(dateStr).substring(0, 10) : String(dateStr);
-                    },
-
-                    fnGetPetImage: function (pet) {
-                        if (pet.petImg || pet.PET_IMG) return pet.petImg || pet.PET_IMG;
-
-                        const species = pet.species || pet.SPECIES || "";
-
-                        if (species === "고양이") return "/img/user/pet/cat.png";
-                        if (species === "강아지") return "/img/user/pet/dog.png";
-                        if (species === "조류") return "/img/user/pet/bird.png";
-                        if (species === "어류") return "/img/user/pet/fish.png";
-
-                        return "/img/user/pet/etc.png";
-                    },
-
-                    fnGetPetAge: function (birthdate) {
-                        if (!birthdate) return "-";
-
-                        const str = String(birthdate).substring(0, 10);
-                        const parts = str.split("-");
-
-                        if (parts.length < 3) return "-";
-
-                        const birthYear = Number(parts[0]);
-                        const birthMonth = Number(parts[1]);
-                        const birthDay = Number(parts[2]);
-
-                        if (!birthYear || !birthMonth || !birthDay) return "-";
-
-                        const today = new Date();
-                        let age = today.getFullYear() - birthYear;
-
-                        const todayMonth = today.getMonth() + 1;
-                        const todayDay = today.getDate();
-
-                        if (
-                            todayMonth < birthMonth ||
-                            (todayMonth === birthMonth && todayDay < birthDay)
-                        ) {
-                            age--;
-                        }
-
-                        return Math.max(age, 0);
+                    } else {
+                        self.petList = [];
                     }
-                },
 
-                mounted() {
-                    this.fnLoadPetList();
+                    if (!self.selectedPetNo && self.petList.length > 0) {
+                        self.selectedPetNo = self.petList[0].petNo || self.petList[0].PET_NO;
+                    }
+
+                    self.fnLoadHealthList();
+                    self.fnLoadWeightList();
+                    self.fnLoadVaccineList();
+                },
+                error: function () {
+                    self.petList = [];
                 }
             });
+        },
 
-            app.mount("#app");
-        </script>
+        fnSelectPet: function (pet) {
+            this.selectedPetNo = pet.petNo || pet.PET_NO;
+
+            this.fnCancelHealthEdit();
+            this.fnCancelWeightEdit();
+            this.fnCancelVacEdit();
+
+            this.fnLoadHealthList();
+            this.fnLoadWeightList();
+            this.fnLoadVaccineList();
+        },
+
+        fnLoadHealthList: function () {
+            if (!this.selectedPetNo) return;
+
+            let self = this;
+
+            $.ajax({
+                url: "/user/health-list.dox",
+                type: "POST",
+                dataType: "json",
+                data: { petNo: self.selectedPetNo },
+                success: function (data) {
+                    self.healthList = data.result === "success" ? (data.healthList || []) : [];
+
+                    self.healthList.sort(function (a, b) {
+                        return String(b.date || "").localeCompare(String(a.date || ""));
+                    });
+                },
+                error: function () {
+                    self.healthList = [];
+                }
+            });
+        },
+
+        fnLoadWeightList: function () {
+            if (!this.selectedPetNo) return;
+
+            let self = this;
+
+            $.ajax({
+                url: "/user/weight-list.dox",
+                type: "POST",
+                dataType: "json",
+                data: { petNo: self.selectedPetNo },
+                success: function (data) {
+                    self.weightList = data.result === "success" ? (data.weightList || []) : [];
+
+                    self.weightList.sort(function (a, b) {
+                        return String(b.date || "").localeCompare(String(a.date || ""));
+                    });
+
+                    setTimeout(function () {
+                        self.fnDrawWeightChart();
+                    }, 100);
+                },
+                error: function () {
+                    self.weightList = [];
+                }
+            });
+        },
+
+        fnLoadVaccineList: function () {
+            if (!this.selectedPetNo) return;
+
+            let self = this;
+
+            $.ajax({
+                url: "/user/vaccine-list.dox",
+                type: "POST",
+                dataType: "json",
+                data: { petNo: self.selectedPetNo },
+                success: function (data) {
+                    self.vacList = data.result === "success" ? (data.vaccineList || data.vacList || []) : [];
+
+                    self.vacList.sort(function (a, b) {
+                        return String(b.date || b.vacDate || "").localeCompare(String(a.date || a.vacDate || ""));
+                    });
+                },
+                error: function () {
+                    self.vacList = [];
+                }
+            });
+        },
+
+        fnSaveHealthRecord: function () {
+            if (!this.selectedPetNo) {
+                alert("반려동물을 선택해주세요.");
+                return;
+            }
+
+            if (!this.healthForm.title) {
+                alert("제목을 입력해주세요.");
+                return;
+            }
+
+            if (!this.healthForm.date) {
+                alert("기록일을 입력해주세요.");
+                return;
+            }
+
+            if (this.healthForm.id
+                && this.healthForm.title === this.originHealthForm.title
+                && this.healthForm.date === this.originHealthForm.date
+                && this.healthForm.memo === this.originHealthForm.memo) {
+                alert("변경된 내용이 없습니다.");
+                return;
+            }
+
+            let self = this;
+            const url = self.healthForm.id ? "/user/update-health.dox" : "/user/add-health.dox";
+
+            $.ajax({
+                url: url,
+                type: "POST",
+                dataType: "json",
+                data: {
+                    id: self.healthForm.id,
+                    petNo: self.selectedPetNo,
+                    title: self.healthForm.title,
+                    memo: self.healthForm.memo,
+                    date: self.healthForm.date
+                },
+                success: function (data) {
+                    alert(data.message || "저장되었습니다.");
+
+                    if (data.result === "success") {
+                        self.fnCancelHealthEdit();
+                        self.fnLoadHealthList();
+                    }
+                },
+                error: function () {
+                    alert("건강 기록 저장 실패");
+                }
+            });
+        },
+
+        fnEditHealth: function (item) {
+            const title = item.title || "";
+            const date = this.fnFormatDate(item.date);
+            const memo = item.memo || "";
+
+            this.healthForm = {
+                id: item.id || item.healthNo,
+                title: title,
+                date: date,
+                memo: memo
+            };
+
+            this.originHealthForm = {
+                title: title,
+                date: date,
+                memo: memo
+            };
+
+            window.scrollTo(0, 0);
+        },
+
+        fnCancelHealthEdit: function () {
+            this.healthForm = {
+                id: "",
+                title: "",
+                date: "",
+                memo: ""
+            };
+
+            this.originHealthForm = {
+                title: "",
+                date: "",
+                memo: ""
+            };
+        },
+
+        fnDeleteHealth: function (id) {
+            let self = this;
+
+            if (!confirm("건강 기록을 삭제하시겠습니까?")) return;
+
+            $.ajax({
+                url: "/user/delete-health.dox",
+                type: "POST",
+                dataType: "json",
+                data: { id: id },
+                success: function (data) {
+                    alert(data.message || "삭제되었습니다.");
+                    self.fnLoadHealthList();
+                },
+                error: function () {
+                    alert("건강 기록 삭제 실패");
+                }
+            });
+        },
+
+        fnSaveWeightRecord: function () {
+            if (!this.selectedPetNo) {
+                alert("반려동물을 선택해주세요.");
+                return;
+            }
+
+            if (!this.weightForm.weight) {
+                alert("몸무게를 입력해주세요.");
+                return;
+            }
+
+            if (!this.weightForm.date) {
+                alert("기록일을 입력해주세요.");
+                return;
+            }
+
+            if (this.weightForm.id
+                && String(this.weightForm.weight) === String(this.originWeightForm.weight)
+                && this.weightForm.date === this.originWeightForm.date) {
+                alert("변경된 내용이 없습니다.");
+                return;
+            }
+
+            let self = this;
+            const url = self.weightForm.id ? "/user/update-weight.dox" : "/user/add-weight.dox";
+
+            $.ajax({
+                url: url,
+                type: "POST",
+                dataType: "json",
+                data: {
+                    id: self.weightForm.id,
+                    petNo: self.selectedPetNo,
+                    weight: self.weightForm.weight,
+                    date: self.weightForm.date
+                },
+                success: function (data) {
+                    alert(data.message || "저장되었습니다.");
+
+                    if (data.result === "success") {
+                        self.fnCancelWeightEdit();
+                        self.fnLoadWeightList();
+                    }
+                },
+                error: function () {
+                    alert("몸무게 기록 저장 실패");
+                }
+            });
+        },
+
+        fnEditWeight: function (item) {
+            const weight = item.weight || "";
+            const date = this.fnFormatDate(item.date);
+
+            this.weightForm = {
+                id: item.id || item.weightNo,
+                weight: weight,
+                date: date
+            };
+
+            this.originWeightForm = {
+                weight: weight,
+                date: date
+            };
+
+            window.scrollTo(0, 0);
+        },
+
+        fnCancelWeightEdit: function () {
+            this.weightForm = {
+                id: "",
+                weight: "",
+                date: ""
+            };
+
+            this.originWeightForm = {
+                weight: "",
+                date: ""
+            };
+        },
+
+        fnDeleteWeight: function (id) {
+            let self = this;
+
+            if (!confirm("몸무게 기록을 삭제하시겠습니까?")) return;
+
+            $.ajax({
+                url: "/user/delete-weight.dox",
+                type: "POST",
+                dataType: "json",
+                data: { id: id },
+                success: function (data) {
+                    alert(data.message || "삭제되었습니다.");
+                    self.fnLoadWeightList();
+                },
+                error: function () {
+                    alert("몸무게 기록 삭제 실패");
+                }
+            });
+        },
+
+        fnSaveVacRecord: function () {
+            if (!this.selectedPetNo) {
+                alert("반려동물을 선택해주세요.");
+                return;
+            }
+
+            if (!this.vacForm.name) {
+                alert("백신명을 입력해주세요.");
+                return;
+            }
+
+            if (!this.vacForm.date) {
+                alert("접종일을 입력해주세요.");
+                return;
+            }
+
+            if (this.vacForm.id
+                && this.vacForm.name === this.originVacForm.name
+                && this.vacForm.date === this.originVacForm.date
+                && this.vacForm.nextDate === this.originVacForm.nextDate
+                && this.vacForm.hospitalName === this.originVacForm.hospitalName
+                && this.vacForm.memo === this.originVacForm.memo) {
+                alert("변경된 내용이 없습니다.");
+                return;
+            }
+
+            let self = this;
+            const url = self.vacForm.id ? "/user/update-vaccine.dox" : "/user/add-vaccine.dox";
+
+            $.ajax({
+                url: url,
+                type: "POST",
+                dataType: "json",
+                data: {
+                    id: self.vacForm.id,
+                    petNo: self.selectedPetNo,
+                    name: self.vacForm.name,
+                    date: self.vacForm.date,
+                    nextDate: self.vacForm.nextDate ? self.vacForm.nextDate : null,
+                    hospitalName: self.vacForm.hospitalName || "",
+                    memo: self.vacForm.memo || ""
+                },
+                success: function (data) {
+                    alert(data.message || "저장되었습니다.");
+
+                    if (data.result === "success") {
+                        self.fnCancelVacEdit();
+                        self.fnLoadVaccineList();
+                    }
+                },
+                error: function () {
+                    alert("백신 기록 저장 실패");
+                }
+            });
+        },
+
+        fnEditVaccine: function (item) {
+            const name = item.name || item.vacName || "";
+            const date = this.fnFormatDate(item.date || item.vacDate);
+            const nextDate = this.fnFormatDate(item.nextDate || item.nextVacDate);
+            const hospitalName = item.hospitalName || "";
+            const memo = item.memo || "";
+
+            this.vacForm = {
+                id: item.id || item.vacNo,
+                name: name,
+                date: date,
+                nextDate: nextDate,
+                hospitalName: hospitalName,
+                memo: memo
+            };
+
+            this.originVacForm = {
+                name: name,
+                date: date,
+                nextDate: nextDate,
+                hospitalName: hospitalName,
+                memo: memo
+            };
+
+            window.scrollTo(0, 0);
+        },
+
+        fnCancelVacEdit: function () {
+            this.vacForm = {
+                id: "",
+                name: "",
+                date: "",
+                nextDate: "",
+                hospitalName: "",
+                memo: ""
+            };
+
+            this.originVacForm = {
+                name: "",
+                date: "",
+                nextDate: "",
+                hospitalName: "",
+                memo: ""
+            };
+        },
+
+        fnDeleteVaccine: function (id) {
+            let self = this;
+
+            if (!confirm("백신 기록을 삭제하시겠습니까?")) return;
+
+            $.ajax({
+                url: "/user/delete-vaccine.dox",
+                type: "POST",
+                dataType: "json",
+                data: { id: id },
+                success: function (data) {
+                    alert(data.message || "삭제되었습니다.");
+                    self.fnLoadVaccineList();
+                },
+                error: function () {
+                    alert("백신 기록 삭제 실패");
+                }
+            });
+        },
+
+        fnDrawWeightChart: function () {
+            const canvas = document.getElementById("weightChart");
+
+            if (!canvas || typeof Chart === "undefined") return;
+
+            if (this.weightChart) {
+                this.weightChart.destroy();
+                this.weightChart = null;
+            }
+
+            const list = [...this.weightList].sort(function (a, b) {
+                return String(a.date || "").localeCompare(String(b.date || ""));
+            });
+
+            const labels = list.map(item => this.fnFormatDate(item.date));
+            const values = list.map(item => Number(item.weight || 0));
+
+            this.weightChart = new Chart(canvas, {
+                type: "line",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: "몸무게(kg)",
+                        data: values,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        },
+
+        fnFormatDate: function (dateStr) {
+            if (!dateStr || dateStr === "날짜 없음") return "";
+            return String(dateStr).length >= 10 ? String(dateStr).substring(0, 10) : String(dateStr);
+        },
+
+        fnGetPetImage: function (pet) {
+            if (pet.petImg || pet.PET_IMG) return pet.petImg || pet.PET_IMG;
+
+            const species = pet.species || pet.SPECIES || "";
+
+            if (species === "고양이") return "/img/user/pet/cat.png";
+            if (species === "강아지") return "/img/user/pet/dog.png";
+            if (species === "조류") return "/img/user/pet/bird.png";
+            if (species === "어류") return "/img/user/pet/fish.png";
+
+            return "/img/user/pet/etc.png";
+        },
+
+        fnGetPetAge: function (birthdate) {
+            if (!birthdate) return "-";
+
+            const str = String(birthdate).substring(0, 10);
+            const parts = str.split("-");
+
+            if (parts.length < 3) return "-";
+
+            const birthYear = Number(parts[0]);
+            const birthMonth = Number(parts[1]);
+            const birthDay = Number(parts[2]);
+
+            if (!birthYear || !birthMonth || !birthDay) return "-";
+
+            const today = new Date();
+            let age = today.getFullYear() - birthYear;
+
+            const todayMonth = today.getMonth() + 1;
+            const todayDay = today.getDate();
+
+            if (
+                todayMonth < birthMonth ||
+                (todayMonth === birthMonth && todayDay < birthDay)
+            ) {
+                age--;
+            }
+
+            return Math.max(age, 0);
+        }
+    },
+
+    mounted() {
+        this.fnLoadPetList();
+    }
+});
+
+app.mount("#app");
+</script>
 
     </body>
 

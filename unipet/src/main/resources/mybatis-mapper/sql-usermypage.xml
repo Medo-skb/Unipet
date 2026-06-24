@@ -732,6 +732,22 @@
 
     ORDER BY uc.EXP_DATE ASC
 </select>
-	
+	<!-- 품종 자동완성 조회 -->
+<select id="selectBreedList"
+        parameterType="hashmap"
+        resultType="hashmap">
+
+    SELECT
+        BREED_NO,
+        SPECIES_NO,
+        BREED_NAME,
+        CAUTION
+    FROM PET_BREED
+    WHERE SPECIES_NO = #{speciesNo}
+      AND USE_YN = 'Y'
+      AND BREED_NAME LIKE CONCAT('%', #{keyword}, '%')
+    ORDER BY BREED_NAME
+
+</select>
 
 </mapper>
