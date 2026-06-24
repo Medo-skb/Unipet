@@ -1,8 +1,10 @@
 package com.example.unipet.dao;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,6 +14,7 @@ import com.example.unipet.model.AiRecommend;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
 
 @Service
 public class AiRecommendService {
@@ -34,7 +37,7 @@ public class AiRecommendService {
             
             List<HashMap<String, Object>> productCandidates = aiRecommendMapper.selectTopProductList();
             String productJson = gson.toJson(productCandidates);
-
+            
             // 2. 유저별 반복 작업 시작
             for (String userId : userList) {
                 try {
@@ -57,20 +60,21 @@ public class AiRecommendService {
                     String userJson = gson.toJson(userData);
 
                     String prompt = "너는 반려동물 맞춤형 큐레이터야. 아래 제공된 [사용자 데이터]를 분석하고, [추천 후보군 리스트] 안에서 "
-                                  + "가장 적합한 예약 업체 2개와 쇼핑 상품 2개를 골라줘.\n"
-                                  + "만약 제공된 후보군이 부족하더라도, 펫 정보에 맞춰 일반적인 상품이라도 반드시 2개를 채워서 추천해.\n\n"
-                                  + "[사용자 데이터]\n" + userJson + "\n\n"
-                                  + "[추천 후보군 리스트]\n"
-                                  + "- 예약 업체 후보:\n" + storeJson + "\n"
-                                  + "- 쇼핑 상품 후보:\n" + productJson + "\n\n"
-                                  + "⚠️ [응답 작성 규칙 - 반드시 지킬 것]\n"
-                                  + "1. 오직 중괄호 { 로 시작하고 } 로 끝나는 순수 JSON 텍스트만 출력해. 마크다운(```json)은 절대 금지야.\n"
-                                  + "2. JSON 내부에 '이유(reason)' 같은 불필요한 텍스트는 전부 빼고, 오직 번호, 타입, 이름만 남겨.\n"
-                                  + "3. 반드시 아래의 JSON 포맷을 똑같이 지켜서 대답해:\n"
-                                  + "{\"services\": [{\"storeNo\": 1, \"type\": \"미용실\", \"name\": \"가게명\"}], "
-                                  + "\"products\": [{\"productNo\": 10, \"name\": \"상품명\"}]}";
+                            + "가장 적합한 예약 업체와 쇼핑 상품을 각각 최대 4개씩(1~4개) 골라줘.\n"
+                            + "⚠️ [중요] 반드시 [추천 후보군 리스트] 안에 존재하는 데이터만 사용해야 해. 후보군에 없는 가짜 번호(productNo, storeNo)를 지어내면 절대 안 돼!\n\n"
+                            + "[사용자 데이터]\n" + userJson + "\n\n"
+                            + "[추천 후보군 리스트]\n"
+                            + "- 예약 업체 후보:\n" + storeJson + "\n"
+                            + "- 쇼핑 상품 후보:\n" + productJson + "\n\n"
+                            + "⚠️ [응답 작성 규칙 - 글자 끊김 방지를 위해 아주 엄격히 준수할 것]\n"
+                            + "1. 오직 중괄호 { 로 시작하고 } 로 끝나는 순수 JSON 텍스트만 출력해. 마크다운(```json), 앞뒤 설명, 주석, 줄바꿈은 절대 금지야.\n"
+                            + "2. 이름(name)이나 타입(type) 같은 텍스트는 전부 빼고, 오직 'storeNo'와 'productNo' 숫자 번호만 담아줘.\n"
+                            + "3. 반드시 아래의 [출력 포맷 예시] 구조를 똑같이 지켜서 응답해줘. (후보가 부족하면 2~3개만 넣어도 됨)\n\n"
+                            + "[출력 포맷 예시]\n"
+                            + "{\"services\": [{\"storeNo\": 1}, {\"storeNo\": 2}, {\"storeNo\": 3}, {\"storeNo\": 4}], "
+                            + "\"products\": [{\"productNo\": 10}, {\"productNo\": 11}, {\"productNo\": 12}, {\"productNo\": 13}]}";
 
-                    String aiResponse = geminiService.callGemini(prompt);
+                    String aiResponse = geminiService.callGeminiForRecommend(prompt);
                     aiResponse = aiResponse.replace("```json", "").replace("```", "").trim();
                     
                     if (!aiResponse.startsWith("{")) {
@@ -100,7 +104,6 @@ public class AiRecommendService {
                 } catch (Exception e) {
                     System.out.println("유저 [" + userId + "] 추천 에러: " + e.getMessage());
                 } finally {
-                    // 🎯 여기에 프린트문을 넣어 코드가 진짜 적용되었는지 콘솔로 확인합니다!
                     System.out.println("⏳ 유저 [" + userId + "] 처리 완료. 한도 초과 방지를 위해 30초 대기합니다...");
                     try {
                         Thread.sleep(30000);
@@ -108,7 +111,7 @@ public class AiRecommendService {
                         Thread.currentThread().interrupt();
                     }
                 }
-            } // for문 끝
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -116,5 +119,77 @@ public class AiRecommendService {
     
     public AiRecommend getRecommendationByUserId(String userId) throws Exception {
         return aiRecommendMapper.getRecommendationByUserId(userId);
+    }
+    
+    public HashMap<String, Object> getEnrichedAiRecommendation(String userId) throws Exception {
+        HashMap<String, Object> resultMap = new HashMap<>();
+        
+        AiRecommend aiData = aiRecommendMapper.getRecommendationByUserId(userId);
+        if (aiData == null) {
+            return null;
+        }
+
+        Gson gson = new Gson();
+        List<Map<String, Object>> serviceList = gson.fromJson(aiData.getRecServices(), new TypeToken<List<Map<String, Object>>>(){}.getType());
+        List<Map<String, Object>> productList = gson.fromJson(aiData.getRecProducts(), new TypeToken<List<Map<String, Object>>>(){}.getType());
+        
+        List<Integer> storeNoList = new ArrayList<>();
+        for (Map<String, Object> svc : serviceList) {
+            if (svc.get("storeNo") != null) {
+                storeNoList.add(((Number) svc.get("storeNo")).intValue());
+            }
+        }
+        
+        if (!storeNoList.isEmpty()) {
+            List<HashMap<String, Object>> storeDetails = aiRecommendMapper.selectStoreDetailsForAi(storeNoList);
+            
+            for (Map<String, Object> svc : serviceList) {
+                int sNo = ((Number) svc.get("storeNo")).intValue();
+                
+                for (HashMap<String, Object> detail : storeDetails) {
+                    int dNo = ((Number) detail.get("storeNo")).intValue();
+                    if (sNo == dNo) {
+                    	svc.put("storeName", detail.get("storeName"));
+                    	svc.put("filePath", detail.get("filePath"));
+                        svc.put("fileName", detail.get("fileName"));
+                        svc.put("sAddr", detail.get("sAddr"));
+                        svc.put("subTitle", detail.get("subTitle"));
+                        svc.put("sCategoryName", detail.get("sCategoryName"));
+                        break;
+                    }
+                }
+            }
+            
+            List<Integer> productNoList = new ArrayList<>();
+            for (Map<String, Object> prod : productList) {
+                if (prod.get("productNo") != null) {
+                    productNoList.add(((Number) prod.get("productNo")).intValue());
+                }
+            }
+            
+            if (!productNoList.isEmpty()) {
+                List<HashMap<String, Object>> productDetails = aiRecommendMapper.selectProductDetailsForAi(productNoList);
+                                
+                for (Map<String, Object> prod : productList) {
+                    int pNo = ((Number) prod.get("productNo")).intValue();
+                    
+                    for (HashMap<String, Object> detail : productDetails) {
+                        int dNo = ((Number) detail.get("productNo")).intValue();
+                        if (pNo == dNo) {
+                        	prod.put("productName", detail.get("productName"));
+                        	prod.put("productPrice", detail.get("productPrice"));
+                        	prod.put("filePath", detail.get("filePath"));
+                            prod.put("fileName", detail.get("fileName"));
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        resultMap.put("aiServices", serviceList);
+        resultMap.put("aiProducts", productList);
+        
+        return resultMap;
     }
 }

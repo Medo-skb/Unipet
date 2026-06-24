@@ -140,8 +140,6 @@
                                 </div>
                                 
                             <div class="img-modal-overlay" v-if="showImageModal" @click="fnCloseImageModal">
-                                <span class="modal-close-btn" @click.stop="fnCloseImageModal">&times;</span>
-                                
                                 <button type="button" 
                                         class="modal-nav-btn btn-left" 
                                         v-if="currentImgIndex > 0" 
@@ -149,7 +147,12 @@
                                     &#10094;
                                 </button>
                                 
-                                <img :src="modalImages[currentImgIndex]" class="modal-large-img" @click.stop>
+                                <div class="modal-content-wrap" @click.stop>
+                                    <img :src="modalImages[currentImgIndex]" class="modal-large-img">
+                                    <button type="button" class="modal-close-btn" @click="fnCloseImageModal">
+                                        ×
+                                    </button>
+                                </div>
                                 
                                 <button type="button" 
                                         class="modal-nav-btn btn-right" 

@@ -208,7 +208,7 @@ public class MainController {
 		return new Gson().toJson(resultMap);
 	}
     
-    // 🎯 추가: AI 맞춤 추천 데이터 가져오기
+    // AI 맞춤 추천 데이터 가져오기
     @RequestMapping(value = "/getAiRecommendation.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
     @ResponseBody
     public String getAiRecommendation(HttpSession session) throws Exception {
@@ -222,17 +222,10 @@ public class MainController {
         }
 
         try {
-            // 🎯 매퍼 대신 서비스를 호출하여 규칙을 준수합니다.
-            AiRecommend aiData =aiRecommendService.getRecommendationByUserId(userId);
+            HashMap<String, Object> enrichedData = aiRecommendService.getEnrichedAiRecommendation(userId);
             
-            if (aiData != null) {
-                Gson gson = new Gson();
-                
-                List<Map<String, Object>> serviceList = gson.fromJson(aiData.getRecServices(), new TypeToken<List<Map<String, Object>>>(){}.getType());
-                List<Map<String, Object>> productList = gson.fromJson(aiData.getRecProducts(), new TypeToken<List<Map<String, Object>>>(){}.getType());
-                
-                resultMap.put("aiServices", serviceList);
-                resultMap.put("aiProducts", productList);
+            if (enrichedData != null) {
+                resultMap.putAll(enrichedData);
                 resultMap.put("result", "success");
             } else {
                 resultMap.put("result", "empty");

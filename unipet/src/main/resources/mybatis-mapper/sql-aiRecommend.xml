@@ -39,33 +39,76 @@
     </select>
 
     <select id="selectTopProductList" resultType="hashmap">
-        SELECT 
-            P.PRODUCT_NO AS productNo, 
-            P.PRODUCT_NAME AS name, 
-            P.BRAND AS brand,
-            IFNULL(S.totalSold, 0) AS totalSold,
-            IFNULL(R.score, 0) AS score
-        FROM product P
-        
-        INNER JOIN (
-            SELECT OD.PRODUCT_NO, SUM(OD.ORD_QTY) AS totalSold
-            FROM order_detail OD
-            INNER JOIN orders O ON OD.ORD_NO = O.ORD_NO
-            WHERE O.ORD_STATUS = 'PAY_DONE'
-            GROUP BY OD.PRODUCT_NO
-        ) S ON P.PRODUCT_NO = S.PRODUCT_NO
-        
-        INNER JOIN (
-            SELECT PRODUCT_NO, ROUND(AVG(RATING), 1) AS score
-            FROM review
-            WHERE PRODUCT_NO IS NOT NULL
-            GROUP BY PRODUCT_NO
-        ) R ON P.PRODUCT_NO = R.PRODUCT_NO
-        
-        WHERE P.PRODUCT_STATUS = 'SALE'
-          AND R.score >= 4.0  ORDER BY S.totalSold DESC, R.score DESC
-        LIMIT 5
-    </select>
+	    SELECT 
+	        P.PRODUCT_NO AS productNo, 
+	        P.PRODUCT_NAME AS name, 
+	        P.BRAND AS brand,
+	        IFNULL(S.totalSold, 0) AS totalSold,
+	        IFNULL(R.score, 0) AS score
+	    FROM PRODUCT P
+	    
+	    LEFT JOIN (
+	        SELECT OD.PRODUCT_NO, SUM(OD.ORD_QTY) AS totalSold
+	        FROM ORDER_DETAIL OD
+	        INNER JOIN ORDERS O ON OD.ORD_NO = O.ORD_NO
+	        WHERE O.ORD_STATUS = 'PAY' 
+	        GROUP BY OD.PRODUCT_NO
+	    ) S ON P.PRODUCT_NO = S.PRODUCT_NO
+	    
+	    LEFT JOIN (
+	        SELECT PRODUCT_NO, ROUND(AVG(RATING), 1) AS score
+	        FROM REVIEW
+	        WHERE PRODUCT_NO IS NOT NULL
+	        GROUP BY PRODUCT_NO
+	    ) R ON P.PRODUCT_NO = R.PRODUCT_NO
+	    
+	    WHERE P.PRODUCT_STATUS = 'Y'
+	      
+	    ORDER BY score DESC, totalSold DESC
+	    LIMIT 15
+	</select>
+    
+    <select id="selectStoreDetailsForAi" parameterType="java.util.List" resultType="hashmap">
+	    SELECT 
+	        s.STORE_NO AS storeNo,
+	        s.STORE_NAME AS storeName,
+	        c.KOR AS sCategoryName,
+	        s.S_ADDR AS sAddr,
+	        sd.SUB_TITLE AS subTitle,
+	        sf.FILE_PATH AS filePath,
+	        sf.FILE_NAME AS fileName
+	    FROM STORE s
+	    LEFT JOIN STORE_DETAIL sd 
+	        ON s.STORE_NO = sd.STORE_NO
+	    LEFT JOIN CODE c 
+	        ON s.S_CATEGORY = c.VALUE 
+	       AND c.TYPE = 'S_CATEGORY'
+	    LEFT JOIN STORE_FILE sf 
+	        ON s.STORE_NO = sf.STORE_NO 
+	       AND sf.IS_MAIN = 'Y'
+	    WHERE s.STORE_NO IN
+	    <foreach collection="list" item="item" open="(" separator="," close=")">
+	        #{item}
+	    </foreach>
+	</select>
+	
+	<select id="selectProductDetailsForAi" parameterType="java.util.List" resultType="hashmap">
+	    SELECT 
+	        p.PRODUCT_NO AS productNo,
+	        p.PRODUCT_NAME AS productName,
+	        p.PRODUCT_PRICE AS productPrice,
+	        pf.FILE_PATH AS filePath,
+	        pf.FILE_NAME AS fileName
+	    FROM PRODUCT p
+	    -- 상품 이미지 테이블 조인 (메인 이미지만 가져오기)
+	    LEFT JOIN PRODUCT_FILE pf 
+	        ON p.PRODUCT_NO = pf.PRODUCT_NO 
+	       AND pf.IS_MAIN = 'Y'
+	    WHERE p.PRODUCT_NO IN
+	    <foreach collection="list" item="item" open="(" separator="," close=")">
+	        #{item}
+	    </foreach>
+	</select>
 
     <select id="getUserHistory" parameterType="String" resultType="hashmap">
         SELECT
@@ -92,7 +135,7 @@
              FROM orders O
              INNER JOIN order_detail OD ON O.ORD_NO = OD.ORD_NO
              INNER JOIN product P ON OD.PRODUCT_NO = P.PRODUCT_NO
-             WHERE O.USER_ID = #{userId} AND O.ORD_STATUS = 'PAY_DONE'
+             WHERE O.USER_ID = #{userId} AND O.ORD_STATUS = 'PAY'
              ORDER BY O.ORD_DATE DESC 
              LIMIT 1) AS lastShopping
         FROM DUAL

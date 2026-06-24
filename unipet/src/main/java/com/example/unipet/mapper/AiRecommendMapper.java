@@ -26,6 +26,10 @@ public interface AiRecommendMapper {
     void insertRecommendation(AiRecommend aiRecommend) throws Exception;
     void updateRecommendation(AiRecommend aiRecommend) throws Exception;
     
-    // 🎯 [추가] 프론트엔드에서 메인 페이지 로딩 시 추천 데이터를 꺼내갈 메서드
+    // 프론트엔드에서 메인 페이지 로딩 시 추천 데이터를 꺼내갈 메서드
     AiRecommend getRecommendationByUserId(String userId) throws Exception;
+    
+    List<HashMap<String, Object>> selectStoreDetailsForAi(List<Integer> storeNoList) throws Exception;
+    
+    List<HashMap<String, Object>> selectProductDetailsForAi(List<Integer> productNoList) throws Exception;
 }
