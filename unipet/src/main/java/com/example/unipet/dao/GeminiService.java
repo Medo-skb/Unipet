@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import com.example.unipet.model.AiRecommendRequest;
 import com.example.unipet.model.ChatRequest;
 import com.example.unipet.model.ChatResponse;
 
@@ -193,6 +194,54 @@ public class GeminiService {
         }
 
         return requestCount.get() >= 100;
+    }
+    
+    public String callGeminiForRecommend(String prompt) {
+
+        if (isOverLimit()) {
+            return "오늘 사용량이 초과되었습니다. 내일 다시 이용해주세요.";
+        }
+
+        String requestUrl = apiUrl + "?key=" + geminiApiKey;
+        
+        AiRecommendRequest request = new AiRecommendRequest(prompt); 
+
+        int maxRetry = 2;
+        for (int i = 0; i < maxRetry; i++) {
+            try {
+                // 구글 서버로 전송 (ChatResponse 구조는 동일하므로 그대로 재사용 가능)
+                ChatResponse response = restTemplate.postForObject(requestUrl, request, ChatResponse.class);
+
+                if (response == null || response.getCandidates() == null || response.getCandidates().isEmpty() ||
+                    response.getCandidates().get(0).getContent() == null ||
+                    response.getCandidates().get(0).getContent().getParts() == null ||
+                    response.getCandidates().get(0).getContent().getParts().isEmpty() ||
+                    response.getCandidates().get(0).getContent().getParts().get(0).getText() == null) {
+                    return "현재 응답을 가져오지 못했습니다. 다시 시도해주세요.";
+                }
+
+                requestCount.incrementAndGet();
+                StringBuilder result = new StringBuilder();
+                var parts = response.getCandidates().get(0).getContent().getParts();
+
+                for (var part : parts) {
+                    if (part.getText() != null) {
+                        result.append(part.getText());
+                    }
+                }
+                return result.toString();
+
+            } catch (Exception e) {
+                if (e instanceof HttpClientErrorException.TooManyRequests) {
+                    try { Thread.sleep(35000); } catch (InterruptedException ie) { Thread.currentThread().interrupt(); }
+                }
+                if (i == maxRetry - 1) {
+                    e.printStackTrace();
+                    return "요청이 많아 잠시 후 다시 시도해주세요.";
+                }
+            }
+        }
+        return "현재 추천 응답이 불안정합니다. 잠시 후 다시 시도해주세요.";
     }
 
 }

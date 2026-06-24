@@ -90,8 +90,8 @@
                 
                 <section class="main-ai-section" v-if="aiStoreList.length > 0">
                     <div class="section-header">
-                        <h2 class="section-title title-store">✨ AI 맞춤 추천 업체</h2>
-                        <p class="section-desc">회원님의 최근 활동과 지역을 분석하여 선별했어요.</p>
+                        <h2 class="section-title">✨ AI 맞춤 추천 업체</h2>
+                        <div class="section-desc">회원님의 최근 활동과 지역을 분석하여 선별했어요.</div>
                     </div>
 
                     <div class="store-card-list">
@@ -100,15 +100,33 @@
                             :key="'ai-store-' + index"
                             @click="fnGoStoreDetail(item.storeNo)">
 
-                            <div class="store-card-body ai-card-body">
-                                <div class="store-name-row">
-                                    <div class="store-name">{{ item.name }}</div>
-                                    <div class="store-category">{{ item.type }}</div>
+                            <div class="store-image-box">
+                                <img v-if="item.filePath && item.fileName"
+                                    :src="item.filePath + item.fileName"
+                                    class="store-image"
+                                    @error="handleImgError">
+
+                                <div v-else class="no-image-box">
+                                    등록된 이미지가<br>없습니다.
                                 </div>
 
-                                <div class="ai-reason-box box-store">
-                                    <strong>💬 AI 큐레이터:</strong><br>
-                                    회원님의 취향을 저격할 최고의 <strong>{{ item.type }}</strong> 업체로 선별해 보았어요!
+                                <div class="store-rank-badge">
+                                    AI Pick
+                                </div>
+                            </div>
+
+                            <div class="store-card-body">
+                                <div class="store-name-row">
+                                    <div class="store-name">{{ item.storeName || item.name }}</div>
+                                    <div class="store-category">{{ item.sCategoryName || item.type }}</div>
+                                </div>
+
+                                <div class="store-best-menu">
+                                    {{ item.subTitle || '회원님을 위한 완벽한 맞춤 공간' }}
+                                </div>
+
+                                <div class="store-address">
+                                    {{ item.sAddr }}
                                 </div>
                             </div>
                         </div>
@@ -117,21 +135,36 @@
 
                 <section class="main-ai-section product-ai-section" v-if="aiProductList.length > 0">
                     <div class="section-header">
-                        <h2 class="section-title title-product">🎁 AI 맞춤 추천 상품</h2>
+                        <h2 class="section-title">✨ AI 맞춤 추천 상품</h2>
+                        <div class="section-desc">회원님의 최근 활동과 지역을 분석하여 선별했어요.</div>
                     </div>
 
-                    <div class="product-card-list">
-                        <div class="product-card"
+                    <div class="recommend-card-list">
+                        <div class="recommend-card"
                             v-for="(item, index) in aiProductList"
                             :key="'ai-product-' + index"
                             @click="fnGoProductDetail(item.productNo)">
 
-                            <div class="product-card-body ai-card-body">
-                                <div class="product-name ai-product-name">{{ item.name }}</div>
+                            <div class="recommend-image-box">
+                                <img v-if="item.filePath && item.fileName"
+                                    :src="item.filePath + item.fileName"
+                                    class="recommend-image"
+                                    @error="handleImgError">
+
+                                <div v-else class="no-image-box">
+                                    등록된 이미지가<br>없습니다.
+                                </div>
+
+                                <div class="store-rank-badge badge-ai-pick">
+                                    AI Pick
+                                </div>
+                            </div>
+
+                            <div class="product-card-body">
+                                <div class="product-name">{{ item.productName || item.name }}</div>
                                 
-                                <div class="ai-reason-box box-product">
-                                    <strong>💬 AI 큐레이터:</strong><br>
-                                    우리 아이에게 딱 맞는 <strong>{{ item.name }}</strong> 상품을 강력 추천합니다!
+                                <div class="product-price">
+                                    {{ fnFormatPrice(item.productPrice) }}원
                                 </div>
                             </div>
                         </div>

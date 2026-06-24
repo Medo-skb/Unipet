@@ -16,13 +16,12 @@ public class AiRecommendScheduler {
      * 매일 새벽 3시에 실행되는 AI 맞춤 추천 생성 배치 작업
      * cron = "초 분 시 일 월 요일"
      */
-//    @Scheduled(cron = "0 0 3 * * *")
-    @Scheduled(cron = "0 0/3 * * * *")
+    @Scheduled(cron = "0 0 3 * * *")
+//    @Scheduled(cron = "0 0/3 * * * *")
     public void makeDailyAiRecommendation() {
         System.out.println("[배치 작업 시작] AI 맞춤 추천 데이터 생성을 시작합니다.");
         
         try {
-            // 서비스 단으로 위임하여 로직을 처리합니다.
             aiRecommendService.processAllUserRecommendations();
             
             System.out.println("[배치 작업 완료] 모든 활성 유저의 AI 추천 데이터가 갱신되었습니다.");
