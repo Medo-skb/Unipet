@@ -71,6 +71,7 @@ public class ReservationController {
 	    HashMap<String, Object> reviewSummary = reservationService.getStoreReviewSummary(map);
 	    resultMap.put("reviewCount", reviewSummary.get("count"));
 	    resultMap.put("reviewAvg", reviewSummary.get("avg"));
+	    resultMap.put("reviewSummaryText", reviewSummary.get("summaryText"));
 
 	    return new Gson().toJson(resultMap); 
 	}

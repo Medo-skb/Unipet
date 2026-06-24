@@ -13,7 +13,7 @@
     <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoApiKey}&libraries=services"></script>
     
     <title>UNIPET</title>
-    <link href="/css/reservation/storeDetail.css" rel="stylesheet">
+    <link href="/css/reservation/storeDetail_copy.css" rel="stylesheet">
 </head>
 <body>
     <jsp:include page="/WEB-INF/header/header.jsp" />
@@ -80,7 +80,14 @@
                             </span>
                         </div>
                         <hr>
-                        
+
+                        <div class="ai-review-summary" v-if="reviewSummaryText">
+                            <div class="ai-review-label">AI 리뷰 요약</div>
+                            <div class="ai-review-text">{{ reviewSummaryText }}</div>
+                        </div>
+                        <div class="ai-review-summary empty" v-else-if="reviewCount > 0 && reviewCount <= 2">
+                            리뷰가 충분하지 않아 요약 기능이 제공되지 않습니다.
+                        </div>
                         <div class="review-list-container">
                             <div v-if="reviewList.length === 0" class="no-review">
                                 작성된 리뷰가 없습니다.
@@ -193,6 +200,7 @@
                 reviewList: [],
                 reviewCount: 0,
                 reviewAvg: 0,
+                reviewSummaryText: '',
                 currentPage: 1,      
                 itemsPerPage: 5,
                 showImageModal: false,  
@@ -235,6 +243,8 @@
                         self.reviewList = data.reviewList;
                         self.reviewCount = data.reviewCount; 
                         self.reviewAvg = data.reviewAvg;
+                        
+                        self.reviewSummaryText = data.reviewSummaryText || '';
                         
                         setTimeout(() => {
                             self.drawMap();

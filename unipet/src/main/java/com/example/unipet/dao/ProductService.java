@@ -216,6 +216,7 @@ public class ProductService {
 
 			resultMap.put("list", list);
 			resultMap.put("summary", summary);
+			resultMap.put("reviewSummaryText", summary == null || summary.getSummaryText() == null ? "" : summary.getSummaryText());
 			resultMap.put("result", "success");
 
 		} catch (Exception e) {

@@ -11,7 +11,7 @@
 			integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
 		<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 		<script src="/js/page-change.js"></script>
-		<link rel="stylesheet" href="/css/product/productView.css">
+		<link rel="stylesheet" href="/css/product/productView_copy.css">
 	</head>
 
 	<body>
@@ -223,6 +223,14 @@
 						<div class="review-summary">
 							리뷰 {{reviewCount}}개 / 평균 ⭐ {{reviewAvg}}
 						</div>
+					</div>
+
+					<div class="product-review-ai-summary" v-if="reviewSummaryText">
+						<div class="product-review-ai-label">AI 리뷰 요약</div>
+						<div class="product-review-ai-text">{{reviewSummaryText}}</div>
+					</div>
+					<div class="product-review-ai-summary empty" v-else-if="reviewCount > 0 && reviewCount <= 2">
+						리뷰가 충분하지 않아 요약 기능이 제공되지 않습니다.
 					</div>
 
 					<div v-if="reviewList.length == 0" class="empty-box">
@@ -473,6 +481,7 @@
 						pagedReviewList: [],
 						reviewCount: 0,
 						reviewAvg: 0,
+						reviewSummaryText: '',
 						reviewCurrentPage: 1,
 						reviewPageSize: 5,
 						reviewTotalPage: 1,
@@ -657,6 +666,7 @@
 									self.reviewList = data.list || [];
 									self.reviewCount = data.summary != null ? data.summary.reviewCount : 0;
 									self.reviewAvg = data.summary != null ? data.summary.avgRating : 0;
+									self.reviewSummaryText = data.reviewSummaryText || '';
 
 									for (let i = 0; i < self.reviewList.length; i++) {
 										self.reviewList[i].editMode = false;
@@ -672,6 +682,7 @@
 									self.pagedReviewList = [];
 									self.reviewCount = 0;
 									self.reviewAvg = 0;
+									self.reviewSummaryText = '';
 									self.reviewCurrentPage = 1;
 									self.fnSetReviewPaging();
 								}

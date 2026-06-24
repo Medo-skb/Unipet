@@ -131,9 +131,11 @@ public class ReservationService {
 	    if (summary != null) {
 	        resultMap.put("count", summary.get("REVIEW_COUNT"));
 	        resultMap.put("avg", summary.get("REVIEW_AVG"));
+	        resultMap.put("summaryText", summary.get("REVIEW_SUMMARY_TEXT") == null ? "" : summary.get("REVIEW_SUMMARY_TEXT"));
 	    } else {
 	        resultMap.put("count", 0);
 	        resultMap.put("avg", 0);
+	        resultMap.put("summaryText", "");
 	    }
 	    
 	    return resultMap;
