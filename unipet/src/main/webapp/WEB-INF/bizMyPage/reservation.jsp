@@ -87,37 +87,62 @@
                                     <tr>
                                         <th>예약번호</th>
                                         <th>예약자명</th>
-                                        <th>예약자 번호</th>
+                                        <th>전화 번호</th>
                                         <th>예약일시</th>
                                         <th>메뉴명</th>
-                                        <th>요구사항</th>
-                                        <th>펫이름</th>
-                                        <th>동물</th>
-                                        <th>품종</th>
-                                        <th>생년월일</th>
-                                        <th>성별</th>
-                                        <th>상태</th>
+                                        <th>예약 상세</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr v-if="reservationList.length === 0">
-                                        <td colspan="11" class="empty-text">조회된 예약이 없습니다.</td>
+                                        <td colspan="6" class="empty-text">조회된 예약이 없습니다.</td>
                                     </tr>
 
-                                    <tr v-for="item in reservationList" :key="item.rsvNo">
-                                        <td>{{item.rsvNo}}</td>
-                                        <td>{{item.userName}}</td>
-                                        <td>{{item.phone}}</td>
-                                        <td>{{item.rsvDateTime}}</td>
-                                        <td>{{item.menuName}}</td>
-                                        <td>{{item.request}}</td>
-                                        <td>{{item.petName}}</td>
-                                        <td>{{item.species}}</td>
-                                        <td>{{item.breed}}</td>
-                                        <td>{{item.birthdate}}</td>
-                                        <td>{{item.gender}}</td>
-                                        <td>{{item.rsvStatusName}}</td>
-                                    </tr>
+                                    <template v-for="item in reservationList" :key="item.rsvNo">
+                                        <tr>
+                                            <td>{{item.rsvNo}}</td>
+                                            <td>{{item.userName}}</td>
+                                            <td>{{item.phone}}</td>
+                                            <td>{{item.rsvDateTime}}</td>
+                                            <td>{{item.menuName}}</td>
+                                            <td>
+                                                <button type="button" class="reservation-detail-btn" @click="fnToggleReservationDetail(item.rsvNo)">
+                                                    {{selectedReservationNo === item.rsvNo ? '닫기' : '상세보기'}}
+                                                </button>
+                                            </td>
+                                        </tr>
+
+                                        <tr v-if="selectedReservationNo === item.rsvNo" class="reservation-detail-row">
+                                            <td colspan="6">
+                                                <div class="reservation-detail-box">
+                                                    <div class="reservation-detail-item">
+                                                        <strong>요구사항</strong>
+                                                        <span>{{item.request ? item.request : '없음'}}</span>
+                                                    </div>
+                                                    <div class="reservation-detail-item">
+                                                        <strong>펫이름</strong>
+                                                        <span>{{item.petName}}</span>
+                                                    </div>
+                                                    <div class="reservation-detail-item">
+                                                        <strong>동물</strong>
+                                                        <span>{{item.species}}</span>
+                                                    </div>
+                                                    <div class="reservation-detail-item">
+                                                        <strong>품종</strong>
+                                                        <span>{{item.breed}}</span>
+                                                    </div>
+                                                    <div class="reservation-detail-item">
+                                                        <strong>생년월일</strong>
+                                                        <span>{{item.birthdate}}</span>
+                                                    </div>
+                                                    <div class="reservation-detail-item">
+                                                        <strong>성별</strong>
+                                                        <span>{{item.gender}}</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </template>
                                 </tbody>
                             </table>
                         </div>
@@ -142,7 +167,8 @@
                     completeReservationCount: 0
                 },
                 reservationCategory: "TODAY",
-                reservationList: []
+                reservationList: [],
+                selectedReservationNo: ""
             };
         },
         methods: {
@@ -204,9 +230,20 @@
             fnChangeReservationCategory: function (category) {
                 let self = this;
                 self.reservationCategory = category;
+                self.selectedReservationNo = "";
                 self.fnGetReservationList();
             },
 
+            fnToggleReservationDetail: function (rsvNo) {
+                let self = this;
+
+                if (self.selectedReservationNo === rsvNo) {
+                    self.selectedReservationNo = "";
+                    return;
+                }
+
+                self.selectedReservationNo = rsvNo;
+            },
 
         }, // methods
         mounted() {

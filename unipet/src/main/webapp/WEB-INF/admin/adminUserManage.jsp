@@ -28,14 +28,14 @@
                         <div class="content-desc">일반 사용자 회원 정보와 활동 내역을 조회합니다.</div>
 
                         <div class="admin-search-box">
-                            <select class="admin-search-select" v-model="userStatus" @change="fnUserList">
+                            <select class="admin-search-select" v-model="userStatus" @change="fnSearchUserList">
                                 <option value="">전체 상태</option>
                                 <option value="NOR">일반</option>
                                 <option value="BAN">정지</option>
                                 <option value="EXT">탈퇴</option>
                             </select>
 
-                            <select class="admin-search-select" v-model="sortType" @change="fnUserList">
+                            <select class="admin-search-select" v-model="sortType" @change="fnSearchUserList">
                                 <option value="">기본순</option>
                                 <option value="reportDesc">신고 많은순</option>
                             </select>
@@ -44,16 +44,12 @@
                                 type="text"
                                 class="admin-search-input"
                                 v-model="keyword"
-                                @keyup.enter="fnUserList"
+                                @keyup.enter="fnSearchUserList"
                                 placeholder="아이디, 이름, 닉네임 검색">
-                            <button type="button" class="admin-search-btn" @click="fnUserList">검색</button>
+                            <button type="button" class="admin-search-btn" @click="fnSearchUserList">검색</button>
                         </div>
 
                         <div class="admin-user-sticky-area">
-                            <div class="admin-user-top-scroll">
-                                <div class="admin-user-scroll-inner"></div>
-                            </div>
-
                             <div class="admin-user-head-wrap">
                                 <table class="admin-user-table admin-user-head-table">
                                     <thead>
@@ -158,8 +154,30 @@
                             </table>
                         </div>
 
+                        <div class="admin-user-top-scroll">
+                            <div class="admin-user-scroll-inner"></div>
+                        </div>
+
                         <div class="empty-box" v-if="userList.length === 0">
                             조회된 회원이 없습니다.
+                        </div>
+                        <div class="admin-pagination" v-if="totalCount > 0">
+                            <button type="button" class="page-btn" :disabled="currentPage === 1" @click="fnMovePage(currentPage - 1)">
+                                이전
+                            </button>
+
+                            <button type="button"
+                                    class="page-btn"
+                                    v-for="page in pageList"
+                                    :key="page"
+                                    :class="{ active: currentPage === page }"
+                                    @click="fnMovePage(page)">
+                                {{ page }}
+                            </button>
+
+                            <button type="button" class="page-btn" :disabled="currentPage === totalPage" @click="fnMovePage(currentPage + 1)">
+                                다음
+                            </button>
                         </div>
                     </div>
                 </section>
@@ -419,6 +437,9 @@
                     userStatus: "",
                     sortType: "",
                     userList: [],
+                    currentPage: 1,
+                    pageSize: 10,
+                    totalCount: 0,
 
                     modalOpen: false,
                     modalTitle: "",
@@ -433,6 +454,23 @@
                     editNickname: ""
                 };
             },
+            computed: {
+                totalPage: function () {
+                    return Math.ceil(this.totalCount / this.pageSize);
+                },
+
+                pageList: function () {
+                    let list = [];
+                    let startPage = Math.floor((this.currentPage - 1) / 5) * 5 + 1;
+                    let endPage = Math.min(startPage + 4, this.totalPage);
+
+                    for (let i = startPage; i <= endPage; i++) {
+                        list.push(i);
+                    }
+
+                    return list;
+                }
+            },
             methods: {
                 fnUserList: function () {
                     let self = this;
@@ -444,11 +482,14 @@
                         data: {
                             keyword: self.keyword,
                             userStatus: self.userStatus,
-                            sortType: self.sortType
+                            sortType: self.sortType,
+                            page: self.currentPage,
+                            pageSize: self.pageSize
                         },
                         success: function (data) {
                             if (data.result === "success") {
                                 self.userList = data.list || [];
+                                self.totalCount = data.totalCount || 0;
 
                                 self.$nextTick(function () {
                                     self.fnSyncUserTableScroll();
@@ -761,6 +802,19 @@
                             alert("서버 통신 중 오류가 발생했습니다.");
                         }
                     });
+                },
+                fnSearchUserList: function () {
+                    this.currentPage = 1;
+                    this.fnUserList();
+                },
+
+                fnMovePage: function (page) {
+                    if (page < 1 || page > this.totalPage) {
+                        return;
+                    }
+
+                    this.currentPage = page;
+                    this.fnUserList();
                 },
                 
             },

@@ -592,5 +592,19 @@ public class AdminController {
 	    HashMap<String, Object> resultMap = adminService.rejectReportBatch(map);
 	    return new Gson().toJson(resultMap);
 	}
+	
+	@RequestMapping(value = "/admin/businessUser/statusUpdate.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String updateAdminBusinessUserStatus(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.updateAdminBusinessUserStatus(map);
+	    return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/admin/businessUser/storeStatusUpdate.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String updateAdminBusinessStoreStatus(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.updateAdminBusinessStoreStatus(map);
+	    return new Gson().toJson(resultMap);
+	}
 
 }

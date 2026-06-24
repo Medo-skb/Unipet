@@ -29,71 +29,80 @@
                         <h2>쇼핑몰 문의 답변 관리</h2>
                         <div class="content-desc">답변이 등록되지 않은 상품 문의 목록입니다.</div>
 
-                        <div class="qna-list" v-if="qnaAnswerList.length > 0">
-                            <div class="qna-card" v-for="item in qnaAnswerList" :key="item.qnaNo">
-                                <table class="report-table">
-                                    <tbody>
-                                        <tr>
-                                            <th>상품명</th>
-                                            <td colspan="3">
-                                                <span class="link-text" @click="fnGoProductDetail(item.productNo)">
-                                                    {{ item.productName }}
-                                                </span>
-                                            </td>
-                                        </tr>
+                        <div class="qna-list" v-if="qnaGroupList.length > 0">
+                            <div class="qna-product-card" v-for="group in qnaGroupList" :key="group.productNo">
+                                <div class="qna-product-header" @click="fnToggleQnaProduct(group.productNo)">
+                                    <div class="qna-product-title">
+                                        <span class="qna-toggle-icon">
+                                            {{ openedProductMap[group.productNo] ? '▼' : '▶' }}
+                                        </span>
 
-                                        <tr>
-                                            <th>문의자</th>
-                                            <td>
-                                                {{ item.userName }}
-                                                <span v-if="item.nickname">({{ item.nickname }})</span>
-                                            </td>
-                                            <th>문의자 ID</th>
-                                            <td>{{ item.userId }}</td>
-                                        </tr>
+                                        <span class="link-text" @click.stop="fnGoProductDetail(group.productNo)">
+                                            {{ group.productName }}
+                                        </span>
+                                    </div>
 
-                                        <tr>
-                                            <th>문의 날짜</th>
-                                            <td colspan="3">{{ item.cdate }}</td>
-                                        </tr>
+                                    <span class="qna-product-count">
+                                        문의 {{ group.items.length }}건
+                                    </span>
+                                </div>
 
-                                        <tr>
-                                            <th>문의 제목</th>
-                                            <td colspan="3">{{ item.qnaTitle }}</td>
-                                        </tr>
+                                <div class="qna-card" v-if="openedProductMap[group.productNo]" v-for="item in group.items" :key="item.qnaNo">
+                                    <table class="report-table">
+                                        <tbody>
+                                            <tr>
+                                                <th>문의자</th>
+                                                <td>
+                                                    {{ item.userName }}
+                                                    <span v-if="item.nickname">({{ item.nickname }})</span>
+                                                </td>
+                                                <th>문의자 ID</th>
+                                                <td>{{ item.userId }}</td>
+                                            </tr>
 
-                                        <tr>
-                                            <th>문의 내용</th>
-                                            <td colspan="3">{{ item.qContents }}</td>
-                                        </tr>
+                                            <tr>
+                                                <th>문의 날짜</th>
+                                                <td colspan="3">{{ item.cdate }}</td>
+                                            </tr>
 
-                                        <tr>
-                                            <th>비공개 여부</th>
-                                            <td colspan="3">
-                                                {{ item.isSecret === 'Y' ? '비공개' : '공개' }}
-                                            </td>
-                                        </tr>
+                                            <tr>
+                                                <th>문의 제목</th>
+                                                <td colspan="3">{{ item.qnaTitle }}</td>
+                                            </tr>
 
-                                        <tr>
-                                            <th>답변 작성</th>
-                                            <td colspan="3">
-                                                <textarea 
-                                                    class="qna-answer-textarea"
-                                                    v-model="item.aContents"
-                                                    placeholder="답변 내용을 입력하세요."></textarea>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                            <tr>
+                                                <th>문의 내용</th>
+                                                <td colspan="3">{{ item.qContents }}</td>
+                                            </tr>
 
-                                <div class="report-btn-box">
-                                    <button type="button" class="btn-reject" @click="fnDeleteQna(item)">
-                                        문의 삭제
-                                    </button>
+                                            <tr>
+                                                <th>비공개 여부</th>
+                                                <td colspan="3">
+                                                    {{ item.isSecret === 'Y' ? '비공개' : '공개' }}
+                                                </td>
+                                            </tr>
 
-                                    <button type="button" class="btn-approve" @click="fnSaveQnaAnswer(item)">
-                                        답변 등록
-                                    </button>
+                                            <tr>
+                                                <th>답변 작성</th>
+                                                <td colspan="3">
+                                                    <textarea
+                                                        class="qna-answer-textarea"
+                                                        v-model="item.aContents"
+                                                        placeholder="답변 내용을 입력하세요."></textarea>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <div class="report-btn-box">
+                                        <button type="button" class="btn-reject" @click="fnDeleteQna(item)">
+                                            문의 삭제
+                                        </button>
+
+                                        <button type="button" class="btn-approve" @click="fnSaveQnaAnswer(item)">
+                                            답변 등록
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -116,8 +125,33 @@
     const app = Vue.createApp({
         data() {
             return {
-                qnaAnswerList: []
+                qnaAnswerList: [],
+                openedProductMap: {}
             };
+        },
+        computed: {
+            qnaGroupList: function () {
+                let groupMap = {};
+                let groupList = [];
+
+                this.qnaAnswerList.forEach(function (item) {
+                    let productNo = item.productNo;
+
+                    if (!groupMap[productNo]) {
+                        groupMap[productNo] = {
+                            productNo: productNo,
+                            productName: item.productName,
+                            items: []
+                        };
+
+                        groupList.push(groupMap[productNo]);
+                    }
+
+                    groupMap[productNo].items.push(item);
+                });
+
+                return groupList;
+            }
         },
         methods: {
             fnQnaAnswerList: function () {
@@ -204,6 +238,10 @@
 
             fnGoProductDetail: function(productNo) {
                 location.href = "/product/view.do?productNo=" + productNo;
+            },
+
+            fnToggleQnaProduct: function (productNo) {
+                this.openedProductMap[productNo] = !this.openedProductMap[productNo];
             }
         },
         mounted() {

@@ -29,7 +29,7 @@
                     <div class="content-desc">사업자 회원 정보, 업체 정보, 신고 및 예약 내역을 조회합니다.</div>
 
                     <div class="admin-search-box">
-                        <select class="admin-search-select" v-model="sStatus" @change="fnBusinessUserList">
+                        <select class="admin-search-select" v-model="sStatus" @change="fnSearchBusinessUserList">
                             <option value="">전체 상태</option>
                             <option value="AFF">제휴</option>
                             <option value="GEN">가입</option>
@@ -37,13 +37,13 @@
                             <option value="REJ">반려</option>
                         </select>
 
-                        <select class="admin-search-select" v-model="isOpen" @change="fnBusinessUserList">
+                        <select class="admin-search-select" v-model="isOpen" @change="fnSearchBusinessUserList">
                             <option value="">전체 영업</option>
                             <option value="Y">영업중</option>
                             <option value="N">폐업</option>
                         </select>
 
-                        <select class="admin-search-select" v-model="sortType" @change="fnBusinessUserList">
+                        <select class="admin-search-select" v-model="sortType" @change="fnSearchBusinessUserList">
                             <option value="">기본순</option>
                             <option value="ratingDesc">평점 높은순</option>
                             <option value="ratingAsc">평점 낮은순</option>
@@ -55,16 +55,12 @@
                             type="text"
                             class="admin-search-input"
                             v-model="keyword"
-                            @keyup.enter="fnBusinessUserList"
+                            @keyup.enter="fnSearchBusinessUserList"
                             placeholder="사업자 아이디, 대표자명, 업체명 검색">
-                        <button type="button" class="admin-search-btn" @click="fnBusinessUserList">검색</button>
+                        <button type="button" class="admin-search-btn" @click="fnSearchBusinessUserList">검색</button>
                     </div>
 
                     <div class="admin-user-sticky-area">
-                        <div class="admin-user-top-scroll">
-                            <div class="admin-user-scroll-inner business-user-scroll-inner"></div>
-                        </div>
-
                         <div class="admin-user-head-wrap">
                             <table class="admin-user-table admin-user-head-table business-user-table">
                                 <thead>
@@ -129,6 +125,29 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <div class="admin-user-top-scroll">
+                        <div class="admin-user-scroll-inner business-user-scroll-inner"></div>
+                    </div>
+
+                    <div class="admin-pagination" v-if="totalCount > 0">
+                        <button type="button" class="page-btn" :disabled="currentPage === 1" @click="fnMovePage(currentPage - 1)">
+                            이전
+                        </button>
+
+                        <button type="button"
+                                class="page-btn"
+                                v-for="page in pageList"
+                                :key="page"
+                                :class="{ active: currentPage === page }"
+                                @click="fnMovePage(page)">
+                            {{ page }}
+                        </button>
+
+                        <button type="button" class="page-btn" :disabled="currentPage === totalPage" @click="fnMovePage(currentPage + 1)">
+                            다음
+                        </button>
+                    </div>
                 </div>
             </section>
         </div>
@@ -159,7 +178,28 @@
                                 <span v-else>-</span>
                             </td>
                         </tr>
-                        <tr><th>사업자 상태</th><td>{{ fnBusinessUserStatus(basicInfo.uStatus) }}</td></tr>
+                        <tr>
+                            <th>
+                                <div class="admin-basic-edit-th">
+                                    <span>사업자 유저 상태</span>
+                                    <button type="button" class="admin-mini-btn" @click="fnEditBusinessUserStatus">수정</button>
+                                </div>
+                            </th>
+                            <td>
+                                <template v-if="businessUserStatusEditMode">
+                                    <div class="admin-basic-edit-box">
+                                        <select class="admin-basic-edit-select" v-model="editBusinessUserStatus">
+                                            <option value="APR">승인</option>
+                                            <option value="BAN">정지</option>
+                                        </select>
+                                        <button type="button" class="admin-mini-btn black" @click="fnUpdateBusinessUserStatus">확인</button>
+                                    </div>
+                                </template>
+                                <template v-else>
+                                    {{ fnBusinessUserStatus(basicInfo.uStatus) }}
+                                </template>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
 
@@ -167,7 +207,7 @@
                     <table class="approve-table">
                         <tbody>
                             <tr><th>업체명</th><td>{{ fnEmpty(storeInfo.storeName) }}</td></tr>
-                            <tr><th>카테고리</th><td>{{ fnEmpty(storeInfo.sCategory) }}</td></tr>
+                            <tr><th>카테고리</th><td>{{ fnStoreCategory(storeInfo.sCategory) }}</td></tr>
                             <tr><th>사업자번호</th><td>{{ fnEmpty(storeInfo.biznum) }}</td></tr>
                             <tr><th>은행명</th><td>{{ fnEmpty(storeInfo.accName) }}</td></tr>
                             <tr><th>계좌번호</th><td>{{ fnEmpty(storeInfo.accNo) }}</td></tr>
@@ -181,7 +221,28 @@
                                 </th>
                                 <td>{{ fnEmpty(storeInfo.sAddr) }} {{ fnEmpty(storeInfo.sFullAddr) }}</td>
                             </tr>
-                            <tr><th>업체 상태</th><td>{{ fnStoreStatus(storeInfo.sStatus) }}</td></tr>
+                            <tr>
+                                <th>
+                                    <div class="admin-basic-edit-th">
+                                        <span>업체 상태</span>
+                                        <button type="button" class="admin-mini-btn" @click="fnEditStoreStatus">수정</button>
+                                    </div>
+                                </th>
+                                <td>
+                                    <template v-if="storeStatusEditMode">
+                                        <div class="admin-basic-edit-box">
+                                            <select class="admin-basic-edit-select" v-model="editStoreStatus">
+                                                <option value="AFF">제휴</option>
+                                                <option value="GEN">가입</option>
+                                            </select>
+                                            <button type="button" class="admin-mini-btn black" @click="fnUpdateStoreStatus">확인</button>
+                                        </div>
+                                    </template>
+                                    <template v-else>
+                                        {{ fnStoreStatus(storeInfo.sStatus) }}
+                                    </template>
+                                </td>
+                            </tr>
                             <tr><th>폐업 여부</th><td>{{ fnOpenStatus(storeInfo.isOpen) }}</td></tr>
                             <tr><th>예약 단위</th><td>{{ fnEmpty(storeInfo.slot) }}분</td></tr>
                             <tr><th>수용 인원</th><td>{{ fnEmpty(storeInfo.capacity) }}</td></tr>
@@ -326,6 +387,9 @@
                 isOpen: "",
                 sortType: "",
                 businessUserList: [],
+                currentPage: 1,
+                pageSize: 10,
+                totalCount: 0,
 
                 modalOpen: false,
                 modalTitle: "",
@@ -336,8 +400,29 @@
                 fileList: [],
                 detailList: [],
 
-                mapOpen: false
+                mapOpen: false,
+                businessUserStatusEditMode: false,
+                storeStatusEditMode: false,
+                editBusinessUserStatus: "",
+                editStoreStatus: ""
             };
+        },
+        computed: {
+            totalPage: function () {
+                return Math.ceil(this.totalCount / this.pageSize);
+            },
+
+            pageList: function () {
+                let list = [];
+                let startPage = Math.floor((this.currentPage - 1) / 5) * 5 + 1;
+                let endPage = Math.min(startPage + 4, this.totalPage);
+
+                for (let i = startPage; i <= endPage; i++) {
+                    list.push(i);
+                }
+
+                return list;
+            }
         },
         methods: {
             fnBusinessUserList: function () {
@@ -351,11 +436,14 @@
                         keyword: self.keyword,
                         sStatus: self.sStatus,
                         isOpen: self.isOpen,
-                        sortType: self.sortType
+                        sortType: self.sortType,
+                        page: self.currentPage,
+                        pageSize: self.pageSize
                     },
                     success: function (data) {
                         if (data.result === "success") {
                             self.businessUserList = data.list || [];
+                            self.totalCount = data.totalCount || 0;
 
                             self.$nextTick(function () {
                                 self.fnSyncUserTableScroll();
@@ -476,6 +564,10 @@
                 this.fileList = [];
                 this.detailList = [];
                 this.mapOpen = false;
+                this.businessUserStatusEditMode = false;
+                this.storeStatusEditMode = false;
+                this.editBusinessUserStatus = "";
+                this.editStoreStatus = "";
             },
 
             fnOpenMap: function () {
@@ -599,7 +691,101 @@
                     tableWrap.scrollLeft = topScroll.scrollLeft;
                     headWrap.scrollLeft = topScroll.scrollLeft;
                 };
-            }
+            },
+            fnSearchBusinessUserList: function () {
+                this.currentPage = 1;
+                this.fnBusinessUserList();
+            },
+
+            fnMovePage: function (page) {
+                if (page < 1 || page > this.totalPage) {
+                    return;
+                }
+
+                this.currentPage = page;
+                this.fnBusinessUserList();
+            },
+
+            fnStoreCategory: function (category) {
+                if (category === "HOS") return "병원";
+                if (category === "SAL") return "미용";
+                if (category === "BRD") return "위탁시설";
+                return this.fnEmpty(category);
+            },
+
+            fnEditBusinessUserStatus: function () {
+                this.businessUserStatusEditMode = true;
+                this.editBusinessUserStatus = this.basicInfo ? this.basicInfo.uStatus : "";
+            },
+
+            fnEditStoreStatus: function () {
+                this.storeStatusEditMode = true;
+                this.editStoreStatus = this.storeInfo ? this.storeInfo.sStatus : "";
+            },
+
+            fnUpdateBusinessUserStatus: function () {
+                let self = this;
+
+                if (!self.basicInfo || !self.basicInfo.sUserId) {
+                    alert("사업자 정보가 없습니다.");
+                    return;
+                }
+
+                $.ajax({
+                    url: "/admin/businessUser/statusUpdate.dox",
+                    type: "POST",
+                    dataType: "json",
+                    data: {
+                        sUserId: self.basicInfo.sUserId,
+                        uStatus: self.editBusinessUserStatus
+                    },
+                    success: function (data) {
+                        if (data.result === "success") {
+                            self.basicInfo.uStatus = self.editBusinessUserStatus;
+                            self.businessUserStatusEditMode = false;
+                            self.fnBusinessUserList();
+                            alert("사업자 유저 상태가 변경되었습니다.");
+                        } else {
+                            alert(data.message || "사업자 유저 상태 변경에 실패했습니다.");
+                        }
+                    },
+                    error: function () {
+                        alert("서버 통신 중 오류가 발생했습니다.");
+                    }
+                });
+            },
+
+            fnUpdateStoreStatus: function () {
+                let self = this;
+
+                if (!self.storeInfo || !self.storeInfo.storeNo) {
+                    alert("업체 정보가 없습니다.");
+                    return;
+                }
+
+                $.ajax({
+                    url: "/admin/businessUser/storeStatusUpdate.dox",
+                    type: "POST",
+                    dataType: "json",
+                    data: {
+                        storeNo: self.storeInfo.storeNo,
+                        sStatus: self.editStoreStatus
+                    },
+                    success: function (data) {
+                        if (data.result === "success") {
+                            self.storeInfo.sStatus = self.editStoreStatus;
+                            self.storeStatusEditMode = false;
+                            self.fnBusinessUserList();
+                            alert("업체 상태가 변경되었습니다.");
+                        } else {
+                            alert(data.message || "업체 상태 변경에 실패했습니다.");
+                        }
+                    },
+                    error: function () {
+                        alert("서버 통신 중 오류가 발생했습니다.");
+                    }
+                });
+            },
         },
         mounted() {
             this.fnBusinessUserList();
