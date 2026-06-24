@@ -231,16 +231,33 @@
 
 					<div v-else>
 						<div class="review-item" v-for="review in pagedReviewList" :key="review.reviewNo">
-							<div class="review-head">
-								<div class="review-user-area">
-									<span class="review-user">
-										{{review.writerNickname ? review.writerNickname : review.userId}}
-									</span>
+							<div class="review-top-layout">
+								<div class="review-info-group">
+									<div class="review-head">
+										<div class="review-user-area">
+											<span class="review-user">
+												{{review.writerNickname ? review.writerNickname : review.userId}}
+											</span>
 
-									<span class="review-date">{{review.reviewCdate}}</span>
+											<span class="review-date">{{review.reviewCdate}}</span>
+										</div>
+									</div>
+
+									<div class="review-rating" v-if="!review.editMode">
+										{{fnConvertStar(review.rating)}}
+										<span class="review-score">{{review.rating}}점</span>
+									</div>
 								</div>
 
-								<div class="review-action-area">
+								<div class="review-thumb-group"
+									v-if="fnReviewImgArray(review).length > 0 && !review.editMode">
+									<img v-for="(img, index) in fnReviewImgArray(review)"
+										:key="'review-img-' + review.reviewNo + '-' + index" :src="img"
+										class="review-thumb-img-large" @click="fnOpenReviewImgModal(review, index)"
+										@error="fnReviewImgError">
+								</div>
+
+								<div class="review-action-area review-actions" v-if="!review.editMode">
 									<button v-if="fnCanEditReview(review)" type="button" class="review-action-btn edit"
 										@click="fnReviewEdit(review)">
 										수정
@@ -250,19 +267,6 @@
 										class="review-action-btn delete" @click="fnReviewDelete(review)">
 										삭제
 									</button>
-								</div>
-							</div>
-
-							<div class="review-rating-img-row">
-								<div class="review-rating">
-									{{fnConvertStar(review.rating)}}
-									<span class="review-score">{{review.rating}}점</span>
-								</div>
-
-								<div class="review-img-list" v-if="fnReviewImgArray(review).length > 0">
-									<img v-for="(img, index) in fnReviewImgArray(review)"
-										:key="'review-img-' + review.reviewNo + '-' + index" :src="img"
-										class="review-img" @click="fnOpenReviewImgModal(img)" @error="fnReviewImgError">
 								</div>
 							</div>
 
@@ -445,14 +449,24 @@
 				</div>
 			</div>
 
-			<div class="review-img-modal-wrap" v-if="reviewModalOpen" @click="fnCloseReviewImgModal()">
-				<div class="review-img-modal-box" @click.stop>
-					<button type="button" class="review-img-modal-close" @click="fnCloseReviewImgModal()">
-						×
-					</button>
+			<div class="img-modal-overlay" v-if="reviewModalOpen" @click="fnCloseReviewImgModal">
+				<button type="button" class="modal-nav-btn btn-left" v-if="reviewModalIndex > 0"
+					@click.stop="fnPrevReviewImg">
+					&#10094;
+				</button>
 
-					<img :src="reviewModalImg" class="review-img-modal-img">
+				<div class="modal-content-wrap" @click.stop>
+					<img :src="reviewModalImages[reviewModalIndex]" class="modal-large-img">
+
+					<button type="button" class="modal-close-btn" @click="fnCloseReviewImgModal">
+						&times;
+					</button>
 				</div>
+
+				<button type="button" class="modal-nav-btn btn-right"
+					v-if="reviewModalIndex < reviewModalImages.length - 1" @click.stop="fnNextReviewImg">
+					&#10095;
+				</button>
 			</div>
 		</div>
 
@@ -480,6 +494,8 @@
 						reviewPageBlockSize: 5,
 						reviewModalOpen: false,
 						reviewModalImg: "",
+						reviewModalImages: [],
+						reviewModalIndex: 0,
 						qnaList: [],
 						cartCount: 0,
 						wishYn: "N",
@@ -627,18 +643,42 @@
 						event.target.style.display = "none";
 					},
 
-					fnOpenReviewImgModal: function (img) {
-						if (img == null || img == "") {
+					fnOpenReviewImgModal: function (review, index) {
+						let imgList = this.fnReviewImgArray(review);
+
+						if (imgList.length == 0) {
 							return;
 						}
 
-						this.reviewModalImg = img;
+						this.reviewModalImages = imgList;
+						this.reviewModalIndex = index;
+						this.reviewModalImg = imgList[index];
 						this.reviewModalOpen = true;
+
+						document.body.style.overflow = "hidden";
 					},
 
 					fnCloseReviewImgModal: function () {
 						this.reviewModalOpen = false;
 						this.reviewModalImg = "";
+						this.reviewModalImages = [];
+						this.reviewModalIndex = 0;
+
+						document.body.style.overflow = "";
+					},
+
+					fnPrevReviewImg: function () {
+						if (this.reviewModalIndex > 0) {
+							this.reviewModalIndex--;
+							this.reviewModalImg = this.reviewModalImages[this.reviewModalIndex];
+						}
+					},
+
+					fnNextReviewImg: function () {
+						if (this.reviewModalIndex < this.reviewModalImages.length - 1) {
+							this.reviewModalIndex++;
+							this.reviewModalImg = this.reviewModalImages[this.reviewModalIndex];
+						}
 					},
 
 					fnGetReviewList: function () {
