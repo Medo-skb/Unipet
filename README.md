@@ -1,4 +1,4 @@
-<img width="265" height="24" alt="image" src="https://github.com/user-attachments/assets/c31a8a75-2912-4f3c-a3fe-d7d458eded37" /># 🐶 UNIPET(유니펫) - 반려동물의 모든것!! 🐱
+# 🐶 UNIPET(유니펫) - 반려동물의 모든것!! 🐱
 
 ## 💡 프로젝트 소개
 
