@@ -246,6 +246,7 @@
 						self.editor = Jodit.make("#bContent", {
 							height: 430,
 							minHeight: 320,
+							placeholder: "게시글 내용을 입력해주세요",
 							toolbarAdaptive: false,
 							showCharsCounter: false,
 							showWordsCounter: false,

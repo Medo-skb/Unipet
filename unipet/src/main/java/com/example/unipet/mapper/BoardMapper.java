@@ -25,6 +25,9 @@ public interface BoardMapper {
 
 	public List<Board> selectBoardAlarmList(HashMap<String, Object> map);
 
+	// 금칙어 목록 조회
+	public List<String> selectBadWordList();
+
 	// 한개 리턴 -> selectXXX
 	public int selectBoardCnt(HashMap<String, Object> map);
 

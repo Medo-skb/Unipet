@@ -378,11 +378,20 @@ public class BoardService {
 
 		String result = text;
 
-		// 여기에 금칙어를 추가하면 게시글 제목, 게시글 본문, 댓글에 모두 적용된다.
-		String[] badWords = { "씨발", "병신", "미친", "개새끼", "지랄", "꺼져" };
+		List<String> badWordList = boardMapper.selectBadWordList();
 
-		for (int i = 0; i < badWords.length; i++) {
-			String pattern = makeBadWordPattern(badWords[i]);
+		if (badWordList == null || badWordList.size() == 0) {
+			return result;
+		}
+
+		for (int i = 0; i < badWordList.size(); i++) {
+			String badWord = badWordList.get(i);
+
+			if (badWord == null || badWord.trim().equals("")) {
+				continue;
+			}
+
+			String pattern = makeBadWordPattern(badWord.trim());
 			result = result.replaceAll(pattern, "***");
 		}
 
