@@ -190,14 +190,7 @@
                     </div>
                 </div>
 
-                <div class="breed-guide">
-                    <span class="guide-icon">⚠️</span>
-                    <span>
-                        품종은 자동완성 목록에서 선택해야 등록할 수 있습니다.
-                        불법 또는 등록 제한 품종은 목록에 표시되지 않습니다.
-                    </span>
-                </div>
-
+               
                 <div v-if="selectedBreedCaution === 'Y'" class="breed-caution-box">
                     <span class="guide-icon">⚠️</span>
                     <span>
