@@ -404,6 +404,20 @@ public class AdminController {
 	    return new Gson().toJson(resultMap);
 	}
 
+	@RequestMapping(value = "/admin/user/dangerPetCount.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getRecentDangerPetUserCount(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.getRecentDangerPetUserCount(map);
+	    return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/admin/user/dangerPetList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getRecentDangerPetUserList(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.getRecentDangerPetUserList(map);
+	    return new Gson().toJson(resultMap);
+	}
+
 	@RequestMapping(value = "/admin/user/basic.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
 	public String getAdminUserBasic(@RequestParam HashMap<String, Object> map) throws Exception {
@@ -457,6 +471,13 @@ public class AdminController {
 	@ResponseBody
 	public String getAdminUserOrderList(@RequestParam HashMap<String, Object> map) throws Exception {
 	    HashMap<String, Object> resultMap = adminService.getAdminUserOrderList(map);
+	    return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/admin/user/orderProductList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getAdminUserOrderProductList(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.getAdminUserOrderProductList(map);
 	    return new Gson().toJson(resultMap);
 	}
 

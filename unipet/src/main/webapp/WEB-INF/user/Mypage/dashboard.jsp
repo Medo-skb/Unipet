@@ -23,8 +23,9 @@
         <div id="app" class="user-page-wrap" v-cloak>
             <div class="user-page-container">
 
-                <!-- 사이드바 직접 삽입 -->
-                <jsp:include page="/WEB-INF/user/Mypage/sidebar.jsp" />
+                <jsp:include page="/WEB-INF/user/Mypage/sidebar.jsp">
+                    <jsp:param name="activeMenu" value="home" />
+                </jsp:include>
 
 
                 <main class="user-content">

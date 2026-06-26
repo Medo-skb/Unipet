@@ -37,7 +37,7 @@ body {
 }
 
 .content-desc {
-    margin: 0 0 24px;
+    margin: 0 0 10px;
     font-size: 15px;
     color: var(--text-sub);
     line-height: 1.6;
@@ -68,7 +68,7 @@ body {
 }
 
 .approve-table th {
-    width: 190px;
+    width: 200px;
     background: var(--table-head);
     font-weight: 700;
     color: var(--text-main);
@@ -544,45 +544,15 @@ body {
     color: var(--text-main, #222222);
 }
 
-.admin-user-sticky-area {
-    background: #ffffff;
-    border-top: 1px solid var(--line-dark, #bbbbbb);
-}
-
-.admin-user-top-scroll {
-    overflow-x: auto;
-    overflow-y: hidden;
-    height: 16px;
-    background: #ffffff;
-}
-
-.admin-user-scroll-inner {
-    width: 1280px;
-    height: 1px;
-}
-
-.admin-user-head-wrap {
-    overflow: hidden;
-    background: #ffffff;
-    border-right: 1px solid var(--line, #e5e5e5);
-    border-bottom: 1px solid var(--line-dark, #bbbbbb);
-}
-
-.admin-user-head-table {
-    margin: 0;
-}
-
 .admin-user-table-wrap {
-    overflow-x: hidden;
+    width: 100%;
+    overflow-x: auto;
     overflow-y: visible;
+    border-top: 1px solid var(--line-dark, #bbbbbb);
     border-right: 1px solid var(--line, #e5e5e5);
     border-bottom: 1px solid var(--line-dark, #bbbbbb);
     background: #ffffff;
     min-height: 520px;
-}
-
-.admin-user-hidden-thead {
-    display: none;
 }
 
 .admin-user-table th {
@@ -812,10 +782,6 @@ body {
 .business-user-table th:nth-child(7),
 .business-user-table td:nth-child(7) {
     width: 230px;
-}
-
-.business-user-scroll-inner {
-    width: 1050px;
 }
 
 .store-name-link {
@@ -1077,7 +1043,7 @@ body {
 }
 
 .admin-approve-table {
-    min-width: 1220px;
+    min-width: 1100px;
 }
 
 .admin-approve-table th:nth-child(1),
@@ -1298,7 +1264,7 @@ body {
 }
 
 .admin-qna-table {
-    min-width: 1120px;
+    min-width: 1460px;
 }
 
 .admin-qna-table th:nth-child(1),
@@ -1308,32 +1274,37 @@ body {
 
 .admin-qna-table th:nth-child(2),
 .admin-qna-table td:nth-child(2) {
-    width: 140px;
+    width: 130px;
 }
 
 .admin-qna-table th:nth-child(3),
 .admin-qna-table td:nth-child(3) {
-    width: 190px;
+    width: 140px;
 }
 
 .admin-qna-table th:nth-child(4),
 .admin-qna-table td:nth-child(4) {
-    width: 210px;
+    width: 190px;
 }
 
 .admin-qna-table th:nth-child(5),
 .admin-qna-table td:nth-child(5) {
-    width: 280px;
+    width: 230px;
 }
 
 .admin-qna-table th:nth-child(6),
 .admin-qna-table td:nth-child(6) {
-    width: 110px;
+    width: 320px;
 }
 
 .admin-qna-table th:nth-child(7),
 .admin-qna-table td:nth-child(7) {
     width: 110px;
+}
+
+.admin-qna-table th:nth-child(8),
+.admin-qna-table td:nth-child(8) {
+    width: 120px;
 }
 
 .qna-ellipsis,
@@ -1382,6 +1353,18 @@ body {
     word-break: break-all;
 }
 
+.qna-search-box {
+    flex-wrap: wrap;
+}
+
+.qna-type-select {
+    width: 170px;
+}
+
+.qna-search-input {
+    width: 300px;
+}
+
 .biz-status-modal-body .input-group {
     margin-top: 16px;
 }
@@ -1414,7 +1397,8 @@ body {
 }
 
 .admin-report-table-wrap {
-    overflow-x: hidden;
+    width: 100%;
+    overflow-x: auto;
     overflow-y: visible;
     border-top: 1px solid var(--line-dark, #bbbbbb);
     border-right: 1px solid var(--line, #e5e5e5);
@@ -1556,4 +1540,103 @@ body {
 
 .admin-approve-table tbody tr:hover td {
     background: #fcfcfc;
+}
+
+.admin-danger-summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 8px 0 0px;
+    padding: 12px 16px;
+    border: 1px solid var(--line, #e5e5e5);
+    border-radius: 12px;
+    background: #ffffff;
+    color: var(--text-main, #222222);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.admin-danger-summary strong {
+    color: #d93025;
+    font-size: 16px;
+}
+
+.admin-danger-summary:hover {
+    border-color: var(--main, #111111);
+}
+
+.admin-danger-summary.active {
+    background: var(--main);
+    border-color: var(--main);
+    color: #ffffff;
+}
+
+.admin-danger-summary.active strong {
+    color: #ffffff;
+}
+
+.admin-danger-summary.active:hover {
+    background-color: var(--btnh);
+    border-color: var(--btnh);
+    color: #ffffff;
+}
+
+.danger-pet-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 48px;
+    height: 26px;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: #fff3cd;
+    color: #9a6700;
+    font-size: 13px;
+    font-weight: 700;
+    box-sizing: border-box;
+}
+
+.admin-order-product-modal {
+    width: min(760px, 96vw);
+}
+
+.admin-danger-pet-modal {
+    width: min(680px, 96vw);
+}
+
+.admin-danger-pet-modal-body {
+    overflow-x: hidden;
+}
+
+.admin-danger-pet-table {
+    width: 100%;
+    min-width: 0;
+    table-layout: fixed;
+}
+
+.admin-danger-pet-table th:nth-child(1),
+.admin-danger-pet-table td:nth-child(1) {
+    width: 34%;
+}
+
+.admin-danger-pet-table th:nth-child(2),
+.admin-danger-pet-table td:nth-child(2) {
+    width: 24%;
+}
+
+.admin-danger-pet-table th:nth-child(3),
+.admin-danger-pet-table td:nth-child(3) {
+    width: 42%;
+}
+
+.admin-order-product-modal .admin-user-modal-body {
+    overflow-x: hidden;
+}
+
+.admin-order-product-modal .admin-detail-table {
+    width: 100%;
+    min-width: 0;
+    table-layout: fixed;
 }

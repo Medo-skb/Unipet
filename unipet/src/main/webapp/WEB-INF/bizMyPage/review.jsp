@@ -140,14 +140,16 @@
                         <div class="form-row">
                             <div class="form-label-row">
                                 <label>신고 사유</label>
-                                <span class="text-count">
-                                    {{ reportForm.reportReason.length }} / 300
-                                </span>
                             </div>
 
-                            <textarea v-model="reportForm.reportReason"
-                                    maxlength="300"
-                                    placeholder="신고 사유를 입력해주세요."></textarea>
+                            <select v-model="reportForm.reportReason" class="report-reason-select">
+                                <option value="">신고 사유를 선택해주세요.</option>
+                                <option v-for="reason in reportReasonList"
+                                        :key="reason"
+                                        :value="reason">
+                                    {{ reason }}
+                                </option>
+                            </select>
                         </div>
 
                         <div class="modal-footer">
@@ -183,7 +185,15 @@
                 reportForm: {
                     reviewNo: "",
                     reportReason: ""
-                }
+                },
+                reportReasonList: [
+                    "욕설/비방",
+                    "광고/도배",
+                    "음란성",
+                    "허위 정보",
+                    "예약/이용 내역과 무관한 리뷰",
+                    "기타"
+                ]
             };
         },
         methods: {
@@ -294,13 +304,8 @@
             fnSaveReportReview: function () {
                 let self = this;
 
-                if (!self.reportForm.reportReason.trim()) {
-                    alert("신고 사유를 입력해주세요.");
-                    return;
-                }
-
-                if (self.reportForm.reportReason.length > 300) {
-                    alert("신고 사유는 300자까지 작성할 수 있습니다.");
+                if (!self.reportForm.reportReason) {
+                    alert("신고 사유를 선택해주세요.");
                     return;
                 }
 

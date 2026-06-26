@@ -38,26 +38,9 @@
                             </select>
                         </div>
 
-                        <div class="admin-user-sticky-area" v-if="filteredReportList.length > 0">
-                            <div class="admin-user-head-wrap admin-report-head-wrap">
-                                <table class="admin-user-table admin-report-table admin-report-head-table">
-                                    <thead>
-                                        <tr>
-                                            <th>처리여부</th>
-                                            <th>신고 대상</th>
-                                            <th>카테고리</th>
-                                            <th>신고자</th>
-                                            <th>작성자</th>
-                                            <th>신고사유</th>
-                                        </tr>
-                                    </thead>
-                                </table>
-                            </div>
-                        </div>
-
                         <div class="admin-report-table-wrap admin-list-fixed-area" v-if="filteredReportList.length > 0">
                             <table class="admin-user-table admin-report-table">
-                                <thead class="admin-user-hidden-thead">
+                                <thead>
                                     <tr>
                                         <th>처리여부</th>
                                         <th>신고 대상</th>
@@ -102,10 +85,6 @@
                                     </tr>
                                 </tbody>
                             </table>
-                        </div>
-
-                        <div class="admin-user-top-scroll admin-report-top-scroll" v-if="filteredReportList.length > 0">
-                            <div class="admin-user-scroll-inner admin-report-scroll-inner"></div>
                         </div>
 
                         <div class="empty-box" v-else>
@@ -288,10 +267,6 @@
                                 item.reportStatus = item.repStatus || "WAI";
                                 self.reportList.push(item);
                             });
-
-                            self.$nextTick(function () {
-                                self.fnSyncReportTableScroll();
-                            });
                         } else {
                             alert(data.message);
                         }
@@ -356,33 +331,6 @@
                 }
 
                 this.currentPage = page;
-
-                this.$nextTick(function () {
-                    this.fnSyncReportTableScroll();
-                });
-            },
-
-            fnSyncReportTableScroll: function () {
-                let topScroll = document.querySelector(".admin-report-top-scroll");
-                let scrollInner = document.querySelector(".admin-report-scroll-inner");
-                let tableWrap = document.querySelector(".admin-report-table-wrap");
-                let headWrap = document.querySelector(".admin-report-head-wrap");
-                let bodyTable = document.querySelector(".admin-report-table-wrap .admin-report-table");
-                let headTable = document.querySelector(".admin-report-head-table");
-
-                if (!topScroll || !scrollInner || !tableWrap || !headWrap || !bodyTable || !headTable) {
-                    return;
-                }
-
-                let tableWidth = bodyTable.scrollWidth;
-
-                scrollInner.style.width = tableWidth + "px";
-                headTable.style.width = tableWidth + "px";
-
-                topScroll.onscroll = function () {
-                    tableWrap.scrollLeft = topScroll.scrollLeft;
-                    headWrap.scrollLeft = topScroll.scrollLeft;
-                };
             },
 
             fnOpenReportTarget: function (item) {
@@ -526,9 +474,6 @@
         mounted() {
             this.fnLoadReportList();
 
-            this.$nextTick(function () {
-                this.fnSyncReportTableScroll();
-            });
         }
     });
 

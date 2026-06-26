@@ -60,27 +60,9 @@
                         <button type="button" class="admin-search-btn" @click="fnSearchBusinessUserList">검색</button>
                     </div>
 
-                    <div class="admin-user-sticky-area">
-                        <div class="admin-user-head-wrap">
-                            <table class="admin-user-table admin-user-head-table business-user-table">
-                                <thead>
-                                    <tr>
-                                        <th>사업자 아이디</th>
-                                        <th>기본 정보</th>
-                                        <th>업체</th>
-                                        <th>업체 상태</th>
-                                        <th>폐업 여부</th>
-                                        <th>평점</th>
-                                        <th>예약 건수(취소 외/취소)</th>
-                                    </tr>
-                                </thead>
-                            </table>
-                        </div>
-                    </div>
-
                     <div class="admin-user-table-wrap">
                         <table class="admin-user-table business-user-table">
-                            <thead class="admin-user-hidden-thead">
+                            <thead>
                                 <tr>
                                     <th>사업자 아이디</th>
                                     <th>기본 정보</th>
@@ -124,10 +106,6 @@
                                 </tr>
                             </tbody>
                         </table>
-                    </div>
-
-                    <div class="admin-user-top-scroll">
-                        <div class="admin-user-scroll-inner business-user-scroll-inner"></div>
                     </div>
 
                     <div class="admin-pagination" v-if="totalCount > 0">
@@ -444,10 +422,6 @@
                         if (data.result === "success") {
                             self.businessUserList = data.list || [];
                             self.totalCount = data.totalCount || 0;
-
-                            self.$nextTick(function () {
-                                self.fnSyncUserTableScroll();
-                            });
                         } else {
                             alert(data.message || "사업자 회원 목록을 불러오지 못했습니다.");
                         }
@@ -670,28 +644,6 @@
                 return this.fnEmpty(status);
             },
 
-            fnSyncUserTableScroll: function () {
-                let topScroll = document.querySelector(".admin-user-top-scroll");
-                let scrollInner = document.querySelector(".admin-user-scroll-inner");
-                let tableWrap = document.querySelector(".admin-user-table-wrap");
-                let headWrap = document.querySelector(".admin-user-head-wrap");
-                let bodyTable = document.querySelector(".admin-user-table-wrap .admin-user-table");
-                let headTable = document.querySelector(".admin-user-head-table");
-
-                if (!topScroll || !scrollInner || !tableWrap || !headWrap || !bodyTable || !headTable) {
-                    return;
-                }
-
-                let tableWidth = bodyTable.scrollWidth;
-
-                scrollInner.style.width = tableWidth + "px";
-                headTable.style.width = tableWidth + "px";
-
-                topScroll.onscroll = function () {
-                    tableWrap.scrollLeft = topScroll.scrollLeft;
-                    headWrap.scrollLeft = topScroll.scrollLeft;
-                };
-            },
             fnSearchBusinessUserList: function () {
                 this.currentPage = 1;
                 this.fnBusinessUserList();
@@ -790,9 +742,6 @@
         mounted() {
             this.fnBusinessUserList();
 
-            this.$nextTick(function () {
-                this.fnSyncUserTableScroll();
-            });
         }
     });
 

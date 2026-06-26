@@ -39,7 +39,9 @@
         <div id="app" class="user-page-wrap" v-cloak>
 
             <div class="user-page-container">
-                <jsp:include page="/WEB-INF/user/Mypage/sidebar.jsp" />
+                <jsp:include page="/WEB-INF/user/Mypage/sidebar.jsp">
+                    <jsp:param name="activeMenu" value="subscription" />
+                </jsp:include>
                 
 
                 <!-- 본문 -->

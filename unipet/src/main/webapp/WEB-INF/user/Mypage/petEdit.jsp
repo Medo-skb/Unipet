@@ -24,7 +24,9 @@
 
     <div class="user-page-container">
 
-        <jsp:include page="/WEB-INF/user/Mypage/sidebar.jsp" />
+        <jsp:include page="/WEB-INF/user/Mypage/sidebar.jsp">
+            <jsp:param name="activeMenu" value="pet" />
+        </jsp:include>
 
         <main class="user-content">
 

@@ -184,5 +184,65 @@ public class MainService {
 		}
 		return resultMap;
 	}
+	
+    // 홈페이지 문의 등록
+    public HashMap<String, Object> insertUnipetQna(HashMap<String, Object> map) {
+        HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+        try {
+            int cnt = mainMapper.insertUnipetQna(map);
+
+            if (cnt > 0) {
+                resultMap.put("result", "success");
+                resultMap.put("message", "문의가 등록되었습니다.");
+            } else {
+                resultMap.put("result", "fail");
+                resultMap.put("message", "문의 등록에 실패했습니다.");
+            }
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            resultMap.put("result", "fail");
+            resultMap.put("message", Message.MSG_SERVER_ERR);
+        }
+
+        return resultMap;
+    }
+
+    // 홈페이지 문의 내역 조회
+    public HashMap<String, Object> getUnipetQnaList(HashMap<String, Object> map) {
+        HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+        try {
+            int page = 1;
+            int pageSize = 10;
+
+            if (map.get("page") != null && !map.get("page").toString().equals("")) {
+                page = Integer.parseInt(map.get("page").toString());
+            }
+
+            int start = (page - 1) * pageSize;
+
+            map.put("start", start);
+            map.put("pageSize", pageSize);
+
+            List<Main> list = mainMapper.selectUnipetQnaList(map);
+            int count = mainMapper.selectUnipetQnaCount(map);
+
+            resultMap.put("list", list);
+            resultMap.put("count", count);
+            resultMap.put("page", page);
+            resultMap.put("pageSize", pageSize);
+            resultMap.put("result", "success");
+            resultMap.put("message", Message.MSG_SEARCH);
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            resultMap.put("result", "fail");
+            resultMap.put("message", Message.MSG_SERVER_ERR);
+        }
+
+        return resultMap;
+    }
     
 }
