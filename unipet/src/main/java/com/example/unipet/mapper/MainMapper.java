@@ -50,5 +50,14 @@ public interface MainMapper {
     
     // 유치원 업체 리스트
     public List<Main> selectKindergartenStoreList(HashMap<String, Object> map);
+
+    // 홈페이지 문의 등록
+    int insertUnipetQna(HashMap<String, Object> map);
+
+    // 홈페이지 문의 내역 조회
+    public List<Main> selectUnipetQnaList(HashMap<String, Object> map);
+
+    // 홈페이지 문의 내역 개수
+    int selectUnipetQnaCount(HashMap<String, Object> map);
     
 }

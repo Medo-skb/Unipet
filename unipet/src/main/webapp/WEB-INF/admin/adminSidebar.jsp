@@ -22,7 +22,7 @@
         </li>
 
         <li class="menu-item ${param.activeMenu eq 'qnaAnswer' ? 'active' : ''}">
-            <a href="/admin/qnaAnswer.do">쇼핑몰 문의 답변 관리</a>
+            <a href="/admin/qnaAnswer.do">문의 답변 관리</a>
         </li>
 
         <li class="menu-item ${param.activeMenu eq 'productManage' ? 'active' : ''}">

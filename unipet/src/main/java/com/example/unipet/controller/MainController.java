@@ -90,19 +90,95 @@ public class MainController {
         return "/main/main-search-product";
     }
     
-    // 커뮤니티 전체 검색
-    @RequestMapping("/main/search/board.do")
-    public String mainSearchBoard(Model model, @RequestParam HashMap<String, Object> map) {
-        model.addAttribute("keyword", map.get("keyword"));
-        model.addAttribute("bMainNo", map.get("bMainNo"));
-        return "/main/main-search-board";
+    // 고객센터 기본 진입
+    @RequestMapping("/unipet/customer.do")
+    public String customer(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+        return "redirect:/unipet/customer/inquiry.do";
     }
-    
+
+    // 고객센터 - 홈페이지 문의
+    @RequestMapping("/unipet/customer/inquiry.do")
+    public String customerInquiry(
+            HttpServletRequest request,
+            Model model,
+            @RequestParam HashMap<String, Object> map,
+            HttpSession session
+    ) throws Exception {
+
+        String userId = (String) session.getAttribute("sessionId");
+
+        if (userId == null || userId.equals("")) {
+            return "redirect:/user/login.do";
+        }
+
+        return "main/customer/customer-inquiry";
+    }
+
+    // 고객센터 - 문의 내역
+    @RequestMapping("/unipet/customer/history.do")
+    public String customerHistory(
+            HttpServletRequest request,
+            Model model,
+            @RequestParam HashMap<String, Object> map,
+            HttpSession session
+    ) throws Exception {
+
+        String userId = (String) session.getAttribute("sessionId");
+
+        if (userId == null || userId.equals("")) {
+            return "redirect:/user/login.do";
+        }
+
+        return "main/customer/customer-history";
+    }
+
     // 챗봇
     @RequestMapping("/unipet/chatbot.do")
-	public String gemini(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception {
-		return "main/gemini-chat2";
-	}
+    public String gemini(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+        return "main/gemini-chat";
+    }
+
+    // 홈페이지 문의 등록
+    @RequestMapping(value = "/unipet/customer/inquiry/insert.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+    @ResponseBody
+    public String insertUnipetQna(Model model, @RequestParam HashMap<String, Object> map, HttpSession session) throws Exception {
+        HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+        String userId = (String) session.getAttribute("sessionId");
+
+        if (userId == null || userId.equals("")) {
+            resultMap.put("result", "notLogin");
+            resultMap.put("message", "로그인 후 문의할 수 있습니다.");
+            return new Gson().toJson(resultMap);
+        }
+
+        map.put("userId", userId);
+
+        resultMap = mainService.insertUnipetQna(map);
+
+        return new Gson().toJson(resultMap);
+    }
+
+    // 홈페이지 문의 내역 조회
+    @RequestMapping(value = "/unipet/customer/history/list.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+    @ResponseBody
+    public String getUnipetQnaList(Model model, @RequestParam HashMap<String, Object> map, HttpSession session) throws Exception {
+        HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+        String userId = (String) session.getAttribute("sessionId");
+
+        if (userId == null || userId.equals("")) {
+            resultMap.put("result", "notLogin");
+            resultMap.put("message", "로그인 후 확인할 수 있습니다.");
+            return new Gson().toJson(resultMap);
+        }
+
+        map.put("userId", userId);
+
+        resultMap = mainService.getUnipetQnaList(map);
+
+        return new Gson().toJson(resultMap);
+    }
     
     // 메인페이지 리스트
     @RequestMapping(value = "/getMainBasicList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")

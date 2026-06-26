@@ -95,6 +95,11 @@ public class Admin {
     String ansStatus;
     String aContents;
 
+    // 통합 문의 관리용
+    String qnaCategory;
+    String qnaCategoryName;
+    String unaType;
+
     // 유저 정보
     String userName;
     String nickname;
@@ -123,6 +128,7 @@ public class Admin {
     String petName;
     String species;
     String breed;
+    String caution;
     String birthdate;
     String gender;
 
@@ -152,6 +158,12 @@ public class Admin {
     String ordAddr;
     String deliStatus;
     String ordDate;
+
+    // ORDER_DETAIL
+    Integer productKindCount;
+    Integer ordQty;
+    Integer unitPrice;
+    Integer productTotalPrice;
 
     // RESERVATION
     String rsvDate;

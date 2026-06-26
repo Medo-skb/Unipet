@@ -13,37 +13,79 @@
 		AND ADMIN_PWD = #{adminPwd}
 	</select>
 	
-	<!-- 쇼핑몰 문의 목록 -->
+	<!-- 통합 문의 목록: 상품 문의 + 홈페이지 문의 -->
 	<select id="selectQnaAnswerList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
-	    SELECT
-	        Q.QNA_NO AS qnaNo,
-	        Q.PRODUCT_NO AS productNo,
-	        P.PRODUCT_NAME AS productName,
-	        Q.QNA_TITLE AS qnaTitle,
-	        Q.Q_CONTENTS AS qContents,
-	        Q.A_CONTENTS AS aContents,
-	        Q.IS_SECRET AS isSecret,
-	        Q.ANS_STATUS AS ansStatus,
+	    SELECT *
+	    FROM (
+	        SELECT
+	            'PRODUCT' AS qnaCategory,
+	            '상품 문의' AS qnaCategoryName,
+	            Q.QNA_NO AS qnaNo,
+	            Q.PRODUCT_NO AS productNo,
+	            P.PRODUCT_NAME AS productName,
+	            NULL AS unaType,
+	            Q.QNA_TITLE AS qnaTitle,
+	            Q.Q_CONTENTS AS qContents,
+	            Q.A_CONTENTS AS aContents,
+	            Q.IS_SECRET AS isSecret,
+	            Q.ANS_STATUS AS ansStatus,
+	            Q.USER_ID AS userId,
+	            Q.CDATE AS cdate,
+	            U.USER_NAME AS userName,
+	            U.NICKNAME AS nickname
+	        FROM QNA Q
+	        LEFT JOIN PRODUCT P
+	            ON Q.PRODUCT_NO = P.PRODUCT_NO
+	        LEFT JOIN USERS U
+	            ON Q.USER_ID = U.USER_ID
 	
-	        Q.USER_ID AS userId,
-	        Q.CDATE AS cdate,
+	        UNION ALL
 	
-	        U.USER_NAME AS userName,
-	        U.NICKNAME AS nickname
-	
-	    FROM QNA Q
-	    LEFT JOIN PRODUCT P
-	        ON Q.PRODUCT_NO = P.PRODUCT_NO
-	
-	    LEFT JOIN USERS U
-	        ON Q.USER_ID = U.USER_ID
-	
+	        SELECT
+	            'HOME' AS qnaCategory,
+	            '홈페이지 문의' AS qnaCategoryName,
+	            UQ.UNA_NO AS qnaNo,
+	            NULL AS productNo,
+	            UQ.UNA_TYPE AS productName,
+	            UQ.UNA_TYPE AS unaType,
+	            UQ.UNA_TITLE AS qnaTitle,
+	            UQ.UNA_CONTENT AS qContents,
+	            UQ.UNA_ANSWER AS aContents,
+	            'Y' AS isSecret,
+	            UQ.ANSWER_YN AS ansStatus,
+	            UQ.USER_ID AS userId,
+	            UQ.CDATE AS cdate,
+	            U.USER_NAME AS userName,
+	            U.NICKNAME AS nickname
+	        FROM QNA_UNIPET UQ
+	        LEFT JOIN USERS U
+	            ON UQ.USER_ID = U.USER_ID
+	    ) QNA_ALL
 	    WHERE 1 = 1
+	
 	    <if test="ansStatus != null and ansStatus != ''">
-	        AND Q.ANS_STATUS = #{ansStatus}
+	        AND ansStatus = #{ansStatus}
 	    </if>
 	
-	    ORDER BY Q.QNA_NO DESC
+	    <if test="qnaCategory != null and qnaCategory != ''">
+	        AND qnaCategory = #{qnaCategory}
+	    </if>
+	
+	    <if test="unaType != null and unaType != ''">
+	        AND qnaCategory = 'HOME'
+	        AND unaType = #{unaType}
+	    </if>
+	
+	    <if test="keyword != null and keyword != ''">
+	        AND (
+	            productName LIKE CONCAT('%', #{keyword}, '%')
+	            OR qnaTitle LIKE CONCAT('%', #{keyword}, '%')
+	            OR qContents LIKE CONCAT('%', #{keyword}, '%')
+	            OR userId LIKE CONCAT('%', #{keyword}, '%')
+	        )
+	    </if>
+	
+	    ORDER BY cdate DESC, qnaNo DESC
 	</select>
 	
 	<!-- 쇼핑몰 문의 답변 등록 -->
@@ -52,6 +94,15 @@
 	    SET A_CONTENTS = #{aContents},
 	        ANS_STATUS = 'Y'
 	    WHERE QNA_NO = #{qnaNo}
+	</update>
+	
+	<!-- 홈페이지 문의 답변 등록 -->
+	<update id="updateUnipetQnaAnswer" parameterType="hashmap">
+	    UPDATE QNA_UNIPET
+	    SET UNA_ANSWER = #{aContents},
+	        ANSWER_YN = 'Y',
+	        UDATE = NOW()
+	    WHERE UNA_NO = #{qnaNo}
 	</update>
 	
 	<!-- 쇼핑몰 문의 삭제 -->
@@ -897,6 +948,15 @@
 		    <when test="sortType == 'reportDesc'">
 		        ORDER BY U.REP_COUNT DESC, U.CDATE DESC
 		    </when>
+		    <when test="sortType == 'reservationDesc'">
+		        ORDER BY reservationCount DESC, U.CDATE DESC
+		    </when>
+		    <when test="sortType == 'orderDesc'">
+		        ORDER BY orderCount DESC, U.CDATE DESC
+		    </when>
+		    <when test="sortType == 'reviewDesc'">
+		        ORDER BY reviewCount DESC, U.CDATE DESC
+		    </when>
 		    <otherwise>
 		        ORDER BY U.CDATE DESC
 		    </otherwise>
@@ -939,17 +999,20 @@
 
 	<!-- 회원 반려동물 상세 -->
 	<select id="selectAdminUserPetList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
-		SELECT
-			PET_NO AS petNo,
-			PET_NAME AS petName,
-			SPECIES AS species,
-			BREED AS breed,
-			BIRTHDATE AS birthdate,
-			GENDER AS gender,
-			CDATE AS cdate
-		FROM PET
-		WHERE USER_ID = #{userId}
-		ORDER BY PET_NO DESC
+	    SELECT
+	        P.PET_NO AS petNo,
+	        P.PET_NAME AS petName,
+	        P.SPECIES AS species,
+	        P.BREED AS breed,
+	        PB.CAUTION AS caution,
+	        P.BIRTHDATE AS birthdate,
+	        P.GENDER AS gender,
+	        P.CDATE AS cdate
+	    FROM PET P
+	    LEFT JOIN PET_BREED PB
+	        ON P.BREED = PB.BREED_NAME
+	    WHERE P.USER_ID = #{userId}
+	    ORDER BY P.PET_NO DESC
 	</select>
 
 	<!-- 회원 구독 상세 -->
@@ -997,19 +1060,81 @@
 
 	<!-- 회원 주문 상세 -->
 	<select id="selectAdminUserOrderList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
-		SELECT
-			ORD_NO AS ordNo,
-			COUPON_NO AS couponNo,
-			POINT_NO AS pointNo,
-			DIS_PRICE AS disPrice,
-			TOTAL_PRICE AS totalPrice,
-			ORD_STATUS AS ordStatus,
-			ORD_ADDR AS ordAddr,
-			DELI_STATUS AS deliStatus,
-			ORD_DATE AS ordDate
-		FROM ORDERS
-		WHERE USER_ID = #{userId}
-		ORDER BY ORD_NO DESC
+	    SELECT
+	        O.ORD_NO AS ordNo,
+	        O.COUPON_NO AS couponNo,
+	        O.POINT_NO AS pointNo,
+	        O.DIS_PRICE AS disPrice,
+	
+	        (
+	            SELECT P.PRODUCT_NAME
+	            FROM ORDER_DETAIL OD
+	            INNER JOIN PRODUCT P
+	                ON OD.PRODUCT_NO = P.PRODUCT_NO
+	            WHERE OD.ORD_NO = O.ORD_NO
+	            ORDER BY OD.PRODUCT_NO ASC
+	            LIMIT 1
+	        ) AS productName,
+	
+	        (
+	            SELECT COUNT(DISTINCT OD.PRODUCT_NO)
+	            FROM ORDER_DETAIL OD
+	            WHERE OD.ORD_NO = O.ORD_NO
+	        ) AS productKindCount,
+	
+	        O.TOTAL_PRICE AS totalPrice,
+	        O.ORD_STATUS AS ordStatus,
+	        O.ORD_ADDR AS ordAddr,
+	        O.DELI_STATUS AS deliStatus,
+	        O.ORD_DATE AS ordDate
+	    FROM ORDERS O
+	    WHERE O.USER_ID = #{userId}
+	    ORDER BY O.ORD_NO DESC
+	</select>
+	
+	<!-- 회원 주문 상품 상세 -->
+	<select id="selectAdminUserOrderProductList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        OD.ORD_NO AS ordNo,
+	        OD.PRODUCT_NO AS productNo,
+	        P.PRODUCT_NAME AS productName,
+	        OD.ORD_QTY AS ordQty,
+	        OD.UNIT_PRICE AS unitPrice,
+	        (OD.ORD_QTY * OD.UNIT_PRICE) AS productTotalPrice
+	    FROM ORDER_DETAIL OD
+	    INNER JOIN PRODUCT P
+	        ON OD.PRODUCT_NO = P.PRODUCT_NO
+	    WHERE OD.ORD_NO = #{ordNo}
+	    ORDER BY OD.PRODUCT_NO ASC
+	</select>
+	
+	<!-- 최근 30일 위험 동물 등록 회원 수 -->
+	<select id="selectRecentDangerPetUserCount" parameterType="hashmap" resultType="int">
+	    SELECT COUNT(DISTINCT P.USER_ID)
+	    FROM PET P
+	    INNER JOIN PET_BREED PB
+	        ON P.BREED = PB.BREED_NAME
+	    WHERE PB.CAUTION = 'Y'
+	      AND P.CDATE >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+	</select>
+	
+	<!-- 최근 30일 위험 동물 등록 회원 상세 -->
+	<select id="selectRecentDangerPetUserList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        U.USER_ID AS userId,
+	        U.USER_NAME AS userName,
+	        GROUP_CONCAT(DISTINCT P.BREED ORDER BY P.BREED SEPARATOR ', ') AS breed
+	    FROM PET P
+	    INNER JOIN PET_BREED PB
+	        ON P.BREED = PB.BREED_NAME
+	    INNER JOIN USERS U
+	        ON P.USER_ID = U.USER_ID
+	    WHERE PB.CAUTION = 'Y'
+	      AND P.CDATE >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+	    GROUP BY
+	        U.USER_ID,
+	        U.USER_NAME
+	    ORDER BY U.USER_ID ASC
 	</select>
 
 	<!-- 회원 예약 상세 -->

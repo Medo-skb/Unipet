@@ -27,6 +27,13 @@
                         <h2>회원 조회 및 관리</h2>
                         <div class="content-desc">일반 사용자 회원 정보와 활동 내역을 조회합니다.</div>
 
+                        <div class="admin-danger-summary"
+                            :class="{ active: dangerPetCount > 0 }"
+                            @click="fnOpenDangerPetModal">
+                            최근 30일 안에 위험 동물 등록한 회원
+                            <strong>{{ dangerPetCount }}</strong>명
+                        </div>
+
                         <div class="admin-search-box">
                             <select class="admin-search-select" v-model="userStatus" @change="fnSearchUserList">
                                 <option value="">전체 상태</option>
@@ -38,6 +45,9 @@
                             <select class="admin-search-select" v-model="sortType" @change="fnSearchUserList">
                                 <option value="">기본순</option>
                                 <option value="reportDesc">신고 많은순</option>
+                                <option value="reservationDesc">예약 많은순</option>
+                                <option value="orderDesc">주문 많은순</option>
+                                <option value="reviewDesc">리뷰 많은순</option>
                             </select>
 
                             <input
@@ -49,32 +59,9 @@
                             <button type="button" class="admin-search-btn" @click="fnSearchUserList">검색</button>
                         </div>
 
-                        <div class="admin-user-sticky-area">
-                            <div class="admin-user-head-wrap">
-                                <table class="admin-user-table admin-user-head-table">
-                                    <thead>
-                                        <tr>
-                                            <th>유저 아이디</th>
-                                            <th>유저 상태</th>
-                                            <th>기본 정보</th>
-                                            <th>신고 누적 횟수</th>
-                                            <th>반려동물</th>
-                                            <th>구독 여부</th>
-                                            <th>포인트</th>
-                                            <th>쿠폰 내역</th>
-                                            <th>주문 내역</th>
-                                            <th>예약 내역</th>
-                                            <th>리뷰 내역</th>
-                                            <th>커뮤니티 내역</th>
-                                        </tr>
-                                    </thead>
-                                </table>
-                            </div>
-                        </div>
-
                         <div class="admin-user-table-wrap">
                             <table class="admin-user-table">
-                                <thead class="admin-user-hidden-thead">
+                                <thead>
                                     <tr>
                                         <th>유저 아이디</th>
                                         <th>유저 상태</th>
@@ -152,10 +139,6 @@
                                     </tr>
                                 </tbody>
                             </table>
-                        </div>
-
-                        <div class="admin-user-top-scroll">
-                            <div class="admin-user-scroll-inner"></div>
                         </div>
 
                         <div class="empty-box" v-if="userList.length === 0">
@@ -262,6 +245,7 @@
                                 <th>반려동물명</th>
                                 <th>종</th>
                                 <th>품종</th>
+                                <th>경고</th>
                                 <th>생일</th>
                                 <th>성별</th>
                                 <th>등록일</th>
@@ -272,6 +256,11 @@
                                 <td>{{ fnEmpty(item.petName) }}</td>
                                 <td>{{ fnEmpty(item.species) }}</td>
                                 <td>{{ fnEmpty(item.breed) }}</td>
+                                <td>
+                                    <span :class="item.caution === 'Y' ? 'danger-pet-badge' : ''">
+                                        {{ fnPetCaution(item.caution) }}
+                                    </span>
+                                </td>
                                 <td>{{ fnEmpty(item.birthdate) }}</td>
                                 <td>{{ fnEmpty(item.gender) }}</td>
                                 <td>{{ fnEmpty(item.cdate) }}</td>
@@ -326,6 +315,7 @@
                                 <th>쿠폰번호</th>
                                 <th>포인트번호</th>
                                 <th>할인가</th>
+                                <th>주문 상품</th>
                                 <th>총금액</th>
                                 <th>주문상태</th>
                                 <th>배송상태</th>
@@ -339,6 +329,11 @@
                                 <td>{{ fnEmptyNo(item.couponNo) }}</td>
                                 <td>{{ fnEmptyNo(item.pointNo) }}</td>
                                 <td>{{ fnEmpty(item.disPrice) }}</td>
+                                <td>
+                                    <button type="button" class="detail-link-btn" @click="fnOpenOrderProductModal(item)">
+                                        {{ fnOrderProductTitle(item) }}
+                                    </button>
+                                </td>
                                 <td>{{ fnEmpty(item.totalPrice) }}</td>
                                 <td>{{ fnOrdStatus(item.ordStatus) }}</td>
                                 <td>{{ fnDeliStatus(item.deliStatus) }}</td>
@@ -419,13 +414,80 @@
                         </tbody>
                     </table>
 
+                    <div class="admin-user-modal-bg" v-if="orderProductModalOpen">
+                        <div class="admin-user-modal admin-order-product-modal">
+                            <div class="admin-user-modal-header">
+                                <h3>주문 상품 상세</h3>
+                                <button type="button" class="admin-user-modal-close" @click="fnCloseOrderProductModal">×</button>
+                            </div>
+
+                            <div class="admin-user-modal-body">
+                                <table class="admin-detail-table">
+                                    <thead>
+                                        <tr>
+                                            <th>주문 상품 이름</th>
+                                            <th>수량</th>
+                                            <th>개당 가격</th>
+                                            <th>총 가격</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="item in orderProductList" :key="item.productNo">
+                                            <td>{{ fnEmpty(item.productName) }}</td>
+                                            <td>{{ fnEmpty(item.ordQty) }}</td>
+                                            <td>{{ fnEmpty(item.unitPrice) }}</td>
+                                            <td>{{ fnEmpty(item.productTotalPrice) }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                <div class="empty-box" v-if="orderProductList.length === 0">
+                                    조회된 주문 상품이 없습니다.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="empty-box" v-if="modalType !== 'basic' && modalType !== 'subscription' && detailList.length === 0">
                         조회된 상세 내역이 없습니다.
                     </div>
                 </div>
             </div>
         </div>
+        <div class="admin-user-modal-bg" v-if="dangerPetModalOpen">
+            <div class="admin-user-modal admin-danger-pet-modal">
+                <div class="admin-user-modal-header">
+                    <h3>최근 30일 위험 동물 등록 회원</h3>
+                    <button type="button" class="admin-user-modal-close" @click="fnCloseDangerPetModal">×</button>
+                </div>
+
+                <div class="admin-user-modal-body admin-danger-pet-modal-body">
+                    <table class="admin-detail-table admin-danger-pet-table">
+                        <thead>
+                            <tr>
+                                <th>회원 아이디</th>
+                                <th>이름</th>
+                                <th>등록한 품종</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="item in dangerPetList" :key="item.userId">
+                                <td>{{ fnEmpty(item.userId) }}</td>
+                                <td>{{ fnEmpty(item.userName) }}</td>
+                                <td>{{ fnEmpty(item.breed) }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="empty-box" v-if="dangerPetList.length === 0">
+                        최근 30일 안에 위험 동물을 등록한 회원이 없습니다.
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
+    
 
     <jsp:include page="/WEB-INF/footer/footer.jsp" />
 
@@ -447,6 +509,13 @@
                     basicInfo: null,
                     subscriptionInfo: null,
                     detailList: [],
+
+                    orderProductModalOpen: false,
+                    orderProductList: [],
+
+                    dangerPetCount: 0,
+                    dangerPetModalOpen: false,
+                    dangerPetList: [],
 
                     userStatusEditMode: false,
                     nicknameEditMode: false,
@@ -491,9 +560,6 @@
                                 self.userList = data.list || [];
                                 self.totalCount = data.totalCount || 0;
 
-                                self.$nextTick(function () {
-                                    self.fnSyncUserTableScroll();
-                                });
                             } else {
                                 alert(data.message || "회원 목록을 불러오지 못했습니다.");
                             }
@@ -528,6 +594,37 @@
                     this.fnOpenListModal("order", "주문 내역", "/admin/user/orderList.dox", item.userId);
                 },
 
+                fnOpenOrderProductModal: function (item) {
+                    let self = this;
+
+                    self.orderProductModalOpen = true;
+                    self.orderProductList = [];
+
+                    $.ajax({
+                        url: "/admin/user/orderProductList.dox",
+                        type: "POST",
+                        dataType: "json",
+                        data: {
+                            ordNo: item.ordNo
+                        },
+                        success: function (data) {
+                            if (data.result === "success") {
+                                self.orderProductList = data.list || [];
+                            } else {
+                                alert(data.message || "주문 상품을 불러오지 못했습니다.");
+                            }
+                        },
+                        error: function () {
+                            alert("서버 통신 중 오류가 발생했습니다.");
+                        }
+                    });
+                },
+
+                fnCloseOrderProductModal: function () {
+                    this.orderProductModalOpen = false;
+                    this.orderProductList = [];
+                },
+
                 fnOpenReservation: function (item) {
                     this.fnOpenListModal("reservation", "예약 내역", "/admin/user/reservationList.dox", item.userId);
                 },
@@ -538,6 +635,49 @@
 
                 fnOpenReport: function (item) {
                     this.fnOpenListModal("report", "신고 상세", "/admin/user/reportList.dox", item.userId);
+                },
+
+                fnLoadDangerPetCount: function () {
+                    let self = this;
+
+                    $.ajax({
+                        url: "/admin/user/dangerPetCount.dox",
+                        type: "POST",
+                        dataType: "json",
+                        success: function (data) {
+                            if (data.result === "success") {
+                                self.dangerPetCount = data.count || 0;
+                            }
+                        }
+                    });
+                },
+
+                fnOpenDangerPetModal: function () {
+                    let self = this;
+
+                    self.dangerPetModalOpen = true;
+                    self.dangerPetList = [];
+
+                    $.ajax({
+                        url: "/admin/user/dangerPetList.dox",
+                        type: "POST",
+                        dataType: "json",
+                        success: function (data) {
+                            if (data.result === "success") {
+                                self.dangerPetList = data.list || [];
+                            } else {
+                                alert(data.message || "위험 동물 등록 회원을 불러오지 못했습니다.");
+                            }
+                        },
+                        error: function () {
+                            alert("서버 통신 중 오류가 발생했습니다.");
+                        }
+                    });
+                },
+
+                fnCloseDangerPetModal: function () {
+                    this.dangerPetModalOpen = false;
+                    this.dangerPetList = [];
                 },
 
                 fnOpenInfoModal: function (type, title, url, userId) {
@@ -685,6 +825,7 @@
                     if (type === "COMMENT") return "커뮤니티 댓글";
                     return this.fnEmpty(type);
                 },
+
                 fnShortId: function (userId) {
                     if (!userId) {
                         return "-";
@@ -697,34 +838,32 @@
                     return userId;
                 },
 
-                fnSyncUserTableScroll: function () {
-                    let topScroll = document.querySelector(".admin-user-top-scroll");
-                    let scrollInner = document.querySelector(".admin-user-scroll-inner");
-                    let tableWrap = document.querySelector(".admin-user-table-wrap");
-                    let headWrap = document.querySelector(".admin-user-head-wrap");
-                    let bodyTable = document.querySelector(".admin-user-table-wrap .admin-user-table");
-                    let headTable = document.querySelector(".admin-user-head-table");
-
-                    if (!topScroll || !scrollInner || !tableWrap || !headWrap || !bodyTable || !headTable) {
-                        return;
-                    }
-
-                    let tableWidth = bodyTable.scrollWidth;
-
-                    scrollInner.style.width = tableWidth + "px";
-                    headTable.style.width = tableWidth + "px";
-
-                    topScroll.onscroll = function () {
-                        tableWrap.scrollLeft = topScroll.scrollLeft;
-                        headWrap.scrollLeft = topScroll.scrollLeft;
-                    };
-                },
                 fnEmptyNo: function (value) {
                     if (value === null || value === undefined || value === "" || value === 0) {
                         return "-";
                     }
                     return value;
                 },
+
+                fnPetCaution: function (caution) {
+                    if (caution === "Y") return "위험";
+                    return "-";
+                },
+
+                fnOrderProductTitle: function (item) {
+                    if (!item.productName) {
+                        return "상품 없음";
+                    }
+
+                    let count = Number(item.productKindCount || 0);
+
+                    if (count <= 1) {
+                        return item.productName;
+                    }
+
+                    return item.productName + " 외 " + (count - 1);
+                },
+
                 fnEditUserStatus: function () {
                     this.userStatusEditMode = true;
                     this.editUserStatus = this.basicInfo ? this.basicInfo.userStatus : "";
@@ -820,10 +959,7 @@
             },
             mounted() {
                 this.fnUserList();
-
-                this.$nextTick(function () {
-                    this.fnSyncUserTableScroll();
-                });
+                this.fnLoadDangerPetCount();
             }
         });
 

@@ -19,7 +19,10 @@ public interface AdminMapper {
 
 	// 쇼핑몰 문의 답변 등록
 	int updateQnaAnswer(HashMap<String, Object> map);
-	
+
+	// 홈페이지 문의 답변 등록
+	int updateUnipetQnaAnswer(HashMap<String, Object> map);
+
 	// 쇼핑몰 문의 삭제
 	int deleteQna(HashMap<String, Object> map);
 	
@@ -139,6 +142,9 @@ public interface AdminMapper {
 	// 회원 주문 상세
 	List<Admin> selectAdminUserOrderList(HashMap<String, Object> map);
 
+	// 회원 주문 상품 상세
+	List<Admin> selectAdminUserOrderProductList(HashMap<String, Object> map);
+
 	// 회원 예약 상세
 	List<Admin> selectAdminUserReservationList(HashMap<String, Object> map);
 
@@ -182,6 +188,12 @@ public interface AdminMapper {
 	int updateUserRepCount(Map<String, Object> map);
 	
 	int selectAdminUserCount(HashMap<String, Object> map);
+
+	// 최근 30일 위험 동물 등록 회원 수
+	int selectRecentDangerPetUserCount(HashMap<String, Object> map);
+
+	// 최근 30일 위험 동물 등록 회원 상세
+	List<Admin> selectRecentDangerPetUserList(HashMap<String, Object> map);
 
 	int selectAdminBusinessUserCount(HashMap<String, Object> map);
 

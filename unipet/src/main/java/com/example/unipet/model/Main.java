@@ -41,8 +41,18 @@ public class Main {
 	String filePath;
 	String fileName;
 	
-	// 사용자 정보
-	String userId;
-	String socialType;
-	
+    // 사용자 정보
+    String userId;
+    String socialType;
+
+    // 홈페이지 문의
+    int unaNo;
+    String unaType;
+    String unaTitle;
+    String unaContent;
+    String unaAnswer;
+    String answerYn;
+    String cdate;
+    String udate;
+    
 }

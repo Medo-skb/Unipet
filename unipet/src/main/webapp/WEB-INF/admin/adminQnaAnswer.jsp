@@ -26,24 +26,53 @@
 
                 <section class="admin-content">
                     <div class="content-card">
-                        <h2>쇼핑몰 문의 답변 관리</h2>
-                        <div class="content-desc">쇼핑몰 상품 문의와 답변 상태를 조회합니다.</div>
+                        <h2>문의 답변 관리</h2>
+                        <div class="content-desc">상품 문의와 홈페이지 문의를 조회하고 답변을 등록합니다.</div>
 
-                        <div class="admin-search-box">
+                        <div class="admin-search-box qna-search-box">
                             <select class="admin-search-select" v-model="ansStatus" @change="fnSearchQnaAnswerList">
-                                <option value="">전체</option>
+                                <option value="">전체 답변</option>
                                 <option value="N">미답변</option>
                                 <option value="Y">답변 완료</option>
                             </select>
+
+                            <select class="admin-search-select" v-model="qnaCategory" @change="fnSearchQnaAnswerList">
+                                <option value="">전체 문의</option>
+                                <option value="PRODUCT">상품 문의</option>
+                                <option value="HOME">홈페이지 문의</option>
+                            </select>
+
+                            <select class="admin-search-select qna-type-select" v-model="unaType" @change="fnSearchQnaAnswerList">
+                                <option value="">전체 유형</option>
+                                <option value="계정/로그인">계정/로그인</option>
+                                <option value="결제">결제</option>
+                                <option value="배송">배송</option>
+                                <option value="교환/반품/환불">교환/반품/환불</option>
+                                <option value="쿠폰/이벤트">쿠폰/이벤트</option>
+                                <option value="사이트 오류">사이트 오류</option>
+                                <option value="입점/사업자 문의">입점/사업자 문의</option>
+                                <option value="기타">기타</option>
+                            </select>
+
+                            <input type="text"
+                                class="admin-search-input qna-search-input"
+                                v-model="qnaKeyword"
+                                placeholder="상품명, 문의 유형, 제목, 내용, 문의자 ID 검색"
+                                @keyup.enter="fnSearchQnaAnswerList">
+
+                            <button type="button" class="admin-search-btn" @click="fnSearchQnaAnswerList">
+                                검색
+                            </button>
                         </div>
 
-                        <div class="admin-qna-table-wrap" v-if="qnaAnswerList.length > 0">
+                        <div class="admin-qna-table-wrap" v-if="filteredQnaList.length > 0">
                             <table class="admin-user-table admin-qna-table">
                                 <thead>
                                     <tr>
                                         <th>답변여부</th>
+                                        <th>문의 카테고리</th>
                                         <th>문의자 ID</th>
-                                        <th>상품 명</th>
+                                        <th>문의 유형/상품명</th>
                                         <th>문의 제목</th>
                                         <th>문의 내용</th>
                                         <th>비공개 여부</th>
@@ -51,7 +80,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="item in pagedQnaList" :key="item.qnaNo">
+                                    <tr v-for="item in pagedQnaList" :key="item.qnaCategory + '-' + item.qnaNo">
                                         <td>
                                             <button
                                                 v-if="!fnIsAnswered(item)"
@@ -67,6 +96,12 @@
                                         </td>
 
                                         <td>
+                                            <span class="qna-ellipsis" :title="fnEmpty(item.qnaCategoryName)">
+                                                {{ fnEmpty(item.qnaCategoryName) }}
+                                            </span>
+                                        </td>
+
+                                        <td>
                                             <span class="qna-ellipsis" :title="fnEmpty(item.userId)">
                                                 {{ fnEmpty(item.userId) }}
                                             </span>
@@ -74,12 +109,20 @@
 
                                         <td>
                                             <button
+                                                v-if="item.qnaCategory === 'PRODUCT'"
                                                 type="button"
                                                 class="detail-link-btn qna-ellipsis-btn"
                                                 :title="fnEmpty(item.productName)"
                                                 @click="fnGoProductDetail(item.productNo)">
                                                 {{ fnEmpty(item.productName) }}
                                             </button>
+
+                                            <span
+                                                v-else
+                                                class="qna-ellipsis"
+                                                :title="fnEmpty(item.unaType || item.productName)">
+                                                {{ fnEmpty(item.unaType || item.productName) }}
+                                            </span>
                                         </td>
 
                                         <td>
@@ -107,9 +150,9 @@
                         </div>
 
                         <div class="empty-box" v-else>
-                            조회된 상품 문의가 없습니다.
+                            조회된 문의가 없습니다.
                         </div>
-                        <div class="admin-pagination" v-if="qnaAnswerList.length > 0">
+                        <div class="admin-pagination" v-if="filteredQnaList.length > 0">
                             <button type="button" class="page-btn" :disabled="currentPage === 1" @click="fnMovePage(currentPage - 1)">
                                 이전
                             </button>
@@ -142,8 +185,16 @@
                     <table class="approve-table">
                         <tbody>
                             <tr>
+                                <th>문의 카테고리</th>
+                                <td>{{ fnEmpty(selectedQna.qnaCategoryName) }}</td>
+                            </tr>
+                            <tr>
                                 <th>문의자 ID</th>
                                 <td>{{ fnEmpty(selectedQna.userId) }}</td>
+                            </tr>
+                            <tr>
+                                <th>문의 유형/상품명</th>
+                                <td>{{ fnEmpty(selectedQna.qnaCategory === 'HOME' ? selectedQna.unaType : selectedQna.productName) }}</td>
                             </tr>
                             <tr>
                                 <th>문의 날짜</th>
@@ -193,6 +244,10 @@
     data() {
         return {
             ansStatus: "",
+            qnaCategory: "",
+            unaType: "",
+            qnaKeyword: "",
+            searchKeyword: "",
             qnaAnswerList: [],
             currentPage: 1,
             pageSize: 10,
@@ -202,8 +257,12 @@
         };
     },
     computed: {
+        filteredQnaList: function () {
+            return this.qnaAnswerList;
+        },
+
         totalPage: function () {
-            return Math.ceil(this.qnaAnswerList.length / this.pageSize);
+            return Math.ceil(this.filteredQnaList.length / this.pageSize);
         },
 
         pageList: function () {
@@ -222,7 +281,7 @@
             let start = (this.currentPage - 1) * this.pageSize;
             let end = start + this.pageSize;
 
-            return this.qnaAnswerList.slice(start, end);
+            return this.filteredQnaList.slice(start, end);
         }
     },
     methods: {
@@ -234,7 +293,10 @@
                 type: "POST",
                 dataType: "json",
                 data: {
-                    ansStatus: self.ansStatus
+                    ansStatus: self.ansStatus,
+                    qnaCategory: self.qnaCategory,
+                    unaType: self.unaType,
+                    keyword: self.searchKeyword
                 },
                 success: function (data) {
                     if (data.result === "success") {
@@ -268,7 +330,7 @@
         fnSaveQnaAnswer: function () {
             let self = this;
 
-            if (!self.selectedQna || !self.selectedQna.qnaNo) {
+            if (!self.selectedQna || !self.selectedQna.qnaNo || !self.selectedQna.qnaCategory) {
                 alert("문의 정보가 없습니다.");
                 return;
             }
@@ -288,6 +350,7 @@
                 dataType: "json",
                 data: {
                     qnaNo: self.selectedQna.qnaNo,
+                    qnaCategory: self.selectedQna.qnaCategory,
                     aContents: self.answerContents.trim()
                 },
                 success: function (data) {
@@ -306,6 +369,10 @@
         },
 
         fnGoProductDetail: function (productNo) {
+            if (!productNo) {
+                return;
+            }
+
             location.href = "/product/view.do?productNo=" + productNo;
         },
 
@@ -337,6 +404,12 @@
         },
         fnSearchQnaAnswerList: function () {
             this.currentPage = 1;
+            this.searchKeyword = this.qnaKeyword;
+
+            if (this.unaType && this.qnaCategory === "PRODUCT") {
+                this.qnaCategory = "HOME";
+            }
+
             this.fnQnaAnswerList();
         },
 

@@ -41,12 +41,18 @@ public class AdminService {
 	    return resultMap;
 	}
 	
-	// 쇼핑몰 문의 답변 등록
+	// 문의 답변 등록
 	public HashMap<String, Object> editQnaAnswer(HashMap<String, Object> map){
 	    HashMap<String, Object> resultMap = new HashMap<>();
 
 	    try {
-	        adminMapper.updateQnaAnswer(map);
+	        String qnaCategory = map.get("qnaCategory") == null ? "" : map.get("qnaCategory").toString();
+
+	        if ("HOME".equals(qnaCategory)) {
+	            adminMapper.updateUnipetQnaAnswer(map);
+	        } else {
+	            adminMapper.updateQnaAnswer(map);
+	        }
 
 	        resultMap.put("result", "success");
 	    } catch (Exception e) {
@@ -401,6 +407,44 @@ public class AdminService {
 	    return resultMap;
 	}
 
+	// 최근 30일 위험 동물 등록 회원 수
+	public HashMap<String, Object> getRecentDangerPetUserCount(HashMap<String, Object> map) {
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+	    try {
+	        int count = adminMapper.selectRecentDangerPetUserCount(map);
+
+	        resultMap.put("count", count);
+	        resultMap.put("result", "success");
+	        resultMap.put("message", Message.MSG_SEARCH);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        resultMap.put("result", "fail");
+	        resultMap.put("message", Message.MSG_SERVER_ERR);
+	    }
+
+	    return resultMap;
+	}
+
+	// 최근 30일 위험 동물 등록 회원 상세
+	public HashMap<String, Object> getRecentDangerPetUserList(HashMap<String, Object> map) {
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+	    try {
+	        List<Admin> list = adminMapper.selectRecentDangerPetUserList(map);
+
+	        resultMap.put("list", list);
+	        resultMap.put("result", "success");
+	        resultMap.put("message", Message.MSG_SEARCH);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        resultMap.put("result", "fail");
+	        resultMap.put("message", Message.MSG_SERVER_ERR);
+	    }
+
+	    return resultMap;
+	}
+
 	// 회원 기본 정보 상세
 	public HashMap<String, Object> getAdminUserBasic(HashMap<String, Object> map) {
 	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
@@ -566,6 +610,25 @@ public class AdminService {
 
 	    try {
 	        List<Admin> list = adminMapper.selectAdminUserOrderList(map);
+
+	        resultMap.put("list", list);
+	        resultMap.put("result", "success");
+	        resultMap.put("message", Message.MSG_SEARCH);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        resultMap.put("result", "fail");
+	        resultMap.put("message", Message.MSG_SERVER_ERR);
+	    }
+
+	    return resultMap;
+	}
+
+	// 회원 주문 상품 상세
+	public HashMap<String, Object> getAdminUserOrderProductList(HashMap<String, Object> map) {
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+	    try {
+	        List<Admin> list = adminMapper.selectAdminUserOrderProductList(map);
 
 	        resultMap.put("list", list);
 	        resultMap.put("result", "success");

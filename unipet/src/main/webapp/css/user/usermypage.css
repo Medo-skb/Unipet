@@ -3,10 +3,6 @@ h1, h2, h3, p, ul, li {
     padding: 0;
 }
 
-button {
-    font-family: inherit;
-}
-
 .user-page-wrap {
     width: 100%;
     min-height: 100vh;
@@ -25,14 +21,14 @@ button {
 
 .user-sidebar {
     width: 240px;
+    flex-shrink: 0;
     border: 1px solid var(--line-soft);
     border-radius: 18px;
     background: #fff;
     overflow: hidden;
-    flex-shrink: 0;
 }
 
-.sidebar-title {
+.user-sidebar .sidebar-title {
     padding: 26px 22px;
     font-size: 24px;
     font-weight: 700;
@@ -40,42 +36,51 @@ button {
     border-bottom: 1px solid var(--line-soft);
 }
 
-.sidebar-menu {
+.user-sidebar .sidebar-menu {
     list-style: none;
+    margin: 0;
+    padding: 0;
 }
 
-.menu-item {
+.user-sidebar .menu-item {
     border-bottom: 1px solid var(--line-soft);
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+    cursor: default;
 }
 
-.menu-item:last-child {
+.user-sidebar .menu-item:last-child {
     border-bottom: none;
 }
 
-.menu-item button {
-    width: 100%;
+.user-sidebar .menu-item a {
     display: block;
     padding: 18px 22px;
-    border: none;
-    background: #fff;
-    color: var(--text-main);
     font-size: 17px;
     font-weight: 600;
-    text-align: left;
-    cursor: pointer;
-    transition: color 0.2s ease, padding-left 0.2s ease;
+    color: var(--text-main);
+    background: #fff;
+    text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease, padding-left 0.2s ease;
 }
 
-.menu-item button:hover {
+.user-sidebar .menu-item a:hover {
     color: var(--main);
     padding-left: 28px;
     border-left: 4px solid var(--main);
+    text-decoration: none;
 }
 
-.menu-item.active button {
+.user-sidebar .menu-item.active a {
     color: var(--main);
     font-weight: 700;
     border-left: 4px solid var(--main);
+}
+
+.user-sidebar .menu-item.active a:hover {
+    color: var(--main);
+    padding-left: 22px;
 }
 
 .user-content {
