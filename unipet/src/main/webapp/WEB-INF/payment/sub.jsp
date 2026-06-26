@@ -94,7 +94,6 @@
                     data: param,
                     success: function (data) {
                         self.info = data.info;
-                        console.log(data);
                     }
                 });
             },
