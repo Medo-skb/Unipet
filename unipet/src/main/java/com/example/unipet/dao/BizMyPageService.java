@@ -587,14 +587,53 @@ public class BizMyPageService {
 	    return resultMap;
 	}
 	
+	// 사업자번호 중복 확인
+	public HashMap<String, Object> checkBiznum(HashMap<String, Object> map) {
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+	    try {
+	        int count = bizMyPageMapper.checkBiznum(map);
+
+	        resultMap.put("result", "success");
+	        resultMap.put("count", count);
+	        resultMap.put("message", count > 0 ? "이미 등록된 사업자번호입니다." : "사용 가능한 사업자번호입니다.");
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        resultMap.put("result", "fail");
+	        resultMap.put("message", "사업자번호 중복확인 중 오류가 발생했습니다.");
+	    }
+
+	    return resultMap;
+	}
+
 	// 반려 후 재신청
 	public HashMap<String, Object> editRejectedStore(HashMap<String, Object> map) {
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
 		try {
-			int result = bizMyPageMapper.updateRejectedStore(map);
+		    if (map.get("biznum") == null || String.valueOf(map.get("biznum")).isBlank()) {
+		        resultMap.put("result", "fail");
+		        resultMap.put("message", "사업자번호를 입력해주세요.");
+		        return resultMap;
+		    }
 
-			resultMap.put("result", "success");
+		    String biznum = String.valueOf(map.get("biznum"));
+		    if (!biznum.matches("^\\d{3}-\\d{2}-\\d{5}$")) {
+		        resultMap.put("result", "fail");
+		        resultMap.put("message", "사업자번호를 XXX-XX-XXXXX 형식으로 입력해주세요.");
+		        return resultMap;
+		    }
+
+		    int biznumCount = bizMyPageMapper.checkBiznum(map);
+		    if (biznumCount > 0) {
+		        resultMap.put("result", "fail");
+		        resultMap.put("message", "이미 등록된 사업자번호입니다.");
+		        return resultMap;
+		    }
+
+		    int result = bizMyPageMapper.updateRejectedStore(map);
+
+		    resultMap.put("result", "success");
 			resultMap.put("message", "재신청되었습니다.");
 		} catch (Exception e) {
 			System.out.println(e.getMessage());

@@ -274,7 +274,13 @@ public class UserController {
 	@PostMapping("/user/checkBiz.dox")
 	@ResponseBody
 	public String checkBizUser(@RequestParam HashMap<String, Object> map) {
-		return gson.toJson(userService.checkStoreUser(map));
+	    return gson.toJson(userService.checkStoreUser(map));
+	}
+
+	@PostMapping("/user/checkBiznum.dox")
+	@ResponseBody
+	public String checkBiznum(@RequestParam HashMap<String, Object> map) {
+	    return gson.toJson(userService.checkBiznum(map));
 	}
 
 	// 외부업체 검색

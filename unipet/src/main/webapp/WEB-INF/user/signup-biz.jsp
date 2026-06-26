@@ -99,6 +99,19 @@
                 </div>
 
                 <div class="input-group">
+                    <label>사업자번호</label>
+                    <div class="inline-box biznum-box">
+                        <input type="text" class="input-field biznum-input" v-model="biznum1" maxlength="3" placeholder="123" @input="fnOnlyBiznum('biznum1', 3)">
+                        <span class="biznum-dash">-</span>
+                        <input type="text" class="input-field biznum-input" v-model="biznum2" maxlength="2" placeholder="45" @input="fnOnlyBiznum('biznum2', 2)">
+                        <span class="biznum-dash">-</span>
+                        <input type="text" class="input-field biznum-input" v-model="biznum3" maxlength="5" placeholder="67890" @input="fnOnlyBiznum('biznum3', 5)">
+                        <button type="button" class="btn-sub" @click="fnCheckBiznum">중복확인</button>
+                    </div>
+                    <div v-if="biznumMsg" class="info-text" :class="{ success: biznumChecked }">{{ biznumMsg }}</div>
+                </div>
+
+                <div class="input-group">
                     <label>사업자등록증</label>
                     <input type="file" class="input-field file-field" @change="fnHandleFile" accept=".jpg,.jpeg,.png,.pdf">
                     <div class="info-text">JPG, PNG, PDF 형식만 업로드 가능합니다. (최대 5MB)</div>
@@ -129,10 +142,15 @@
                 pwd: "",
                 pwdCheck: "",
                 userName: "",
+                biznum1: "",
+                biznum2: "",
+                biznum3: "",
                 bizFile: null,
 
                 idChecked: false,
-                idMsg: ""
+                idMsg: "",
+                biznumChecked: false,
+                biznumMsg: ""
             };
         },
         methods: {
@@ -222,6 +240,50 @@
                 });
             },
 
+            // 사업자번호 숫자만 입력
+            fnOnlyBiznum: function (key, maxLength) {
+                this[key] = this[key].replace(/[^0-9]/g, "").slice(0, maxLength);
+                this.biznumChecked = false;
+                this.biznumMsg = "";
+            },
+
+            // 사업자번호 조합
+            fnGetBiznum: function () {
+                return this.biznum1 + "-" + this.biznum2 + "-" + this.biznum3;
+            },
+
+            // 사업자번호 중복확인
+            fnCheckBiznum: function () {
+                let self = this;
+                let biznum = self.fnGetBiznum();
+
+                if (self.biznum1.length !== 3 || self.biznum2.length !== 2 || self.biznum3.length !== 5) {
+                    alert("사업자번호를 XXX-XX-XXXXX 형식으로 입력해주세요.");
+                    return;
+                }
+
+                $.ajax({
+                    url: "/user/checkBiznum.dox",
+                    type: "POST",
+                    dataType: "json",
+                    data: { biznum: biznum },
+                    success: function (data) {
+                        if (data.count > 0) {
+                            self.biznumChecked = false;
+                            self.biznumMsg = "이미 등록된 사업자번호입니다.";
+                            alert("이미 등록된 사업자번호입니다.");
+                        } else {
+                            self.biznumChecked = true;
+                            self.biznumMsg = "사용 가능한 사업자번호입니다.";
+                            alert("사용 가능한 사업자번호입니다.");
+                        }
+                    },
+                    error: function () {
+                        alert("사업자번호 중복확인 중 오류가 발생했습니다.");
+                    }
+                });
+            },
+
             // 사업자등록증 파일 선택
             fnHandleFile: function (e) {
                 this.bizFile = e.target.files[0];
@@ -236,13 +298,25 @@
                     return;
                 }
 
-                if (!self.userId || !self.pwd || !self.userName) {
-                    alert("아이디, 비밀번호, 대표자명은 필수입니다.");
+                let biznum = self.fnGetBiznum();
+
+                if (!self.userId || !self.pwd || !self.userName || !self.biznum1 || !self.biznum2 || !self.biznum3) {
+                    alert("아이디, 비밀번호, 대표자명, 사업자번호는 필수입니다.");
+                    return;
+                }
+
+                if (self.biznum1.length !== 3 || self.biznum2.length !== 2 || self.biznum3.length !== 5) {
+                    alert("사업자번호를 XXX-XX-XXXXX 형식으로 입력해주세요.");
                     return;
                 }
 
                 if (!self.idChecked) {
                     alert("아이디 중복확인을 해주세요.");
+                    return;
+                }
+
+                if (!self.biznumChecked) {
+                    alert("사업자번호 중복확인을 해주세요.");
                     return;
                 }
 
@@ -261,6 +335,7 @@
                 formData.append("userId", self.userId.trim());
                 formData.append("pwd", self.pwd);
                 formData.append("userName", self.userName);
+                formData.append("biznum", biznum);
                 formData.append("bizFile", self.bizFile);
 
                 $.ajax({

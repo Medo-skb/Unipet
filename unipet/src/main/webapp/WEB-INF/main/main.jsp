@@ -173,7 +173,8 @@
 
                 <section class="main-store-section scroll-fade-up">
                     <div class="section-header">
-                        <h2 class="section-title">최근 예약이 많은 업체</h2>
+                        <h2 class="section-title">예약이 많은 업체</h2>
+                        <div class="section-desc">최근 예약이 많이 들어온 인기 업체를 모았어요.</div>
                     </div>
 
                     <div class="store-card-list">
@@ -216,6 +217,7 @@
                 <section class="main-product-section scroll-fade-up">
                     <div class="section-header">
                         <h2 class="section-title">최다 주문 상품</h2>
+                        <div class="section-desc">회원들이 가장 많이 주문한 인기 상품이에요.</div>
                     </div>
 
                     <div class="product-card-list">
@@ -250,6 +252,7 @@
 
                         <div class="section-header">
                             <h2 class="section-title">카테고리별 인기 업체</h2>
+                            <div class="section-desc">카테고리별로 많은 관심을 받은 업체를 확인해보세요.</div>
                         </div>
 
                         <div class="category-tab-wrap">
@@ -307,6 +310,7 @@
                 <div class="recommend-section-block scroll-fade-up">
                     <div class="section-header">
                         <h2 class="section-title">동물별 인기 상품</h2>
+                        <div class="section-desc">반려동물 유형에 맞춰 인기 상품을 선별했어요.</div>
                     </div>
 
                     <div class="category-tab-wrap">

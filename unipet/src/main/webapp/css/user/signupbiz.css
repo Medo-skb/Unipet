@@ -92,6 +92,19 @@
     flex: 1;
 }
 
+.biznum-box {
+    align-items: center;
+}
+
+.biznum-box .biznum-input {
+    text-align: center;
+}
+
+.biznum-dash {
+    color: var(--text-sub);
+    font-weight: 700;
+}
+
 .btn-sub {
     min-width: 110px;
     height: 46px;

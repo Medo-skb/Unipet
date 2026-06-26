@@ -29,262 +29,187 @@
                         <h2>커뮤니티 및 리뷰 신고 관리</h2>
                         <div class="content-desc">신고 유형별로 접수된 신고를 확인하고 처리할 수 있습니다.</div>
 
-                        <div class="report-tab-wrap">
-                            <button 
-                                type="button"
-                                class="report-tab-btn"
-                                :class="{ active : reportTab === 'bookingReview' }"
-                                @click="fnChangeReportTab('bookingReview')">
-                                예약 리뷰 신고
-                            </button>
-
-                            <button 
-                                type="button"
-                                class="report-tab-btn"
-                                :class="{ active : reportTab === 'communityPost' }"
-                                @click="fnChangeReportTab('communityPost')">
-                                커뮤니티 글 신고
-                            </button>
-
-                            <button 
-                                type="button"
-                                class="report-tab-btn"
-                                :class="{ active : reportTab === 'communityComment' }"
-                                @click="fnChangeReportTab('communityComment')">
-                                커뮤니티 댓글 신고
-                            </button>
+                        <div class="admin-search-box">
+                            <select class="admin-search-select" v-model="reportType" @change="fnSearchReportList">
+                                <option value="">전체 카테고리</option>
+                                <option value="bookingReview">예약 리뷰</option>
+                                <option value="communityPost">커뮤니티 글</option>
+                                <option value="communityComment">커뮤니티 댓글</option>
+                            </select>
                         </div>
 
-                        <!-- 예약 리뷰 신고 -->
-                        <div v-if="reportTab === 'bookingReview'">
-                            <div class="report-section-title">예약 리뷰 신고 목록</div>
-
-                            <div class="report-group-list" v-if="bookingReviewGroupList.length > 0">
-                                <div class="report-store-card" v-for="item in bookingReviewGroupList" :key="item.storeNo">
-                                    <div class="report-store-header" @click="fnSelectBookingReviewGroup(item)">
-                                        <div class="report-store-title">
-                                            <span class="qna-toggle-icon">
-                                                {{ selectedBookingReviewGroup && selectedBookingReviewGroup.storeNo === item.storeNo ? '▼' : '▶' }}
-                                            </span>
-
-                                            <span class="link-text" @click.stop="fnGoStoreDetail(item.storeNo)">
-                                                {{ item.storeName }}
-                                            </span>
-                                        </div>
-
-                                        <span class="report-store-count">
-                                            신고 {{ item.reportCount }}건
-                                        </span>
-                                    </div>
-
-                                    <div class="report-detail-wrap" v-if="selectedBookingReviewGroup && selectedBookingReviewGroup.storeNo === item.storeNo">
-                                        <div class="report-detail-top">
-                                            <div class="report-detail-title">
-                                                {{ item.storeName }} 신고 내역
-                                            </div>
-
-                                            <div class="report-detail-actions">
-                                                <button type="button" class="btn-reject" @click="fnRejectBatch('bookingReview')">
-                                                    모두 반려
-                                                </button>
-                                                <button type="button" class="btn-approve" @click="fnApproveBatch('bookingReview')">
-                                                    모두 승인
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        <div class="report-list" v-if="bookingReviewReportList.length > 0">
-                                            <div class="report-card" v-for="detail in bookingReviewReportList" :key="detail.reportNo">
-                                                <table class="report-table">
-                                                    <tbody>
-                                                        <tr>
-                                                            <th>신고자</th>
-                                                            <td>{{ detail.reporterId }}</td>
-                                                            <th>작성자</th>
-                                                            <td>{{ detail.userId }}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <th>신고사유</th>
-                                                            <td colspan="3">{{ detail.reportReason }}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <th>리뷰 내용</th>
-                                                            <td colspan="3">{{ detail.rContents }}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <th>리뷰 첨부 사진</th>
-                                                            <td colspan="3">
-                                                                <div v-if="detail.filePath" class="report-preview-img-list">
-                                                                    <img v-for="filePath in fnFilePathList(detail.filePath)"
-                                                                        :key="filePath"
-                                                                        :src="filePath"
-                                                                        class="report-preview-img">
-                                                                </div>
-                                                                <span v-else>사진 없음</span>
-                                                            </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <th>메뉴명</th>
-                                                            <td colspan="3">{{ detail.menuName ? detail.menuName : '삭제된 메뉴' }}</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-
-                                                <div class="report-btn-box">
-                                                    <button type="button" class="btn-approve" @click="fnApproveReport(detail)">
-                                                        승인
-                                                    </button>
-                                                    <button type="button" class="btn-reject" @click="fnRejectReport(detail)">
-                                                        반려
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="empty-box" v-else>
-                                예약 리뷰 신고가 없습니다.
+                        <div class="admin-user-sticky-area" v-if="filteredReportList.length > 0">
+                            <div class="admin-user-head-wrap admin-report-head-wrap">
+                                <table class="admin-user-table admin-report-table admin-report-head-table">
+                                    <thead>
+                                        <tr>
+                                            <th>처리여부</th>
+                                            <th>신고 대상</th>
+                                            <th>카테고리</th>
+                                            <th>신고자</th>
+                                            <th>작성자</th>
+                                            <th>신고사유</th>
+                                        </tr>
+                                    </thead>
+                                </table>
                             </div>
                         </div>
 
-                        <!-- 커뮤니티 글 신고 -->
-                        <div v-if="reportTab === 'communityPost'">
-                            <div class="report-section-title">커뮤니티 글 신고 목록</div>
-
-                            <div class="report-group-list" v-if="communityPostGroupList.length > 0">
-                                <div class="report-store-card" v-for="item in communityPostGroupList" :key="item.targetNo">
-                                    <div class="report-store-header" @click="fnSelectCommunityPostGroup(item)">
-                                        <div class="report-store-title">
-                                            <span class="qna-toggle-icon">
-                                                {{ selectedCommunityPostGroup && selectedCommunityPostGroup.targetNo === item.targetNo ? '▼' : '▶' }}
-                                            </span>
-
-                                            <span class="link-text report-ellipsis" @click.stop="fnGoBoardDetail(item.boardNo)">
-                                                {{ item.title }}
-                                            </span>
-                                        </div>
-
-                                        <span class="report-store-count">
-                                            신고 {{ item.reportCount }}건
-                                        </span>
-                                    </div>
-
-                                    <div class="report-detail-wrap" v-if="selectedCommunityPostGroup && selectedCommunityPostGroup.targetNo === item.targetNo">
-                                        <div class="report-detail-top">
-                                            <div class="report-detail-title report-ellipsis">
-                                                {{ item.title }} 신고 내역
-                                            </div>
-
-                                            <div class="report-detail-actions">
-                                                <button type="button" class="btn-reject" @click="fnRejectBatch('communityPost')">
-                                                    모두 반려
+                        <div class="admin-report-table-wrap admin-list-fixed-area" v-if="filteredReportList.length > 0">
+                            <table class="admin-user-table admin-report-table">
+                                <thead class="admin-user-hidden-thead">
+                                    <tr>
+                                        <th>처리여부</th>
+                                        <th>신고 대상</th>
+                                        <th>카테고리</th>
+                                        <th>신고자</th>
+                                        <th>작성자</th>
+                                        <th>신고사유</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="item in pagedReportList" :key="item.reportType + '_' + item.reportNo">
+                                        <td>
+                                            <div v-if="item.reportStatus === 'WAI'">
+                                                <button type="button" class="admin-mini-btn report-approve-text-btn" @click="fnApproveReport(item)">
+                                                    승인
                                                 </button>
-                                                <button type="button" class="btn-approve" @click="fnApproveBatch('communityPost')">
-                                                    모두 승인
+                                                <button type="button" class="admin-mini-btn report-reject-text-btn" @click="fnRejectReport(item)">
+                                                    반려
                                                 </button>
                                             </div>
-                                        </div>
 
-                                        <div class="report-list" v-if="communityPostReportList.length > 0">
-                                            <div class="report-card" v-for="detail in communityPostReportList" :key="detail.reportNo">
-                                                <table class="report-table">
-                                                    <tbody>
-                                                        <tr>
-                                                            <th>신고자</th>
-                                                            <td>{{ detail.reporterId }}</td>
-                                                            <th>작성자</th>
-                                                            <td>{{ detail.reportedUserId }}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <th>신고사유</th>
-                                                            <td colspan="3">{{ detail.reportReason }}</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                                            <span v-else :class="['report-status-badge', item.reportStatus === 'ACC' ? 'approve' : 'reject']">
+                                                {{ fnReportStatusText(item.reportStatus) }}
+                                            </span>
+                                        </td>
 
-                            <div class="empty-box" v-else>
-                                커뮤니티 글 신고가 없습니다.
-                            </div>
+                                        <td>
+                                            <button type="button" class="detail-link-btn" @click="fnOpenReportTarget(item)">
+                                                보기
+                                            </button>
+                                        </td>
+
+                                        <td>{{ fnReportTypeText(item.reportType) }}</td>
+                                        <td>{{ fnEmpty(item.reporterId) }}</td>
+                                        <td>{{ fnEmpty(fnReportedUserId(item)) }}</td>
+
+                                        <td>
+                                            <span class="report-ellipsis" :title="fnEmpty(item.reportReason)">
+                                                {{ fnEmpty(item.reportReason) }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
 
-                        <!-- 커뮤니티 댓글 신고 -->
-                        <div v-if="reportTab === 'communityComment'">
-                            <div class="report-section-title">커뮤니티 댓글 신고 목록</div>
+                        <div class="admin-user-top-scroll admin-report-top-scroll" v-if="filteredReportList.length > 0">
+                            <div class="admin-user-scroll-inner admin-report-scroll-inner"></div>
+                        </div>
 
-                            <div class="report-group-list" v-if="communityCommentGroupList.length > 0">
-                                <div class="report-store-card" v-for="item in communityCommentGroupList" :key="item.targetNo">
-                                    <div class="report-store-header" @click="fnSelectCommunityCommentGroup(item)">
-                                        <div class="report-store-title">
-                                            <span class="qna-toggle-icon">
-                                                {{ selectedCommunityCommentGroup && selectedCommunityCommentGroup.targetNo === item.targetNo ? '▼' : '▶' }}
-                                            </span>
+                        <div class="empty-box" v-else>
+                            조회된 신고가 없습니다.
+                        </div>
 
-                                            <span class="link-text report-ellipsis" @click.stop="fnGoBoardDetail(item.boardNo)">
-                                                {{ item.contents ? item.contents : item.title }}
-                                            </span>
-                                        </div>
+                        <div class="admin-pagination" v-if="filteredReportList.length > 0">
+                            <button type="button" class="page-btn" :disabled="currentPage === 1" @click="fnMovePage(currentPage - 1)">
+                                이전
+                            </button>
 
-                                        <span class="report-store-count">
-                                            신고 {{ item.reportCount }}건
-                                        </span>
-                                    </div>
+                            <button type="button"
+                                    class="page-btn"
+                                    v-for="page in pageList"
+                                    :key="page"
+                                    :class="{ active: currentPage === page }"
+                                    @click="fnMovePage(page)">
+                                {{ page }}
+                            </button>
 
-                                    <div class="report-detail-wrap" v-if="selectedCommunityCommentGroup && selectedCommunityCommentGroup.targetNo === item.targetNo">
-                                        <div class="report-detail-top">
-                                            <div class="report-detail-title report-ellipsis">
-                                                {{ item.contents ? item.contents : item.title }} 신고 내역
-                                            </div>
-
-                                            <div class="report-detail-actions">
-                                                <button type="button" class="btn-reject" @click="fnRejectBatch('communityComment')">
-                                                    모두 반려
-                                                </button>
-                                                <button type="button" class="btn-approve" @click="fnApproveBatch('communityComment')">
-                                                    모두 승인
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        <div class="report-list" v-if="communityCommentReportList.length > 0">
-                                            <div class="report-card" v-for="detail in communityCommentReportList" :key="detail.reportNo">
-                                                <table class="report-table">
-                                                    <tbody>
-                                                        <tr>
-                                                            <th>신고자</th>
-                                                            <td>{{ detail.reporterId }}</td>
-                                                            <th>작성자</th>
-                                                            <td>{{ detail.reportedUserId }}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <th>신고사유</th>
-                                                            <td>{{ detail.reportReason }}</td>
-                                                            <th>글 제목</th>
-                                                            <td>
-                                                                <span class="report-ellipsis">{{ detail.title }}</span>
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="empty-box" v-else>
-                                커뮤니티 댓글 신고가 없습니다.
-                            </div>
+                            <button type="button" class="page-btn" :disabled="currentPage === totalPage" @click="fnMovePage(currentPage + 1)">
+                                다음
+                            </button>
                         </div>
 
                     </div>
                 </section>
+                <div class="admin-user-modal-bg" v-if="reviewModalOpen">
+                    <div class="admin-user-modal admin-report-review-modal">
+                        <div class="admin-user-modal-header">
+                            <h3>예약 리뷰 신고 대상</h3>
+                            <button type="button" class="admin-user-modal-close" @click="fnCloseReviewModal">×</button>
+                        </div>
+
+                        <div class="admin-user-modal-body" v-if="selectedReviewReport">
+                            <table class="approve-table">
+                                <tbody>
+                                    <tr><th>업체명</th><td>{{ fnEmpty(selectedReviewReport.storeName) }}</td></tr>
+                                    <tr><th>메뉴명</th><td>{{ fnEmpty(selectedReviewReport.menuName) }}</td></tr>
+                                    <tr><th>신고자</th><td>{{ fnEmpty(selectedReviewReport.reporterId) }}</td></tr>
+                                    <tr><th>작성자</th><td>{{ fnEmpty(fnReportedUserId(selectedReviewReport)) }}</td></tr>
+                                    <tr><th>신고사유</th><td>{{ fnEmpty(selectedReviewReport.reportReason) }}</td></tr>
+                                    <tr>
+                                        <th>리뷰내용</th>
+                                        <td>
+                                            <div class="report-modal-content">
+                                                {{ fnEmpty(selectedReviewReport.rContents) }}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>리뷰 첨부 사진</th>
+                                        <td>
+                                            <div v-if="selectedReviewReport.filePath" class="report-preview-img-list">
+                                                <img v-for="filePath in fnFilePathList(selectedReviewReport.filePath)"
+                                                    :key="filePath"
+                                                    :src="filePath"
+                                                    class="report-preview-img">
+                                            </div>
+                                            <span v-else>사진 없음</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="admin-user-modal-bg" v-if="commentModalOpen">
+                    <div class="admin-user-modal admin-report-review-modal">
+                        <div class="admin-user-modal-header">
+                            <h3>댓글 신고 대상</h3>
+                            <button type="button" class="admin-user-modal-close" @click="fnCloseCommentModal">×</button>
+                        </div>
+
+                        <div class="admin-user-modal-body" v-if="selectedCommentReport">
+                            <table class="approve-table">
+                                <tbody>
+                                    <tr>
+                                        <th>글 제목</th>
+                                        <td>
+                                            <button type="button"
+                                                    class="detail-link-btn"
+                                                    @click="fnGoBoardNewTab(selectedCommentReport.boardNo)">
+                                                {{ fnEmpty(selectedCommentReport.title) }}
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>댓글 작성시간</th>
+                                        <td>{{ fnEmpty(selectedCommentReport.createTime) }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>댓글 내용</th>
+                                        <td>
+                                            <div class="report-modal-content">
+                                                {{ fnEmpty(selectedCommentReport.contents) }}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -298,207 +223,196 @@
     const app = Vue.createApp({
         data() {
             return {
-                reportTab: "bookingReview",
+                reportType: "",
+                reportList: [],
+                currentPage: 1,
+                pageSize: 10,
 
-                bookingReviewGroupList: [],
-                bookingReviewReportList: [],
-                selectedBookingReviewGroup: null,
+                reviewModalOpen: false,
+                selectedReviewReport: null,
 
-                communityPostGroupList: [],
-                communityPostReportList: [],
-                selectedCommunityPostGroup: null,
-
-                communityCommentGroupList: [],
-                communityCommentReportList: [],
-                selectedCommunityCommentGroup: null
+                commentModalOpen: false,
+                selectedCommentReport: null
             };
         },
-            methods: {
-            fnChangeReportTab: function(tabName) {
+        computed: {
+            filteredReportList: function () {
                 let self = this;
 
-                self.reportTab = tabName;
-                localStorage.setItem("reportTab", tabName);
+                return self.reportList.filter(function (item) {
+                    if (self.reportType && item.reportType !== self.reportType) {
+                        return false;
+                    }
 
-                self.fnLoadCurrentTab();
+                    return true;
+                });
             },
 
-            fnLoadCurrentTab: function() {
-                let self = this;
+            totalPage: function () {
+                return Math.ceil(this.filteredReportList.length / this.pageSize);
+            },
 
-                if (self.reportTab === "bookingReview") {
-                    self.fnBookingReviewGroupList();
-                } else if (self.reportTab === "communityPost") {
-                    self.fnCommunityPostGroupList();
-                } else if (self.reportTab === "communityComment") {
-                    self.fnCommunityCommentGroupList();
+            pageList: function () {
+                let list = [];
+                let startPage = Math.floor((this.currentPage - 1) / 5) * 5 + 1;
+                let endPage = Math.min(startPage + 4, this.totalPage);
+
+                for (let i = startPage; i <= endPage; i++) {
+                    list.push(i);
                 }
+
+                return list;
             },
 
-            fnReportStatusText: function(status) {
-                if (status === "WAI") return "접수";
-                if (status === "REJ") return "반려";
-                if (status === "ACC") return "승인";
-                return status;
-            },
+            pagedReportList: function () {
+                let start = (this.currentPage - 1) * this.pageSize;
+                let end = start + this.pageSize;
 
-            fnBookingReviewGroupList: function() {
+                return this.filteredReportList.slice(start, end);
+            }
+        },
+        methods: {
+            fnLoadReportList: function () {
                 let self = this;
+
+                self.reportList = [];
 
                 $.ajax({
-                    url: "/admin/report/reservationGroupList.dox",
+                    url: "/getReservationReviewReportList.dox",
                     type: "POST",
                     dataType: "json",
-                    success: function(data) {
+                    success: function (data) {
                         if (data.result === "success") {
-                            self.bookingReviewGroupList = data.list || [];
+                            (data.list || []).forEach(function (item) {
+                                item.reportType = "bookingReview";
+                                item.reportStatus = item.repStatus || "WAI";
+                                self.reportList.push(item);
+                            });
 
-                            self.selectedBookingReviewGroup = null;
-                            self.bookingReviewReportList = [];
+                            self.$nextTick(function () {
+                                self.fnSyncReportTableScroll();
+                            });
                         } else {
                             alert(data.message);
                         }
                     },
-                    error: function() {
-                        alert("예약 리뷰 신고 그룹 조회 중 오류가 발생했습니다.");
+                    error: function () {
+                        alert("예약 리뷰 신고 조회 중 오류가 발생했습니다.");
+                    }
+                });
+
+                $.ajax({
+                    url: "/admin/report/communityPostList.dox",
+                    type: "POST",
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.result === "success") {
+                            (data.list || []).forEach(function (item) {
+                                item.reportType = "communityPost";
+                                item.reportStatus = item.repStatus || "WAI";
+                                self.reportList.push(item);
+                            });
+
+                            self.$nextTick(function () {
+                                self.fnSyncReportTableScroll();
+                            });
+                        } else {
+                            alert(data.message);
+                        }
+                    },
+                    error: function () {
+                        alert("커뮤니티 글 신고 조회 중 오류가 발생했습니다.");
+                    }
+                });
+
+                $.ajax({
+                    url: "/admin/report/communityCommentList.dox",
+                    type: "POST",
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.result === "success") {
+                            (data.list || []).forEach(function (item) {
+                                item.reportType = "communityComment";
+                                item.reportStatus = item.repStatus || "WAI";
+                                self.reportList.push(item);
+                            });
+                        } else {
+                            alert(data.message);
+                        }
+                    },
+                    error: function () {
+                        alert("커뮤니티 댓글 신고 조회 중 오류가 발생했습니다.");
                     }
                 });
             },
 
-            fnSelectBookingReviewGroup: function(item) {
-                let self = this;
+            fnSearchReportList: function () {
+                this.currentPage = 1;
+            },
 
-                if (self.selectedBookingReviewGroup && self.selectedBookingReviewGroup.storeNo === item.storeNo) {
-                    self.selectedBookingReviewGroup = null;
-                    self.bookingReviewReportList = [];
+            fnMovePage: function (page) {
+                if (page < 1 || page > this.totalPage) {
                     return;
                 }
 
-                self.selectedBookingReviewGroup = item;
+                this.currentPage = page;
 
-                $.ajax({
-                    url: "/admin/report/reservationDetailList.dox",
-                    type: "POST",
-                    dataType: "json",
-                    data: { storeNo: item.storeNo },
-                    success: function(data) {
-                        if (data.result === "success") {
-                            self.bookingReviewReportList = data.list || [];
-                        } else {
-                            alert(data.message);
-                        }
-                    },
-                    error: function() {
-                        alert("예약 리뷰 신고 상세 조회 중 오류가 발생했습니다.");
-                    }
+                this.$nextTick(function () {
+                    this.fnSyncReportTableScroll();
                 });
             },
 
-            fnCommunityPostGroupList: function() {
-                let self = this;
+            fnSyncReportTableScroll: function () {
+                let topScroll = document.querySelector(".admin-report-top-scroll");
+                let scrollInner = document.querySelector(".admin-report-scroll-inner");
+                let tableWrap = document.querySelector(".admin-report-table-wrap");
+                let headWrap = document.querySelector(".admin-report-head-wrap");
+                let bodyTable = document.querySelector(".admin-report-table-wrap .admin-report-table");
+                let headTable = document.querySelector(".admin-report-head-table");
 
-                $.ajax({
-                    url: "/admin/report/communityPostGroupList.dox",
-                    type: "POST",
-                    dataType: "json",
-                    success: function(data) {
-                        if (data.result === "success") {
-                            self.communityPostGroupList = data.list || [];
-
-                            self.selectedCommunityPostGroup = null;
-                            self.communityPostReportList = [];
-                        } else {
-                            alert(data.message);
-                        }
-                    },
-                    error: function() {
-                        alert("커뮤니티 글 신고 그룹 조회 중 오류가 발생했습니다.");
-                    }
-                });
-            },
-
-            fnSelectCommunityPostGroup: function(item) {
-                let self = this;
-
-                if (self.selectedCommunityPostGroup && self.selectedCommunityPostGroup.targetNo === item.targetNo) {
-                    self.selectedCommunityPostGroup = null;
-                    self.communityPostReportList = [];
+                if (!topScroll || !scrollInner || !tableWrap || !headWrap || !bodyTable || !headTable) {
                     return;
                 }
 
-                self.selectedCommunityPostGroup = item;
+                let tableWidth = bodyTable.scrollWidth;
 
-                $.ajax({
-                    url: "/admin/report/communityPostDetailList.dox",
-                    type: "POST",
-                    dataType: "json",
-                    data: { targetNo: item.targetNo },
-                    success: function(data) {
-                        if (data.result === "success") {
-                            self.communityPostReportList = data.list || [];
-                        } else {
-                            alert(data.message);
-                        }
-                    },
-                    error: function() {
-                        alert("커뮤니티 글 신고 상세 조회 중 오류가 발생했습니다.");
-                    }
-                });
+                scrollInner.style.width = tableWidth + "px";
+                headTable.style.width = tableWidth + "px";
+
+                topScroll.onscroll = function () {
+                    tableWrap.scrollLeft = topScroll.scrollLeft;
+                    headWrap.scrollLeft = topScroll.scrollLeft;
+                };
             },
 
-            fnCommunityCommentGroupList: function() {
-                let self = this;
-
-                $.ajax({
-                    url: "/admin/report/communityCommentGroupList.dox",
-                    type: "POST",
-                    dataType: "json",
-                    success: function(data) {
-                        if (data.result === "success") {
-                            self.communityCommentGroupList = data.list || [];
-
-                            self.selectedCommunityCommentGroup = null;
-                            self.communityCommentReportList = [];
-                        } else {
-                            alert(data.message);
-                        }
-                    },
-                    error: function() {
-                        alert("커뮤니티 댓글 신고 그룹 조회 중 오류가 발생했습니다.");
-                    }
-                });
-            },
-
-            fnSelectCommunityCommentGroup: function(item) {
-                let self = this;
-
-                if (self.selectedCommunityCommentGroup && self.selectedCommunityCommentGroup.targetNo === item.targetNo) {
-                    self.selectedCommunityCommentGroup = null;
-                    self.communityCommentReportList = [];
+            fnOpenReportTarget: function (item) {
+                if (item.reportType === "bookingReview") {
+                    this.selectedReviewReport = item;
+                    this.reviewModalOpen = true;
                     return;
                 }
 
-                self.selectedCommunityCommentGroup = item;
+                if (item.reportType === "communityComment") {
+                    this.selectedCommentReport = item;
+                    this.commentModalOpen = true;
+                    return;
+                }
 
-                $.ajax({
-                    url: "/admin/report/communityCommentDetailList.dox",
-                    type: "POST",
-                    dataType: "json",
-                    data: { targetNo: item.targetNo },
-                    success: function(data) {
-                        if (data.result === "success") {
-                            self.communityCommentReportList = data.list || [];
-                        } else {
-                            alert(data.message);
-                        }
-                    },
-                    error: function() {
-                        alert("커뮤니티 댓글 신고 상세 조회 중 오류가 발생했습니다.");
+                if (item.reportType === "communityPost") {
+                    if (item.boardNo) {
+                        this.fnGoBoardNewTab(item.boardNo);
+                    } else {
+                        alert("이동할 게시글 번호가 없습니다.");
                     }
-                });
+                }
             },
 
-            fnApproveReport: function(item) {
+            fnCloseReviewModal: function () {
+                this.reviewModalOpen = false;
+                this.selectedReviewReport = null;
+            },
+
+            fnApproveReport: function (item) {
                 let self = this;
 
                 if (!confirm("해당 신고를 승인하시겠습니까?")) return;
@@ -509,170 +423,112 @@
                 }
 
                 $.ajax({
-                    url: "/admin/report/approve.dox",
+                    url: item.reportType === "bookingReview" ? "/admin/report/approve.dox" : "/admin/report/communityApprove.dox",
                     type: "POST",
                     dataType: "json",
                     data: {
                         reportNo: item.reportNo,
                         reviewNo: item.reviewNo,
-                        reportedUserId: item.userId,
+                        targetNo: item.targetNo,
+                        reportedUserId: self.fnReportedUserId(item),
+                        type: item.reportType === "communityPost" ? "POST" : "COMMENT",
                         banYn: banYn
                     },
-                    success: function(data) {
+                    success: function (data) {
                         if (data.result === "success") {
                             alert("승인 처리되었습니다.");
-                            self.fnLoadCurrentTab();
+                            self.fnLoadReportList();
                         } else {
                             alert(data.message);
                         }
                     },
-                    error: function() {
+                    error: function () {
                         alert("승인 처리 중 오류가 발생했습니다.");
                     }
                 });
             },
 
-            fnRejectReport: function(item) {
+            fnRejectReport: function (item) {
                 let self = this;
 
                 if (!confirm("해당 신고를 반려하시겠습니까?")) return;
 
                 $.ajax({
-                    url: "/admin/report/reject.dox",
+                    url: item.reportType === "bookingReview" ? "/admin/report/reject.dox" : "/admin/report/communityReject.dox",
                     type: "POST",
                     dataType: "json",
                     data: {
                         reportNo: item.reportNo
                     },
-                    success: function(data) {
+                    success: function (data) {
                         if (data.result === "success") {
                             alert("반려 처리되었습니다.");
-                            self.fnLoadCurrentTab();
+                            self.fnLoadReportList();
                         } else {
                             alert(data.message);
                         }
                     },
-                    error: function() {
+                    error: function () {
                         alert("반려 처리 중 오류가 발생했습니다.");
                     }
                 });
             },
 
-            fnApproveBatch: function(reportType) {
-                let self = this;
-                let targetNo = "";
-                let storeNo = "";
-
-                if (reportType === "bookingReview") {
-                    if (!self.selectedBookingReviewGroup) return;
-                    storeNo = self.selectedBookingReviewGroup.storeNo;
-                } else if (reportType === "communityPost") {
-                    if (!self.selectedCommunityPostGroup) return;
-                    targetNo = self.selectedCommunityPostGroup.targetNo;
-                } else if (reportType === "communityComment") {
-                    if (!self.selectedCommunityCommentGroup) return;
-                    targetNo = self.selectedCommunityCommentGroup.targetNo;
-                }
-
-                if (!confirm("해당 대상의 신고가 승인됩니다. 승인하시겠습니까?")) return;
-
-                let banYn = "N";
-                if (confirm("신고당한 사람의 계정을 정지하시겠습니까?")) {
-                    banYn = "Y";
-                }
-
-                $.ajax({
-                    url: "/admin/report/batchApprove.dox",
-                    type: "POST",
-                    dataType: "json",
-                    data: {
-                        reportType: reportType,
-                        storeNo: storeNo,
-                        targetNo: targetNo,
-                        banYn: banYn
-                    },
-                    success: function(data) {
-                        if (data.result === "success") {
-                            alert("승인 처리되었습니다.");
-                            self.fnLoadCurrentTab();
-                        } else {
-                            alert(data.message);
-                        }
-                    },
-                    error: function() {
-                        alert("승인 처리 중 오류가 발생했습니다.");
-                    }
-                });
+            fnReportStatusText: function (status) {
+                if (status === "WAI") return "미처리";
+                if (status === "ACC") return "승인";
+                if (status === "REJ") return "반려";
+                return this.fnEmpty(status);
             },
 
-            fnRejectBatch: function(reportType) {
-                let self = this;
-                let targetNo = "";
-                let storeNo = "";
-
-                if (reportType === "bookingReview") {
-                    if (!self.selectedBookingReviewGroup) return;
-                    storeNo = self.selectedBookingReviewGroup.storeNo;
-                } else if (reportType === "communityPost") {
-                    if (!self.selectedCommunityPostGroup) return;
-                    targetNo = self.selectedCommunityPostGroup.targetNo;
-                } else if (reportType === "communityComment") {
-                    if (!self.selectedCommunityCommentGroup) return;
-                    targetNo = self.selectedCommunityCommentGroup.targetNo;
-                }
-
-                if (!confirm("해당 대상의 신고가 반려됩니다. 반려하시겠습니까?")) return;
-
-                $.ajax({
-                    url: "/admin/report/batchReject.dox",
-                    type: "POST",
-                    dataType: "json",
-                    data: {
-                        reportType: reportType,
-                        storeNo: storeNo,
-                        targetNo: targetNo
-                    },
-                    success: function(data) {
-                        if (data.result === "success") {
-                            alert("반려 처리되었습니다.");
-                            self.fnLoadCurrentTab();
-                        } else {
-                            alert(data.message);
-                        }
-                    },
-                    error: function() {
-                        alert("반려 처리 중 오류가 발생했습니다.");
-                    }
-                });
+            fnReportTypeText: function (type) {
+                if (type === "bookingReview") return "예약 리뷰";
+                if (type === "communityPost") return "커뮤니티 글";
+                if (type === "communityComment") return "커뮤니티 댓글";
+                return this.fnEmpty(type);
             },
 
-            fnGoStoreDetail: function(storeNo) {
-                location.href = "/reservation/store-detail.do?storeNo=" + storeNo;
+            fnReportedUserId: function (item) {
+                return item.reportedUserId || item.userId;
             },
 
-            fnGoBoardDetail: function(boardNo) {
-                location.href = "/board/view.do?boardNo=" + boardNo;
-            },
-
-            fnFilePathList: function(filePath) {
+            fnFilePathList: function (filePath) {
                 if (!filePath) {
                     return [];
                 }
 
-                return filePath.split("|").filter(function(item) {
+                return filePath.split("|").filter(function (item) {
                     return item;
                 });
             },
+
+            fnEmpty: function (value) {
+                if (value === null || value === undefined || value === "") {
+                    return "-";
+                }
+
+                return value;
+            },
+            fnCloseCommentModal: function () {
+                this.commentModalOpen = false;
+                this.selectedCommentReport = null;
+            },
+
+            fnGoBoardNewTab: function (boardNo) {
+                if (!boardNo) {
+                    alert("이동할 게시글 번호가 없습니다.");
+                    return;
+                }
+
+                window.open("/board/view.do?boardNo=" + boardNo, "_blank");
+            },
         },
         mounted() {
-            let self = this;
-            let savedTab = localStorage.getItem("reportTab");
+            this.fnLoadReportList();
 
-            if (savedTab && savedTab !== "productReview") {
-                self.reportTab = savedTab;
-            }
-
-            self.fnLoadCurrentTab();
+            this.$nextTick(function () {
+                this.fnSyncReportTableScroll();
+            });
         }
     });
 

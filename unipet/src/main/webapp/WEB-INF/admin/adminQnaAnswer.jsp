@@ -27,91 +27,158 @@
                 <section class="admin-content">
                     <div class="content-card">
                         <h2>쇼핑몰 문의 답변 관리</h2>
-                        <div class="content-desc">답변이 등록되지 않은 상품 문의 목록입니다.</div>
+                        <div class="content-desc">쇼핑몰 상품 문의와 답변 상태를 조회합니다.</div>
 
-                        <div class="qna-list" v-if="qnaGroupList.length > 0">
-                            <div class="qna-product-card" v-for="group in qnaGroupList" :key="group.productNo">
-                                <div class="qna-product-header" @click="fnToggleQnaProduct(group.productNo)">
-                                    <div class="qna-product-title">
-                                        <span class="qna-toggle-icon">
-                                            {{ openedProductMap[group.productNo] ? '▼' : '▶' }}
-                                        </span>
+                        <div class="admin-search-box">
+                            <select class="admin-search-select" v-model="ansStatus" @change="fnSearchQnaAnswerList">
+                                <option value="">전체</option>
+                                <option value="N">미답변</option>
+                                <option value="Y">답변 완료</option>
+                            </select>
+                        </div>
 
-                                        <span class="link-text" @click.stop="fnGoProductDetail(group.productNo)">
-                                            {{ group.productName }}
-                                        </span>
-                                    </div>
+                        <div class="admin-qna-table-wrap" v-if="qnaAnswerList.length > 0">
+                            <table class="admin-user-table admin-qna-table">
+                                <thead>
+                                    <tr>
+                                        <th>답변여부</th>
+                                        <th>문의자 ID</th>
+                                        <th>상품 명</th>
+                                        <th>문의 제목</th>
+                                        <th>문의 내용</th>
+                                        <th>비공개 여부</th>
+                                        <th>문의 날짜</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="item in pagedQnaList" :key="item.qnaNo">
+                                        <td>
+                                            <button
+                                                v-if="!fnIsAnswered(item)"
+                                                type="button"
+                                                class="admin-mini-btn qna-answer-action"
+                                                @click="fnOpenAnswerModal(item)">
+                                                답변하기
+                                            </button>
 
-                                    <span class="qna-product-count">
-                                        문의 {{ group.items.length }}건
-                                    </span>
-                                </div>
+                                            <span v-else class="qna-answer-complete">
+                                                답변완료
+                                            </span>
+                                        </td>
 
-                                <div class="qna-card" v-if="openedProductMap[group.productNo]" v-for="item in group.items" :key="item.qnaNo">
-                                    <table class="report-table">
-                                        <tbody>
-                                            <tr>
-                                                <th>문의자</th>
-                                                <td>
-                                                    {{ item.userName }}
-                                                    <span v-if="item.nickname">({{ item.nickname }})</span>
-                                                </td>
-                                                <th>문의자 ID</th>
-                                                <td>{{ item.userId }}</td>
-                                            </tr>
+                                        <td>
+                                            <span class="qna-ellipsis" :title="fnEmpty(item.userId)">
+                                                {{ fnEmpty(item.userId) }}
+                                            </span>
+                                        </td>
 
-                                            <tr>
-                                                <th>문의 날짜</th>
-                                                <td colspan="3">{{ item.cdate }}</td>
-                                            </tr>
+                                        <td>
+                                            <button
+                                                type="button"
+                                                class="detail-link-btn qna-ellipsis-btn"
+                                                :title="fnEmpty(item.productName)"
+                                                @click="fnGoProductDetail(item.productNo)">
+                                                {{ fnEmpty(item.productName) }}
+                                            </button>
+                                        </td>
 
-                                            <tr>
-                                                <th>문의 제목</th>
-                                                <td colspan="3">{{ item.qnaTitle }}</td>
-                                            </tr>
+                                        <td>
+                                            <span class="qna-ellipsis" :title="fnEmpty(item.qnaTitle)">
+                                                {{ fnEmpty(item.qnaTitle) }}
+                                            </span>
+                                        </td>
 
-                                            <tr>
-                                                <th>문의 내용</th>
-                                                <td colspan="3">{{ item.qContents }}</td>
-                                            </tr>
+                                        <td>
+                                            <span class="qna-ellipsis" :title="fnEmpty(item.qContents)">
+                                                {{ fnEmpty(item.qContents) }}
+                                            </span>
+                                        </td>
 
-                                            <tr>
-                                                <th>비공개 여부</th>
-                                                <td colspan="3">
-                                                    {{ item.isSecret === 'Y' ? '비공개' : '공개' }}
-                                                </td>
-                                            </tr>
+                                        <td>
+                                            {{ item.isSecret === 'Y' ? '비공개' : '공개' }}
+                                        </td>
 
-                                            <tr>
-                                                <th>답변 작성</th>
-                                                <td colspan="3">
-                                                    <textarea
-                                                        class="qna-answer-textarea"
-                                                        v-model="item.aContents"
-                                                        placeholder="답변 내용을 입력하세요."></textarea>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-
-                                    <div class="report-btn-box">
-                                        <button type="button" class="btn-reject" @click="fnDeleteQna(item)">
-                                            문의 삭제
-                                        </button>
-
-                                        <button type="button" class="btn-approve" @click="fnSaveQnaAnswer(item)">
-                                            답변 등록
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+                                        <td>
+                                            {{ fnQnaDate(item.cdate) }}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
 
                         <div class="empty-box" v-else>
-                            답변 대기 중인 문의가 없습니다.
+                            조회된 상품 문의가 없습니다.
+                        </div>
+                        <div class="admin-pagination" v-if="qnaAnswerList.length > 0">
+                            <button type="button" class="page-btn" :disabled="currentPage === 1" @click="fnMovePage(currentPage - 1)">
+                                이전
+                            </button>
+
+                            <button type="button"
+                                    class="page-btn"
+                                    v-for="page in pageList"
+                                    :key="page"
+                                    :class="{ active: currentPage === page }"
+                                    @click="fnMovePage(page)">
+                                {{ page }}
+                            </button>
+
+                            <button type="button" class="page-btn" :disabled="currentPage === totalPage" @click="fnMovePage(currentPage + 1)">
+                                다음
+                            </button>
                         </div>
                     </div>
                 </section>
+            </div>
+        </div>
+        <div class="admin-user-modal-bg" v-if="answerModalOpen">
+            <div class="admin-user-modal admin-qna-answer-modal">
+                <div class="admin-user-modal-header">
+                    <h3>문의 답변 작성</h3>
+                    <button type="button" class="admin-user-modal-close" @click="fnCloseAnswerModal">×</button>
+                </div>
+
+                <div class="admin-user-modal-body" v-if="selectedQna">
+                    <table class="approve-table">
+                        <tbody>
+                            <tr>
+                                <th>문의자 ID</th>
+                                <td>{{ fnEmpty(selectedQna.userId) }}</td>
+                            </tr>
+                            <tr>
+                                <th>문의 날짜</th>
+                                <td>{{ fnQnaDate(selectedQna.cdate) }}</td>
+                            </tr>
+                            <tr>
+                                <th>문의 제목</th>
+                                <td>{{ fnEmpty(selectedQna.qnaTitle) }}</td>
+                            </tr>
+                            <tr>
+                                <th>문의 내용</th>
+                                <td>
+                                    <div class="qna-modal-content">
+                                        {{ fnEmpty(selectedQna.qContents) }}
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>답변 작성</th>
+                                <td>
+                                    <textarea
+                                        class="qna-answer-textarea"
+                                        v-model="answerContents"
+                                        placeholder="답변 내용을 입력하세요."></textarea>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="report-btn-box">
+                        <button type="button" class="btn-approve" @click="fnSaveQnaAnswer">
+                            저장
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -123,132 +190,168 @@
 
 <script>
     const app = Vue.createApp({
-        data() {
-            return {
-                qnaAnswerList: [],
-                openedProductMap: {}
-            };
+    data() {
+        return {
+            ansStatus: "",
+            qnaAnswerList: [],
+            currentPage: 1,
+            pageSize: 10,
+            answerModalOpen: false,
+            selectedQna: null,
+            answerContents: ""
+        };
+    },
+    computed: {
+        totalPage: function () {
+            return Math.ceil(this.qnaAnswerList.length / this.pageSize);
         },
-        computed: {
-            qnaGroupList: function () {
-                let groupMap = {};
-                let groupList = [];
 
-                this.qnaAnswerList.forEach(function (item) {
-                    let productNo = item.productNo;
+        pageList: function () {
+            let list = [];
+            let startPage = Math.floor((this.currentPage - 1) / 5) * 5 + 1;
+            let endPage = Math.min(startPage + 4, this.totalPage);
 
-                    if (!groupMap[productNo]) {
-                        groupMap[productNo] = {
-                            productNo: productNo,
-                            productName: item.productName,
-                            items: []
-                        };
-
-                        groupList.push(groupMap[productNo]);
-                    }
-
-                    groupMap[productNo].items.push(item);
-                });
-
-                return groupList;
+            for (let i = startPage; i <= endPage; i++) {
+                list.push(i);
             }
+
+            return list;
         },
-        methods: {
-            fnQnaAnswerList: function () {
-                let self = this;
 
-                $.ajax({
-                    url: "/admin/qna/list.dox",
-                    type: "POST",
-                    dataType: "json",
-                    success: function (data) {
-                        if (data.result === "success") {
-                            self.qnaAnswerList = data.list || [];
-                        } else {
-                            alert(data.message);
-                        }
-                    },
-                    error: function () {
-                        alert("쇼핑몰 문의 목록 조회 중 오류가 발생했습니다.");
-                    }
-                });
-            },
+        pagedQnaList: function () {
+            let start = (this.currentPage - 1) * this.pageSize;
+            let end = start + this.pageSize;
 
-            fnSaveQnaAnswer: function (item) {
-                let self = this;
-
-                if (!item.aContents || item.aContents.trim() === "") {
-                    alert("답변 내용을 입력하세요.");
-                    return;
-                }
-
-                if (!confirm("해당 문의에 답변을 등록하시겠습니까?")) {
-                    return;
-                }
-
-                $.ajax({
-                    url: "/admin/qna/answer.dox",
-                    type: "POST",
-                    dataType: "json",
-                    data: {
-                        qnaNo: item.qnaNo,
-                        aContents: item.aContents
-                    },
-                    success: function (data) {
-                        if (data.result === "success") {
-                            alert("답변이 등록되었습니다.");
-                            self.fnQnaAnswerList();
-                        } else {
-                            alert(data.message);
-                        }
-                    },
-                    error: function () {
-                        alert("답변 등록 중 오류가 발생했습니다.");
-                    }
-                });
-            },
-
-            fnDeleteQna: function (item) {
-                let self = this;
-
-                if (!confirm("해당 문의를 삭제하시겠습니까?")) {
-                    return;
-                }
-
-                $.ajax({
-                    url: "/admin/qna/delete.dox",
-                    type: "POST",
-                    dataType: "json",
-                    data: {
-                        qnaNo: item.qnaNo
-                    },
-                    success: function (data) {
-                        if (data.result === "success") {
-                            alert("문의가 삭제되었습니다.");
-                            self.fnQnaAnswerList();
-                        } else {
-                            alert("문의 삭제에 실패했습니다.");
-                        }
-                    },
-                    error: function () {
-                        alert("문의 삭제 중 오류가 발생했습니다.");
-                    }
-                });
-            },
-
-            fnGoProductDetail: function(productNo) {
-                location.href = "/product/view.do?productNo=" + productNo;
-            },
-
-            fnToggleQnaProduct: function (productNo) {
-                this.openedProductMap[productNo] = !this.openedProductMap[productNo];
-            }
-        },
-        mounted() {
-            let self = this;
-            self.fnQnaAnswerList();
+            return this.qnaAnswerList.slice(start, end);
         }
-    });
+    },
+    methods: {
+        fnQnaAnswerList: function () {
+            let self = this;
 
-    app.mount('#app');
+            $.ajax({
+                url: "/admin/qna/list.dox",
+                type: "POST",
+                dataType: "json",
+                data: {
+                    ansStatus: self.ansStatus
+                },
+                success: function (data) {
+                    if (data.result === "success") {
+                        self.qnaAnswerList = data.list || [];
+
+                        if (self.currentPage > self.totalPage) {
+                            self.currentPage = self.totalPage || 1;
+                        }
+                    } else {
+                        alert(data.message);
+                    }
+                },
+                error: function () {
+                    alert("쇼핑몰 문의 목록 조회 중 오류가 발생했습니다.");
+                }
+            });
+        },
+
+        fnOpenAnswerModal: function (item) {
+            this.selectedQna = item;
+            this.answerContents = item.aContents || "";
+            this.answerModalOpen = true;
+        },
+
+        fnCloseAnswerModal: function () {
+            this.answerModalOpen = false;
+            this.selectedQna = null;
+            this.answerContents = "";
+        },
+
+        fnSaveQnaAnswer: function () {
+            let self = this;
+
+            if (!self.selectedQna || !self.selectedQna.qnaNo) {
+                alert("문의 정보가 없습니다.");
+                return;
+            }
+
+            if (!self.answerContents || self.answerContents.trim() === "") {
+                alert("답변 내용을 입력하세요.");
+                return;
+            }
+
+            if (!confirm("해당 문의에 답변을 등록하시겠습니까?")) {
+                return;
+            }
+
+            $.ajax({
+                url: "/admin/qna/answer.dox",
+                type: "POST",
+                dataType: "json",
+                data: {
+                    qnaNo: self.selectedQna.qnaNo,
+                    aContents: self.answerContents.trim()
+                },
+                success: function (data) {
+                    if (data.result === "success") {
+                        alert("답변이 등록되었습니다.");
+                        self.fnCloseAnswerModal();
+                        self.fnQnaAnswerList();
+                    } else {
+                        alert(data.message);
+                    }
+                },
+                error: function () {
+                    alert("답변 등록 중 오류가 발생했습니다.");
+                }
+            });
+        },
+
+        fnGoProductDetail: function (productNo) {
+            location.href = "/product/view.do?productNo=" + productNo;
+        },
+
+        fnIsAnswered: function (item) {
+            return item.ansStatus === "Y";
+        },
+
+        fnQnaDate: function (value) {
+            if (!value) {
+                return "-";
+            }
+
+            let dateText = String(value).substring(0, 10);
+            let parts = dateText.split("-");
+
+            if (parts.length === 3) {
+                return parts[0].substring(2, 4) + "." + parts[1] + "." + parts[2];
+            }
+
+            return value;
+        },
+
+        fnEmpty: function (value) {
+            if (value === null || value === undefined || value === "") {
+                return "-";
+            }
+
+            return value;
+        },
+        fnSearchQnaAnswerList: function () {
+            this.currentPage = 1;
+            this.fnQnaAnswerList();
+        },
+
+        fnMovePage: function (page) {
+            if (page < 1 || page > this.totalPage) {
+                return;
+            }
+
+            this.currentPage = page;
+        },
+    },
+    mounted() {
+        this.fnQnaAnswerList();
+    }
+});
+
+app.mount('#app');
 </script>

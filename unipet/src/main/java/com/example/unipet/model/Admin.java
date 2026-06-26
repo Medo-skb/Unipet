@@ -34,12 +34,15 @@ public class Admin {
 	// STORE_SUBMIT
 	String submitStatus;
 
-	// STORE_FILE / 공통 파일
+	// STORE_FILE / PRODUCT_FILE / 공통 파일
 	String filePath;
 	String fileName;
 	String originName;
+	Long fileSize;
+	String fileExt;
 	String isProof;
 	String isMain;
+	String isDetail;
 	
 	// 리뷰 신고 관련
 	int reportNo; 
@@ -53,8 +56,23 @@ public class Admin {
 	
     String reviewType;
 
+    // 상품
+    String productName;
+    String brand;
+    Integer productPrice;
+    Integer stockQty;
+    String productStatus;
+    Integer aMainNo;
+    Integer aSubNo;
+    Integer iMainNo;
+    Integer iSubNo;
+    String aMainType;
+    String aSubType;
+    String iMainType;
+    String iSubType;
+    
+
     // 상품 리뷰용
-    String productName; 
     Integer ordNo; 
 
     // 예약 리뷰용
@@ -66,6 +84,7 @@ public class Admin {
     String reportedUserId;
     String contents;
     String title;
+    String createTime;
 	    
     // QNA
     int qnaNo;

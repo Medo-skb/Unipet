@@ -43,20 +43,38 @@ public class UserService {
 
 	// 사업자 아이디 중복 체크
 	public HashMap<String, Object> checkStoreUser(HashMap<String, Object> map) {
-		HashMap<String, Object> result = new HashMap<>();
+	    HashMap<String, Object> result = new HashMap<>();
 
-		try {
-			int count = userMapper.checkUser(map);
-			result.put("result", true);
-			result.put("count", count);
-			result.put("message", count > 0 ? "이미 사용중인 아이디입니다." : "사용 가능한 아이디입니다.");
-		} catch (Exception e) {
-			e.printStackTrace();
-			result.put("result", false);
-			result.put("message", "사업자 아이디 중복 체크 중 오류가 발생했습니다.");
-		}
+	    try {
+	        int count = userMapper.checkUser(map);
+	        result.put("result", true);
+	        result.put("count", count);
+	        result.put("message", count > 0 ? "이미 사용중인 아이디입니다." : "사용 가능한 아이디입니다.");
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        result.put("result", false);
+	        result.put("message", "사업자 아이디 중복 체크 중 오류가 발생했습니다.");
+	    }
 
-		return result;
+	    return result;
+	}
+
+	// 사업자번호 중복 체크
+	public HashMap<String, Object> checkBiznum(HashMap<String, Object> map) {
+	    HashMap<String, Object> result = new HashMap<>();
+
+	    try {
+	        int count = userMapper.checkBiznum(map);
+	        result.put("result", true);
+	        result.put("count", count);
+	        result.put("message", count > 0 ? "이미 등록된 사업자번호입니다." : "사용 가능한 사업자번호입니다.");
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        result.put("result", false);
+	        result.put("message", "사업자번호 중복 체크 중 오류가 발생했습니다.");
+	    }
+
+	    return result;
 	}
 
 	// 외부업체 검색
@@ -137,9 +155,29 @@ public class UserService {
 
 			int availableStoreCount = userMapper.selectAvailableStoreCount(map);
 			if (availableStoreCount == 0) {
-				result.put("result", false);
-				result.put("message", "신청할 수 없는 업체입니다.");
-				return result;
+			    result.put("result", false);
+			    result.put("message", "신청할 수 없는 업체입니다.");
+			    return result;
+			}
+
+			if (map.get("biznum") == null || String.valueOf(map.get("biznum")).isBlank()) {
+			    result.put("result", false);
+			    result.put("message", "사업자번호를 입력해주세요.");
+			    return result;
+			}
+
+			String biznum = String.valueOf(map.get("biznum"));
+			if (!biznum.matches("^\\d{3}-\\d{2}-\\d{5}$")) {
+			    result.put("result", false);
+			    result.put("message", "사업자번호를 XXX-XX-XXXXX 형식으로 입력해주세요.");
+			    return result;
+			}
+
+			int biznumCount = userMapper.checkBiznum(map);
+			if (biznumCount > 0) {
+			    result.put("result", false);
+			    result.put("message", "이미 등록된 사업자번호입니다.");
+			    return result;
 			}
 
 			int pendingStoreCount = userMapper.selectPendingSubmitCountByStore(map);

@@ -84,6 +84,24 @@
                                     <div class="section-title">사업자 정보</div>
 
                                     <div class="input-group">
+                                        <label>사업자번호</label>
+                                        <div class="biznum-row">
+                                            <input type="text" class="input-field biznum-input biznum-3" v-model="biznum1" maxlength="3" placeholder="123" :readonly="biznumChecked" @input="fnOnlyBiznum('biznum1', 3)">
+                                            <span class="biznum-dash">-</span>
+                                            <input type="text" class="input-field biznum-input biznum-2" v-model="biznum2" maxlength="2" placeholder="45" :readonly="biznumChecked" @input="fnOnlyBiznum('biznum2', 2)">
+                                            <span class="biznum-dash">-</span>
+                                            <input type="text" class="input-field biznum-input biznum-5" v-model="biznum3" maxlength="5" placeholder="67890" :readonly="biznumChecked" @input="fnOnlyBiznum('biznum3', 5)">
+                                            <button type="button" class="btn-sub" @click="fnCheckBiznum" :disabled="biznumChecked">
+                                                {{ biznumChecked ? '확인완료' : '중복확인' }}
+                                            </button>
+                                            <button type="button" class="btn-sub btn-biznum-reset" v-if="biznumChecked" @click="fnResetBiznum">
+                                                다시입력
+                                            </button>
+                                        </div>
+                                        <div v-if="biznumMsg" class="info-text" :class="{ success: biznumChecked }">{{ biznumMsg }}</div>
+                                    </div>
+
+                                    <div class="input-group">
                                         <label>대표자명</label>
                                         <input type="text" class="input-field" v-model="ceoName" placeholder="대표자명을 입력해주세요">
                                     </div>
@@ -135,6 +153,11 @@
 
                     sUserId: "",
                     ceoName: "",
+                    biznum1: "",
+                    biznum2: "",
+                    biznum3: "",
+                    biznumChecked: false,
+                    biznumMsg: "",
                     bizFileName: "",
                     bizFile: null
                 };
@@ -190,6 +213,12 @@
                                 self.sUserId = info.sUserId;
                                 self.ceoName = info.ceoName;
                                 self.bizFileName = info.bizFileName;
+
+                                self.biznum1 = "";
+                                self.biznum2 = "";
+                                self.biznum3 = "";
+                                self.biznumChecked = false;
+                                self.biznumMsg = "";
 
                                 self.selectedStore = {
                                     storeNo: info.storeNo,
@@ -264,6 +293,50 @@
                     });
                 },
 
+                fnOnlyBiznum: function (key, maxLength) {
+                    this[key] = this[key].replace(/[^0-9]/g, "").slice(0, maxLength);
+                    this.biznumChecked = false;
+                    this.biznumMsg = "";
+                },
+
+                fnGetBiznum: function () {
+                    return this.biznum1 + "-" + this.biznum2 + "-" + this.biznum3;
+                },
+
+                fnCheckBiznum: function () {
+                    let self = this;
+                    let biznum = self.fnGetBiznum();
+
+                    if (self.biznum1.length !== 3 || self.biznum2.length !== 2 || self.biznum3.length !== 5) {
+                        alert("사업자번호를 XXX-XX-XXXXX 형식으로 입력해주세요.");
+                        return;
+                    }
+
+                    $.ajax({
+                        url: "/biz/checkBiznum.dox",
+                        type: "POST",
+                        dataType: "json",
+                        data: {
+                            biznum: biznum,
+                            storeNo: self.selectedStore ? self.selectedStore.storeNo : ""
+                        },
+                        success: function (data) {
+                            if (data.count > 0) {
+                                self.biznumChecked = false;
+                                self.biznumMsg = "이미 등록된 사업자번호입니다.";
+                                alert("이미 등록된 사업자번호입니다.");
+                            } else {
+                                self.biznumChecked = true;
+                                self.biznumMsg = "사용 가능한 사업자번호입니다.";
+                                alert("사용 가능한 사업자번호입니다.");
+                            }
+                        },
+                        error: function () {
+                            alert("사업자번호 중복확인 중 오류가 발생했습니다.");
+                        }
+                    });
+                },
+
                 fnOpenBizFile: function () {
                     if (!this.bizFileName) {
                         alert("등록된 파일이 없습니다.");
@@ -285,6 +358,18 @@
                         return;
                     }
 
+                    let biznum = self.fnGetBiznum();
+
+                    if (self.biznum1.length !== 3 || self.biznum2.length !== 2 || self.biznum3.length !== 5) {
+                        alert("사업자번호를 XXX-XX-XXXXX 형식으로 입력해주세요.");
+                        return;
+                    }
+
+                    if (!self.biznumChecked) {
+                        alert("사업자번호 중복확인을 해주세요.");
+                        return;
+                    }
+
                     if (!self.ceoName || self.ceoName.trim() === "") {
                         alert("대표자명을 입력해주세요.");
                         return;
@@ -298,6 +383,7 @@
                     formData.append("storeNo", self.selectedStore.storeNo);
                     formData.append("oldStoreNo", self.applyInfo.storeNo);
                     formData.append("sUserId", self.sUserId);
+                    formData.append("biznum", biznum);
                     formData.append("ceoName", self.ceoName.trim());
 
                     if (self.bizFile) {
@@ -322,7 +408,11 @@
                             alert("재신청 처리 중 오류가 발생했습니다.");
                         }
                     });
-                }
+                },
+                fnResetBiznum: function () {
+                    this.biznumChecked = false;
+                    this.biznumMsg = "";
+                },
             },
             mounted() {
                 this.fnGetApplyStatus();

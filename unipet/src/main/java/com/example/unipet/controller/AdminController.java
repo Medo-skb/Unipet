@@ -537,62 +537,6 @@ public class AdminController {
 	    return new Gson().toJson(resultMap);
 	}
 	
-	@RequestMapping(value = "/admin/report/reservationGroupList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
-	@ResponseBody
-	public String getReservationReviewReportGroupList(@RequestParam HashMap<String, Object> map) throws Exception {
-	    HashMap<String, Object> resultMap = adminService.getReservationReviewReportGroupList(map);
-	    return new Gson().toJson(resultMap);
-	}
-
-	@RequestMapping(value = "/admin/report/reservationDetailList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
-	@ResponseBody
-	public String getReservationReviewReportDetailList(@RequestParam HashMap<String, Object> map) throws Exception {
-	    HashMap<String, Object> resultMap = adminService.getReservationReviewReportDetailList(map);
-	    return new Gson().toJson(resultMap);
-	}
-
-	@RequestMapping(value = "/admin/report/communityPostGroupList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
-	@ResponseBody
-	public String getCommunityPostReportGroupList(@RequestParam HashMap<String, Object> map) throws Exception {
-	    HashMap<String, Object> resultMap = adminService.getCommunityPostReportGroupList(map);
-	    return new Gson().toJson(resultMap);
-	}
-
-	@RequestMapping(value = "/admin/report/communityPostDetailList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
-	@ResponseBody
-	public String getCommunityPostReportDetailList(@RequestParam HashMap<String, Object> map) throws Exception {
-	    HashMap<String, Object> resultMap = adminService.getCommunityPostReportDetailList(map);
-	    return new Gson().toJson(resultMap);
-	}
-
-	@RequestMapping(value = "/admin/report/communityCommentGroupList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
-	@ResponseBody
-	public String getCommunityCommentReportGroupList(@RequestParam HashMap<String, Object> map) throws Exception {
-	    HashMap<String, Object> resultMap = adminService.getCommunityCommentReportGroupList(map);
-	    return new Gson().toJson(resultMap);
-	}
-
-	@RequestMapping(value = "/admin/report/communityCommentDetailList.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
-	@ResponseBody
-	public String getCommunityCommentReportDetailList(@RequestParam HashMap<String, Object> map) throws Exception {
-	    HashMap<String, Object> resultMap = adminService.getCommunityCommentReportDetailList(map);
-	    return new Gson().toJson(resultMap);
-	}
-
-	@RequestMapping(value = "/admin/report/batchApprove.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
-	@ResponseBody
-	public String approveReportBatch(@RequestParam HashMap<String, Object> map) throws Exception {
-	    HashMap<String, Object> resultMap = adminService.approveReportBatch(map);
-	    return new Gson().toJson(resultMap);
-	}
-
-	@RequestMapping(value = "/admin/report/batchReject.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
-	@ResponseBody
-	public String rejectReportBatch(@RequestParam HashMap<String, Object> map) throws Exception {
-	    HashMap<String, Object> resultMap = adminService.rejectReportBatch(map);
-	    return new Gson().toJson(resultMap);
-	}
-	
 	@RequestMapping(value = "/admin/businessUser/statusUpdate.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
 	public String updateAdminBusinessUserStatus(@RequestParam HashMap<String, Object> map) throws Exception {
@@ -606,5 +550,174 @@ public class AdminController {
 	    HashMap<String, Object> resultMap = adminService.updateAdminBusinessStoreStatus(map);
 	    return new Gson().toJson(resultMap);
 	}
+	
+	@RequestMapping("/admin/productManage.do")
+	public String adminProductManage(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+	    HttpSession session = request.getSession();
+	    String role = (String) session.getAttribute("sessionRole");
 
+	    if (role == null || !role.equals("ADMIN")) {
+	        return "redirect:/admin/login.do";
+	    }
+
+	    return "/admin/adminProductManage";
+	}
+
+	@RequestMapping("/admin/productEdit.do")
+	public String adminProductEdit(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+	    HttpSession session = request.getSession();
+	    String role = (String) session.getAttribute("sessionRole");
+
+	    if (role == null || !role.equals("ADMIN")) {
+	        return "redirect:/admin/login.do";
+	    }
+
+	    model.addAttribute("productNo", map.get("productNo"));
+
+	    return "/admin/adminProductEdit";
+	}
+	
+	@RequestMapping("/admin/productRegister.do")
+	public String adminProductRegister(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+	    HttpSession session = request.getSession();
+	    String role = (String) session.getAttribute("sessionRole");
+
+	    if (role == null || !role.equals("ADMIN")) {
+	        return "redirect:/admin/login.do";
+	    }
+
+	    return "/admin/adminProductRegister";
+	}
+
+	@RequestMapping(value = "/admin/product/list.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getAdminProductList(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.getAdminProductList(map);
+	    return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/admin/product/detail.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getAdminProductDetail(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.getAdminProductDetail(map);
+	    return new Gson().toJson(resultMap);
+	}
+	
+	@RequestMapping(value = "/admin/product/update.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String updateAdminProduct(HttpServletRequest request,
+	        @RequestParam HashMap<String, Object> map,
+	        @RequestParam(value = "mainImageFile", required = false) MultipartFile mainImageFile,
+	        @RequestParam(value = "detailImageFile", required = false) MultipartFile detailImageFile) throws Exception {
+
+	    if (mainImageFile != null && !mainImageFile.isEmpty()) {
+	        String originName = mainImageFile.getOriginalFilename();
+	        String saveName = System.currentTimeMillis() + "_main_" + originName;
+
+	        String uploadPath = request.getServletContext().getRealPath("/img/product/");
+	        File dir = new File(uploadPath);
+
+	        if (!dir.exists()) {
+	            dir.mkdirs();
+	        }
+
+	        File saveFile = new File(uploadPath, saveName);
+	        mainImageFile.transferTo(saveFile);
+
+	        map.put("mainImagePath", "/img/product/" + saveName);
+	    }
+
+	    if (detailImageFile != null && !detailImageFile.isEmpty()) {
+	        String originName = detailImageFile.getOriginalFilename();
+	        String saveName = System.currentTimeMillis() + "_detail_" + originName;
+
+	        String uploadPath = request.getServletContext().getRealPath("/img/product/");
+	        File dir = new File(uploadPath);
+
+	        if (!dir.exists()) {
+	            dir.mkdirs();
+	        }
+
+	        File saveFile = new File(uploadPath, saveName);
+	        detailImageFile.transferTo(saveFile);
+
+	        map.put("detailImagePath", "/img/product/" + saveName);
+	    }
+
+	    HashMap<String, Object> resultMap = adminService.updateAdminProduct(map);
+	    return new Gson().toJson(resultMap);
+	}
+	
+	@RequestMapping(value = "/admin/product/category/list.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getAdminProductCategoryList(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = adminService.getAdminProductCategoryList(map);
+	    return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/admin/product/insert.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String insertAdminProduct(HttpServletRequest request,
+	        @RequestParam HashMap<String, Object> map,
+	        @RequestParam(value = "mainImageFile", required = false) MultipartFile mainImageFile,
+	        @RequestParam(value = "detailImageFile", required = false) MultipartFile detailImageFile) throws Exception {
+
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+	    try {
+	        String uploadPath = request.getServletContext().getRealPath("/img/product/");
+	        File dir = new File(uploadPath);
+
+	        if (!dir.exists()) {
+	            dir.mkdirs();
+	        }
+
+	        if (mainImageFile != null && !mainImageFile.isEmpty()) {
+	            String originName = mainImageFile.getOriginalFilename();
+	            String fileExt = "";
+
+	            if (originName != null && originName.contains(".")) {
+	                fileExt = originName.substring(originName.lastIndexOf(".") + 1).toLowerCase();
+	            }
+
+	            String fileName = System.currentTimeMillis() + "_main_" + originName;
+	            File saveFile = new File(uploadPath, fileName);
+	            mainImageFile.transferTo(saveFile);
+
+	            map.put("mainFilePath", "/img/product/");
+	            map.put("mainFileName", fileName);
+	            map.put("mainOriginName", originName);
+	            map.put("mainFileSize", mainImageFile.getSize());
+	            map.put("mainFileExt", fileExt);
+	        }
+
+	        if (detailImageFile != null && !detailImageFile.isEmpty()) {
+	            String originName = detailImageFile.getOriginalFilename();
+	            String fileExt = "";
+
+	            if (originName != null && originName.contains(".")) {
+	                fileExt = originName.substring(originName.lastIndexOf(".") + 1).toLowerCase();
+	            }
+
+	            String fileName = System.currentTimeMillis() + "_detail_" + originName;
+	            File saveFile = new File(uploadPath, fileName);
+	            detailImageFile.transferTo(saveFile);
+
+	            map.put("detailFilePath", "/img/product/");
+	            map.put("detailFileName", fileName);
+	            map.put("detailOriginName", originName);
+	            map.put("detailFileSize", detailImageFile.getSize());
+	            map.put("detailFileExt", fileExt);
+	        }
+
+	        resultMap = adminService.insertAdminProduct(map);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        resultMap.put("result", "fail");
+	        resultMap.put("message", "상품 등록 중 오류가 발생했습니다.");
+	    }
+
+	    return new Gson().toJson(resultMap);
+	}
+	
 }

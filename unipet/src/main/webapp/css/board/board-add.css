@@ -190,36 +190,14 @@ textarea {
 }
 
 /* 등록 버튼 */
-.save-btn {
-	background: var(--main);
-	color: #fff;
-	border: none !important;
-}
-
-.save-btn:hover {
-	opacity: 0.9;
-}
-
-/* 기본 보조 버튼 */
+.save-btn,
 .list-btn {
-	background: var(--bg);
-	color: var(--text-main);
-	border: 1px solid var(--line-soft) !important;
-}
-
-.list-btn:hover {
-	color: var(--main);
-	border-color: var(--main) !important;
-	background: var(--bg);
-}
-
-/* 임시저장 버튼만 등록 버튼처럼 */
-.btn-row button:nth-child(2) {
 	background: var(--main);
 	color: #fff;
 	border: none !important;
 }
 
-.btn-row button:nth-child(2):hover {
-	opacity: 0.9;
+.save-btn:hover,
+.list-btn:hover {
+	background-color: var(--btnh);
 }

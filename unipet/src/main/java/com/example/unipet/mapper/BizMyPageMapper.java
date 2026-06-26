@@ -91,6 +91,9 @@ public interface BizMyPageMapper {
 	// 사업자 아이디 중복 확인
 	public int checkBizUserId(HashMap<String, Object> map);
 
+	// 사업자번호 중복 확인
+	public int checkBiznum(HashMap<String, Object> map);
+
 	// 사업자 내 정보 수정
 	public void updateBizUser(HashMap<String, Object> map);
 	

@@ -424,6 +424,14 @@
 	    ) A
 	</select>
 	
+	<!-- 사업자번호 중복 조회 -->
+	<select id="checkBiznum" parameterType="hashmap" resultType="int">
+	    SELECT COUNT(*)
+	    FROM STORE
+	    WHERE BIZNUM = #{biznum}
+	      AND (#{storeNo} IS NULL OR #{storeNo} = '' OR STORE_NO != #{storeNo})
+	</select>
+	
 	<!-- 내 정보 수정 -->
 	<update id="updateBizUser" parameterType="hashmap">
 		UPDATE STORE_USER

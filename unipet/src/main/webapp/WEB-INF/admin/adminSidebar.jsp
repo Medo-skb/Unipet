@@ -24,5 +24,9 @@
         <li class="menu-item ${param.activeMenu eq 'qnaAnswer' ? 'active' : ''}">
             <a href="/admin/qnaAnswer.do">쇼핑몰 문의 답변 관리</a>
         </li>
+
+        <li class="menu-item ${param.activeMenu eq 'productManage' ? 'active' : ''}">
+            <a href="/admin/productManage.do">상품 등록 및 관리</a>
+        </li>
     </ul>
 </aside>

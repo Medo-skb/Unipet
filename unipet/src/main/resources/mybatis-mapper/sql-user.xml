@@ -11,7 +11,14 @@
 	        (SELECT COUNT(*) FROM store_user WHERE S_USER_ID = #{userId})
 	    ) AS totalCount
 	</select>
-
+	
+	<!-- 사업자번호 중복체크 -->
+	<select id="checkBiznum" parameterType="hashmap" resultType="int">
+	    SELECT COUNT(*)
+	    FROM unipet.store
+	    WHERE BIZNUM = #{biznum}
+	</select>
+	
 	<!-- 휴대폰 중복체크 -->
 	<select id="checkPhone" parameterType="hashmap" resultType="int">
 	    SELECT COUNT(*)
@@ -337,7 +344,9 @@
 	<!-- 신청한 업체 상태를 검토 대기 상태로 변경 -->
 	<update id="updateStoreStatusToPending" parameterType="hashmap">
 	    UPDATE unipet.store
-	    SET S_STATUS = 'PND'
+	    SET S_STATUS = 'PND',
+	        S_USER_ID = #{userId},
+	        BIZNUM = #{biznum}
 	    WHERE STORE_NO = #{storeNo}
 	      AND S_STATUS = 'EXT'
 	      AND S_USER_ID IS NULL
