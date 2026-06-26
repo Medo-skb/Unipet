@@ -648,7 +648,6 @@
 					},
 
 					fnReviewImgError: function (event) {
-						console.log("리뷰 이미지 로드 실패:", event.target.src);
 						event.target.style.display = "none";
 					},
 
