@@ -391,10 +391,17 @@ public class BizMyPageController {
 	@RequestMapping(value = "/checkBizUserId.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
 	public String checkBizUserId(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
-		HashMap<String, Object> resultMap = new HashMap<String, Object>();
-		resultMap = bizMyPageService.getBizUserId(map);
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+	    resultMap = bizMyPageService.getBizUserId(map);
 
-		return new Gson().toJson(resultMap);
+	    return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/biz/checkBiznum.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String checkBiznum(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = bizMyPageService.checkBiznum(map);
+	    return new Gson().toJson(resultMap);
 	}
 	
 	// 내 정보 수정

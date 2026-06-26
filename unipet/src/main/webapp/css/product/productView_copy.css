@@ -284,8 +284,7 @@ button {
 	margin-top: 22px;
 }
 
-.btn-area button,
-.qna-write-btn {
+.btn-area button {
 	min-width: 130px;
 	height: 52px;
 	border: none;
@@ -312,8 +311,7 @@ button {
 	color: var(--main);
 }
 
-.btn-buy,
-.qna-write-btn {
+.btn-buy {
 	background: var(--main);
 	color: #fff;
 }
@@ -321,6 +319,18 @@ button {
 .btn-buy:hover,
 .qna-write-btn:hover {
 	background: #f83f5f;
+}
+
+.qna-write-btn{
+	min-width: 100px;
+	height: 40px;
+	border: none;
+	border-radius: 12px;
+	cursor: pointer;
+	font-size: 16px;
+	font-weight: 800;
+	background: var(--main);
+	color: #fff;
 }
 
 .empty-box {
@@ -740,6 +750,7 @@ button {
 .qna-secret-option:hover {
 	border-color: var(--main);
 	background: var(--soft-pink-2);
+	color: var(--main);
 }
 
 .qna-secret-option.active {
@@ -820,11 +831,6 @@ button {
 	background: #fff;
 	border: 1px solid var(--line);
 	border-radius: 10px;
-}
-
-.qna-title-row:hover {
-	border-color: var(--line-soft);
-	background: var(--soft-pink-2);
 }
 
 .qna-title-text {

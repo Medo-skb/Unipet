@@ -103,28 +103,27 @@
 	font-weight: 700;
 }
 
+.btn-row button{
+	height: 40px;
+	border: none;
+	border-radius: 8px;
+	cursor: pointer;
+	padding: 0 16px;
+	font-weight: 700;	
+}
+
 /* 배경 있는 버튼 */
 .like-btn,
-.list-btn {
+.list-btn,
+.report-btn {
 	background: var(--main);
 	color: #fff;
 }
 
 .like-btn:hover,
-.list-btn:hover {
-	opacity: 0.9;
-}
-
-/* 배경 없는 버튼 */
-.report-btn {
-	background: var(--bg);
-	color: var(--text-main);
-	border: 1px solid var(--line-soft) !important;
-}
-
+.list-btn:hover,
 .report-btn:hover {
-	color: var(--main);
-	border-color: var(--main) !important;
+	background-color: var(--btnh);
 }
 
 .comment-box {
@@ -249,12 +248,7 @@
 	color: var(--text-main);
 }
 
-.comment-btn-row {
-	display: flex;
-	gap: 10px;
-	margin-top: 10px;
-}
-
+.comment-btn-row,
 .comment-edit-btn-row {
 	display: flex;
 	gap: 10px;

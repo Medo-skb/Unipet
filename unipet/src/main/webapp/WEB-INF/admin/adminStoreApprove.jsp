@@ -30,66 +30,122 @@
                         <h2>사업자 입점 승인 관리</h2>
                         <div class="content-desc">승인 대기 중인 사업자 목록입니다.</div>
 
-                        <div class="approve-list" v-if="approveList && approveList.length > 0">
-                            <div class="approve-card" v-for="item in approveList" :key="item.storeNo">
-                                <table class="approve-table">
-                                    <tbody>
-                                        <tr>
-                                            <th>사업자 아이디</th>
-                                            <td>{{ item.sUserId }}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>대표자명</th>
-                                            <td>{{ item.ceoName }}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>업체명</th>
-                                            <td>{{ item.storeName }}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>업종</th>
-                                            <td>{{ fnCategoryName(item.sCategory) }}</td>
-                                        </tr>
-                                        <tr>
-                                            <th>주소</th>
-                                            <td>
-                                                <button type="button" class="address-link" @click="fnOpenMap(item)">
-                                                    {{ fnFullAddress(item) }}
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>사업자 등록증</th>
-                                            <td>
-                                                <button
-                                                    v-if="item.bizFileName"
-                                                    type="button"
-                                                    class="file-link"
-                                                    @click="fnBizFilePreview(item)">
-                                                    {{ item.bizFileName }}
-                                                </button>
-                                                <span v-else>사업자 등록증 파일이 없습니다.</span>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-
-                                <div class="report-btn-box">
-                                    <button type="button" class="btn-reject" @click="fnOpenRejectModal(item)">
-                                        반려
-                                    </button>
-                                    <button type="button" class="btn-approve" @click="fnOpenApproveModal(item)">
-                                        승인
-                                    </button>
-                                </div>
-                            </div>
+                        <div class="admin-approve-table-wrap admin-list-fixed-area" v-if="approveList && approveList.length > 0">
+                            <table class="admin-user-table admin-approve-table">
+                                <thead>
+                                    <tr>
+                                        <th>사업자 아이디</th>
+                                        <th>사업자 번호</th>
+                                        <th>사업자 등록증</th>
+                                        <th>대표자명</th>
+                                        <th>업체명</th>
+                                        <th>업종</th>
+                                        <th>주소</th>
+                                        <th>승인/반려</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="item in pagedApproveList" :key="item.storeNo">
+                                        <td>{{ item.sUserId }}</td>
+                                        <td>{{ fnEmpty(item.biznum) }}</td>
+                                        <td>
+                                            <button
+                                                v-if="item.bizFileName"
+                                                type="button"
+                                                class="detail-link-btn"
+                                                @click="fnBizFilePreview(item)">
+                                                보기
+                                            </button>
+                                            <span v-else>-</span>
+                                        </td>
+                                        <td>{{ item.ceoName }}</td>
+                                        <td>{{ item.storeName }}</td>
+                                        <td>{{ fnCategoryName(item.sCategory) }}</td>
+                                        <td>
+                                            <button type="button" class="detail-link-btn address-cell-btn" @click="fnOpenMap(item)">
+                                                {{ fnFullAddress(item) }}
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn-approve-reject" @click="fnOpenBizStatusModal(item)">
+                                                승인/반려
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
 
                         <div class="empty-box" v-if="approveList.length === 0">
                             승인 대기 중인 사업자가 없습니다.
                         </div>
+
+                        <div class="admin-pagination" v-if="approveList.length > 0">
+                            <button type="button" class="page-btn" :disabled="currentPage === 1" @click="fnMovePage(currentPage - 1)">
+                                이전
+                            </button>
+
+                            <button type="button"
+                                    class="page-btn"
+                                    v-for="page in pageList"
+                                    :key="page"
+                                    :class="{ active: currentPage === page }"
+                                    @click="fnMovePage(page)">
+                                {{ page }}
+                            </button>
+
+                            <button type="button" class="page-btn" :disabled="currentPage === totalPage" @click="fnMovePage(currentPage + 1)">
+                                다음
+                            </button>
+                        </div>
                     </div>
                 </section>
+                <!-- 사업자 승인/반려 선택 모달 -->
+                <div class="biz-status-modal-bg" v-if="bizStatusModalOpen">
+                    <div class="biz-status-modal">
+                        <div class="biz-status-modal-header">
+                            <h3>사업자 승인/반려</h3>
+                            <button type="button" class="biz-status-modal-close" @click="fnCloseBizStatusModal">×</button>
+                        </div>
+
+                        <div class="biz-status-modal-body">
+                            <div class="biz-status-row">
+                                <span class="biz-status-label">업체명</span>
+                                <span>{{ bizStatusTarget ? bizStatusTarget.storeName : '' }}</span>
+                            </div>
+
+                            <div class="biz-status-row">
+                                <span class="biz-status-label">사업자 번호</span>
+                                <span>{{ bizStatusTarget ? fnEmpty(bizStatusTarget.biznum) : '-' }}</span>
+                            </div>
+
+                            <div class="input-group">
+                                <label>반려 사유</label>
+                                <textarea
+                                    class="biz-status-reason"
+                                    v-model="rejReason"
+                                    placeholder="반려할 경우 사유를 입력해주세요."></textarea>
+                            </div>
+
+                            <div class="biz-status-message">
+                                승인하시겠습니까?
+                                승인 시 반려 사유는 저장되지 않습니다.
+                            </div>
+                        </div>
+
+                        <div class="biz-status-modal-footer">
+                            <button type="button" class="modal-cancel-btn" @click="fnCloseBizStatusModal">
+                                취소
+                            </button>
+                            <button type="button" class="btn-reject" @click="fnRejectBizStatus" :disabled="isProcessingBizStatus">
+                                반려
+                            </button>
+                            <button type="button" class="btn-approve" @click="fnApproveBizStatus" :disabled="isProcessingBizStatus">
+                                승인
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -107,67 +163,6 @@
                 <div id="kakaoMap" class="kakao-map"></div>
             </div>
         </div>
-        <!-- 사업자 승인 모달 -->
-        <div class="approve-modal-bg" v-if="approveModalOpen">
-            <div class="approve-modal">
-                <div class="approve-modal-header">
-                    <h3>사업자 승인</h3>
-                    <button type="button" class="approve-modal-close" @click="fnCloseApproveModal">×</button>
-                </div>
-
-                <div class="approve-modal-body">
-                    <div class="approve-info-row">
-                        <span class="approve-info-label">업체명</span>
-                        <span>{{ approveTarget ? approveTarget.storeName : '' }}</span>
-                    </div>
-
-                    <label class="approve-input-label" for="bizNum">사업자 번호</label>
-                    <input
-                        id="bizNum"
-                        type="text"
-                        class="approve-input"
-                        v-model="bizNum"
-                        placeholder="사업자 번호를 입력하세요.">
-                </div>
-
-                <div class="approve-modal-footer">
-                    <button type="button" class="admin-action-btn cancel-btn" @click="fnCloseApproveModal">취소</button>
-                    <button type="button" class="admin-action-btn approve-btn" @click="fnApprove" :disabled="isApproving">
-                        {{ isApproving ? '승인 처리 중...' : '승인' }}
-                    </button>
-                </div>
-            </div>
-        </div>
-        <!-- 사업자 반려 모달 -->
-        <div class="reject-modal-bg" v-if="rejectModalOpen">
-            <div class="reject-modal">
-                <div class="reject-modal-header">
-                    <h3>사업자 반려</h3>
-                    <button type="button" class="reject-modal-close" @click="fnCloseRejectModal">×</button>
-                </div>
-
-                <div class="reject-modal-body">
-                    <div class="reject-info-row">
-                        <span class="reject-info-label">업체명</span>
-                        <span>{{ rejectTarget ? rejectTarget.storeName : '' }}</span>
-                    </div>
-
-                    <label class="reject-input-label" for="rejReason">반려 사유</label>
-                    <textarea
-                        id="rejReason"
-                        class="reject-textarea"
-                        v-model="rejReason"
-                        placeholder="반려 사유를 입력하세요."></textarea>
-                </div>
-
-                <div class="reject-modal-footer">
-                    <button type="button" class="admin-action-btn cancel-btn" @click="fnCloseRejectModal">취소</button>
-                    <button type="button" class="admin-action-btn reject-btn" @click="fnReject" :disabled="isRejecting">
-                        {{ isRejecting ? '반려 처리 중...' : '반려' }}
-                    </button>
-                </div>
-            </div>
-        </div>
     </div>
 
     <jsp:include page="/WEB-INF/footer/footer.jsp" />
@@ -180,21 +175,42 @@
         data() {
             return {
                 approveList: [],
+                currentPage: 1,
+                pageSize: 10,
 
                 mapModalOpen: false,
                 mapTarget: null,
                 map: null,
 
-                approveModalOpen: false,
-                approveTarget: null,
-                bizNum: "",
-                isApproving: false,
-
-                rejectModalOpen: false,
-                rejectTarget: null,
+                bizStatusModalOpen: false,
+                bizStatusTarget: null,
                 rejReason: "",
-                isRejecting: false
+                isProcessingBizStatus: false
             };
+        },
+        computed: {
+            totalPage: function () {
+                return Math.ceil(this.approveList.length / this.pageSize);
+            },
+
+            pageList: function () {
+                let list = [];
+                let startPage = Math.floor((this.currentPage - 1) / 5) * 5 + 1;
+                let endPage = Math.min(startPage + 4, this.totalPage);
+
+                for (let i = startPage; i <= endPage; i++) {
+                    list.push(i);
+                }
+
+                return list;
+            },
+
+            pagedApproveList: function () {
+                let start = (this.currentPage - 1) * this.pageSize;
+                let end = start + this.pageSize;
+
+                return this.approveList.slice(start, end);
+            }
         },
         methods: {
             fnBizList: function () {
@@ -208,6 +224,10 @@
                     success: function (data) {
                         if (data.result === "success") {
                             self.approveList = data.list || [];
+
+                            if (self.currentPage > self.totalPage) {
+                                self.currentPage = self.totalPage || 1;
+                            }
                         } else {
                             alert(data.message);
                         }
@@ -276,6 +296,7 @@
                 self.mapTarget = null;
                 self.map = null;
             },
+            
             fnFullAddress: function (item) {
                 if (!item) {
                     return "";
@@ -286,6 +307,23 @@
 
                 return (sAddr + " " + sFullAddr).trim();
             },
+
+            fnEmpty: function (value) {
+                if (value === null || value === undefined || value === "") {
+                    return "-";
+                }
+                return value;
+            },
+
+            fnMovePage: function (page) {
+                if (page < 1 || page > this.totalPage) {
+                    return;
+                }
+
+                this.currentPage = page;
+
+            },
+
             fnBizFilePreview: function (item) {
                 if (!item.bizFileName) {
                     alert("사업자 등록증 파일이 없습니다.");
@@ -294,138 +332,112 @@
 
                 window.open("/img/bizfile/" + item.bizFileName, "_blank");
             },
-            fnOpenRejectModal: function (item) {
-                let self = this;
 
-                self.rejectTarget = item;
-                self.rejReason = "";
-                self.rejectModalOpen = true;
-            },
-
-            fnCloseRejectModal: function () {
-                let self = this;
-
-                self.rejectModalOpen = false;
-                self.rejectTarget = null;
-                self.rejReason = "";
-                self.isRejecting = false;
-            },
-
-            fnReject: function () {
-                let self = this;
-
-                if (self.isRejecting) {
+            fnOpenBizStatusModal: function (item) {
+                if (!item) {
+                    alert("처리할 업체 정보가 없습니다.");
                     return;
                 }
 
-                if (!self.rejectTarget) {
-                    alert("반려할 업체 정보가 없습니다.");
-                    return;
-                }
-
-                if (!self.rejReason.trim()) {
-                    alert("반려 사유를 입력해주세요.");
-                    return;
-                }
-
-                let message = "업체명: " + self.rejectTarget.storeName
-                    + "\n반려 사유: " + self.rejReason.trim()
-                    + "\n\n반려하시겠습니까?";
-
-                if (!confirm(message)) {
-                    return;
-                }
-
-                self.isRejecting = true;
-
-                $.ajax({
-                    url: "/editBizStatusRej.dox",
-                    dataType: "json",
-                    type: "POST",
-                    data: {
-                        storeNo: self.rejectTarget.storeNo,
-                        sUserId: self.rejectTarget.sUserId,
-                        rejReason: self.rejReason.trim()
-                    },
-                    success: function (data) {
-                        if (data.result === "success") {
-                            alert("반려되었습니다.");
-                            self.fnCloseRejectModal();
-                            self.fnBizList();
-                        } else {
-                            self.isRejecting = false;
-                            alert(data.message || "반려 처리 중 오류가 발생했습니다.");
-                        }
-                    },
-                    error: function () {
-                        self.isRejecting = false;
-                        alert("서버 통신 중 오류가 발생했습니다.");
-                    }
-                });
+                this.bizStatusTarget = item;
+                this.rejReason = "";
+                this.bizStatusModalOpen = true;
             },
-            fnOpenApproveModal: function (item) {
-                let self = this;
 
-                self.approveTarget = item;
-                self.bizNum = "";
-                self.approveModalOpen = true;
+            fnCloseBizStatusModal: function () {
+                this.bizStatusModalOpen = false;
+                this.bizStatusTarget = null;
+                this.rejReason = "";
+                this.isProcessingBizStatus = false;
             },
-            fnCloseApproveModal: function () {
-                let self = this;
 
-                self.approveModalOpen = false;
-                self.approveTarget = null;
-                self.bizNum = "";
-                self.isApproving = false;
-            },
-            fnApprove: function () {
+            fnApproveBizStatus: function () {
                 let self = this;
+                let item = self.bizStatusTarget;
 
-                if (self.isApproving) {
+                if (self.isProcessingBizStatus) {
                     return;
                 }
 
-                if (!self.approveTarget) {
+                if (!item) {
                     alert("승인할 업체 정보가 없습니다.");
                     return;
                 }
 
-                if (!self.bizNum.trim()) {
-                    alert("사업자 번호를 입력해주세요.");
+                if (!item.biznum) {
+                    alert("사업자번호가 없습니다.");
                     return;
                 }
 
-                let message = "업체명: " + self.approveTarget.storeName
-                    + "\n사업자번호: " + self.bizNum.trim()
-                    + "\n\n승인하시겠습니까?";
-
-                if (!confirm(message)) {
-                    return;
-                }
-
-                self.isApproving = true;
+                self.isProcessingBizStatus = true;
 
                 $.ajax({
                     url: "/editBizStatusApr.dox",
                     dataType: "json",
                     type: "POST",
                     data: {
-                        storeNo: self.approveTarget.storeNo,
-                        sUserId: self.approveTarget.sUserId,
-                        bizNum: self.bizNum.trim()
+                        storeNo: item.storeNo,
+                        sUserId: item.sUserId,
+                        bizNum: item.biznum
                     },
                     success: function (data) {
                         if (data.result === "success") {
                             alert("승인되었습니다.");
-                            self.fnCloseApproveModal();
+                            self.fnCloseBizStatusModal();
                             self.fnBizList();
                         } else {
-                            self.isApproving = false;
+                            self.isProcessingBizStatus = false;
                             alert(data.message || "승인 처리 중 오류가 발생했습니다.");
                         }
                     },
                     error: function () {
-                        self.isApproving = false;
+                        self.isProcessingBizStatus = false;
+                        alert("서버 통신 중 오류가 발생했습니다.");
+                    }
+                });
+            },
+
+            fnRejectBizStatus: function () {
+                let self = this;
+                let item = self.bizStatusTarget;
+
+                if (self.isProcessingBizStatus) {
+                    return;
+                }
+
+                if (!item) {
+                    alert("반려할 업체 정보가 없습니다.");
+                    return;
+                }
+
+                if (!self.rejReason || self.rejReason.trim() === "") {
+                    alert("반려 사유를 입력해주세요.");
+                    return;
+                }
+
+                self.isProcessingBizStatus = true;
+
+                $.ajax({
+                    url: "/editBizStatusRej.dox",
+                    dataType: "json",
+                    type: "POST",
+                    data: {
+                        storeNo: item.storeNo,
+                        sUserId: item.sUserId,
+                        rejReason: self.rejReason.trim()
+                    },
+                    success: function (data) {
+                        if (data.result === "success") {
+                            alert("반려되었습니다.");
+                            self.fnCloseBizStatusModal();
+                            self.fnBizList();
+                        } else {
+                            self.isProcessingBizStatus = false;
+                            alert(data.message || "반려 처리 중 오류가 발생했습니다.");
+                        }
+                    },
+                    error: function () {
+                        self.isProcessingBizStatus = false;
                         alert("서버 통신 중 오류가 발생했습니다.");
                     }
                 });
@@ -434,6 +446,10 @@
         mounted() {
             let self = this;
             self.fnBizList();
+
+            self.$nextTick(function () {
+                self.fnSyncApproveTableScroll();
+            });
         }
     });
 

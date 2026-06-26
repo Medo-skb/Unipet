@@ -212,26 +212,16 @@ textarea {
 	font-size: 14px;
 }
 
-/* 등록, 임시저장, 취소 */
+/* 등록, 임시저장, 삭제, 취소 */
 .save-btn,
-.list-btn {
+.list-btn,
+.remove-btn {
 	background: var(--main);
 	color: #fff;
 }
 
 .save-btn:hover,
-.list-btn:hover {
-	opacity: 0.9;
-}
-
-/* 삭제 버튼 */
-.remove-btn {
-	background: var(--bg);
-	color: var(--text-main);
-	border: 1px solid var(--line-soft) !important;
-}
-
+.list-btn:hover,
 .remove-btn:hover {
-	color: var(--main);
-	border-color: var(--main) !important;
+	background-color: var(--btnh);
 }

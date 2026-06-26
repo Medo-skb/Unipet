@@ -13,6 +13,8 @@ public interface UserMapper {
 
 	int checkUser(HashMap<String, Object> map);
 
+	int checkBiznum(HashMap<String, Object> map);
+
 	int insertUser(HashMap<String, Object> map);
 
 	int insertBizUser(HashMap<String, Object> map);

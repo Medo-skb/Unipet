@@ -616,217 +616,6 @@ public class AdminService {
 
 	    return resultMap;
 	}
-	
-	public HashMap<String, Object> getReservationReviewReportGroupList(HashMap<String, Object> map) {
-	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
-
-	    try {
-	        List<Admin> list = adminMapper.selectReservationReviewReportGroupList(map);
-	        resultMap.put("list", list);
-	        resultMap.put("result", "success");
-	        resultMap.put("message", Message.MSG_SEARCH);
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        resultMap.put("result", "fail");
-	        resultMap.put("message", Message.MSG_SERVER_ERR);
-	    }
-
-	    return resultMap;
-	}
-
-	public HashMap<String, Object> getReservationReviewReportDetailList(HashMap<String, Object> map) {
-	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
-
-	    try {
-	        List<Admin> list = adminMapper.selectReservationReviewReportDetailList(map);
-	        resultMap.put("list", list);
-	        resultMap.put("result", "success");
-	        resultMap.put("message", Message.MSG_SEARCH);
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        resultMap.put("result", "fail");
-	        resultMap.put("message", Message.MSG_SERVER_ERR);
-	    }
-
-	    return resultMap;
-	}
-
-	public HashMap<String, Object> getCommunityPostReportGroupList(HashMap<String, Object> map) {
-	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
-
-	    try {
-	        List<Admin> list = adminMapper.selectCommunityPostReportGroupList(map);
-	        resultMap.put("list", list);
-	        resultMap.put("result", "success");
-	        resultMap.put("message", Message.MSG_SEARCH);
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        resultMap.put("result", "fail");
-	        resultMap.put("message", Message.MSG_SERVER_ERR);
-	    }
-
-	    return resultMap;
-	}
-
-	public HashMap<String, Object> getCommunityPostReportDetailList(HashMap<String, Object> map) {
-	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
-
-	    try {
-	        List<Admin> list = adminMapper.selectCommunityPostReportDetailList(map);
-	        resultMap.put("list", list);
-	        resultMap.put("result", "success");
-	        resultMap.put("message", Message.MSG_SEARCH);
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        resultMap.put("result", "fail");
-	        resultMap.put("message", Message.MSG_SERVER_ERR);
-	    }
-
-	    return resultMap;
-	}
-
-	public HashMap<String, Object> getCommunityCommentReportGroupList(HashMap<String, Object> map) {
-	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
-
-	    try {
-	        List<Admin> list = adminMapper.selectCommunityCommentReportGroupList(map);
-	        resultMap.put("list", list);
-	        resultMap.put("result", "success");
-	        resultMap.put("message", Message.MSG_SEARCH);
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        resultMap.put("result", "fail");
-	        resultMap.put("message", Message.MSG_SERVER_ERR);
-	    }
-
-	    return resultMap;
-	}
-
-	public HashMap<String, Object> getCommunityCommentReportDetailList(HashMap<String, Object> map) {
-	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
-
-	    try {
-	        List<Admin> list = adminMapper.selectCommunityCommentReportDetailList(map);
-	        resultMap.put("list", list);
-	        resultMap.put("result", "success");
-	        resultMap.put("message", Message.MSG_SEARCH);
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        resultMap.put("result", "fail");
-	        resultMap.put("message", Message.MSG_SERVER_ERR);
-	    }
-
-	    return resultMap;
-	}
-	
-	@Transactional
-	public HashMap<String, Object> approveReportBatch(HashMap<String, Object> map) {
-	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
-
-	    try {
-	        String reportType = String.valueOf(map.get("reportType"));
-
-	        if ("bookingReview".equals(reportType)) {
-	            List<Admin> list = adminMapper.selectReservationReviewReportDetailList(map);
-
-	            for (Admin item : list) {
-	                HashMap<String, Object> repMap = new HashMap<String, Object>();
-	                repMap.put("reportedUserId", item.getUserId());
-	                repMap.put("repCount", 1);
-	                adminMapper.updateUserRepCount(repMap);
-	            }
-
-	            adminMapper.updateReservationReviewReportBatchApprove(map);
-
-	            for (Admin item : list) {
-	                HashMap<String, Object> reviewMap = new HashMap<String, Object>();
-	                reviewMap.put("reviewNo", item.getReviewNo());
-	                adminMapper.deleteReviewFile(reviewMap);
-	                adminMapper.deleteReview(reviewMap);
-	            }
-
-	            if ("Y".equals(map.get("banYn")) && list.size() > 0) {
-	                for (Admin item : list) {
-	                    adminMapper.updateUserStatusBan(item.getUserId());
-	                }
-	            }
-
-	        } else if ("communityPost".equals(reportType)) {
-	            List<Admin> list = adminMapper.selectCommunityPostReportDetailList(map);
-
-	            for (Admin item : list) {
-	                HashMap<String, Object> repMap = new HashMap<String, Object>();
-	                repMap.put("reportedUserId", item.getReportedUserId());
-	                repMap.put("repCount", 1);
-	                adminMapper.updateUserRepCount(repMap);
-	            }
-
-	            adminMapper.updateCommunityPostReportBatchApprove(map);
-	            adminMapper.deleteBoardFile(map);
-	            adminMapper.deleteBoard(map);
-
-	            if ("Y".equals(map.get("banYn")) && list.size() > 0) {
-	                adminMapper.updateUserStatusBan(list.get(0).getReportedUserId());
-	            }
-
-	        } else if ("communityComment".equals(reportType)) {
-	            List<Admin> list = adminMapper.selectCommunityCommentReportDetailList(map);
-
-	            for (Admin item : list) {
-	                HashMap<String, Object> repMap = new HashMap<String, Object>();
-	                repMap.put("reportedUserId", item.getReportedUserId());
-	                repMap.put("repCount", 1);
-	                adminMapper.updateUserRepCount(repMap);
-	            }
-
-	            adminMapper.updateCommunityCommentReportBatchApprove(map);
-	            adminMapper.deleteBoardComment(map);
-
-	            if ("Y".equals(map.get("banYn")) && list.size() > 0) {
-	                adminMapper.updateUserStatusBan(list.get(0).getReportedUserId());
-	            }
-	        }
-
-	        resultMap.put("result", "success");
-	        resultMap.put("message", "승인 처리되었습니다.");
-
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-	        resultMap.put("result", "fail");
-	        resultMap.put("message", Message.MSG_SERVER_ERR);
-	    }
-
-	    return resultMap;
-	}
-
-	@Transactional
-	public HashMap<String, Object> rejectReportBatch(HashMap<String, Object> map) {
-	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
-
-	    try {
-	        String reportType = String.valueOf(map.get("reportType"));
-
-	        if ("bookingReview".equals(reportType)) {
-	            adminMapper.updateReservationReviewReportBatchReject(map);
-	        } else if ("communityPost".equals(reportType)) {
-	            adminMapper.updateCommunityPostReportBatchReject(map);
-	        } else if ("communityComment".equals(reportType)) {
-	            adminMapper.updateCommunityCommentReportBatchReject(map);
-	        }
-
-	        resultMap.put("result", "success");
-	        resultMap.put("message", "반려 처리되었습니다.");
-
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-	        resultMap.put("result", "fail");
-	        resultMap.put("message", Message.MSG_SERVER_ERR);
-	    }
-
-	    return resultMap;
-	}
 
 	// 회원 신고 상세
 	public HashMap<String, Object> getAdminUserReportList(HashMap<String, Object> map) {
@@ -1071,6 +860,151 @@ public class AdminService {
 
 	    return resultMap;
 	}
+	
+	// 상품 목록 조회
+	public HashMap<String, Object> getAdminProductList(HashMap<String, Object> map) {
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
+	    try {
+	        int page = Integer.parseInt(String.valueOf(map.getOrDefault("page", "1")));
+	        int pageSize = Integer.parseInt(String.valueOf(map.getOrDefault("pageSize", "10")));
+	        int startIndex = (page - 1) * pageSize;
 
+	        map.put("startIndex", startIndex);
+	        map.put("pageSize", pageSize);
+
+	        int totalCount = adminMapper.selectAdminProductCount(map);
+	        List<Admin> list = adminMapper.selectAdminProductList(map);
+
+	        resultMap.put("list", list);
+	        resultMap.put("totalCount", totalCount);
+	        resultMap.put("result", "success");
+	        resultMap.put("message", Message.MSG_SEARCH);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        resultMap.put("result", "fail");
+	        resultMap.put("message", Message.MSG_SERVER_ERR);
+	    }
+
+	    return resultMap;
+	}
+
+	// 상품 상세 조회
+	public HashMap<String, Object> getAdminProductDetail(HashMap<String, Object> map) {
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+	    try {
+	        Admin info = adminMapper.selectAdminProductDetail(map);
+	        List<Admin> fileList = adminMapper.selectAdminProductFileList(map);
+
+	        resultMap.put("info", info);
+	        resultMap.put("fileList", fileList);
+	        resultMap.put("result", "success");
+	        resultMap.put("message", Message.MSG_SEARCH);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        resultMap.put("result", "fail");
+	        resultMap.put("message", Message.MSG_SERVER_ERR);
+	    }
+
+	    return resultMap;
+	}
+	
+	public HashMap<String, Object> updateAdminProduct(HashMap<String, Object> map) {
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+	    try {
+	    	int result = adminMapper.updateAdminProduct(map);
+
+	    	if (result > 0) {
+	    	    if (map.get("mainImagePath") != null) {
+	    	        int mainImageCount = adminMapper.selectAdminProductMainImageCount(map);
+
+	    	        if (mainImageCount > 0) {
+	    	            adminMapper.updateAdminProductMainImage(map);
+	    	        } else {
+	    	            adminMapper.insertAdminProductMainImage(map);
+	    	        }
+	    	    }
+
+	    	    if (map.get("detailImagePath") != null) {
+	    	        int detailImageCount = adminMapper.selectAdminProductDetailImageCount(map);
+
+	    	        if (detailImageCount > 0) {
+	    	            adminMapper.updateAdminProductDetailImage(map);
+	    	        } else {
+	    	            adminMapper.insertAdminProductDetailImage(map);
+	    	        }
+	    	    }
+
+	    	    resultMap.put("result", "success");
+	    	} else {
+	    	    resultMap.put("result", "fail");
+	    	    resultMap.put("message", "수정할 상품 정보를 찾을 수 없습니다.");
+	    	}
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        resultMap.put("result", "fail");
+	        resultMap.put("message", Message.MSG_SERVER_ERR);
+	    }
+
+	    return resultMap;
+	}
+
+	public HashMap<String, Object> getAdminProductCategoryList(HashMap<String, Object> map) {
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+	    try {
+	        resultMap.put("animalMainList", adminMapper.selectAdminAnimalMainCategoryList(map));
+	        resultMap.put("animalSubList", adminMapper.selectAdminAnimalSubCategoryList(map));
+	        resultMap.put("itemMainList", adminMapper.selectAdminItemMainCategoryList(map));
+	        resultMap.put("itemSubList", adminMapper.selectAdminItemSubCategoryList(map));
+	        resultMap.put("result", "success");
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        resultMap.put("result", "fail");
+	        resultMap.put("message", Message.MSG_SERVER_ERR);
+	    }
+
+	    return resultMap;
+	}
+
+	public HashMap<String, Object> insertAdminProduct(HashMap<String, Object> map) {
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+	    try {
+	        adminMapper.insertAdminProduct(map);
+
+	        if (map.get("mainFileName") != null) {
+	            map.put("filePath", map.get("mainFilePath"));
+	            map.put("fileName", map.get("mainFileName"));
+	            map.put("originName", map.get("mainOriginName"));
+	            map.put("fileSize", map.get("mainFileSize"));
+	            map.put("fileExt", map.get("mainFileExt"));
+	            map.put("isMain", "Y");
+	            map.put("isDetail", "N");
+	            adminMapper.insertAdminProductFile(map);
+	        }
+
+	        if (map.get("detailFileName") != null) {
+	            map.put("filePath", map.get("detailFilePath"));
+	            map.put("fileName", map.get("detailFileName"));
+	            map.put("originName", map.get("detailOriginName"));
+	            map.put("fileSize", map.get("detailFileSize"));
+	            map.put("fileExt", map.get("detailFileExt"));
+	            map.put("isMain", "N");
+	            map.put("isDetail", "Y");
+	            adminMapper.insertAdminProductFile(map);
+	        }
+
+	        resultMap.put("result", "success");
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        resultMap.put("result", "fail");
+	        resultMap.put("message", Message.MSG_SERVER_ERR);
+	    }
+
+	    return resultMap;
+	}
+	
 }

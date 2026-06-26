@@ -24,7 +24,7 @@
 
                 <section class="admin-content">
                     <div class="content-card">
-                        <h2>회원조회 및 관리</h2>
+                        <h2>회원 조회 및 관리</h2>
                         <div class="content-desc">일반 사용자 회원 정보와 활동 내역을 조회합니다.</div>
 
                         <div class="admin-search-box">

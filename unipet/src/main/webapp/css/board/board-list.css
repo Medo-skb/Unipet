@@ -83,9 +83,8 @@
 	font-weight: 700;
 }
 
-.search-row button:hover,
 .write-btn:hover {
-	opacity: 0.9;
+	background-color: var(--btnh);
 }
 
 /* 테이블 */

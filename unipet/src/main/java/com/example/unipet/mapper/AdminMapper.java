@@ -177,45 +177,9 @@ public interface AdminMapper {
 
 	// 사업자 예약 상세
 	List<Admin> selectAdminBusinessUserReservationList(HashMap<String, Object> map);
-	
-	// 예약 리뷰 신고 업체별 그룹
-	List<Admin> selectReservationReviewReportGroupList(HashMap<String, Object> map);
-
-	// 예약 리뷰 신고 업체별 상세
-	List<Admin> selectReservationReviewReportDetailList(HashMap<String, Object> map);
-
-	// 커뮤니티 글 신고 글별 그룹
-	List<Admin> selectCommunityPostReportGroupList(HashMap<String, Object> map);
-
-	// 커뮤니티 글 신고 글별 상세
-	List<Admin> selectCommunityPostReportDetailList(HashMap<String, Object> map);
-
-	// 커뮤니티 댓글 신고 댓글별 그룹
-	List<Admin> selectCommunityCommentReportGroupList(HashMap<String, Object> map);
-
-	// 커뮤니티 댓글 신고 댓글별 상세
-	List<Admin> selectCommunityCommentReportDetailList(HashMap<String, Object> map);
 
 	// 회원 신고 누적 증가
 	int updateUserRepCount(Map<String, Object> map);
-	
-	// 예약 리뷰 신고 일괄 승인
-	int updateReservationReviewReportBatchApprove(HashMap<String, Object> map);
-
-	// 예약 리뷰 신고 일괄 반려
-	int updateReservationReviewReportBatchReject(HashMap<String, Object> map);
-
-	// 커뮤니티 글 신고 일괄 승인
-	int updateCommunityPostReportBatchApprove(HashMap<String, Object> map);
-
-	// 커뮤니티 글 신고 일괄 반려
-	int updateCommunityPostReportBatchReject(HashMap<String, Object> map);
-
-	// 커뮤니티 댓글 신고 일괄 승인
-	int updateCommunityCommentReportBatchApprove(HashMap<String, Object> map);
-
-	// 커뮤니티 댓글 신고 일괄 반려
-	int updateCommunityCommentReportBatchReject(HashMap<String, Object> map);
 	
 	int selectAdminUserCount(HashMap<String, Object> map);
 
@@ -226,5 +190,39 @@ public interface AdminMapper {
 	int updateAdminBusinessUserStatus(HashMap<String, Object> map);
 
 	int updateAdminBusinessStoreStatus(HashMap<String, Object> map);
+	
+	int selectAdminProductCount(HashMap<String, Object> map);
+
+	List<Admin> selectAdminProductList(HashMap<String, Object> map);
+
+	Admin selectAdminProductDetail(HashMap<String, Object> map);
+
+	List<Admin> selectAdminProductFileList(HashMap<String, Object> map);
+	
+	int updateAdminProduct(HashMap<String, Object> map);
+
+	int selectAdminProductMainImageCount(HashMap<String, Object> map);
+
+	int selectAdminProductDetailImageCount(HashMap<String, Object> map);
+
+	int updateAdminProductMainImage(HashMap<String, Object> map);
+
+	int updateAdminProductDetailImage(HashMap<String, Object> map);
+
+	int insertAdminProductMainImage(HashMap<String, Object> map);
+
+	int insertAdminProductDetailImage(HashMap<String, Object> map);
+	
+	List<Admin> selectAdminAnimalMainCategoryList(HashMap<String, Object> map);
+
+	List<Admin> selectAdminAnimalSubCategoryList(HashMap<String, Object> map);
+
+	List<Admin> selectAdminItemMainCategoryList(HashMap<String, Object> map);
+
+	List<Admin> selectAdminItemSubCategoryList(HashMap<String, Object> map);
+
+	int insertAdminProduct(HashMap<String, Object> map);
+
+	int insertAdminProductFile(HashMap<String, Object> map);
 
 }
