@@ -1231,7 +1231,6 @@ button {
 
 /* ============================= */
 /* 상품평 이미지 + 모달 */
-/* 예약리뷰 CSS 참고 */
 /* ============================= */
 
 .review-top-layout {
@@ -1268,22 +1267,31 @@ button {
 	gap: 8px;
 	margin-left: 20px;
 	flex-wrap: wrap;
+	align-items: flex-start;
 }
 
+/* 상품평 이미지가 머지 후 원본 크기로 커지는 문제 방지 */
+.review-thumb-group img,
+.review-top-layout img,
+.review-item img:not(.modal-large-img),
 .review-thumb-img-large {
 	width: 60px !important;
 	height: 60px !important;
 	max-width: 60px !important;
 	max-height: 60px !important;
-	border-radius: 8px;
-	object-fit: cover;
-	border: 1px solid #e0e0e0;
-	background: #fafafa;
-	cursor: pointer;
-	display: block;
-	transition: filter 0.2s;
+	min-width: 60px !important;
+	min-height: 60px !important;
+	border-radius: 8px !important;
+	object-fit: cover !important;
+	border: 1px solid #e0e0e0 !important;
+	background: #fafafa !important;
+	cursor: pointer !important;
+	display: block !important;
+	transition: filter 0.2s !important;
 }
 
+.review-thumb-group img:hover,
+.review-top-layout img:hover,
 .review-thumb-img-large:hover {
 	filter: brightness(0.8);
 }
@@ -1378,6 +1386,7 @@ button {
 .modal-nav-btn.btn-right {
 	right: 40px;
 }
+
 /* ============================= */
 /* 반응형 */
 /* ============================= */
@@ -1450,27 +1459,11 @@ button {
 		align-self: flex-start;
 	}
 
-	.modal {
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		background: rgba(0, 0, 0, 0.5);
-		display: flex;
-		justify-content: center;
-		align-items: center;
+	.modal-nav-btn.btn-left {
+		left: 18px;
 	}
 
-	.modal-content {
-		background: white;
-		padding: 30px;
-		border-radius: 10px;
-		text-align: center;
-	}
-
-	.modal-btn button {
-		margin: 10px;
-		padding: 10px 20px;
+	.modal-nav-btn.btn-right {
+		right: 18px;
 	}
 }

@@ -1233,88 +1233,110 @@ button {
 /* 상품평 이미지 + 모달 */
 /* ============================= */
 
-.review-rating-img-row {
+.review-top-layout {
 	display: flex;
-	align-items: center;
-	gap: 14px;
-	flex-wrap: wrap;
-	min-height: 60px;
-	margin: 8px 0 14px;
+	justify-content: flex-start;
+	align-items: flex-start;
+	margin-bottom: 12px;
 }
 
-.review-rating-img-row .review-rating {
+.review-info-group {
+	flex-shrink: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.review-top-layout .review-head {
 	display: flex;
 	align-items: center;
-	height: 60px;
+	justify-content: flex-start;
+	margin-bottom: 0;
+	font-size: 14px;
+	gap: 16px;
+}
+
+.review-top-layout .review-rating {
 	margin-bottom: 0;
 	color: #f1c40f;
-	font-size: 16px;
-	white-space: nowrap;
-}
-
-.review-rating-img-row .review-score {
-	margin-left: 6px;
 	font-size: 14px;
-	font-weight: 700;
-	color: #555555;
 }
 
-.review-rating-img-row .review-img-list {
+.review-thumb-group {
 	display: flex;
-	align-items: center;
-	gap: 10px;
+	gap: 8px;
+	margin-left: 20px;
 	flex-wrap: wrap;
-	margin-top: 0;
+	align-items: flex-start;
 }
 
-.review-rating-img-row .review-img {
-	width: 60px;
-	height: 60px;
-	object-fit: cover;
-	border-radius: 8px;
-	border: 1px solid var(--line-soft);
-	background: #fafafa;
-	cursor: pointer;
+/* 상품평 이미지가 원본 크기로 커지는 문제 방지 */
+.review-thumb-group img,
+.review-top-layout img,
+.review-item img:not(.modal-large-img),
+.review-thumb-img-large {
+	width: 60px !important;
+	height: 60px !important;
+	max-width: 60px !important;
+	max-height: 60px !important;
+	min-width: 60px !important;
+	min-height: 60px !important;
+	border-radius: 8px !important;
+	object-fit: cover !important;
+	border: 1px solid #e0e0e0 !important;
+	background: #fafafa !important;
+	cursor: pointer !important;
+	display: block !important;
+	transition: filter 0.2s !important;
 }
 
-.review-rating-img-row .review-img:hover {
-	opacity: 0.85;
+.review-thumb-group img:hover,
+.review-top-layout img:hover,
+.review-thumb-img-large:hover {
+	filter: brightness(0.8);
 }
 
-.review-img-modal-wrap {
-	position: fixed;
-	left: 0;
-	top: 0;
-	width: 100%;
-	height: 100%;
-	background: rgba(0, 0, 0, 0.65);
-	z-index: 9999;
+.review-actions {
 	display: flex;
-	align-items: center;
-	justify-content: center;
-	padding: 30px;
-	box-sizing: border-box;
+	gap: 6px;
+	margin-left: auto;
+	align-self: center;
+	flex-shrink: 0;
 }
 
-.review-img-modal-box {
+/* 모달 전체 배경 */
+.img-modal-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background-color: rgba(0, 0, 0, 0.6);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 9999;
+}
+
+/* 모달 이미지 감싸는 영역 */
+.modal-content-wrap {
 	position: relative;
+	display: inline-block;
 	max-width: 90vw;
 	max-height: 90vh;
-	background: #fff;
-	border-radius: 14px;
-	padding: 16px;
-	box-sizing: border-box;
 }
 
-.review-img-modal-img {
+/* 모달 큰 이미지 */
+.modal-large-img {
 	display: block;
-	max-width: 82vw;
-	max-height: 78vh;
-	object-fit: contain;
-	border-radius: 10px;
+	max-width: 90vw;
+	max-height: 90vh;
+	border-radius: 8px;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
 
-.review-img-modal-close {
+/* 닫기 버튼 */
+.modal-close-btn {
 	position: absolute;
 	right: -12px;
 	top: -12px;
@@ -1329,6 +1351,75 @@ button {
 	line-height: 30px;
 	cursor: pointer;
 	box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+	z-index: 10000;
+}
+
+/* 이미지 좌우 슬라이드 버튼 */
+.modal-nav-btn {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 60px;
+	height: 60px;
+	border: none;
+	border-radius: 50%;
+	background: rgba(0, 0, 0, 0.45);
+	color: #ffffff;
+	font-size: 30px;
+	font-weight: 700;
+	cursor: pointer;
+	user-select: none;
+	z-index: 10000;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	line-height: 1;
+	padding: 0;
+	transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+.modal-nav-btn:hover {
+	background: rgba(255, 255, 255, 0.9);
+	color: #333333;
+	box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+.modal-nav-btn.btn-left {
+	left: 40px;
+}
+
+.modal-nav-btn.btn-right {
+	right: 40px;
+}
+
+/* ============================= */
+/* AI 리뷰 요약 */
+/* ============================= */
+
+.product-review-ai-summary {
+	margin: 0 0 18px;
+	padding: 16px 18px;
+	border: 1px solid var(--line);
+	border-radius: 12px;
+	background: #fafafa;
+}
+
+.product-review-ai-label {
+	margin-bottom: 8px;
+	color: var(--main);
+	font-size: 13px;
+	font-weight: 700;
+}
+
+.product-review-ai-text {
+	color: var(--text-main);
+	font-size: 15px;
+	line-height: 1.6;
+}
+
+.product-review-ai-summary.empty {
+	color: var(--text-sub);
+	font-size: 14px;
 }
 
 /* ============================= */
@@ -1388,53 +1479,26 @@ button {
 		line-height: 30px !important;
 	}
 
-	.modal {
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		background: rgba(0, 0, 0, 0.5);
-		display: flex;
-		justify-content: center;
-		align-items: center;
+	.review-top-layout {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 10px;
 	}
 
-	.modal-content {
-		background: white;
-		padding: 30px;
-		border-radius: 10px;
-		text-align: center;
+	.review-thumb-group {
+		margin-left: 0;
 	}
 
-	.modal-btn button {
-		margin: 10px;
-		padding: 10px 20px;
+	.review-actions {
+		margin-left: 0;
+		align-self: flex-start;
 	}
-}
-/* AI 리뷰 요약 */
-.product-review-ai-summary {
-	margin: 0 0 18px;
-	padding: 16px 18px;
-	border: 1px solid var(--line);
-	border-radius: 12px;
-	background: #fafafa;
-}
 
-.product-review-ai-label {
-	margin-bottom: 8px;
-	color: var(--main);
-	font-size: 13px;
-	font-weight: 700;
-}
+	.modal-nav-btn.btn-left {
+		left: 18px;
+	}
 
-.product-review-ai-text {
-	color: var(--text-main);
-	font-size: 15px;
-	line-height: 1.6;
-}
-
-.product-review-ai-summary.empty {
-	color: var(--text-sub);
-	font-size: 14px;
+	.modal-nav-btn.btn-right {
+		right: 18px;
+	}
 }
