@@ -158,11 +158,11 @@
                 map: null,
                 markers: [],
                 list: [],
-                rawList: [],         // 🎯 [추가] 필터링 전 원본 데이터를 안전하게 보관할 배열
+                rawList: [],         
                 infowindow: null,
                 selectedType: '',
                 selectedSort: 'distance',
-                onlyMember: false,   // 🎯 [추가] 회원사만 보기 체크박스 상태값
+                onlyMember: false,   
                 myMarker: null,
                 searchDate: { start: '', end: '' },
                 searchTime: { start: '', end: '' },
@@ -250,17 +250,13 @@
                 this.fnStoreList();
             },
             
-            // 🎯 [고도화] 필터링과 정렬을 동시에 처리하는 정적 제어 로직
             sortList() {
-                // 1) 원본 데이터 복제
                 let tempArray = [...this.rawList];
 
-                // 2) 체크박스가 체크되어 있다면 회원사(GEN)만 필터링
                 if (this.onlyMember) {
                     tempArray = tempArray.filter(item => item.sStatus && item.sStatus.toUpperCase() === 'GEN');
                 }
 
-                // 3) 정렬 기준 적용 (1순위 회원사 상단 고정, 2순위 정렬 옵션)
                 tempArray.sort((a, b) => {
                     const aS = a.sStatus ? a.sStatus.toLowerCase() : '';
                     const bS = b.sStatus ? b.sStatus.toLowerCase() : '';
@@ -279,7 +275,6 @@
                     }
                 });
 
-                // 4) 최적화 결과물을 가시 목록(list)에 바인딩 후 페이징 초기화
                 this.list = tempArray;
                 this.currentPage = 1;
                 
@@ -340,7 +335,6 @@
                             }
                         });
                         
-                        // 🎯 [수정] 수신된 원본 가공 리스트를 rawList에 안전하게 대입 후 정렬/필터 호출
                         this.rawList = uniqueData;
                         this.sortList(); 
 
@@ -355,7 +349,7 @@
                 this.searchDate = { start: '', end: '' };
                 this.searchTime = { start: '', end: '' };
                 this.selectedType = '';
-                this.onlyMember = false; // 🎯 초기화 시 체크박스 해제 추가
+                this.onlyMember = false;
 
                 document.getElementById('date-range')._flatpickr.clear();
                 document.getElementById('start-time')._flatpickr.clear();
@@ -410,25 +404,25 @@
                 const status = String(item.sStatus || item.S_STATUS || "").toUpperCase();
 
                 let parts = [];
-                parts.push('<div style="padding:6px 8px; width:150px; background:#fff; font-family:sans-serif; letter-spacing:-0.5px; border-radius:8px;">');
+                parts.push('<div class="map-info-box">');
                 
-                parts.push('  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">');
+                parts.push('  <div class="info-header">');
                 if(type) {
-                    parts.push('    <span style="font-size:10px; color:#777; background:#f4f4f4; padding:1px 4px; border-radius:3px; font-weight:600;">' + type + '</span>');
+                    parts.push('    <span class="info-tag-type">' + type + '</span>');
                 } else {
                     parts.push('    <div></div>');
                 }
 
                 if(status === 'GEN') {
-                    parts.push('    <span style="font-size:10px; color:#ff4b82; background:#fff; border:1px solid #ffdae9; padding:1px 4px; border-radius:3px; font-weight:700;">유니펫 회원사</span>');
+                    parts.push('    <span class="info-tag-status">유니펫 회원사</span>');
                 }
                 parts.push('  </div>');
 
-                parts.push('  <div style="margin-bottom:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">');
-                parts.push('    <strong style="font-size:15px; color:#111; font-weight:700;">' + name + '</strong>');
+                parts.push('  <div class="info-name-wrap">');
+                parts.push('    <strong class="info-name">' + name + '</strong>');
                 parts.push('  </div>');
                 
-                parts.push('  <div style="font-size:11px; color:#888; line-height:1.3; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">');
+                parts.push('  <div class="info-addr">');
                 parts.push(     addr);
                 parts.push('  </div>');
                 

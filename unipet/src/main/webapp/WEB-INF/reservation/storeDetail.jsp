@@ -13,7 +13,7 @@
     <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoApiKey}&libraries=services"></script>
     
     <title>UNIPET</title>
-    <link href="/css/reservation/storeDetail_copy.css" rel="stylesheet">
+    <link href="/css/reservation/storeDetail.css" rel="stylesheet">
 </head>
 <body>
     <jsp:include page="/WEB-INF/header/header.jsp" />
@@ -311,21 +311,21 @@
                 const item = this.storeInfo;
                 const status = String(item.sStatus || "").toUpperCase();
 
-                var content = '<div style="padding:10px 12px; min-width:160px; background:#fff; font-family:sans-serif; letter-spacing:-0.5px;">';
-                content += '    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; gap:8px;">';
+                var content = '<div class="map-detail-box">';
+                content += '    <div class="detail-header">';
                 
                 if (item.storeType) {
-                    content += '    <span style="font-size:10px; color:#777; background:#f0f0f0; padding:2px 5px; border-radius:3px; font-weight:600;">' + item.storeType + '</span>';
+                    content += '    <span class="detail-tag-type">' + item.storeType + '</span>';
                 }
                 if (status === 'GEN') {
-                    content += '    <span style="font-size:10px; color:#ff4b82; background:#fff0f5; border:1px solid #ffdae9; padding:1px 5px; border-radius:3px; font-weight:700; white-space:nowrap;">유니펫 회원사</span>';
+                    content += '    <span class="detail-tag-status">유니펫 회원사</span>';
                 }
                 
                 content += '    </div>';
-                content += '    <div style="margin-bottom:4px;">';
-                content += '        <strong style="font-size:15px; color:#111; font-weight:700;">' + (item.storeName || '') + '</strong>';
+                content += '    <div class="detail-name-wrap">';
+                content += '        <strong class="detail-name">' + (item.storeName || '') + '</strong>';
                 content += '    </div>';
-                content += '    <div style="font-size:12px; color:#666; line-height:1.4;">' + (item.sAddr || '') + '</div>';
+                content += '    <div class="detail-addr">' + (item.sAddr || '') + '</div>';
                 content += '</div>';
 
                 const infowindow = new kakao.maps.InfoWindow({ content: content });

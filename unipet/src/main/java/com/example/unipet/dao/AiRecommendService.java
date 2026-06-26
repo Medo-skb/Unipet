@@ -30,8 +30,8 @@ public class AiRecommendService {
 
         try {
             // 🎯 테스트용 특정 유저 지정
-//            List<String> userList = Arrays.asList("test_user01", "test_user02", "data1", "data2");
-            List<String> userList = Arrays.asList("test_user01");
+            List<String> userList = Arrays.asList("test_user01", "test_user02", "data1", "data2");
+//            List<String> userList = Arrays.asList("test_user01");
 
             System.out.println("총 " + userList.size() + "명의 테스트 유저를 대상으로 AI 추천을 시작합니다.");
             
