@@ -10,7 +10,7 @@
         <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
         <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
         <script src="/js/page-change.js"></script>
-        <title>상품 리뷰</title>
+        <title>UNIPET</title>
 
     </head>
 

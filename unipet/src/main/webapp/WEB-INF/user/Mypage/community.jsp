@@ -15,7 +15,7 @@
 
     <link href="/css/user/usermypage.css" rel="stylesheet">
 
-    <title>UNIPET - 커뮤니티 활동</title>
+    <title>UNIPET</title>
 </head>
 
 <body>

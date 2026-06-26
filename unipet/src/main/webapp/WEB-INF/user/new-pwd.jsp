@@ -7,7 +7,7 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <title>UNIPET - 새 비밀번호 설정</title>
+    <title>UNIPET</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/header.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/footer.css">
 </head>
