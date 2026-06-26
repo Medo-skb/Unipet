@@ -33,14 +33,13 @@
                                     <b>[{{ info.storeName }}]</b> {{ info.menuName }}
                                 </div>
                                 <div class="item-detail" style="line-height: 1.6; color: #666;">
-                                    
+
                                     예약 일시:
                                     <span style="color: #333;">
-                                        <b>{{ info.rsvDate || info.RSV_DATE }}</b> |
-                                        {{ info.startTime || info.START_TIME || info.rsvStartTime || info.RSV_START_TIME
-                                        }}
+                                        <b>{{ fnFormatDate(info.rsvDate || info.RSV_DATE) }}</b> |
+                                        {{ fnFormatTime(info.startTime || info.START_TIME || info.rsvStartTime || info.RSV_START_TIME) }}
                                         ~
-                                        {{ info.endTime || info.END_TIME || info.rsvEndTime || info.RSV_END_TIME }}
+                                        {{ fnFormatTime(info.endTime || info.END_TIME || info.rsvEndTime || info.RSV_END_TIME) }}
                                     </span>
                                     <br>
                                     방문 주소: <span style="color: #333;">{{ info.storeAddr }}</span>
@@ -199,6 +198,24 @@
                 }
             },
             methods: {
+                fnFormatDate: function (date) {
+                    if (!date) {
+                        return "-";
+                    }
+
+                    let str = String(date).replace("T", " ");
+
+                    return str.length >= 16 ? str.substring(0, 16) : str;
+                },
+
+                fnFormatTime: function (time) {
+                    if (!time) {
+                        return "-";
+                    }
+
+                    return String(time).substring(0, 5);
+                },
+
                 // [데이터 가져오기]
                 fnGetInfo: function () {
                     let self = this;
@@ -285,10 +302,8 @@
                 fnGoBack: function () {
                     sessionStorage.setItem("triggerFunction", "openRsvList");
                     location.href = "/user/mypage.do";
-                    }
-                },
-
-             
+                }
+            },
 
             mounted() {
                 this.fnGetInfo();

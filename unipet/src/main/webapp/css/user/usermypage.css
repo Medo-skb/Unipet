@@ -1527,3 +1527,12 @@ button {
         grid-template-columns: 1fr !important;
     }
 }
+.community-wide-section .community-click-item,
+.community-wide-section .community-click-item *,
+.community-wide-section .post-title {
+    cursor: pointer !important;
+}
+
+.community-wide-section .community-click-item:hover {
+    background-color: #fafafa;
+}
