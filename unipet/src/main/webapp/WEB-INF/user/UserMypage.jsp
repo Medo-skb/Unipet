@@ -18,7 +18,7 @@
                 display: none;
             }
         </style>
-        <title>UNIPET - 마이페이지</title>
+        <title>UNIPET</title>
     </head>
 
     <body>

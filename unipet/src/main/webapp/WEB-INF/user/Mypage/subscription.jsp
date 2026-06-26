@@ -26,7 +26,7 @@
         <!-- 마이페이지 CSS -->
         <link href="/css/user/usermypage.css" rel="stylesheet">
 
-        <title>UNIPET - 구독 관리</title>
+        <title>UNIPET</title>
 
     </head>
 

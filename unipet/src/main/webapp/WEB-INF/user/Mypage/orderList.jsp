@@ -12,7 +12,7 @@
 
     <link href="/css/user/usermypage.css" rel="stylesheet">
 
-    <title>UNIPET - 주문 내역</title>
+    <title>UNIPET</title>
 </head>
 
 <body>
