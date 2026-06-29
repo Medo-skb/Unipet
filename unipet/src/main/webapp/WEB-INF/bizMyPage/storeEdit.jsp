@@ -10,35 +10,20 @@
     <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-    <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=본인_JAVASCRIPT_KEY&libraries=services"></script>
+    <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoJavascriptKey}&libraries=services"></script>
     <script src="/js/page-change.js"></script>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/bizMyPage/bizCommon.css">
 </head>
 <body>
     <jsp:include page="/WEB-INF/header/header.jsp" />
 
-    <div id="app">
+    <div id="app" v-cloak>
         <div class="biz-page-wrap">
             <div class="biz-page-container">
 
-                <aside class="biz-sidebar">
-                    <div class="sidebar-title">사업자 마이페이지</div>
-
-                    <ul class="sidebar-menu">
-                        <li class="menu-item">
-                            <a href="/biz/MyPage.do">홈</a>
-                        </li>
-                        <li class="menu-item active">
-                            <a href="/biz/storeEdit.do">내 정보 및 업체 정보 수정</a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="/biz/reservation.do">예약 현황</a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="/biz/review.do">리뷰 관리</a>
-                        </li>
-                    </ul>
-                </aside>
+                <jsp:include page="/WEB-INF/bizMyPage/bizSidebar.jsp">
+                    <jsp:param name="activeMenu" value="storeEdit" />
+                </jsp:include>
 
                 <section class="biz-content store-edit-page">
                     <div class="content-header">
@@ -200,24 +185,16 @@
                             </div>
                             <div class="info-row">
                                 <div class="info-label">브레이크 시작</div>
-                                <div class="info-value">{{storeInfo.breakStart}}</div>
+                                <div class="info-value">{{storeInfo.breakStart ? storeInfo.breakStart : '없음'}}</div>
                             </div>
                             <div class="info-row">
                                 <div class="info-label">브레이크 종료</div>
-                                <div class="info-value">{{storeInfo.breakEnd}}</div>
+                                <div class="info-value">{{storeInfo.breakEnd ? storeInfo.breakEnd : '없음'}}</div>
                             </div>
                             <div class="info-row">
                                 <div class="info-label">예약 단위</div>
                                 <div class="info-value">{{storeInfo.slot}}분</div>
                             </div>
-                            <!-- <div class="info-row">
-                                <div class="info-label">휴무일</div>
-                                <div class="info-value">{{storeInfo.offDay}}</div>
-                            </div> -->
-                            <!-- <div class="info-row">
-                                <div class="info-label">환불정책</div>
-                                <div class="info-value full-text">{{storeInfo.refundPolicy}}</div>
-                            </div> -->
                         </div>
 
                         <div class="section-btn-area">
@@ -258,7 +235,13 @@
                         </table>
 
                         <div class="section-btn-area">
-                            <button type="button" class="edit-btn" @click="fnEditMenu">수정하기</button>
+                            <button type="button" class="edit-btn" @click="fnOpenMenuAddModal">
+                                메뉴 추가
+                            </button>
+
+                            <button type="button" class="edit-btn" @click="fnEditMenu">
+                                수정하기
+                            </button>
                         </div>
                     </div>
 
@@ -408,47 +391,229 @@
 
                                 <div class="form-row">
                                     <label>운영 시작시간</label>
-                                    <input type="time" v-model="editStoreInfo.openTime" ref="openTimeInput" @click="fnOpenTimePicker('openTimeInput')">
+                                    <div class="time-select-area">
+                                        <select v-model="editStoreInfo.openAmpm" @change="fnApplyOpenParts">
+                                            <option value="">선택</option>
+                                            <option value="AM">오전</option>
+                                            <option value="PM">오후</option>
+                                        </select>
+
+                                        <select v-model="editStoreInfo.openHour"
+                                                @change="fnApplyOpenParts"
+                                                :disabled="!editStoreInfo.openAmpm">
+                                            <option value="">시간</option>
+                                            <option v-for="hour in hourOptions" :key="'openHour_' + hour" :value="hour">
+                                                {{ hour }}시
+                                            </option>
+                                        </select>
+
+                                        <select v-model="editStoreInfo.openMinute"
+                                                @change="fnApplyOpenParts"
+                                                :disabled="!editStoreInfo.openHour">
+                                            <option value="">분</option>
+                                            <option v-for="minute in fnGetMinuteOptions()" :key="'openMinute_' + minute" :value="minute">
+                                                {{ minute }}분
+                                            </option>
+                                        </select>
+                                    </div>
                                 </div>
 
                                 <div class="form-row">
                                     <label>운영 종료시간</label>
-                                    <input type="time" v-model="editStoreInfo.closeTime" ref="closeTimeInput" @click="fnOpenTimePicker('closeTimeInput')">
+                                    <div class="time-select-area">
+                                        <select v-model="editStoreInfo.closeAmpm" @change="fnApplyCloseParts">
+                                            <option value="">선택</option>
+                                            <option value="AM">오전</option>
+                                            <option value="PM">오후</option>
+                                        </select>
+
+                                        <select v-model="editStoreInfo.closeHour"
+                                                @change="fnApplyCloseParts"
+                                                :disabled="!editStoreInfo.closeAmpm">
+                                            <option value="">시간</option>
+                                            <option v-for="hour in hourOptions" :key="'closeHour_' + hour" :value="hour">
+                                                {{ hour }}시
+                                            </option>
+                                        </select>
+
+                                        <select v-model="editStoreInfo.closeMinute"
+                                                @change="fnApplyCloseParts"
+                                                :disabled="!editStoreInfo.closeHour">
+                                            <option value="">분</option>
+                                            <option v-for="minute in fnGetMinuteOptions()" :key="'closeMinute_' + minute" :value="minute">
+                                                {{ minute }}분
+                                            </option>
+                                        </select>
+                                    </div>
                                 </div>
 
                                 <div class="form-row">
                                     <label>브레이크 시작</label>
-                                    <input type="time" v-model="editStoreInfo.breakStart" ref="breakStartInput" @click="fnOpenTimePicker('breakStartInput')">
+                                    <div class="time-select-area">
+                                        <select v-model="editStoreInfo.breakStartAmpm"
+                                                @change="fnApplyBreakStartParts"
+                                                :disabled="!fnIsOpenCloseComplete()">
+                                            <option value="">선택 안 함</option>
+                                            <option value="AM">오전</option>
+                                            <option value="PM">오후</option>
+                                        </select>
+
+                                        <select v-model="editStoreInfo.breakStartHour"
+                                                @change="fnApplyBreakStartParts"
+                                                :disabled="!editStoreInfo.breakStartAmpm">
+                                            <option value="">시간</option>
+                                            <option v-for="hour in fnGetBreakHourOptions('breakStart')"
+                                                    :key="'startHour_' + hour"
+                                                    :value="hour">
+                                                {{ hour }}시
+                                            </option>
+                                        </select>
+
+                                        <select v-model="editStoreInfo.breakStartMinute"
+                                                @change="fnApplyBreakStartParts"
+                                                :disabled="!editStoreInfo.breakStartHour">
+                                            <option value="">분</option>
+                                            <option v-for="minute in fnGetBreakMinuteOptions('breakStart')"
+                                                    :key="'startMinute_' + minute"
+                                                    :value="minute">
+                                                {{ minute }}분
+                                            </option>
+                                        </select>
+                                    </div>
                                 </div>
 
                                 <div class="form-row">
                                     <label>브레이크 종료</label>
-                                    <input type="time" v-model="editStoreInfo.breakEnd" ref="breakEndInput" @click="fnOpenTimePicker('breakEndInput')">
+                                    <div class="time-select-area">
+                                        <select v-model="editStoreInfo.breakEndAmpm"
+                                                @change="fnApplyBreakEndParts"
+                                                :disabled="!editStoreInfo.breakStart">
+                                            <option value="">선택 안 함</option>
+                                            <option value="AM">오전</option>
+                                            <option value="PM">오후</option>
+                                        </select>
+
+                                        <select v-model="editStoreInfo.breakEndHour"
+                                                @change="fnApplyBreakEndParts"
+                                                :disabled="!editStoreInfo.breakEndAmpm">
+                                            <option value="">시간</option>
+                                            <option v-for="hour in fnGetBreakHourOptions('breakEnd')"
+                                                    :key="'endHour_' + hour"
+                                                    :value="hour">
+                                                {{ hour }}시
+                                            </option>
+                                        </select>
+
+                                        <select v-model="editStoreInfo.breakEndMinute"
+                                                @change="fnApplyBreakEndParts"
+                                                :disabled="!editStoreInfo.breakEndHour">
+                                            <option value="">분</option>
+                                            <option v-for="minute in fnGetBreakMinuteOptions('breakEnd')"
+                                                    :key="'endMinute_' + minute"
+                                                    :value="minute">
+                                                {{ minute }}분
+                                            </option>
+                                        </select>
+                                    </div>
                                 </div>
 
                                 <div class="form-row">
+                                    <label></label>
+                                    <button type="button" class="nullbtn" @click="fnClearBreakTime">
+                                        브레이크타임 없음
+                                    </button>
+                                </div>
+<!-- 
+                                <div class="form-row">
+                                    <button type="button" class="nullbtn" @click="fnClearBreakTime">
+                                        브레이크타임 없음
+                                    </button>
+                                </div> -->
+
+                                <div class="form-row">
                                     <label>예약 단위</label>
-                                    <select v-model="editStoreInfo.slot">
+                                    <select v-model="editStoreInfo.slot" @change="fnResetBreakTimeBySlot">
                                         <option :value="30">30분</option>
                                         <option :value="60">60분</option>
                                     </select>
+                                    <label></label>
                                     <div class="input-guide-text">예약 단위는 고객이 예약할 수 있는 시간 간격입니다.</div>
                                 </div>
-
-                                <!-- <div class="form-row">
-                                    <label>휴무일</label>
-                                    <input type="text" v-model="editStoreInfo.offDay">
-                                </div> -->
-
-                                <!-- <div class="form-row">
-                                    <label>환불정책</label>
-                                    <textarea v-model="editStoreInfo.refundPolicy"></textarea>
-                                </div> -->
                             </div>
 
                             <div class="modal-footer">
                                 <button type="button" class="cancel-btn" @click="fnCloseStoreEditModal">취소</button>
                                 <button type="button" class="save-btn" @click="fnSaveStoreInfo">저장</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 업체 메뉴 추가 모달 -->
+                    <div v-if="showMenuAddModal" class="modal-overlay">
+                        <div class="edit-modal-box large-modal">
+                            <div class="modal-header">
+                                <h2>업체 메뉴 추가</h2>
+                                <button type="button" class="modal-close-btn" @click="fnCloseMenuAddModal">X</button>
+                            </div>
+
+                            <div class="modal-body">
+                                <div class="menu-add-input-row">
+                                    <div class="menu-add-input-box">
+                                        <label>메뉴명</label>
+                                        <input type="text"
+                                            v-model="addMenuInput.menuName"
+                                            placeholder="메뉴명을 입력하세요">
+                                    </div>
+
+                                    <div class="menu-add-input-box">
+                                        <label>가격</label>
+                                        <input type="number"
+                                            v-model="addMenuInput.menuPrice"
+                                            min="1000"
+                                            placeholder="1000원 이상 입력하세요">
+                                    </div>
+
+                                    <button type="button" class="edit-btn menu-add-confirm-btn" @click="fnAddMenuToAddList">
+                                        확인
+                                    </button>
+                                </div>
+
+                                <table class="menu-edit-table">
+                                    <thead>
+                                        <tr>
+                                            <th>메뉴명</th>
+                                            <th>가격</th>
+                                            <th>상태</th>
+                                            <th>삭제</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        <tr v-if="addMenuList.length === 0">
+                                            <td colspan="4" class="empty-text">추가할 메뉴가 없습니다.</td>
+                                        </tr>
+
+                                        <tr v-for="(item, index) in addMenuList" :key="'addMenu_' + index">
+                                            <td>{{ item.menuName }}</td>
+                                            <td>{{ item.menuPrice }}원</td>
+                                            <td>판매중</td>
+                                            <td>
+                                                <button type="button" class="menu-delete-btn" @click="fnRemoveAddMenu(index)">
+                                                    삭제
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                <div class="menu-guide-text">
+                                    추가된 메뉴는 판매중지 상태로 변경하거나 삭제는 가능하지만 메뉴명과 가격은 수정할 수 없습니다.
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="cancel-btn" @click="fnCloseMenuAddModal">취소</button>
+                                <button type="button" class="save-btn" @click="fnSaveAddMenuList">추가하기</button>
                             </div>
                         </div>
                     </div>
@@ -466,27 +631,20 @@
                                     <thead>
                                         <tr>
                                             <th>메뉴명</th>
-                                            <!-- <th>메뉴 카테고리</th>
-                                            <th>설명</th> -->
                                             <th>가격</th>
-                                            <!-- <th>소요시간</th> -->
                                             <th>상태</th>
                                             <th>삭제</th>
                                         </tr>
                                     </thead>
+
                                     <tbody>
+                                        <tr v-if="editMenuList.length === 0">
+                                            <td colspan="4" class="empty-text">등록된 메뉴가 없습니다.</td>
+                                        </tr>
+
                                         <tr v-for="item in editMenuList" :key="item.menuNo">
-                                            <td><input type="text" v-model="item.menuName"></td>
-                                            <!-- <td><input type="text" v-model="item.menuCategory"></td>
-                                            <td><input type="text" v-model="item.menuInfo"></td> -->
-                                            <td><input type="number" v-model="item.menuPrice"></td>
-                                            <!-- <td>
-                                                <select v-model="item.reqTime">
-                                                    <option :value="30">30분</option>
-                                                    <option :value="60">60분</option>
-                                                    <option :value="90">90분</option>
-                                                </select>
-                                            </td> -->
+                                            <td>{{ item.menuName }}</td>
+                                            <td>{{ item.menuPrice }}원</td>
                                             <td>
                                                 <select v-model="item.mStatus">
                                                     <option value="Y">판매중</option>
@@ -501,10 +659,9 @@
                                         </tr>
                                     </tbody>
                                 </table>
-                                <div class="section-btn-area">
-                                    <button type="button" class="menu-add-btn" @click="fnAddMenu">
-                                        메뉴 추가
-                                    </button>
+
+                                <div class="menu-guide-text">
+                                    삭제된 메뉴는 되돌릴 수 없습니다.
                                 </div>
                             </div>
 
@@ -576,857 +733,31 @@
                             </div>
                         </div>
                     </div>
+                    <!-- 주소 검색 팝업 -->
+                    <div v-if="showPostcodeLayer" class="postcode-overlay">
+                        <div class="postcode-popup-box">
+                            <div class="postcode-popup-header">
+                                <span>주소 검색</span>
+                                <button type="button" class="postcode-close-btn" @click="fnClosePostcode">X</button>
+                            </div>
+
+                            <div id="postcodeWrap" class="postcode-wrap"></div>
+                        </div>
+                    </div>
                 </section>
             </div>
         </div>
     </div>
 
     <jsp:include page="/WEB-INF/footer/footer.jsp" />
+
+    <!-- js 분리 -->
+    <script>
+        window.storeEditConfig = {
+            sessionId: "${sessionScope.sessionId}"
+        };
+    </script>
+
+    <script src="${pageContext.request.contextPath}/js/bizMyPage/storeEdit.js"></script>
 </body>
 </html>
-
-<script>
-    const app = Vue.createApp({
-        data() {
-            return {
-                userInfo: {
-                    sUserId: "",
-                    ceoName: ""
-                },
-                hasApprovedStore: true,
-                approvedStoreMessage: "",
-                storeInfo: {
-                    storeNo: "",
-                    storeName: "",
-                    sCategory: "",
-                    biznum: "",
-                    isOpen: "",
-                    accName: "",
-                    accNo: "",
-                    accHolder: "",
-                    sAddr: "",
-                    sFullAddr: "",
-                    subTitle: "",
-                    sContents: "",
-                    capacity: "",
-                    cutoff: "",
-                    openTime: "",
-                    closeTime: "",
-                    breakStart: "",
-                    breakEnd: "",
-                    slot: "",
-                    offDay: "",
-                    refundPolicy: "",
-                    sStatus: "",
-                    rejReason: ""
-                },
-                fileList: [],
-                menuList: [],
-
-                showStoreEditModal: false,
-                showMenuEditModal: false,
-                showRejectedStoreEditModal: false,
-
-                editStoreInfo: {
-                    storeNo: "",
-                    storeName: "",
-                    sCategory: "",
-                    biznum: "",
-                    lat: "",
-                    lng: "",
-                    isOpen: "",
-                    accName: "",
-                    accNo: "",
-                    accHolder: "",
-                    sAddr: "",
-                    sFullAddr: "",
-                    subTitle: "",
-                    sContents: "",
-                    capacity: "",
-                    cutoff: "",
-                    openTime: "",
-                    closeTime: "",
-                    breakStart: "",
-                    slot: "",
-                    breakEnd: "",
-                    offDay: "",
-                    refundPolicy: ""
-                },
-
-                editMenuList: [],
-                deleteMenuNoList: [],
-                capacityOptions: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
-
-                showMyInfoEditModal: false,
-                isIdChecked: false,
-                
-                editUserInfo: {
-                    sUserId: "",
-                    ceoName: ""
-                },
-
-                isIdChecked: false,
-                
-            };
-        },
-        methods: {
-            // 함수(메소드) - (key : function())
-        fnCheckApprovedStore: function() {
-            let self = this;
-
-            $.ajax({
-                url: "/getApprovedStore.dox",
-                type: "POST",
-                dataType: "json",
-                data: {
-                    sUserId: "${sessionScope.sessionId}"
-                },
-                success: function(data) {
-                if (data.result === "success" && data.list && data.list.length > 0) {
-                    self.storeInfo = data.list[0];
-
-                    if (self.storeInfo.sStatus === "GEN" || self.storeInfo.sStatus === "AFF") {
-                            self.hasApprovedStore = true;
-                            self.approvedStoreMessage = "";
-                            self.fnGetStoreInfo();
-                            self.fnGetFileList();
-                            self.fnGetMenuList();
-                        } else {
-                            self.hasApprovedStore = false;
-                            self.fileList = [];
-                            self.menuList = [];
-
-                            if (self.storeInfo.sStatus === "REJ") {
-                                self.approvedStoreMessage = "사업자 승인이 반려되었습니다.";
-
-                                if (self.storeInfo.rejReason) {
-                                    self.approvedStoreMessage += "\n반려 사유: " + self.storeInfo.rejReason;
-                                }
-                            } else if (self.storeInfo.sStatus === "PND") {
-                                self.approvedStoreMessage = "사업자 승인 대기중입니다.";
-                            } else {
-                                self.approvedStoreMessage = "승인된 업체가 없습니다.";
-                            }
-                        }
-                    } else {
-                        self.hasApprovedStore = false;
-                        self.approvedStoreMessage = "승인된 업체가 없습니다.";
-
-                        self.storeInfo = {
-                            storeNo: "",
-                            storeName: "",
-                            sCategory: "",
-                            biznum: "",
-                            isOpen: "",
-                            accName: "",
-                            accNo: "",
-                            accHolder: "",
-                            sAddr: "",
-                            sFullAddr: "",
-                            subTitle: "",
-                            sContents: "",
-                            capacity: "",
-                            cutoff: "",
-                            openTime: "",
-                            closeTime: "",
-                            breakStart: "",
-                            breakEnd: "",
-                            offDay: "",
-                            refundPolicy: "",
-                            sStatus: "",
-                            rejReason: ""
-                        };
-
-                        self.fileList = [];
-                        self.menuList = [];
-                    }
-                },
-                error: function() {
-                    alert("승인된 업체 확인 중 오류가 발생했습니다.");
-                }
-            });
-        },
-
-            fnRequestWithdraw: function() {
-                let self = this;
-
-                if (!confirm("정말 회원 탈퇴 하시겠습니까?")) {
-                    return;
-                }
-
-                $.ajax({
-                    url: "/biz/withdrawRequest.dox",
-                    type: "POST",
-                    dataType: "json",
-                    data: {},
-                    success: function(data) {
-                        alert(data.message);
-
-                        if (data.success) {
-                            location.href = "/main.do";
-                        }
-                    },
-                    error: function() {
-                        alert("회원 탈퇴 처리 중 오류가 발생했습니다.");
-                    }
-                });
-            },
-
-            fnOpenTimePicker: function(refName) {
-                let self = this;
-                let target = self.$refs[refName];
-
-                if (target && typeof target.showPicker === "function") {
-                    target.showPicker();
-                } else if (target) {
-                    target.focus();
-                }
-            },
-
-            fnGetMyInfo: function () {
-                let self = this;
-                let param = {
-                    sUserId: "${sessionScope.sessionId}"
-                };
-
-                $.ajax({
-                    url: "/getBizUserInfo.dox",
-                    dataType: "json",
-                    type: "POST",
-                    data: param,
-                    success: function (data) {
-                        if (data.info) {
-                            self.userInfo = data.info;
-                        } else {
-                            self.userInfo = {
-                                sUserId: "",
-                                ceoName: "",
-                                email: "",
-                                phone: ""
-                            };
-                        }
-                    },
-                    error: function () {
-                        alert("내 정보 조회에 실패했습니다.");
-                    }
-                });
-            },
-
-            fnGetStoreInfo: function() {
-                let self = this;
-                let param = {
-                    sUserId: "${sessionScope.sessionId}"
-                };
-
-                $.ajax({
-                    url: "/getBizStoreList.dox",
-                    type: "POST",
-                    dataType: "json",
-                    data: param,
-                    success: function(data) {
-                        if (data.list && data.list.length > 0) {
-                            self.storeInfo = data.list[0];
-                        } else {
-                            self.storeInfo = {
-                                storeNo: "",
-                                storeName: "",
-                                sCategory: "",
-                                biznum: "",
-                                isOpen: "",
-                                accName: "",
-                                accNo: "",
-                                accHolder: "",
-                                sAddr: "",
-                                sFullAddr: "",
-                                subTitle: "",
-                                sContents: "",
-                                openTime: "",
-                                closeTime: "",
-                                breakStart: "",
-                                breakEnd: "",
-                                offDay: "",
-                                refundPolicy: ""
-                            };
-                        }
-                    },
-                    error: function() {
-                        alert("업체 정보를 불러오는데 실패했습니다.");
-                    }
-                });
-            },
-
-            fnGetFileList: function() {
-                let self = this;
-                let param = {
-                    sUserId: "${sessionScope.sessionId}"
-                };
-
-                $.ajax({
-                    url: "/getBizImgList.dox",
-                    type: "POST",
-                    dataType: "json",
-                    data: param,
-                    success: function(data) {
-                        if (data.list) {
-                            self.fileList = data.list;
-                        } else {
-                            self.fileList = [];
-                        }
-                    },
-                    error: function() {
-                        alert("이미지 정보를 불러오는데 실패했습니다.");
-                    }
-                });
-            },
-
-            fnGetMenuList: function() {
-                let self = this;
-                let param = {
-                    sUserId: "${sessionScope.sessionId}"
-                };
-
-                $.ajax({
-                    url: "/getBizStoreMenuList.dox",
-                    type: "POST",
-                    dataType: "json",
-                    data: param,
-                    success: function(data) {
-                        if (data.list) {
-                            self.menuList = data.list;
-                        } else {
-                            self.menuList = [];
-                        }
-                    },
-                    error: function() {
-                        alert("업체 메뉴 정보를 불러오는데 실패했습니다.");
-                    }
-                });
-            },
-
-            fnEditRejectedStore: function() {
-                let self = this;
-
-                self.editStoreInfo = {
-                    storeNo: self.storeInfo.storeNo,
-                    storeName: self.storeInfo.storeName,
-                    sCategory: self.storeInfo.sCategory,
-                    biznum: self.storeInfo.biznum,
-                    isOpen: self.storeInfo.isOpen,
-                    accName: self.storeInfo.accName,
-                    accNo: self.storeInfo.accNo,
-                    accHolder: self.storeInfo.accHolder,
-                    sAddr: self.storeInfo.sAddr,
-                    sFullAddr: self.storeInfo.sFullAddr,
-                    subTitle: self.storeInfo.subTitle,
-                    sContents: self.storeInfo.sContents,
-                    capacity: self.storeInfo.capacity,
-                    cutoff: self.storeInfo.cutoff,
-                    openTime: self.storeInfo.openTime,
-                    closeTime: self.storeInfo.closeTime,
-                    breakStart: self.storeInfo.breakStart,
-                    breakEnd: self.storeInfo.breakEnd,
-                    offDay: self.storeInfo.offDay,
-                    refundPolicy: self.storeInfo.refundPolicy
-                };
-
-                self.showRejectedStoreEditModal = true;
-            },
-
-            fnCloseRejectedStoreModal: function() {
-                let self = this;
-                self.showRejectedStoreEditModal = false;
-            },
-
-            fnEditStoreInfo: function() {
-                let self = this;
-
-                self.editStoreInfo = {
-                    storeNo: self.storeInfo.storeNo,
-                    storeName: self.storeInfo.storeName,
-                    sCategory: self.storeInfo.sCategory,
-                    biznum: self.storeInfo.biznum,
-                    isOpen: self.storeInfo.isOpen,
-                    accName: self.storeInfo.accName,
-                    accNo: self.storeInfo.accNo,
-                    accHolder: self.storeInfo.accHolder,
-                    sAddr: self.storeInfo.sAddr,
-                    sFullAddr: self.storeInfo.sFullAddr,
-                    subTitle: self.storeInfo.subTitle,
-                    sContents: self.storeInfo.sContents,
-                    capacity: self.storeInfo.capacity,
-                    cutoff: self.storeInfo.cutoff,
-                    openTime: self.storeInfo.openTime,
-                    closeTime: self.storeInfo.closeTime,
-                    breakStart: self.storeInfo.breakStart,
-                    breakEnd: self.storeInfo.breakEnd,
-                    slot: self.storeInfo.slot || 30,
-                    offDay: self.storeInfo.offDay,
-                    refundPolicy: self.storeInfo.refundPolicy
-                };
-
-                self.showStoreEditModal = true;
-            },
-
-            fnCloseStoreEditModal: function() {
-                let self = this;
-                self.showStoreEditModal = false;
-            },
-
-            fnEditMenu: function() {
-                let self = this;
-
-                self.deleteMenuNoList = [];
-
-                self.editMenuList = self.menuList.map(function(item) {
-                    return {
-                        menuNo: item.menuNo,
-                        storeNo: self.storeInfo.storeNo,
-                        menuName: item.menuName,
-                        menuCategory: item.menuCategory,
-                        menuInfo: item.menuInfo,
-                        menuPrice: item.menuPrice,
-                        reqTime: Number(item.reqTime),
-                        mStatus: item.mStatus
-                    };
-                });
-
-                self.showMenuEditModal = true;
-            },
-
-            fnRemoveMenu: function(item) {
-                let self = this;
-
-                if (!confirm("이 메뉴를 삭제하시겠습니까?")) {
-                    return;
-                }
-
-                if (item.menuNo && Number(item.menuNo) !== 0) {
-                    self.deleteMenuNoList.push(Number(item.menuNo));
-                }
-
-                self.editMenuList = self.editMenuList.filter(menu => menu !== item);
-            },
-
-            fnCloseMenuEditModal: function() {
-                let self = this;
-                self.showMenuEditModal = false;
-            },
-
-            fnAddMenu: function() {
-                let self = this;
-
-                self.editMenuList.push({
-                    menuNo: "",
-                    menuName: "",
-                    menuCategory: "",
-                    menuInfo: "",
-                    menuPrice: "",
-                    reqTime: 30,
-                    mStatus: "Y",
-                    storeNo: self.storeInfo.storeNo
-                });
-            },
-
-            fnSetMainImage: function(fileNo) {
-                let self = this;
-
-                $.ajax({
-                    url: "/biz/store/image/main.dox",
-                    type: "POST",
-                    dataType: "json",
-                    data: { fileNo: fileNo },
-                    success: function(data) {
-                        if (data.result === "success") {
-                            alert("대표 이미지가 설정되었습니다.");
-                            self.fnGetFileList();
-                        } else {
-                            alert(data.message || "대표 이미지 설정에 실패했습니다.");
-                        }
-                    },
-                    error: function() {
-                        alert("서버 오류가 발생했습니다.");
-                    }
-                });
-            },
-
-            fnDeleteImage: function(fileNo) {
-                let self = this;
-
-                if (!confirm("이미지를 삭제하시겠습니까?")) {
-                    return;
-                }
-
-                $.ajax({
-                    url: "/biz/store/image/delete.dox",
-                    type: "POST",
-                    dataType: "json",
-                    data: { fileNo: fileNo },
-                    success: function(data) {
-                        if (data.result === "success") {
-                            alert("삭제되었습니다.");
-                            self.fnGetFileList(); // 리스트 다시 불러오기
-                        } else {
-                            alert(data.message || "삭제 실패");
-                        }
-                    },
-                    error: function() {
-                        alert("서버 오류");
-                    }
-                });
-            },
-
-            fnUploadImage: function (event) {
-                let self = this;
-                const file = event.target.files[0];
-
-                if (!file) {
-                    return;
-                }
-
-                if (!self.storeInfo.storeNo) {
-                    alert("업체 정보가 아직 없습니다. 새로고침 후 다시 시도해주세요.");
-                    event.target.value = "";
-                    return;
-                }
-
-                if (self.fileList.length >= 4) {
-                    alert("이미지는 최대 4개까지 등록할 수 있습니다.");
-                    event.target.value = "";
-                    return;
-                }
-
-                if (!file.type.startsWith("image/")) {
-                    alert("이미지 파일만 업로드할 수 있습니다.");
-                    event.target.value = "";
-                    return;
-                }
-
-                let formData = new FormData();
-                formData.append("file", file);
-                formData.append("storeNo", self.storeInfo.storeNo);
-                formData.append("sUserId", "${sessionScope.sessionId}");
-
-                $.ajax({
-                    url: "/biz/store/image/upload.dox",
-                    type: "POST",
-                    dataType: "json",
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    enctype: "multipart/form-data",
-                    success: function (data) {
-                        if (data.result === "success") {
-                            alert("이미지가 등록되었습니다.");
-                            event.target.value = "";
-                            self.fnGetFileList();   // 이미지 목록 다시 조회
-                        } else {
-                            alert(data.message || "이미지 등록에 실패했습니다.");
-                            event.target.value = "";
-                        }
-                    },
-                    error: function () {
-                        alert("업로드 중 오류가 발생했습니다.");
-                        event.target.value = "";
-                    }
-                });
-            },
-
-            fnSaveRejectedStore: function() {
-                let self = this;
-
-                let param = {
-                    storeNo: self.editStoreInfo.storeNo,
-                    storeName: self.editStoreInfo.storeName,
-                    sCategory: self.editStoreInfo.sCategory,
-                    biznum: self.editStoreInfo.biznum,
-                    accName: self.editStoreInfo.accName,
-                    accNo: self.editStoreInfo.accNo,
-                    accHolder: self.editStoreInfo.accHolder,
-                    sAddr: self.editStoreInfo.sAddr,
-                    sFullAddr: self.editStoreInfo.sFullAddr,
-                    lat: self.editStoreInfo.lat || null,
-                    lng: self.editStoreInfo.lng || null
-                };
-
-                $.ajax({
-                    url: "/biz/store/reapply.dox",
-                    type: "POST",
-                    dataType: "json",
-                    data: param,
-                    success: function(data) {
-                        if (data.result === "success") {
-                            alert("재신청되었습니다.");
-                            self.fnCloseRejectedStoreModal();
-                            self.fnCheckApprovedStore();
-                        } else {
-                            alert(data.message || "재신청에 실패했습니다.");
-                        }
-                    },
-                    error: function() {
-                        alert("재신청 처리 중 오류가 발생했습니다.");
-                    }
-                });
-            },
-
-            fnSaveStoreInfo: function() {
-                let self = this;
-
-            if (!self.editStoreInfo.cutoff || self.editStoreInfo.cutoff < 1 || self.editStoreInfo.cutoff > 72) {
-                alert("예약 마감 시간은 1~72 사이의 숫자만 입력할 수 있습니다.");
-                return;
-            }
-
-            if (Number(self.editStoreInfo.slot) !== 30 && Number(self.editStoreInfo.slot) !== 60) {
-                alert("예약 단위는 30분 또는 60분만 선택할 수 있습니다.");
-                return;
-            }
-
-            let param = {
-                storeNo: self.editStoreInfo.storeNo,
-                isOpen: self.editStoreInfo.isOpen,
-                accName: self.editStoreInfo.accName,
-                accNo: self.editStoreInfo.accNo,
-                accHolder: self.editStoreInfo.accHolder,
-                sAddr: self.editStoreInfo.sAddr,
-                sFullAddr: self.editStoreInfo.sFullAddr,
-                subTitle: self.editStoreInfo.subTitle,
-                sContents: self.editStoreInfo.sContents,
-                capacity: self.editStoreInfo.capacity,
-                openTime: self.editStoreInfo.openTime,
-                closeTime: self.editStoreInfo.closeTime,
-                breakStart: self.editStoreInfo.breakStart,
-                breakEnd: self.editStoreInfo.breakEnd,
-                slot: Number(self.editStoreInfo.slot),
-                offDay: self.editStoreInfo.offDay,
-                refundPolicy: self.editStoreInfo.refundPolicy,
-                lat: self.editStoreInfo.lat || null,
-                lng: self.editStoreInfo.lng || null
-            };
-
-                let saveUrl = self.storeInfo.sStatus === "REJ"
-                    ? "/biz/store/reapply.dox"
-                    : "/biz/store/update.dox";
-
-                $.ajax({
-                    url: saveUrl,
-                    type: "POST",
-                    dataType: "json",
-                    data: param,
-                    success: function(data) {
-                        if (data.result === "success") {
-                            alert("업체 정보가 수정되었습니다.");
-                            self.fnCloseStoreEditModal();
-                            self.fnGetStoreInfo();
-                        } else {
-                            alert(data.message || "업체 정보 수정에 실패했습니다.");
-                        }
-                    },
-                    error: function() {
-                        alert("업체 정보 수정 중 오류가 발생했습니다.");
-                    }
-                });
-            },
-
-            fnSaveMenuList: function() {
-                let self = this;
-                let sendList = self.editMenuList.map(item => ({
-                    ...item,
-                    menuNo: Number(item.menuNo || 0),
-                    storeNo: Number(item.storeNo || self.storeInfo.storeNo),
-                    menuPrice: Number(item.menuPrice || 0),
-                    reqTime: Number(item.reqTime || 0)
-                }));
-
-                $.ajax({
-                    url: "/biz/store/menu/update.dox",
-                    type: "POST",
-                    dataType: "json",
-                    contentType: "application/json",
-                    data: JSON.stringify({
-                        menuList: sendList,
-                        deleteMenuNoList: self.deleteMenuNoList
-                    }),
-                    success: function(data) {
-                        if (data.result === "success") {
-                            alert("업체 메뉴가 수정되었습니다.");
-                            self.fnCloseMenuEditModal();
-                            self.fnGetMenuList();
-                        } else {
-                            alert(data.message || "업체 메뉴 수정에 실패했습니다.");
-                        }
-                    },
-                    error: function() {
-                        alert("업체 메뉴 수정 중 오류가 발생했습니다.");
-                    }
-                });
-            },
-
-            fnEditMyInfo: function() {
-                let self = this;
-
-                self.editUserInfo = {
-                    sUserId: self.userInfo.sUserId,
-                    ceoName: self.userInfo.ceoName,
-                    sUserPwd: "",
-                    sUserPwdConfirm: ""
-                };
-
-                self.isIdChecked = false;
-                self.showMyInfoEditModal = true;
-            },
-
-            fnResetIdCheck: function() {
-                this.isIdChecked = false;
-            },
-
-            fnCheckBizUserId: function() {
-                let self = this;
-                let param = {
-                    sUserId: self.editUserInfo.sUserId,
-                };
-
-                if (!self.editUserInfo.sUserId) {
-                    alert("아이디를 입력해주세요.");
-                    return;
-                }
-
-                $.ajax({
-                    url: "/checkBizUserId.dox",
-                    type: "POST",
-                    dataType: "json",
-                    data: param,
-                    success: function(data) {
-                        if (data.result === "success") {
-                            if (data.exists) {
-                                alert("이미 사용 중인 아이디입니다.");
-                                self.isIdChecked = false;
-                            } else {
-                                alert("사용 가능한 아이디입니다.");
-                                self.isIdChecked = true;
-                            }
-                        } else {
-                            alert(data.message || "중복 확인에 실패했습니다.");
-                        }
-                    },
-                    error: function() {
-                        alert("중복 확인 중 오류가 발생했습니다.");
-                    }
-                });
-            },
-
-            fnSaveMyInfo: function() {
-                let self = this;
-
-                if (!self.editUserInfo.sUserId) {
-                    alert("아이디를 입력해주세요.");
-                    return;
-                }
-
-                if (self.editUserInfo.sUserId !== self.userInfo.sUserId && !self.isIdChecked) {
-                    alert("아이디 중복 확인을 해주세요.");
-                    return;
-                }
-
-                if (!self.editUserInfo.sUserPwd) {
-                    alert("새 비밀번호를 입력해주세요.");
-                    return;
-                }
-
-                if (!self.editUserInfo.sUserPwdConfirm) {
-                    alert("비밀번호 확인을 입력해주세요.");
-                    return;
-                }
-
-                if (self.editUserInfo.sUserPwd !== self.editUserInfo.sUserPwdConfirm) {
-                    alert("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
-                    return;
-                }
-
-                let param = {
-                    sUserId: self.editUserInfo.sUserId,
-                    sUserPwd: self.editUserInfo.sUserPwd
-                };
-
-                $.ajax({
-                    url: "/biz/user/update.dox",
-                    type: "POST",
-                    dataType: "json",
-                    data: param,
-                    success: function(data) {
-                        if (data.result === "success") {
-                            alert("내 정보가 수정되었습니다.");
-                            self.fnCloseMyInfoModal();
-                            self.fnGetMyInfo();
-                        } else {
-                            alert(data.message || "내 정보 수정에 실패했습니다.");
-                        }
-                    },
-                    error: function() {
-                        alert("내 정보 수정 중 오류가 발생했습니다.");
-                    }
-                });
-            },
-
-            fnCloseMyInfoModal: function() {
-                let self = this;
-
-                self.showMyInfoEditModal = false;
-                self.isIdChecked = false;
-
-                self.editUserInfo = {
-                    sUserId: "",
-                    ceoName: "",
-                    sUserPwd: "",
-                    sUserPwdConfirm: ""
-                };
-            },
-
-            fnOpenPostcode: function() {
-                let self = this;
-
-                new daum.Postcode({
-                    oncomplete: function(data) {
-                        let address = data.roadAddress || data.address;
-
-                        self.editStoreInfo.sAddr = address;
-                        self.editStoreInfo.sFullAddr = "";
-                        self.editStoreInfo.lat = null;
-                        self.editStoreInfo.lng = null;
-
-                        let geocoder = new kakao.maps.services.Geocoder();
-
-                        geocoder.addressSearch(address, function(result, status) {
-                            if (status === kakao.maps.services.Status.OK) {
-                                self.editStoreInfo.lng = result[0].x;
-                                self.editStoreInfo.lat = result[0].y;
-                            }
-                        });
-                    }
-                }).open({
-                    popupName: "postcodePopup"
-                });
-            },
-
-            fnCheckCutoff: function() {
-                let self = this;
-
-                if (self.editStoreInfo.cutoff < 1) {
-                    self.editStoreInfo.cutoff = 1;
-                }
-
-                if (self.editStoreInfo.cutoff > 72) {
-                    self.editStoreInfo.cutoff = 72;
-                }
-            },
-
-        }, // methods
-        mounted() {
-            // 처음 시작할 때 실행되는 부분
-            let self = this;
-            self.fnGetMyInfo();
-            self.fnCheckApprovedStore();
-        }
-    });
-
-    app.mount('#app');
-</script>

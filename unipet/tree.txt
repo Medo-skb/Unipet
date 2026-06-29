@@ -1,0 +1,728 @@
+폴더 PATH의 목록입니다.
+볼륨 일련 번호는 A604-886B입니다.
+C:.
+|   .classpath
+|   .DS_Store
+|   .factorypath
+|   .gitattributes
+|   .gitignore
+|   .project
+|   HELP.md
+|   mvnw
+|   mvnw.cmd
+|   pom.xml
+|   tree.txt
+|   
++---.mvn
+|   \---wrapper
+|           maven-wrapper.properties
+|           
++---.settings
+|       org.eclipse.core.resources.prefs
+|       org.eclipse.jdt.apt.core.prefs
+|       org.eclipse.jdt.core.prefs
+|       org.springframework.ide.eclipse.prefs
+|       
++---bin
+|   |   .gitattributes
+|   |   .gitignore
+|   |   .project
+|   |   HELP.md
+|   |   mvnw
+|   |   mvnw.cmd
+|   |   pom.xml
+|   |   
+|   +---.mvn
+|   |   \---wrapper
+|   |           maven-wrapper.properties
+|   |           
+|   +---.settings
+|   |       org.eclipse.core.resources.prefs
+|   |       
+|   +---src
+|   |   +---main
+|   |   |   +---java
+|   |   |   |   \---com
+|   |   |   |       \---example
+|   |   |   |           \---unipet
+|   |   |   |                   UnipetApplication.class
+|   |   |   |                   
+|   |   |   \---resources
+|   |   |       |   application.properties
+|   |   |       |   
+|   |   |       \---templates
+|   |   \---test
+|   |       \---java
+|   |           \---com
+|   |               \---example
+|   |                   \---unipet
+|   |                           UnipetApplicationTests.class
+|   |                           
+|   \---target
+|       \---classes
+|           \---META-INF
+|                   MANIFEST.MF
+|                   
++---src
+|   +---main
+|   |   +---java
+|   |   |   \---com
+|   |   |       \---example
+|   |   |           \---unipet
+|   |   |               |   UnipetApplication.java
+|   |   |               |   
+|   |   |               +---common
+|   |   |               |       BizBlockInterceptor.java
+|   |   |               |       Message.java
+|   |   |               |       
+|   |   |               +---config
+|   |   |               |       AdminInterceptor.java
+|   |   |               |       CartInterceptor.java
+|   |   |               |       ErrorPageConfig.java
+|   |   |               |       GeminiRestTemplateConfig.java
+|   |   |               |       SecurityConfig.java
+|   |   |               |       WebConfig.java
+|   |   |               |       
+|   |   |               +---controller
+|   |   |               |       AdminController.java
+|   |   |               |       BizMyPageController.java
+|   |   |               |       BoardController.java
+|   |   |               |       DefaultController.java
+|   |   |               |       ErrorPageController.java
+|   |   |               |       GeminiController.java
+|   |   |               |       MainController.java
+|   |   |               |       PaymentController.java
+|   |   |               |       ProductController.java
+|   |   |               |       ReservationController.java
+|   |   |               |       ReviewController.java
+|   |   |               |       UserController.java
+|   |   |               |       UserMypageController.java
+|   |   |               |       
+|   |   |               +---dao
+|   |   |               |       AdminService.java
+|   |   |               |       BizMyPageService.java
+|   |   |               |       BoardService.java
+|   |   |               |       DefaultService.java
+|   |   |               |       GeminiService.java
+|   |   |               |       MainService.java
+|   |   |               |       PaymentService.java
+|   |   |               |       ProductService.java
+|   |   |               |       ReservationService.java
+|   |   |               |       ReviewService.java
+|   |   |               |       SmsService.java
+|   |   |               |       UserMypageService.java
+|   |   |               |       UserService.java
+|   |   |               |       
+|   |   |               +---mapper
+|   |   |               |       AdminMapper.java
+|   |   |               |       BizMyPageMapper.java
+|   |   |               |       BoardMapper.java
+|   |   |               |       DefaultMapper.java
+|   |   |               |       GeminiMapper.java
+|   |   |               |       MainMapper.java
+|   |   |               |       PaymentMapper.java
+|   |   |               |       PetMapper.java
+|   |   |               |       ProductMapper.java
+|   |   |               |       ReservationMapper.java
+|   |   |               |       ReviewMapper.java
+|   |   |               |       UserMapper.java
+|   |   |               |       UserMypageMapper.java
+|   |   |               |       
+|   |   |               +---model
+|   |   |               |       Admin.java
+|   |   |               |       BizMyPage.java
+|   |   |               |       Board.java
+|   |   |               |       ChatRequest.java
+|   |   |               |       ChatResponse.java
+|   |   |               |       Coupon.java
+|   |   |               |       Default.java
+|   |   |               |       Main.java
+|   |   |               |       Order.java
+|   |   |               |       Payment.java
+|   |   |               |       Pet.java
+|   |   |               |       Product.java
+|   |   |               |       Reservation.java
+|   |   |               |       Review.java
+|   |   |               |       Store.java
+|   |   |               |       StoreRecommend.java
+|   |   |               |       User.java
+|   |   |               |       
+|   |   |               \---scheduler
+|   |   |                       ReservationScheduler.java
+|   |   |                       SubScheduler.java
+|   |   |                       
+|   |   +---resources
+|   |   |   |   application.properties
+|   |   |   |   
+|   |   |   +---mybatis-mapper
+|   |   |   |       sql-admin.xml
+|   |   |   |       sql-bizMyPage.xml
+|   |   |   |       sql-board.xml
+|   |   |   |       sql-default.xml
+|   |   |   |       sql-gemini.xml
+|   |   |   |       sql-main.xml
+|   |   |   |       sql-payment.xml
+|   |   |   |       sql-pet.xml
+|   |   |   |       sql-product.xml
+|   |   |   |       sql-reservation.xml
+|   |   |   |       sql-review.xml
+|   |   |   |       sql-user.xml
+|   |   |   |       sql-usermypage.xml
+|   |   |   |       
+|   |   |   +---static
+|   |   |   \---templates
+|   |   \---webapp
+|   |       +---css
+|   |       |   +---admin
+|   |       |   |       admin.css
+|   |       |   |       adminLogin.css
+|   |       |   |       
+|   |       |   +---bizMyPage
+|   |       |   |       bizCommon.css
+|   |       |   |       
+|   |       |   +---board
+|   |       |   |       board-add.css
+|   |       |   |       board-add2.css
+|   |       |   |       board-edit.css
+|   |       |   |       board-edit2.css
+|   |       |   |       board-list.css
+|   |       |   |       board-list2.css
+|   |       |   |       board-view.css
+|   |       |   |       board-view2.css
+|   |       |   |       
+|   |       |   +---main
+|   |       |   |       about.css
+|   |       |   |       error.css
+|   |       |   |       footer.css
+|   |       |   |       gemini-chat.css
+|   |       |   |       header.css
+|   |       |   |       kindergarten.css
+|   |       |   |       main-search.css
+|   |       |   |       main.css
+|   |       |   |       terms.css
+|   |       |   |       
+|   |       |   +---payment
+|   |       |   |       pay-rsv.css
+|   |       |   |       pay-rsv2.css
+|   |       |   |       pay-shop.css
+|   |       |   |       pay-shop2.css
+|   |       |   |       pay-success.css
+|   |       |   |       pay-success2.css
+|   |       |   |       refund.css
+|   |       |   |       refund2.css
+|   |       |   |       sub.css
+|   |       |   |       sub2.css
+|   |       |   |       
+|   |       |   +---product
+|   |       |   |       cart.css
+|   |       |   |       cart2.css
+|   |       |   |       product.css
+|   |       |   |       product2.css
+|   |       |   |       productView.css
+|   |       |   |       productView2.css
+|   |       |   |       
+|   |       |   +---reservation
+|   |       |   |       book.css
+|   |       |   |       book2.css
+|   |       |   |       confirm.css
+|   |       |   |       confirm2.css
+|   |       |   |       search.css
+|   |       |   |       search2.css
+|   |       |   |       storeDetail.css
+|   |       |   |       storeDetail2.css
+|   |       |   |       success.css
+|   |       |   |       
+|   |       |   \---user
+|   |       |           findid.css
+|   |       |           findid2.css
+|   |       |           findpwd.css
+|   |       |           findpwd2.css
+|   |       |           join.css
+|   |       |           join2.css
+|   |       |           login.css
+|   |       |           login2.css
+|   |       |           new-pwd.css
+|   |       |           phone-verify.css
+|   |       |           prd-review.css
+|   |       |           prd-review2.css
+|   |       |           rsv-review.css
+|   |       |           rsv-review2.css
+|   |       |           signupbiz.css
+|   |       |           signupbiz2.css
+|   |       |           signupuser.css
+|   |       |           signupuser2.css
+|   |       |           usermypage.css
+|   |       |           usermypage2.css
+|   |       |           
+|   |       +---img
+|   |       |   +---admin
+|   |       |   |       TEST.jpg
+|   |       |   |       
+|   |       |   +---board
+|   |       |   |       unipet_logo.png
+|   |       |   |       
+|   |       |   +---main
+|   |       |   |       banner_1.png
+|   |       |   |       banner_2.png
+|   |       |   |       banner_3.png
+|   |       |   |       error.png
+|   |       |   |       kindergarten.png
+|   |       |   |       login.png
+|   |       |   |       logo.png
+|   |       |   |       membership_banner.png
+|   |       |   |       mypage.png
+|   |       |   |       
+|   |       |   +---product
+|   |       |   |   |   product1.png
+|   |       |   |   |   product10.png
+|   |       |   |   |   product11.png
+|   |       |   |   |   product12.png
+|   |       |   |   |   product13.png
+|   |       |   |   |   product14.png
+|   |       |   |   |   product15.png
+|   |       |   |   |   product16.png
+|   |       |   |   |   product17.png
+|   |       |   |   |   product18.png
+|   |       |   |   |   product19.png
+|   |       |   |   |   product2.png
+|   |       |   |   |   product20.png
+|   |       |   |   |   product21.png
+|   |       |   |   |   product22.png
+|   |       |   |   |   product23.png
+|   |       |   |   |   product24.png
+|   |       |   |   |   product25.png
+|   |       |   |   |   product26.png
+|   |       |   |   |   product27.png
+|   |       |   |   |   product28.png
+|   |       |   |   |   product29.png
+|   |       |   |   |   product3.png
+|   |       |   |   |   product30.png
+|   |       |   |   |   product31.png
+|   |       |   |   |   product32.png
+|   |       |   |   |   product33.png
+|   |       |   |   |   product34.png
+|   |       |   |   |   product35.png
+|   |       |   |   |   product36.png
+|   |       |   |   |   product37.png
+|   |       |   |   |   product38.png
+|   |       |   |   |   product39.png
+|   |       |   |   |   product4.png
+|   |       |   |   |   product40.png
+|   |       |   |   |   product5.png
+|   |       |   |   |   product6.png
+|   |       |   |   |   product7.png
+|   |       |   |   |   product8.png
+|   |       |   |   |   product9.png
+|   |       |   |   |   
+|   |       |   |   \---detail
+|   |       |   |           product10_detail.png
+|   |       |   |           product10_detail2.png
+|   |       |   |           product11_detail.png
+|   |       |   |           product11_detail2.png
+|   |       |   |           product12_detail.png
+|   |       |   |           product12_detail2.png
+|   |       |   |           product13_detail.png
+|   |       |   |           product13_detail2.png
+|   |       |   |           product14_detail.png
+|   |       |   |           product14_detail2.png
+|   |       |   |           product15_detail.png
+|   |       |   |           product15_detail2.png
+|   |       |   |           product16_detail.png
+|   |       |   |           product16_detail2.png
+|   |       |   |           product17_detail.png
+|   |       |   |           product17_detail2.png
+|   |       |   |           product18_detail.png
+|   |       |   |           product18_detail2.png
+|   |       |   |           product19_detail.png
+|   |       |   |           product19_detail2.png
+|   |       |   |           product19_detail3.png
+|   |       |   |           product1_detail.png
+|   |       |   |           product1_detail2.png
+|   |       |   |           product1_detail3.png
+|   |       |   |           product20_detail.png
+|   |       |   |           product20_detail2.png
+|   |       |   |           product20_detail3.png
+|   |       |   |           product21_detail.png
+|   |       |   |           product21_detail2.png
+|   |       |   |           product22_detail.png
+|   |       |   |           product22_detail2.png
+|   |       |   |           product22_detail3.png
+|   |       |   |           product23_detail.png
+|   |       |   |           product23_detail2.png
+|   |       |   |           product23_detail3.png
+|   |       |   |           product24_detail.png
+|   |       |   |           product24_detail2.png
+|   |       |   |           product25_detail.png
+|   |       |   |           product25_detail2.png
+|   |       |   |           product26_detail.png
+|   |       |   |           product26_detail2.png
+|   |       |   |           product27_detail.png
+|   |       |   |           product27_detail2.png
+|   |       |   |           product28_detail.png
+|   |       |   |           product28_detail2.png
+|   |       |   |           product29_detail.png
+|   |       |   |           product29_detail2.png
+|   |       |   |           product2_detail.png
+|   |       |   |           product2_detail2.png
+|   |       |   |           product30_detail.png
+|   |       |   |           product30_detail2.png
+|   |       |   |           product30_detail3.png
+|   |       |   |           product31_detail.png
+|   |       |   |           product31_detail2.png
+|   |       |   |           product31_detail3.png
+|   |       |   |           product32_detail.png
+|   |       |   |           product32_detail2.png
+|   |       |   |           product33_detail.png
+|   |       |   |           product33_detail2.png
+|   |       |   |           product33_detail3.png
+|   |       |   |           product34_detail.png
+|   |       |   |           product34_detail2.png
+|   |       |   |           product34_detail3.png
+|   |       |   |           product35_detail.png
+|   |       |   |           product35_detail2.png
+|   |       |   |           product35_detail3.png
+|   |       |   |           product36_detail.png
+|   |       |   |           product36_detail2.png
+|   |       |   |           product37_detail.png
+|   |       |   |           product37_detail2.png
+|   |       |   |           product38_detail.png
+|   |       |   |           product38_detail2.png
+|   |       |   |           product39_detail.png
+|   |       |   |           product39_detail2.png
+|   |       |   |           product3_detail.png
+|   |       |   |           product3_detail2.png
+|   |       |   |           product3_detail3.png
+|   |       |   |           product40_detail.png
+|   |       |   |           product40_detail2.png
+|   |       |   |           product4_detail.png
+|   |       |   |           product4_detail2.png
+|   |       |   |           product5_detail.png
+|   |       |   |           product5_detail2.png
+|   |       |   |           product5_detail3.png
+|   |       |   |           product6_detail.png
+|   |       |   |           product6_detail2.png
+|   |       |   |           product7_detail.png
+|   |       |   |           product7_detail2.png
+|   |       |   |           product8_detail.png
+|   |       |   |           product8_detail2.png
+|   |       |   |           product9_detail.png
+|   |       |   |           product9_detail2.png
+|   |       |   |           
+|   |       |   +---reservation
+|   |       |   |       map_ping.png
+|   |       |   |       
+|   |       |   +---review
+|   |       |   |       15cceaec-df8b-425a-a64c-17db80c352ed.png
+|   |       |   |       24728c57-df62-4fc2-b53f-f34ad999b15e.png
+|   |       |   |       26e920fb-856e-465d-925f-8a3d093bb60b.jpg
+|   |       |   |       2c7ddf93-204f-4434-8c8e-4817480cd223.png
+|   |       |   |       2e8e4ffc-5094-4aee-9f9f-f0f4c773774b.jpg
+|   |       |   |       2ef1722b-af0c-468f-9a16-a221e194cfdc.png
+|   |       |   |       52638e73-88ab-46b7-a449-e980e639329a.jpg
+|   |       |   |       5a1ac41a-3bed-492a-a3b7-bb39158aabea.gif
+|   |       |   |       7d16e02a-ce0f-4c9c-a871-3473efd1d1b1.jpg
+|   |       |   |       7f15d893-ed05-415d-aa5a-ac2cd776a18b.png
+|   |       |   |       98bfa68d-ea4f-48e9-a415-fa29d639cb9c.gif
+|   |       |   |       9f285100-526c-4fbb-9aa0-4dc7f2e9fc24.png
+|   |       |   |       a0b4b2b1-cf3b-461f-8ff0-a2ad19303842.jpg
+|   |       |   |       a3ed0961-00c1-4eef-820e-511995467508.jpg
+|   |       |   |       a41ad688-9586-4b28-b1cc-534baae8cd18.jpg
+|   |       |   |       a952162b-4d78-44f1-bbea-f224258d8964.jpg
+|   |       |   |       c88940f8-d9b0-4929-8eb8-c98bf9e86921.jpg
+|   |       |   |       ceb911db-7330-4022-87f6-c8b1c66ebf7d.png
+|   |       |   |       d3858c1d-82d8-4081-aa00-8ac4d7d4abd8.jpg
+|   |       |   |       d57ffcf8-c7ae-4383-a82e-462fc3af6dc2.jpg
+|   |       |   |       d754bd0b-e859-4cca-aff5-e773ceddc53c.jpg
+|   |       |   |       d7792e82-0023-4f21-88d2-6564fdf9ff74.png
+|   |       |   |       e785da17-2c0f-4b4f-ac97-c19f2c1305c2.jpg
+|   |       |   |       ee597209-e9c5-4280-9cf2-09e97c9d1287.png
+|   |       |   |       ff6c3625-5dc9-4bdd-abe7-f5b45b8214f7.jpg
+|   |       |   |       ffd81d57-7d7d-4a7a-9441-41cfd2c853cb.jpg
+|   |       |   |       
+|   |       |   +---store
+|   |       |   |       0a4b39b8-b497-4881-aa35-fb07631ab37fpng
+|   |       |   |       0dd5c721-b513-4d22-850e-e4b2737c7ad5jfif
+|   |       |   |       10289bb4-e71c-4a50-87c5-7652a488b25fPNG
+|   |       |   |       17d93191-43ba-4709-8470-0c4ec482702djfif
+|   |       |   |       192c6a65-1dd2-4d98-8d80-a8d25337dfbbpng
+|   |       |   |       1e6150f7-b7a3-414a-8b54-1980c43c2addjfif
+|   |       |   |       3381da9f-5b8c-49ce-b583-9d7bf3624c67jfif
+|   |       |   |       36585eb4-349d-469a-9785-1c14ea9c676ejfif
+|   |       |   |       3db17442-cdf4-477e-8a26-ffd9daf2e782png
+|   |       |   |       4c864764-a5d2-4f86-9b49-20222a760020png
+|   |       |   |       5bcbb72e-8d71-4ec8-96c6-5e414fa6d7c1jfif
+|   |       |   |       5e7fa8a7-b28d-4382-954c-bcf81dcd4cddjfif
+|   |       |   |       5e8c11c0-63c1-4bcf-ad82-b22641d81b2fjfif
+|   |       |   |       60ba705e-2f47-42a2-9d26-8a3ec0a71dc3png
+|   |       |   |       64cbc8e7-f91e-4960-91ff-019467e54007jfif
+|   |       |   |       67a531a0-c367-4749-8a47-0d06be280e01png
+|   |       |   |       69ea3e17-5de7-43ed-bac4-d0c48cc8b2e2jfif
+|   |       |   |       6b41d3cb-7194-42bb-a94f-7f3e20069498png
+|   |       |   |       6d662eb0-072f-4b5e-a686-bad35b9d2631jfif
+|   |       |   |       709a8ae1-e448-4479-953e-79b97b1208fdpng
+|   |       |   |       7351930f-2769-4f57-8846-fc2e82176810jfif
+|   |       |   |       744a295b-3c50-4dee-90b3-932831fbbd8bpng
+|   |       |   |       75261dd2-5685-4273-8df0-b79fc6be355djfif
+|   |       |   |       761ae589-b5ca-4b53-a1f0-bed770636aa5jfif
+|   |       |   |       7a7efcd3-b350-4c8b-b74b-5050e2dd40b7jfif
+|   |       |   |       82546f48-293e-473c-a324-b64795d11663jfif
+|   |       |   |       8421e901-6eef-4b55-8ab5-f53d7c23ce87jfif
+|   |       |   |       8759ce29-83de-441e-94f6-0787a21396f9jfif
+|   |       |   |       8960e608-f99c-40b2-ab2f-0c262cf0c259png
+|   |       |   |       8a5f31ed-8387-4b94-9f68-2a0ccece14depng
+|   |       |   |       8e3121db-4549-4cf1-ad8f-cbd601021bdcjfif
+|   |       |   |       907bd3c2-7953-46c7-a4ac-684d8ba69b7dpng
+|   |       |   |       9288c78a-9b81-4971-a55d-7ec78e475938png
+|   |       |   |       9308afd0-f6df-4ac1-8853-570fe6613b12png
+|   |       |   |       938f9c69-2359-4e4b-9a6d-690e1a71835ejfif
+|   |       |   |       9731cfd3-3dfd-496f-8901-4407d0b213bfjfif
+|   |       |   |       a037caf9-be83-4d41-ad0c-aaf3baa3bd0dpng
+|   |       |   |       a39d7f4e-63df-447b-adc4-2d582b2ade7apng
+|   |       |   |       a751cded-6c7a-4092-915c-1bb64365f4a7png
+|   |       |   |       b1c1aba4-816a-4d6e-bcf9-fad2d2fb1e43jfif
+|   |       |   |       b300a1a5-8205-4058-be2e-b3b244c7b334jfif
+|   |       |   |       b68124b6-300f-4d49-95b6-cfe8139c3b92png
+|   |       |   |       b9c1ac5e-f4a8-4718-ba37-af38b5df4c49jfif
+|   |       |   |       bbe6c03e-d049-4e21-bc90-c13df289d20bjfif
+|   |       |   |       c55e38e4-61e1-42f5-8a14-8e34c73e670cjpg
+|   |       |   |       c780b71d-5044-4b88-8a0a-0580215029eepng
+|   |       |   |       ca0a30e1-bd0c-4198-ac5c-172becaccf49jfif
+|   |       |   |       de42b593-01c0-4bf4-91c2-bd2edd75b67ajfif
+|   |       |   |       f0dee0ac-7223-4558-bc56-37ac43a373d6jfif
+|   |       |   |       f3452bdd-3d86-4840-8769-caa08d515ee6jfif
+|   |       |   |       f54b649c-9965-4e49-a579-bb0eaad20a49jfif
+|   |       |   |       f5906d41-b4e1-448e-a142-36b73145722fpng
+|   |       |   |       f9041056-5fd4-49d6-bd90-1f02b4e4b6b3png
+|   |       |   |       test_img_02.png
+|   |       |   |       test_img_03.png
+|   |       |   |       test_img_04.png
+|   |       |   |       
+|   |       |   \---user
+|   |       |       |   kakao.png
+|   |       |       |   
+|   |       |       \---pet
+|   |       |               bird.png
+|   |       |               cat.png
+|   |       |               dog.png
+|   |       |               etc.png
+|   |       |               fish.png
+|   |       |               
+|   |       +---js
+|   |       |   |   page-change.js
+|   |       |   |   
+|   |       |   \---main
+|   |       |           main.js
+|   |       |           
+|   |       \---WEB-INF
+|   |           |   default.jsp
+|   |           |   
+|   |           +---admin
+|   |           |       adminLogin.jsp
+|   |           |       adminPage.jsp
+|   |           |       
+|   |           +---bizMyPage
+|   |           |       bizMyPageMain.jsp
+|   |           |       reservation.jsp
+|   |           |       review.jsp
+|   |           |       storeEdit.jsp
+|   |           |       
+|   |           +---board
+|   |           |       board-add.jsp
+|   |           |       board-edit.jsp
+|   |           |       board-list.jsp
+|   |           |       board-view.jsp
+|   |           |       
+|   |           +---error
+|   |           |       error.jsp
+|   |           |       
+|   |           +---footer
+|   |           |       footer.jsp
+|   |           |       
+|   |           +---header
+|   |           |       header.jsp
+|   |           |       
+|   |           +---main
+|   |           |       about.jsp
+|   |           |       gemini-chat.jsp
+|   |           |       gemini-chat2.jsp
+|   |           |       kindergarten.jsp
+|   |           |       main-search-board.jsp
+|   |           |       main-search-product.jsp
+|   |           |       main-search-store.jsp
+|   |           |       main-search.jsp
+|   |           |       main.jsp
+|   |           |       privacy.jsp
+|   |           |       terms.jsp
+|   |           |       
+|   |           +---payment
+|   |           |       pay-rsv.jsp
+|   |           |       pay-shop.jsp
+|   |           |       pay-success.jsp
+|   |           |       refund-rsv.jsp
+|   |           |       refund-shop.jsp
+|   |           |       sub.jsp
+|   |           |       
+|   |           +---product
+|   |           |       cart.jsp
+|   |           |       product.jsp
+|   |           |       productView.jsp
+|   |           |       
+|   |           +---reservation
+|   |           |       book.jsp
+|   |           |       confirm.jsp
+|   |           |       search.jsp
+|   |           |       storeDetail.jsp
+|   |           |       success.jsp
+|   |           |       
+|   |           \---user
+|   |                   find-id.jsp
+|   |                   find-pwd.jsp
+|   |                   join.jsp
+|   |                   login.jsp
+|   |                   new-pwd.jsp
+|   |                   phone-verify.jsp
+|   |                   prd-review.jsp
+|   |                   rsv-review.jsp
+|   |                   signup-biz.jsp
+|   |                   signup-user.jsp
+|   |                   UserMypage.jsp
+|   |                   UserMypage2.jsp
+|   |                   
+|   \---test
+|       \---java
+|           \---com
+|               \---example
+|                   \---unipet
+|                           UnipetApplicationTests.java
+|                           
+\---target
+    +---classes
+    |   |   application.properties
+    |   |   
+    |   +---com
+    |   |   \---example
+    |   |       \---unipet
+    |   |           |   UnipetApplication.class
+    |   |           |   
+    |   |           +---common
+    |   |           |       BizBlockInterceptor.class
+    |   |           |       Message.class
+    |   |           |       
+    |   |           +---config
+    |   |           |       AdminInterceptor.class
+    |   |           |       CartInterceptor.class
+    |   |           |       GeminiRestTemplateConfig.class
+    |   |           |       SecurityConfig.class
+    |   |           |       WebConfig.class
+    |   |           |       
+    |   |           +---controller
+    |   |           |       AdminController.class
+    |   |           |       BizMyPageController.class
+    |   |           |       BoardController.class
+    |   |           |       DefaultController.class
+    |   |           |       ErrorPageController.class
+    |   |           |       GeminiController.class
+    |   |           |       MainController.class
+    |   |           |       PaymentController.class
+    |   |           |       ProductController.class
+    |   |           |       ReservationController.class
+    |   |           |       ReviewController.class
+    |   |           |       UserController.class
+    |   |           |       UserMypageController.class
+    |   |           |       
+    |   |           +---dao
+    |   |           |       AdminService.class
+    |   |           |       BizMyPageService.class
+    |   |           |       BoardService.class
+    |   |           |       DefaultService.class
+    |   |           |       GeminiService.class
+    |   |           |       MainService.class
+    |   |           |       PaymentService.class
+    |   |           |       ProductService.class
+    |   |           |       ReservationService.class
+    |   |           |       ReviewService.class
+    |   |           |       SmsService.class
+    |   |           |       UserMypageService.class
+    |   |           |       UserService.class
+    |   |           |       
+    |   |           +---mapper
+    |   |           |       AdminMapper.class
+    |   |           |       BizMyPageMapper.class
+    |   |           |       BoardMapper.class
+    |   |           |       DefaultMapper.class
+    |   |           |       GeminiMapper.class
+    |   |           |       MainMapper.class
+    |   |           |       PaymentMapper.class
+    |   |           |       PetMapper.class
+    |   |           |       ProductMapper.class
+    |   |           |       ReservationMapper.class
+    |   |           |       ReviewMapper.class
+    |   |           |       UserMapper.class
+    |   |           |       UserMypageMapper.class
+    |   |           |       
+    |   |           +---model
+    |   |           |       Admin.class
+    |   |           |       BizMyPage.class
+    |   |           |       Board.class
+    |   |           |       ChatRequest$ChatRequestBuilder.class
+    |   |           |       ChatRequest$Content.class
+    |   |           |       ChatRequest$GenerationConfig.class
+    |   |           |       ChatRequest$Parts.class
+    |   |           |       ChatRequest.class
+    |   |           |       ChatResponse$Candidate.class
+    |   |           |       ChatResponse$ChatResponseBuilder.class
+    |   |           |       ChatResponse$Content.class
+    |   |           |       ChatResponse$Parts.class
+    |   |           |       ChatResponse$SafetyRating.class
+    |   |           |       ChatResponse.class
+    |   |           |       Coupon.class
+    |   |           |       Default.class
+    |   |           |       Main.class
+    |   |           |       Order.class
+    |   |           |       Payment.class
+    |   |           |       Pet.class
+    |   |           |       Product.class
+    |   |           |       Reservation.class
+    |   |           |       Review.class
+    |   |           |       Store.class
+    |   |           |       StoreRecommend.class
+    |   |           |       User.class
+    |   |           |       
+    |   |           \---scheduler
+    |   |                   ReservationScheduler.class
+    |   |                   SubScheduler.class
+    |   |                   
+    |   +---META-INF
+    |   |   |   MANIFEST.MF
+    |   |   |   
+    |   |   \---maven
+    |   |       \---com.example
+    |   |           \---unipet
+    |   |                   pom.properties
+    |   |                   pom.xml
+    |   |                   
+    |   \---mybatis-mapper
+    |           sql-admin.xml
+    |           sql-bizMyPage.xml
+    |           sql-board.xml
+    |           sql-default.xml
+    |           sql-gemini.xml
+    |           sql-main.xml
+    |           sql-payment.xml
+    |           sql-pet.xml
+    |           sql-product.xml
+    |           sql-reservation.xml
+    |           sql-review.xml
+    |           sql-user.xml
+    |           sql-usermypage.xml
+    |           
+    +---generated-sources
+    |   \---annotations
+    +---generated-test-sources
+    |   \---test-annotations
+    \---test-classes
+        \---com
+            \---example
+                \---unipet
+                        UnipetApplicationTests.class
+                        

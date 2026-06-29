@@ -4,10 +4,29 @@
 	padding: 36px 0 50px;
 }
 
+.back-area {
+	margin-bottom: 18px;
+}
+
+.back-btn {
+	height: 40px;
+	border-radius: 8px;
+	padding: 0 16px;
+	border: 1px solid var(--line-soft);
+	background: #fff;
+	color: var(--text-main);
+	font-size: 14px;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.back-btn:hover {
+	background: var(--image-soft);
+}
+
 .box {
 	background: #fff;
 	border: none;
-	border-top: none;
 	border-bottom: 1px solid var(--line-soft);
 	border-radius: 0;
 	padding: 28px 0 34px;
@@ -64,42 +83,6 @@ textarea {
 	height: 300px;
 	resize: none;
 	line-height: 1.7;
-	padding-bottom: 42px;
-}
-
-.textarea-wrap {
-	position: relative;
-	width: 100%;
-}
-
-.textarea-wrap textarea {
-	display: block;
-	width: 100%;
-}
-
-.text-count {
-	position: absolute;
-	right: 14px;
-	bottom: 12px;
-	font-size: 13px;
-	color: #888;
-	background: #fff;
-	padding: 2px 6px;
-	border-radius: 6px;
-	pointer-events: none;
-}
-
-.text-count.danger {
-	color: #e74c3c;
-	font-weight: 700;
-}
-input[type=file] {
-	width: 100%;
-	padding: 12px;
-	border: 1px solid var(--line-soft);
-	border-radius: 8px;
-	background: var(--image-soft);
-	box-sizing: border-box;
 }
 
 .radio-row {
@@ -108,73 +91,113 @@ input[type=file] {
 	align-items: center;
 }
 
-.radio-row label {
-	font-size: 14px;
-	color: var(--text-main);
-	cursor: pointer;
-}
-
 .radio-row input {
 	accent-color: var(--main);
 }
 
+.textarea-wrap {
+	position: relative;
+	width: 100%;
+}
+
+/* Jodit 에디터 */
+.jodit-container {
+	width: 100% !important;
+	border: 1px solid var(--line-soft) !important;
+	border-radius: 8px !important;
+	overflow: hidden;
+	font-family: 'Malgun Gothic' !important;
+}
+
+.jodit-toolbar__box {
+	background: #fafafa !important;
+	border-bottom: 1px solid var(--line-soft) !important;
+}
+
+.jodit-workplace {
+	min-height: 320px !important;
+}
+
+.jodit-wysiwyg {
+	min-height: 320px !important;
+	padding: 14px 14px 42px 14px !important;
+	font-size: 15px !important;
+	line-height: 1.8 !important;
+	color: var(--text-main) !important;
+	font-family: 'Malgun Gothic' !important;
+}
+
+.jodit-wysiwyg img {
+	max-width: 100%;
+	border-radius: 8px;
+}
+
+.text-count {
+	position: absolute;
+	right: 14px;
+	bottom: 12px;
+	z-index: 10;
+	font-size: 13px;
+	color: #777;
+	background-color: rgba(255, 255, 255, 0.9);
+	padding: 3px 6px;
+	border-radius: 6px;
+	pointer-events: none;
+}
+
+.text-count.danger {
+	color: #e74c3c;
+	font-weight: bold;
+}
+
+.existing-file-box {
+	margin-top: 12px;
+	background: var(--image-soft);
+	border: 1px solid var(--line-soft);
+	border-radius: 8px;
+	padding: 12px;
+}
+
+.existing-file-title {
+	font-size: 14px;
+	font-weight: 700;
+	margin-bottom: 8px;
+	color: var(--text-main);
+}
+
+.existing-file-item {
+	font-size: 14px;
+	color: var(--text-main);
+	margin-top: 6px;
+}
+
+/* 버튼 */
 .btn-row {
 	display: flex;
-	gap: 8px;
+	gap: 10px;
 	margin-top: 28px;
 	justify-content: flex-end;
 }
 
 .btn-row button {
-	height: 42px;
+	height: 40px;
+	border: none;
 	border-radius: 8px;
-	padding: 0 18px;
 	cursor: pointer;
-	font-weight: 700;
-	font-size: 14px;
-	border: 1px solid var(--line-soft);
-	background: #fff;
-	color: var(--text-main);
-}
-
-.btn-row button:hover {
-	background: var(--image-soft);
-}
-
-.save-btn {
-	background: var(--main) !important;
-	border-color: var(--main) !important;
-	color: #fff !important;
-}
-
-.save-btn:hover {
-	opacity: 0.9;
-}
-
-.list-btn {
-	background: #fff;
-	color: var(--text-main);
-}
-
-.back-btn {
-	height: 40px;
-	padding: 0;
-	height: 40px;
 	padding: 0 16px;
-	border-radius: 8px;
-	border: 1px solid var(--line-soft);
-	background: #fff;
-	color: var(--text-main);
-	font-size: 14px;
 	font-weight: 700;
-	cursor: pointer;
-	color: var(--text-main);
 	font-size: 14px;
-	font-weight: 700;
-	cursor: pointer;
 }
 
-.back-btn:hover {
-	color: var(--main);
-	border: 1px solid var(--main);
+/* 등록 버튼 */
+.save-btn,
+.list-btn {
+	background: var(--main);
+	color: #fff;
+	border: none !important;
+}
+
+.save-btn:hover,
+.list-btn:hover {
+	background-color: var(--btnh);
 }

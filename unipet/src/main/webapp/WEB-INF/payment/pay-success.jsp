@@ -184,7 +184,6 @@
                 self.payFlg = 'RSV';
                 self.id = self.rsvNo;
             }
-            console.log(self.id);
             // 2. id가 확보되면 상세 정보 조회
             if (self.id !== "") {
                 self.fnGetDetail();

@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.unipet.mapper.AiRecommendMapper">
+
+    <select id="getRecommendationByUserId" parameterType="String" resultType="com.example.unipet.model.AiRecommend">
+        SELECT 
+            USER_ID AS userId, 
+            REC_SERVICES AS recServices, 
+            REC_PRODUCTS AS recProducts, 
+            CREATED_AT AS createdAt, 
+            UPDATED_AT AS updatedAt
+        FROM AI_RECOMMEND
+        WHERE USER_ID = #{userId}
+    </select>
+    
+    <select id="selectUserList" resultType="string">
+        SELECT USER_ID 
+        FROM USERS
+    </select>
+
+    <select id="selectTopStoreList" parameterType="String" resultType="hashmap">
+        SELECT 
+            S.STORE_NO AS storeNo, 
+            S.STORE_NAME AS name, 
+            S.S_CATEGORY AS type, 
+            ROUND(AVG(R.RATING), 1) AS score
+        FROM STORE S
+        INNER JOIN REVIEW R ON S.STORE_NO = R.STORE_NO
+        WHERE R.RSV_NO IS NOT NULL 
+        
+        <if test="userRegion != null and userRegion != ''">
+            AND S.S_ADDR LIKE CONCAT('%', #{userRegion}, '%')
+        </if>
+          
+        GROUP BY S.STORE_NO, S.STORE_NAME, S.S_CATEGORY
+        ORDER BY score DESC
+        LIMIT 5
+    </select>
+
+    <select id="selectTopProductList" resultType="hashmap">
+	    SELECT 
+	        P.PRODUCT_NO AS productNo, 
+	        P.PRODUCT_NAME AS name, 
+	        P.BRAND AS brand,
+	        IFNULL(S.totalSold, 0) AS totalSold,
+	        IFNULL(R.score, 0) AS score
+	    FROM PRODUCT P
+	    
+	    LEFT JOIN (
+	        SELECT OD.PRODUCT_NO, SUM(OD.ORD_QTY) AS totalSold
+	        FROM ORDER_DETAIL OD
+	        INNER JOIN ORDERS O ON OD.ORD_NO = O.ORD_NO
+	        WHERE O.ORD_STATUS = 'PAY' 
+	        GROUP BY OD.PRODUCT_NO
+	    ) S ON P.PRODUCT_NO = S.PRODUCT_NO
+	    
+	    LEFT JOIN (
+	        SELECT PRODUCT_NO, ROUND(AVG(RATING), 1) AS score
+	        FROM REVIEW
+	        WHERE PRODUCT_NO IS NOT NULL
+	        GROUP BY PRODUCT_NO
+	    ) R ON P.PRODUCT_NO = R.PRODUCT_NO
+	    
+	    WHERE P.PRODUCT_STATUS = 'Y'
+	      
+	    ORDER BY score DESC, totalSold DESC
+	    LIMIT 15
+	</select>
+    
+    <select id="selectStoreDetailsForAi" parameterType="java.util.List" resultType="hashmap">
+	    SELECT 
+	        s.STORE_NO AS storeNo,
+	        s.STORE_NAME AS storeName,
+	        c.KOR AS sCategoryName,
+	        s.S_ADDR AS sAddr,
+	        sd.SUB_TITLE AS subTitle,
+	        sf.FILE_PATH AS filePath,
+	        sf.FILE_NAME AS fileName
+	    FROM STORE s
+	    LEFT JOIN STORE_DETAIL sd 
+	        ON s.STORE_NO = sd.STORE_NO
+	    LEFT JOIN CODE c 
+	        ON s.S_CATEGORY = c.VALUE 
+	       AND c.TYPE = 'S_CATEGORY'
+	    LEFT JOIN STORE_FILE sf 
+	        ON s.STORE_NO = sf.STORE_NO 
+	       AND sf.IS_MAIN = 'Y'
+	    WHERE s.STORE_NO IN
+	    <foreach collection="list" item="item" open="(" separator="," close=")">
+	        #{item}
+	    </foreach>
+	</select>
+	
+	<select id="selectProductDetailsForAi" parameterType="java.util.List" resultType="hashmap">
+	    SELECT 
+	        p.PRODUCT_NO AS productNo,
+	        p.PRODUCT_NAME AS productName,
+	        p.PRODUCT_PRICE AS productPrice,
+	        pf.FILE_PATH AS filePath,
+	        pf.FILE_NAME AS fileName
+	    FROM PRODUCT p
+	    -- 상품 이미지 테이블 조인 (메인 이미지만 가져오기)
+	    LEFT JOIN PRODUCT_FILE pf 
+	        ON p.PRODUCT_NO = pf.PRODUCT_NO 
+	       AND pf.IS_MAIN = 'Y'
+	    WHERE p.PRODUCT_NO IN
+	    <foreach collection="list" item="item" open="(" separator="," close=")">
+	        #{item}
+	    </foreach>
+	</select>
+
+    <select id="getUserHistory" parameterType="String" resultType="hashmap">
+        SELECT
+            (SELECT USER_ADDR 
+             FROM USERS 
+             WHERE USER_ID = #{userId}) AS userAddr, 
+             
+            (SELECT CONCAT(PET_NAME, ' (', TIMESTAMPDIFF(YEAR, BIRTHDATE, CURDATE()), '살, ', BREED, ')') 
+             FROM pet 
+             WHERE USER_ID = #{userId} AND IS_MAIN = 'Y' 
+             LIMIT 1) AS petInfo,
+             
+            (SELECT CONCAT(S.S_CATEGORY, ' 방문 [', P.PET_NAME, ' - ', SM.MENU_NAME, '] (', DATE_FORMAT(R.RSV_DATE, '%Y-%m-%d'), ')') 
+             FROM reservation R
+             INNER JOIN store S ON R.STORE_NO = S.STORE_NO
+             INNER JOIN pet P ON R.PET_NO = P.PET_NO
+             INNER JOIN store_menu SM ON R.MENU_NO = SM.MENU_NO
+             WHERE R.USER_ID = #{userId} 
+               AND R.RSV_STATUS = 'FIN' 
+               AND SM.M_STATUS = 'Y'    ORDER BY R.RSV_DATE DESC 
+             LIMIT 1) AS lastVisit,
+             
+            (SELECT P.PRODUCT_NAME 
+             FROM orders O
+             INNER JOIN order_detail OD ON O.ORD_NO = OD.ORD_NO
+             INNER JOIN product P ON OD.PRODUCT_NO = P.PRODUCT_NO
+             WHERE O.USER_ID = #{userId} AND O.ORD_STATUS = 'PAY'
+             ORDER BY O.ORD_DATE DESC 
+             LIMIT 1) AS lastShopping
+        FROM DUAL
+    </select>
+    
+    <select id="checkRecommendationExist" parameterType="String" resultType="int">
+        SELECT COUNT(*) 
+        FROM AI_RECOMMEND 
+        WHERE USER_ID = #{userId}
+    </select>
+
+    <insert id="insertRecommendation" parameterType="com.example.unipet.model.AiRecommend">
+        INSERT INTO AI_RECOMMEND (
+            USER_ID, 
+            REC_SERVICES, 
+            REC_PRODUCTS, 
+            CREATED_AT, 
+            UPDATED_AT
+        ) VALUES (
+            #{userId}, 
+            #{recServices}, 
+            #{recProducts}, 
+            NOW(), 
+            NOW()
+        )
+    </insert>
+    
+    <update id="updateRecommendation" parameterType="com.example.unipet.model.AiRecommend">
+        UPDATE AI_RECOMMEND 
+        SET 
+            REC_SERVICES = #{recServices},
+            REC_PRODUCTS = #{recProducts},
+            UPDATED_AT = NOW()
+        WHERE USER_ID = #{userId}
+    </update>
+	
+</mapper>

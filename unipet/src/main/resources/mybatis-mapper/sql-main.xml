@@ -15,9 +15,8 @@
 		    sf.FILE_PATH AS filePath,
 		    sf.FILE_NAME AS fileName
 		FROM STORE s
-		JOIN RESERVATION r 
+		LEFT JOIN RESERVATION r 
 		    ON s.STORE_NO = r.STORE_NO
-		   AND r.CDATE >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
 		
 		LEFT JOIN STORE_DETAIL sd
 		    ON s.STORE_NO = sd.STORE_NO
@@ -43,7 +42,6 @@
 		        FROM RESERVATION r
 		        JOIN STORE_MENU m
 		            ON r.MENU_NO = m.MENU_NO
-		        WHERE r.CDATE >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
 		        GROUP BY m.STORE_NO, m.MENU_NO, m.MENU_NAME
 		    ) x
 		    WHERE rn = 1
@@ -355,22 +353,97 @@
 	</select>
 	
 	<!-- 유치원 보내주개 -->
-	<select id="selectKindergartenStoreList" resultType="com.example.unipet.model.Main">
-	    SELECT
-	        S.STORE_NO AS storeNo,
-	        S.STORE_NAME AS storeName,
-	        S.S_ADDR AS sAddr,
-	        SD.SUB_TITLE AS subTitle,
-	        SF.FILE_PATH AS filePath,
-	        SF.FILE_NAME AS fileName
-	    FROM STORE S
-	    LEFT JOIN STORE_DETAIL SD
-	        ON S.STORE_NO = SD.STORE_NO
-	    LEFT JOIN STORE_FILE SF
-	        ON S.STORE_NO = SF.STORE_NO
-	       AND SF.IS_MAIN = 'Y'
-	    WHERE S.S_STATUS IN ('GEN','AFF')
-	      AND S.STORE_NAME LIKE '%유치원%'
-	    ORDER BY S.STORE_NO DESC
-	</select>
+    <select id="selectKindergartenStoreList" resultType="com.example.unipet.model.Main">
+        SELECT
+            S.STORE_NO AS storeNo,
+            S.STORE_NAME AS storeName,
+            S.S_ADDR AS sAddr,
+            SD.SUB_TITLE AS subTitle,
+            SF.FILE_PATH AS filePath,
+            SF.FILE_NAME AS fileName
+        FROM STORE S
+        LEFT JOIN STORE_DETAIL SD
+            ON S.STORE_NO = SD.STORE_NO
+        LEFT JOIN STORE_FILE SF
+            ON S.STORE_NO = SF.STORE_NO
+           AND SF.IS_MAIN = 'Y'
+        WHERE S.S_STATUS IN ('GEN','AFF')
+          AND S.STORE_NAME LIKE '%유치원%'
+        ORDER BY S.STORE_NO DESC
+    </select>
+
+    <!-- 홈페이지 문의 등록 -->
+    <insert id="insertUnipetQna" parameterType="hashmap">
+        INSERT INTO QNA_UNIPET (
+            UNA_TYPE,
+            USER_ID,
+            UNA_TITLE,
+            UNA_CONTENT,
+            ANSWER_YN,
+            CDATE
+        ) VALUES (
+            #{unaType},
+            #{userId},
+            #{unaTitle},
+            #{unaContent},
+            'N',
+            NOW()
+        )
+    </insert>
+
+    <!-- 홈페이지 문의 내역 조회 -->
+    <select id="selectUnipetQnaList" parameterType="hashmap" resultType="com.example.unipet.model.Main">
+        SELECT
+            UNA_NO AS unaNo,
+            UNA_TYPE AS unaType,
+            USER_ID AS userId,
+            UNA_TITLE AS unaTitle,
+            UNA_CONTENT AS unaContent,
+            UNA_ANSWER AS unaAnswer,
+            ANSWER_YN AS answerYn,
+            DATE_FORMAT(CDATE, '%Y-%m-%d') AS cdate,
+            DATE_FORMAT(UDATE, '%Y-%m-%d') AS udate
+        FROM QNA_UNIPET
+        WHERE USER_ID = #{userId}
+
+        <if test="unaType != null and unaType != ''">
+            AND UNA_TYPE = #{unaType}
+        </if>
+
+        <if test="answerYn != null and answerYn != ''">
+            AND ANSWER_YN = #{answerYn}
+        </if>
+
+        <if test="keyword != null and keyword != ''">
+            AND (
+                UNA_TITLE LIKE CONCAT('%', #{keyword}, '%')
+                OR UNA_CONTENT LIKE CONCAT('%', #{keyword}, '%')
+            )
+        </if>
+
+        ORDER BY UNA_NO DESC
+        LIMIT #{start}, #{pageSize}
+    </select>
+
+    <!-- 홈페이지 문의 내역 개수 -->
+    <select id="selectUnipetQnaCount" parameterType="hashmap" resultType="int">
+        SELECT COUNT(*)
+        FROM QNA_UNIPET
+        WHERE USER_ID = #{userId}
+
+        <if test="unaType != null and unaType != ''">
+            AND UNA_TYPE = #{unaType}
+        </if>
+
+        <if test="answerYn != null and answerYn != ''">
+            AND ANSWER_YN = #{answerYn}
+        </if>
+
+        <if test="keyword != null and keyword != ''">
+            AND (
+                UNA_TITLE LIKE CONCAT('%', #{keyword}, '%')
+                OR UNA_CONTENT LIKE CONCAT('%', #{keyword}, '%')
+            )
+        </if>
+    </select>
 </mapper>

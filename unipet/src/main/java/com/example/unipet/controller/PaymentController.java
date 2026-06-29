@@ -176,7 +176,6 @@ public class PaymentController {
 
 	    HashMap<String, Object> resultMap = paymentService.getCartList(map);
 
-	    // 스프링 부트에서는 그냥 Map을 리턴하면 자동으로 JSON으로 변환해주므로 Gson이 필요 없습니다.
 	    return resultMap;
 	}
 	

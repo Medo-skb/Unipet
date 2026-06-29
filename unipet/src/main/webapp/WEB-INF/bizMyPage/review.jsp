@@ -16,28 +16,13 @@
 
     <jsp:include page="/WEB-INF/header/header.jsp" />
 
-    <div id="app">
+    <div id="app" v-cloak>
         <div class="biz-page-wrap">
             <div class="biz-page-container">
 
-                <aside class="biz-sidebar">
-                    <div class="sidebar-title">사업자 마이페이지</div>
-
-                    <ul class="sidebar-menu">
-                        <li class="menu-item">
-                            <a href="/biz/MyPage.do">홈</a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="/biz/storeEdit.do">내 정보 및 업체 정보 수정</a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="/biz/reservation.do">예약 현황</a>
-                        </li>
-                        <li class="menu-item active">
-                            <a href="/biz/review.do">리뷰 관리</a>
-                        </li>
-                    </ul>
-                </aside>
+                <jsp:include page="/WEB-INF/bizMyPage/bizSidebar.jsp">
+                    <jsp:param name="activeMenu" value="review" />
+                </jsp:include>
 
                 <section class="biz-content">
                     <div class="content-header">
@@ -108,8 +93,12 @@
 
                                 <div class="review-menu">메뉴 : {{item.menuName}}</div>
 
-                                <div class="review-image-box" v-if="item.filePath && item.fileName">
-                                    <img :src="item.filePath + item.fileName" alt="리뷰 이미지" class="review-image">
+                                <div class="review-image-box" v-if="item.filePath">
+                                    <img v-for="imagePath in fnReviewImageList(item.filePath)"
+                                        :key="imagePath"
+                                        :src="imagePath"
+                                        alt="리뷰 이미지"
+                                        class="review-image">
                                 </div>
 
                                 <div class="review-text">{{item.rContents}}</div>
@@ -148,11 +137,19 @@
                             <button type="button" class="modal-close-btn" @click="fnCloseReportModal">X</button>
                         </div>
 
-                        <div class="modal-body">
-                            <div class="form-row">
+                        <div class="form-row">
+                            <div class="form-label-row">
                                 <label>신고 사유</label>
-                                <textarea v-model="reportForm.reportReason" placeholder="신고 사유를 입력해주세요."></textarea>
                             </div>
+
+                            <select v-model="reportForm.reportReason" class="report-reason-select">
+                                <option value="">신고 사유를 선택해주세요.</option>
+                                <option v-for="reason in reportReasonList"
+                                        :key="reason"
+                                        :value="reason">
+                                    {{ reason }}
+                                </option>
+                            </select>
                         </div>
 
                         <div class="modal-footer">
@@ -188,7 +185,15 @@
                 reportForm: {
                     reviewNo: "",
                     reportReason: ""
-                }
+                },
+                reportReasonList: [
+                    "욕설/비방",
+                    "광고/도배",
+                    "음란성",
+                    "허위 정보",
+                    "예약/이용 내역과 무관한 리뷰",
+                    "기타"
+                ]
             };
         },
         methods: {
@@ -299,8 +304,8 @@
             fnSaveReportReview: function () {
                 let self = this;
 
-                if (!self.reportForm.reportReason.trim()) {
-                    alert("신고 사유를 입력해주세요.");
+                if (!self.reportForm.reportReason) {
+                    alert("신고 사유를 선택해주세요.");
                     return;
                 }
 
@@ -327,10 +332,17 @@
                         alert("리뷰 신고 중 오류가 발생했습니다.");
                     }
                 });
-            }
+            },
 
+            fnReviewImageList: function (filePath) {
+                if (!filePath) {
+                    return [];
+                }
 
-
+                return filePath.split("|").filter(function (item) {
+                    return item;
+                });
+            },
 
         }, // methods
         mounted() {

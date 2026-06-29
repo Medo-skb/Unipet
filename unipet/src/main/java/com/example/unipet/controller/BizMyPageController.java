@@ -4,7 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,7 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.unipet.dao.BizMyPageService;
 import com.google.gson.Gson;
 
-import ch.qos.logback.core.model.Model;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
@@ -26,18 +27,81 @@ public class BizMyPageController {
 	@Autowired
 	BizMyPageService bizMyPageService;
 	
+	@Value("${kakao.maps.apikey}")
+	private String kakaoJavascriptKey;
+	
 	// 사업자 마이페이지 메인
 	@RequestMapping("/biz/MyPage.do") 
 	public String bizMyPage(HttpServletRequest request, HttpSession session, Model model, @RequestParam HashMap<String, Object> map) throws Exception{
-		
+	    
 	    String sessionId = (String) session.getAttribute("sessionId");
 	    String sessionRole = (String) session.getAttribute("sessionRole");
 
 	    if (sessionId == null || !"BIZ".equals(sessionRole)) {
 	        return "redirect:/user/login.do";
 	    }
-		
-		return "/bizMyPage/bizMyPageMain";
+
+	    map.put("sUserId", sessionId);
+
+	    if (!bizMyPageService.hasApprovedStore(map)) {
+	        return "redirect:/biz/apply.do";
+	    }
+
+	    model.addAttribute("applyOnlyMenu", "N");
+	    
+	    return "/bizMyPage/bizMyPageMain";
+	}
+	
+	// 사업자 신청
+	@RequestMapping("/biz/apply.do")
+	public String bizApply(HttpSession session, Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+
+	    String sessionId = (String) session.getAttribute("sessionId");
+	    String sessionRole = (String) session.getAttribute("sessionRole");
+
+	    if (sessionId == null || !"BIZ".equals(sessionRole)) {
+	        return "redirect:/user/login.do";
+	    }
+
+	    map.put("sUserId", sessionId);
+
+	    HashMap<String, Object> statusMap = bizMyPageService.getBizApplyStatus(map);
+	    Object infoObj = statusMap.get("info");
+
+	    if (infoObj instanceof com.example.unipet.model.BizMyPage) {
+	        com.example.unipet.model.BizMyPage info = (com.example.unipet.model.BizMyPage) infoObj;
+	        String status = info.getSStatus();
+
+	        if (!"REJ".equals(status) && !"PND".equals(status)) {
+	            return "redirect:/biz/MyPage.do";
+	        }
+	    }
+
+	    model.addAttribute("applyOnlyMenu", "Y");
+
+	    return "/bizMyPage/bizApply";
+	}
+	
+	// 사업자 신청 상태 조회
+	@RequestMapping(value = "/biz/applyStatus.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String getBizApplyStatus(HttpSession session, @RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+	    String sessionId = (String) session.getAttribute("sessionId");
+	    String sessionRole = (String) session.getAttribute("sessionRole");
+
+	    if (sessionId == null || !"BIZ".equals(sessionRole)) {
+	        resultMap.put("result", "fail");
+	        resultMap.put("message", "로그인이 필요합니다.");
+	        return new Gson().toJson(resultMap);
+	    }
+
+	    map.put("sUserId", sessionId);
+
+	    resultMap = bizMyPageService.getBizApplyStatus(map);
+
+	    return new Gson().toJson(resultMap);
 	}
 	
 	// 사업자 업체 수정
@@ -50,6 +114,8 @@ public class BizMyPageController {
 	    if (sessionId == null || !"BIZ".equals(sessionRole)) {
 	        return "redirect:/user/login.do";
 	    }
+
+	    model.addAttribute("kakaoJavascriptKey", kakaoJavascriptKey);
 	    
 	    return "/bizMyPage/storeEdit";
 	}
@@ -325,10 +391,17 @@ public class BizMyPageController {
 	@RequestMapping(value = "/checkBizUserId.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	@ResponseBody
 	public String checkBizUserId(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
-		HashMap<String, Object> resultMap = new HashMap<String, Object>();
-		resultMap = bizMyPageService.getBizUserId(map);
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+	    resultMap = bizMyPageService.getBizUserId(map);
 
-		return new Gson().toJson(resultMap);
+	    return new Gson().toJson(resultMap);
+	}
+
+	@RequestMapping(value = "/biz/checkBiznum.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String checkBiznum(@RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = bizMyPageService.checkBiznum(map);
+	    return new Gson().toJson(resultMap);
 	}
 	
 	// 내 정보 수정

@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
+import java.io.File;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +33,7 @@ import com.example.unipet.dao.UserService;
 import com.example.unipet.model.User;
 import com.google.gson.Gson;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
@@ -88,6 +90,8 @@ public class UserController {
 	public String signupBizPage() {
 		return "user/signup-biz";
 	}
+	
+	
 
 	@GetMapping("/user/find-id.do")
 	public String findIdPage() {
@@ -139,8 +143,13 @@ public class UserController {
 			session.setAttribute("sessionName", user.getUserName());
 			session.setAttribute("sessionRole", "USER");
 
-			// 소셜 인증 팝업을 안 띄우므로 남아있는 인증 세션 제거
-			session.removeAttribute("needPhoneVerify");
+			if (user.getPhone() == null || user.getPhone().trim().isEmpty()) {
+				session.setAttribute("needPhoneVerify", true);
+				resultMap.put("needPhoneVerify", true);
+			} else {
+				session.removeAttribute("needPhoneVerify");
+				resultMap.put("needPhoneVerify", false);
+			}
 
 			resultMap.put("message", user.getUserName() + "님 환영합니다 👋");
 		}
@@ -164,8 +173,8 @@ public class UserController {
 			session.setAttribute("sessionRole", "BIZ");
 			session.setAttribute("storeStatus", user.getStoreStatus());
 
-			// 소셜 인증 팝업을 안 띄우므로 남아있는 인증 세션 제거
 			session.removeAttribute("needPhoneVerify");
+			resultMap.put("needPhoneVerify", false);
 
 			resultMap.put("message", user.getUserName() + "님 환영합니다 👋");
 		}
@@ -183,17 +192,21 @@ public class UserController {
 		HashMap<String, Object> resultMap = new HashMap<>();
 
 		Boolean phoneVerified = (Boolean) session.getAttribute("phoneVerified");
+		String verifyPhone = (String) session.getAttribute("verifyPhone");
+		String inputPhone = map.get("phone") == null ? "" : String.valueOf(map.get("phone")).replaceAll("[^0-9]", "");
 
-		if (phoneVerified == null || !phoneVerified) {
+		if (phoneVerified == null || !phoneVerified || verifyPhone == null || !verifyPhone.equals(inputPhone)) {
 			resultMap.put("result", false);
 			resultMap.put("message", "휴대폰 인증을 완료해주세요.");
 			return gson.toJson(resultMap);
 		}
 
+		map.put("phone", verifyPhone);
 		resultMap = userService.insertUser(map);
 
 		if (Boolean.TRUE.equals(resultMap.get("result"))) {
 			session.removeAttribute("phoneVerified");
+			session.removeAttribute("verifiedPhone");
 			session.removeAttribute("verifyPhone");
 		}
 
@@ -205,30 +218,53 @@ public class UserController {
 	// =========================
 	@PostMapping("/user/signupBiz.dox")
 	@ResponseBody
-	public String signupBiz(@RequestParam HashMap<String, Object> map,
-			@RequestParam(value = "bizFile", required = false) MultipartFile bizFile) {
+	public String signupBiz(HttpServletRequest request,
+	        @RequestParam HashMap<String, Object> map,
+	        @RequestParam(value = "bizFile", required = false) MultipartFile bizFile) {
 
-		if (bizFile != null && !bizFile.isEmpty()) {
+	    if (bizFile != null && !bizFile.isEmpty()) {
+	        try {
+	            String originName = bizFile.getOriginalFilename();
 
-			String originName = bizFile.getOriginalFilename();
+	            String fileExt = "";
+	            if (originName != null && originName.contains(".")) {
+	                fileExt = originName.substring(originName.lastIndexOf(".") + 1).toLowerCase();
+	            }
 
-			String fileExt = "";
-			if (originName != null && originName.contains(".")) {
-				fileExt = originName.substring(originName.lastIndexOf(".") + 1).toLowerCase();
-			}
+	            String saveName = System.currentTimeMillis() + "_" + originName;
 
-			map.put("bizFileName", originName);
-			map.put("fileName", originName);
-			map.put("originName", originName);
-			map.put("filePath", "/upload");
-			map.put("fileExt", fileExt);
-			map.put("fileSize", bizFile.getSize());
-		}
+	            String uploadPath = request.getServletContext().getRealPath("/img/bizfile/");
+	            File dir = new File(uploadPath);
 
-		HashMap<String, Object> resultMap = userService.insertBizUser(map);
-		return gson.toJson(resultMap);
+	            if (!dir.exists()) {
+	                dir.mkdirs();
+	            }
+
+	            File saveFile = new File(uploadPath, saveName);
+	            bizFile.transferTo(saveFile);
+
+	            map.put("bizFileName", saveName);
+	            map.put("fileName", saveName);
+	            map.put("originName", originName);
+	            map.put("filePath", "/img/bizfile/");
+	            map.put("fileExt", fileExt);
+	            map.put("fileSize", bizFile.getSize());
+	            map.put("isProof", "Y");
+
+	        } catch (Exception e) {
+	            e.printStackTrace();
+
+	            HashMap<String, Object> resultMap = new HashMap<>();
+	            resultMap.put("result", false);
+	            resultMap.put("message", "사업자 등록증 파일 저장 중 오류가 발생했습니다.");
+	            return gson.toJson(resultMap);
+	        }
+	    }
+
+	    HashMap<String, Object> resultMap = userService.insertBizUser(map);
+	    return gson.toJson(resultMap);
 	}
-
+	
 	@PostMapping("/user/check.dox")
 	@ResponseBody
 	public String checkUser(@RequestParam HashMap<String, Object> map) {
@@ -238,9 +274,23 @@ public class UserController {
 	@PostMapping("/user/checkBiz.dox")
 	@ResponseBody
 	public String checkBizUser(@RequestParam HashMap<String, Object> map) {
-		return gson.toJson(userService.checkStoreUser(map));
+	    return gson.toJson(userService.checkStoreUser(map));
 	}
 
+	@PostMapping("/user/checkBiznum.dox")
+	@ResponseBody
+	public String checkBiznum(@RequestParam HashMap<String, Object> map) {
+	    return gson.toJson(userService.checkBiznum(map));
+	}
+
+	// 외부업체 검색
+	@RequestMapping(value = "/user/external-store/list.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String externalStoreList(@RequestParam HashMap<String, Object> map) {
+		HashMap<String, Object> resultMap = userService.getExternalStoreList(map);
+		return gson.toJson(resultMap);
+	}
+	
 	// =========================
 	// SMS 인증번호 발송
 	// =========================
@@ -250,7 +300,7 @@ public class UserController {
 
 		HashMap<String, Object> result = new HashMap<>();
 
-		String cleanPhone = phone.replace("-", "");
+		String cleanPhone = phone.replaceAll("[^0-9]", "");
 		String code = String.format("%06d", new java.util.Random().nextInt(1000000));
 
 		HashMap<String, Object> map = new HashMap<>();
@@ -326,6 +376,7 @@ public class UserController {
 		userService.updatePhoneVerified(updateMap);
 
 		session.setAttribute("phoneVerified", true);
+		session.setAttribute("verifiedPhone", phone);
 		session.setAttribute("smsAuth", true);
 
 		result.put("result", true);
@@ -392,7 +443,7 @@ public class UserController {
 		HashMap<String, Object> resultMap = new HashMap<>();
 
 		Object smsAuth = session.getAttribute("smsAuth");
-		Object phoneVerified = session.getAttribute("phoneVerified");
+		Object verifiedPhone = session.getAttribute("verifiedPhone");
 
 		if (smsAuth == null || !(boolean) smsAuth) {
 			resultMap.put("result", false);
@@ -400,13 +451,13 @@ public class UserController {
 			return gson.toJson(resultMap);
 		}
 
-		if (phoneVerified == null) {
+		if (verifiedPhone == null) {
 			resultMap.put("result", false);
 			resultMap.put("message", "인증된 휴대폰 정보가 없습니다.");
 			return gson.toJson(resultMap);
 		}
 
-		map.put("phone", phoneVerified.toString());
+		map.put("phone", verifiedPhone.toString());
 		resultMap = userService.checkUserForReset(map);
 
 		if (Boolean.TRUE.equals(resultMap.get("result"))) {
@@ -713,10 +764,47 @@ public class UserController {
 		return;
 	}
 	
+	// 휴대폰 재인증 번호 저장
 	@RequestMapping(value = "/user/updateSms.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
     @ResponseBody
-    public String savePayment(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
-        HashMap<String, Object> resultMap = userService.updateSms(map);
+    public String updateSms(Model model, @RequestParam HashMap<String, Object> map, HttpSession session) throws Exception {
+		HashMap<String, Object> resultMap = new HashMap<>();
+
+		String sessionId = (String) session.getAttribute("sessionId");
+		String sessionRole = (String) session.getAttribute("sessionRole");
+		String verifiedPhone = (String) session.getAttribute("verifiedPhone");
+		String inputPhone = map.get("phone") == null ? "" : String.valueOf(map.get("phone")).replaceAll("[^0-9]", "");
+
+		if (sessionId == null || sessionRole == null) {
+			resultMap.put("result", false);
+			resultMap.put("message", "로그인 후 이용해주세요.");
+			return new Gson().toJson(resultMap);
+		}
+
+		if (!"USER".equals(sessionRole)) {
+			resultMap.put("result", false);
+			resultMap.put("message", "일반 사용자만 휴대폰 인증을 사용할 수 있습니다.");
+			return new Gson().toJson(resultMap);
+		}
+
+		if (verifiedPhone == null || !verifiedPhone.equals(inputPhone)) {
+			resultMap.put("result", false);
+			resultMap.put("message", "휴대폰 인증 후 이용해주세요.");
+			return new Gson().toJson(resultMap);
+		}
+
+		map.put("userId", sessionId);
+		map.put("role", sessionRole);
+		map.put("phone", verifiedPhone);
+
+        resultMap = userService.updateSms(map);
+
+		if (Boolean.TRUE.equals(resultMap.get("result"))) {
+			session.removeAttribute("needPhoneVerify");
+			session.removeAttribute("phoneVerified");
+			session.removeAttribute("verifiedPhone");
+			session.removeAttribute("verifyPhone");
+		}
         
         return new Gson().toJson(resultMap); 
     }

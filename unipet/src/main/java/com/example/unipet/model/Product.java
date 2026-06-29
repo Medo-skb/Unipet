@@ -48,6 +48,7 @@ public class Product {
 	String reviewCdate;
 	double avgRating;
 	int reviewCount;
+	String summaryText;
 
 	// ===== QNA =====
 	int qnaNo;

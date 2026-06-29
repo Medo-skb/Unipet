@@ -21,6 +21,12 @@ public interface BizMyPageMapper {
 	
 	// 승인된 업체 리스트 조회
 	public List<BizMyPage> selectApprovedStore(HashMap<String, Object> map);
+
+	// 승인된 업체 개수 조회
+	public int selectApprovedStoreCount(HashMap<String, Object> map);
+
+	// 사업자 신청 상태 조회
+	public BizMyPage selectBizApplyStatus(HashMap<String, Object> map);
 	
 	// 폐업 불가 예약 개수 조회
 	public int selectCloseBlockedReservationCount(HashMap<String, Object> map);
@@ -84,6 +90,9 @@ public interface BizMyPageMapper {
 	
 	// 사업자 아이디 중복 확인
 	public int checkBizUserId(HashMap<String, Object> map);
+
+	// 사업자번호 중복 확인
+	public int checkBiznum(HashMap<String, Object> map);
 
 	// 사업자 내 정보 수정
 	public void updateBizUser(HashMap<String, Object> map);

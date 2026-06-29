@@ -1,235 +1,363 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-
-    <!DOCTYPE html>
-    <html lang="ko">
-
-    <head>
-        <meta charset="UTF-8">
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UNIPET</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="/js/page-change.js"></script>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/header.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main/footer.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/user/signupbiz.css">
+</head>
+<body>
 
-        <!-- <link href="/css/user/signupbiz.css" rel="stylesheet"> -->
-        <link href="/css/user/signupbiz.css" rel="stylesheet">
-        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-        <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-        <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-       
+    <jsp:include page="/WEB-INF/header/header.jsp" />
 
-    </head>
+    <div id="app">
+        <div class="signup-container">
+            <div class="signup-header">사업자 회원가입</div>
 
-    <body>
-        <jsp:include page="/WEB-INF/header/header.jsp" />
+            <div class="signup-section">
+                <div class="section-title">업체 검색</div>
 
-        <div id="app">
-
-            <!-- 아이디 -->
-            <div class="row">
-                <div class="inline-box">
-                    <input v-model="userId" maxlength="20" placeholder="사업자 아이디 (20자 이하)" @input="resetIdCheck">
-                    <button type="button" @click="checkId">중복확인</button>
+                <div class="input-group">
+                    <label>업체명</label>
+                    <input type="text" class="input-field" v-model="searchKeyword" placeholder="업체명을 입력해주세요">
                 </div>
-                <div v-if="idMsg" class="info-text" :style="{color:idChecked?'green':'red'}">
-                    {{ idMsg }}
+
+                <div class="search-row">
+                    <div class="input-group">
+                        <label>지역</label>
+                        <input type="text" class="input-field" v-model="searchRegion" placeholder="예: 종로구, 효제동">
+                    </div>
+                    <div class="input-group">
+                        <label>업종</label>
+                        <select class="input-field" v-model="searchCategory">
+                            <option value="">전체</option>
+                            <option value="HOS">병원</option>
+                            <option value="SAL">미용</option>
+                            <option value="BRD">위탁시설</option>
+                        </select>
+                    </div>
                 </div>
-            </div>
 
-            <!-- 비밀번호 -->
-            <div class="row">
-                <input type="password" v-model="pwd" maxlength="20" placeholder="비밀번호">
-            </div>
+                <button type="button" class="btn-sub" @click="fnSearchStore">업체 검색</button>
 
-            <!-- 비밀번호 확인 -->
-            <div class="row">
-                <input type="password" v-model="pwdCheck" maxlength="20" placeholder="비밀번호 확인">
-                <div v-if="pwdCheck" class="info-text" :style="{color: pwd === pwdCheck ? 'green' : 'red'}">
-                    {{ pwd === pwdCheck ? '비밀번호가 일치합니다.' : '비밀번호가 일치하지 않습니다.' }}
+                <div class="store-result-box" v-if="storeList.length > 0">
+                    <div class="store-card" v-for="item in storeList" :key="item.storeNo" :class="{ active: selectedStore && selectedStore.storeNo === item.storeNo }">
+                        <div class="store-info">
+                            <div class="store-name">{{ item.storeName }}</div>
+                            <div class="store-detail">{{ fnCategoryName(item.sCategory) }} · {{ item.sAddr }}</div>
+                            <div class="store-detail" v-if="item.lat && item.lng">좌표: {{ item.lat }}, {{ item.lng }}</div>
+                        </div>
+                        <button type="button" class="btn-select" @click="fnSelectStore(item)">선택</button>
+                    </div>
                 </div>
-            </div>
 
-            <!-- 대표자명 -->
-            <div class="row">
-                <input v-model="userName" placeholder="대표자명">
-            </div>
-
-            
-            <!-- 사업자등록증 파일 -->
-            <div class="row">
-                <input type="file" @change="handleFile" accept=".jpg,.jpeg,.png,.pdf">
-                
-                <div class="info-text">
-                    사업자등록증을 업로드해 주세요. 파일은 JPG, PNG, PDF 형식만 업로드 가능합니다. (최대 5MB)
+                <div class="empty-text" v-if="isSearched && storeList.length === 0">
+                    검색 결과가 없습니다. 업체명, 지역, 업종을 다시 확인해주세요.
                 </div>
-            </div>
 
-
-            <!-- 업체명 -->
-            <div class="row">
-                <input v-model="storeName" placeholder="업체명">
-            </div>
-
-            <!-- 매장분류 -->
-            <div class="row">
-                <select v-model="sCategory">
-                    <option value="">매장분류 선택</option>
-                    <option value="HOS">병원</option>
-                    <option value="SAL">미용</option>
-                    <option value="BRD">위탁시설</option>
-                </select>
-            </div>
-
-            <!-- 주소 -->
-            <div class="row">
-                <div class="inline-box">
-                    <input v-model="sAddr" placeholder="기본주소" readonly>
-                    <button type="button" @click="openPostcode">주소검색</button>
+                <div class="selected-store" v-if="selectedStore">
+                    <div class="selected-label">선택한 업체</div>
+                    <div class="selected-name">{{ selectedStore.storeName }}</div>
+                    <div class="selected-detail">{{ fnCategoryName(selectedStore.sCategory) }} · {{ selectedStore.sAddr }}</div>
                 </div>
             </div>
 
-            <!-- 상세주소 -->
-            <div class="row">
-                <input v-model="sFullAddr" placeholder="상세주소">
+            <div class="signup-section">
+                <div class="section-title">계정 정보</div>
+
+                <div class="input-group">
+                    <label>사업자 아이디</label>
+                    <div class="inline-box">
+                        <input type="text" class="input-field" v-model="userId" maxlength="20" placeholder="20자 이하" @input="fnResetIdCheck">
+                        <button type="button" class="btn-sub" @click="fnCheckId">중복확인</button>
+                    </div>
+                    <div v-if="idMsg" class="info-text" :class="{ success: idChecked }">{{ idMsg }}</div>
+                </div>
+
+                <div class="input-group">
+                    <label>비밀번호</label>
+                    <input type="password" class="input-field" v-model="pwd" maxlength="20" placeholder="비밀번호">
+                </div>
+
+                <div class="input-group">
+                    <label>비밀번호 확인</label>
+                    <input type="password" class="input-field" v-model="pwdCheck" maxlength="20" placeholder="비밀번호 확인">
+                    <div v-if="pwdCheck" class="info-text" :class="{ success: pwd === pwdCheck }">
+                        {{ pwd === pwdCheck ? '비밀번호가 일치합니다.' : '비밀번호가 일치하지 않습니다.' }}
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>대표자명</label>
+                    <input type="text" class="input-field" v-model="userName" placeholder="대표자명을 입력해주세요">
+                </div>
+
+                <div class="input-group">
+                    <label>사업자번호</label>
+                    <div class="inline-box biznum-box">
+                        <input type="text" class="input-field biznum-input" v-model="biznum1" maxlength="3" placeholder="123" @input="fnOnlyBiznum('biznum1', 3)">
+                        <span class="biznum-dash">-</span>
+                        <input type="text" class="input-field biznum-input" v-model="biznum2" maxlength="2" placeholder="45" @input="fnOnlyBiznum('biznum2', 2)">
+                        <span class="biznum-dash">-</span>
+                        <input type="text" class="input-field biznum-input" v-model="biznum3" maxlength="5" placeholder="67890" @input="fnOnlyBiznum('biznum3', 5)">
+                        <button type="button" class="btn-sub" @click="fnCheckBiznum">중복확인</button>
+                    </div>
+                    <div v-if="biznumMsg" class="info-text" :class="{ success: biznumChecked }">{{ biznumMsg }}</div>
+                </div>
+
+                <div class="input-group">
+                    <label>사업자등록증</label>
+                    <input type="file" class="input-field file-field" @change="fnHandleFile" accept=".jpg,.jpeg,.png,.pdf">
+                    <div class="info-text">JPG, PNG, PDF 형식만 업로드 가능합니다. (최대 5MB)</div>
+                </div>
             </div>
 
-            <!-- 가입 -->
-            <div class="btn-box">
-                <button type="button" @click="signupBiz">사업자 회원가입</button>
-            </div>
-
+            <button type="button" class="btn-submit" @click="fnSignupBiz">사업자 회원가입</button>
         </div>
-        <jsp:include page="/WEB-INF/footer/footer.jsp" />
-        <script>
-            Vue.createApp({
-                data() {
-                    return {
-                        userId: "",
-                        pwd: "",
-                        pwdCheck: "",
-                        userName: "",
-                        bizFile: null,
+    </div>
 
-                        storeName: "",
-                        sCategory: "",
-                        sAddr: "",
-                        sFullAddr: "",
-                        lat: "",
-                        lng: "",
-                        sStatus: "PND",
+    <jsp:include page="/WEB-INF/footer/footer.jsp" />
 
-                        idChecked: false,
-                        idMsg: ""
-                    };
-                },
+</body>
+</html>
 
-                methods: {
-                    resetIdCheck() {
-                        this.idChecked = false;
-                        this.idMsg = "";
-                    },
+<script>
+    const app = Vue.createApp({
+        data() {
+            return {
+                searchKeyword: "",
+                searchRegion: "",
+                searchCategory: "",
+                storeList: [],
+                selectedStore: null,
+                isSearched: false,
 
-                    checkId() {
-                        if (!this.userId) {
-                            alert("아이디를 입력해주세요.");
-                            return;
-                        }
+                userId: "",
+                pwd: "",
+                pwdCheck: "",
+                userName: "",
+                biznum1: "",
+                biznum2: "",
+                biznum3: "",
+                bizFile: null,
 
-                        $.post("/user/checkBiz.dox", { userId: this.userId.trim() }, (res) => {
-                            if (res.count > 0) {
-                                this.idChecked = false;
-                                this.idMsg = "이미 사용 중인 아이디입니다.";
-                                alert("이미 사용 중인 아이디입니다.");
-                            } else {
-                                this.idChecked = true;
-                                this.idMsg = "사용 가능한 아이디입니다.";
-                                alert("사용 가능한 아이디입니다.");
-                            }
-                        }, "json");
-                    },
+                idChecked: false,
+                idMsg: "",
+                biznumChecked: false,
+                biznumMsg: ""
+            };
+        },
+        methods: {
+            // 업체 검색
+            fnSearchStore: function () {
+                let self = this;
 
-                    handleFile(e) {
-                        this.bizFile = e.target.files[0];
-                    },
-
-                    openPostcode() {
-                        new daum.Postcode({
-                            oncomplete: (data) => {
-                                this.sAddr = data.roadAddress || data.address;
-                            }
-                        }).open();
-                    },
-
-                    signupBiz() {
-                        if (!this.userId || !this.pwd || !this.userName) {
-                            alert("아이디, 비밀번호, 대표자명은 필수입니다.");
-                            return;
-                        }
-
-                        if (!this.idChecked) {
-                            alert("아이디 중복확인을 해주세요.");
-                            return;
-                        }
-
-                        if (this.pwd !== this.pwdCheck) {
-                            alert("비밀번호가 일치하지 않습니다.");
-                            return;
-                        }
-
-                        if (!this.bizFile) {
-                            alert("사업자등록증 파일을 첨부해주세요.");
-                            return;
-                        }
-
-                        if (!this.storeName) {
-                            alert("업체명을 입력해주세요.");
-                            return;
-                        }
-
-                        if (!this.sCategory) {
-                            alert("매장분류를 선택해주세요.");
-                            return;
-                        }
-
-                        if (!this.sAddr) {
-                            alert("주소를 입력해주세요.");
-                            return;
-                        }
-
-                        const formData = new FormData();
-
-                        formData.append("userId", this.userId.trim());
-                        formData.append("pwd", this.pwd);
-                        formData.append("userName", this.userName);
-                        formData.append("bizFile", this.bizFile);
-
-                        formData.append("storeName", this.storeName);
-                        formData.append("sCategory", this.sCategory);
-                        formData.append("sAddr", this.sAddr);
-                        formData.append("sFullAddr", this.sFullAddr);
-
-                        formData.append("lat", this.lat);
-                        formData.append("lng", this.lng);
-                        formData.append("sStatus", this.sStatus);
-
-                        $.ajax({
-                            url: "/user/signupBiz.dox",
-                            type: "POST",
-                            data: formData,
-                            processData: false,
-                            contentType: false,
-                            dataType: "json",
-                            success: (res) => {
-                                alert(res.message);
-                                if (res.result) {
-                                    location.href = "/user/login.do";
-                                }
-                            },
-                            error: () => {
-                                alert("사업자 회원가입 중 오류가 발생했습니다.");
-                            }
-                        });
-                    }
+                if (!self.searchKeyword || self.searchKeyword.trim() === "") {
+                    alert("업체명을 입력해주세요.");
+                    return;
                 }
-            }).mount("#app");
-        </script>
 
-    </body>
+                const param = {
+                    keyword: self.searchKeyword.trim(),
+                    region: self.searchRegion.trim(),
+                    sCategory: self.searchCategory
+                };
 
-    </html>
+                $.ajax({
+                    url: "/user/external-store/list.dox",
+                    type: "POST",
+                    dataType: "json",
+                    data: param,
+                    success: function (data) {
+                        if (data.result === "success") {
+                            self.storeList = data.list || [];
+                            self.selectedStore = null;
+                            self.isSearched = true;
+                        } else {
+                            alert(data.message || "업체 검색 중 오류가 발생했습니다.");
+                        }
+                    },
+                    error: function () {
+                        alert("업체 검색 중 오류가 발생했습니다.");
+                    }
+                });
+            },
+
+            // 업체 선택
+            fnSelectStore: function (item) {
+                this.selectedStore = item;
+            },
+
+            // 업종명 변환
+            fnCategoryName: function (category) {
+                if (category === "HOS") {
+                    return "병원";
+                } else if (category === "SAL") {
+                    return "미용";
+                } else if (category === "BRD") {
+                    return "위탁시설";
+                }
+                return "기타";
+            },
+
+            // 아이디 중복확인 상태 초기화
+            fnResetIdCheck: function () {
+                this.idChecked = false;
+                this.idMsg = "";
+            },
+
+            // 아이디 중복확인
+            fnCheckId: function () {
+                let self = this;
+
+                if (!self.userId || self.userId.trim() === "") {
+                    alert("아이디를 입력해주세요.");
+                    return;
+                }
+
+                $.ajax({
+                    url: "/user/checkBiz.dox",
+                    type: "POST",
+                    dataType: "json",
+                    data: { userId: self.userId.trim() },
+                    success: function (data) {
+                        if (data.count > 0) {
+                            self.idChecked = false;
+                            self.idMsg = "이미 사용 중인 아이디입니다.";
+                            alert("이미 사용 중인 아이디입니다.");
+                        } else {
+                            self.idChecked = true;
+                            self.idMsg = "사용 가능한 아이디입니다.";
+                            alert("사용 가능한 아이디입니다.");
+                        }
+                    }
+                });
+            },
+
+            // 사업자번호 숫자만 입력
+            fnOnlyBiznum: function (key, maxLength) {
+                this[key] = this[key].replace(/[^0-9]/g, "").slice(0, maxLength);
+                this.biznumChecked = false;
+                this.biznumMsg = "";
+            },
+
+            // 사업자번호 조합
+            fnGetBiznum: function () {
+                return this.biznum1 + "-" + this.biznum2 + "-" + this.biznum3;
+            },
+
+            // 사업자번호 중복확인
+            fnCheckBiznum: function () {
+                let self = this;
+                let biznum = self.fnGetBiznum();
+
+                if (self.biznum1.length !== 3 || self.biznum2.length !== 2 || self.biznum3.length !== 5) {
+                    alert("사업자번호를 XXX-XX-XXXXX 형식으로 입력해주세요.");
+                    return;
+                }
+
+                $.ajax({
+                    url: "/user/checkBiznum.dox",
+                    type: "POST",
+                    dataType: "json",
+                    data: { biznum: biznum },
+                    success: function (data) {
+                        if (data.count > 0) {
+                            self.biznumChecked = false;
+                            self.biznumMsg = "이미 등록된 사업자번호입니다.";
+                            alert("이미 등록된 사업자번호입니다.");
+                        } else {
+                            self.biznumChecked = true;
+                            self.biznumMsg = "사용 가능한 사업자번호입니다.";
+                            alert("사용 가능한 사업자번호입니다.");
+                        }
+                    },
+                    error: function () {
+                        alert("사업자번호 중복확인 중 오류가 발생했습니다.");
+                    }
+                });
+            },
+
+            // 사업자등록증 파일 선택
+            fnHandleFile: function (e) {
+                this.bizFile = e.target.files[0];
+            },
+
+            // 사업자 회원가입 신청
+            fnSignupBiz: function () {
+                let self = this;
+
+                if (!self.selectedStore) {
+                    alert("신청할 업체를 선택해주세요.");
+                    return;
+                }
+
+                let biznum = self.fnGetBiznum();
+
+                if (!self.userId || !self.pwd || !self.userName || !self.biznum1 || !self.biznum2 || !self.biznum3) {
+                    alert("아이디, 비밀번호, 대표자명, 사업자번호는 필수입니다.");
+                    return;
+                }
+
+                if (self.biznum1.length !== 3 || self.biznum2.length !== 2 || self.biznum3.length !== 5) {
+                    alert("사업자번호를 XXX-XX-XXXXX 형식으로 입력해주세요.");
+                    return;
+                }
+
+                if (!self.idChecked) {
+                    alert("아이디 중복확인을 해주세요.");
+                    return;
+                }
+
+                if (!self.biznumChecked) {
+                    alert("사업자번호 중복확인을 해주세요.");
+                    return;
+                }
+
+                if (self.pwd !== self.pwdCheck) {
+                    alert("비밀번호가 일치하지 않습니다.");
+                    return;
+                }
+
+                if (!self.bizFile) {
+                    alert("사업자등록증 파일을 첨부해주세요.");
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append("storeNo", self.selectedStore.storeNo);
+                formData.append("userId", self.userId.trim());
+                formData.append("pwd", self.pwd);
+                formData.append("userName", self.userName);
+                formData.append("biznum", biznum);
+                formData.append("bizFile", self.bizFile);
+
+                $.ajax({
+                    url: "/user/signupBiz.dox",
+                    type: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    dataType: "json",
+                    success: function (data) {
+                        alert(data.message);
+                        if (data.result) {
+                            location.href = "/user/login.do";
+                        }
+                    },
+                    error: function () {
+                        alert("사업자 회원가입 중 오류가 발생했습니다.");
+                    }
+                });
+            }
+        }
+    });
+
+    app.mount("#app");
+</script>

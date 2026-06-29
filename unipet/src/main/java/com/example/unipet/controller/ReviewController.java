@@ -78,6 +78,11 @@ public class ReviewController {
 	    return reviewService.addReviewPrd(map, files);
 	}
 	
-	
+	// 초기 리뷰 AI 요약 생성
+	@RequestMapping(value = "/admin/review/summary/init.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public HashMap<String, Object> addInitialReviewSummary(@RequestParam HashMap<String, Object> map) throws Exception {
+		return reviewService.addInitialReviewSummary(map);
+	}
 
 }

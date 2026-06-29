@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.unipet.dao.UserMypageService;
@@ -19,19 +20,93 @@ public class UserMypageController {
 	@Autowired
 	private UserMypageService userMypageService;
 
-	// 마이페이지 화면 이동
-	@GetMapping("/user/mypage.do")
-	public String mypage(HttpSession session, HttpServletResponse response) throws IOException {
-
-		// 세션이 없으면 로그인 페이지로 이동
+	// 로그인 체크 공통 함수
+	private boolean checkLogin(HttpSession session, HttpServletResponse response) throws IOException {
 		if (session.getAttribute("sessionId") == null) {
 			response.setContentType("text/html;charset=UTF-8");
-			response.getWriter()
-					.write("<script>" + "alert('로그인 후 이용해주세요.');" + "location.href='/user/login.do';" + "</script>");
-			return null;
+			response.getWriter().write(
+				"<script>" +
+				"alert('로그인 후 이용해주세요.');" +
+				"location.href='/user/login.do';" +
+				"</script>"
+			);
+			return false;
 		}
+		return true;
+	}
 
-		return "user/UserMypage";
+	// 마이페이지 홈 화면 이동
+	@GetMapping("/user/mypage.do")
+	public String mypage(HttpSession session, HttpServletResponse response) throws IOException {
+		if (!checkLogin(session, response)) return null;
+		return "user/Mypage/dashboard";
+	}
+
+	// 구독관리 화면 이동
+	@GetMapping("/user/mypage/subscription.do")
+	public String subscriptionPage(HttpSession session, HttpServletResponse response) throws IOException {
+		if (!checkLogin(session, response)) return null;
+		return "user/Mypage/subscription";
+	}
+
+	// 커뮤니티 화면 이동
+	@GetMapping("/user/mypage/community.do")
+	public String communityPage(HttpSession session, HttpServletResponse response) throws IOException {
+		if (!checkLogin(session, response)) return null;
+		return "user/Mypage/community";
+	}
+	// 커뮤니티 게시글 상세보기
+	@RequestMapping("/community/detail.do")
+	public String communityDetail(@RequestParam HashMap<String, Object> map,
+	                              Model model) {
+	    model.addAttribute("map", map);
+	    return "community/detail";
+	}
+	
+
+
+	// 주문내역 화면 이동
+	@GetMapping("/user/mypage/order-list.do")
+	public String orderListPage(HttpSession session, HttpServletResponse response) throws IOException {
+	    if (!checkLogin(session, response)) return null;
+	    return "user/Mypage/orderList";
+	}
+
+	
+
+	// 예약내역 화면 이동
+	@GetMapping("/user/mypage/reserve-list.do")
+	public String reserveListPage(HttpSession session, HttpServletResponse response) throws IOException {
+		if (!checkLogin(session, response)) return null;
+		return "user/Mypage/reserveList";
+	}
+
+	// 반려동물 관리 화면 이동
+	@GetMapping("/user/mypage/pet-edit.do")
+	public String petEditPage(HttpSession session, HttpServletResponse response) throws IOException {
+		if (!checkLogin(session, response)) return null;
+		return "user/Mypage/petEdit";
+	}
+
+	// 반려동물 건강관리 화면 이동
+	@GetMapping("/user/mypage/pet-health.do")
+	public String petHealthPage(HttpSession session, HttpServletResponse response) throws IOException {
+		if (!checkLogin(session, response)) return null;
+		return "user/Mypage/petHealth";
+	}
+
+	// 포인트 화면 이동
+	@GetMapping("/user/mypage/point-info.do")
+	public String pointInfoPage(HttpSession session, HttpServletResponse response) throws IOException {
+		if (!checkLogin(session, response)) return null;
+		return "user/Mypage/pointInfo";
+	}
+
+	// 쿠폰 화면 이동
+	@GetMapping("/user/mypage/coupon-info.do")
+	public String couponInfoPage(HttpSession session, HttpServletResponse response) throws IOException {
+		if (!checkLogin(session, response)) return null;
+		return "user/Mypage/couponInfo";
 	}
 
 	// 마이페이지 기본 정보 조회
@@ -42,7 +117,6 @@ public class UserMypageController {
 		HashMap<String, Object> result = new HashMap<>();
 		Object sessionId = session.getAttribute("sessionId");
 
-		// 로그인 안 된 경우 프론트에 알려줌
 		if (sessionId == null) {
 			result.put("result", "loginRequired");
 			return result;
@@ -90,7 +164,6 @@ public class UserMypageController {
 
 		HashMap<String, Object> result = userMypageService.deleteUser(map);
 
-		// 탈퇴 성공 시 세션 제거
 		if ("success".equals(result.get("result"))) {
 			session.invalidate();
 		}
@@ -216,6 +289,49 @@ public class UserMypageController {
 		map.put("userId", session.getAttribute("sessionId"));
 		return userMypageService.addHealth(map);
 	}
+	
+	// 몸무게 기록 수정
+	@PostMapping("/user/update-weight.dox")
+	@ResponseBody
+	public HashMap<String, Object> updateWeight(@RequestParam HashMap<String, Object> map, HttpSession session) {
+		map.put("userId", session.getAttribute("sessionId"));
+		return userMypageService.updateWeight(map);
+	}
+
+	// 몸무게 기록 삭제
+	@PostMapping("/user/delete-weight.dox")
+	@ResponseBody
+	public HashMap<String, Object> deleteWeight(@RequestParam HashMap<String, Object> map, HttpSession session) {
+		map.put("userId", session.getAttribute("sessionId"));
+		return userMypageService.deleteWeight(map);
+	}
+
+	// 건강 기록 수정
+	@PostMapping("/user/update-health.dox")
+	@ResponseBody
+	public HashMap<String, Object> updateHealth(@RequestParam HashMap<String, Object> map, HttpSession session) {
+		map.put("userId", session.getAttribute("sessionId"));
+		return userMypageService.updateHealth(map);
+	}
+
+	// 건강 기록 삭제
+	@PostMapping("/user/delete-health.dox")
+	@ResponseBody
+	public HashMap<String, Object> deleteHealth(@RequestParam HashMap<String, Object> map, HttpSession session) {
+		map.put("userId", session.getAttribute("sessionId"));
+		return userMypageService.deleteHealth(map);
+	}
+
+	// 접종 기록 수정
+	@PostMapping("/user/update-vaccine.dox")
+	@ResponseBody
+	public HashMap<String, Object> updateVaccine(@RequestParam HashMap<String, Object> map, HttpSession session) {
+		map.put("userId", session.getAttribute("sessionId"));
+		return userMypageService.updateVaccine(map);
+	}
+
+	
+	
 
 	// 접종 기록 목록 조회
 	@PostMapping("/user/vaccine-list.dox")
@@ -292,6 +408,7 @@ public class UserMypageController {
 		return userMypageService.getSubscriptionInfo(map);
 	}
 
+	// 자동결제 변경
 	@PostMapping("/user/update-auto-pay.dox")
 	@ResponseBody
 	public HashMap<String, Object> updateAutoPay(@RequestParam HashMap<String, Object> map, HttpSession session) {
@@ -344,6 +461,7 @@ public class UserMypageController {
 		return result;
 	}
 
+	// 구독 결제내역 조회
 	@PostMapping("/user/subscription-pay-list.dox")
 	@ResponseBody
 	public HashMap<String, Object> subscriptionPayList(HttpSession session) {
@@ -370,7 +488,6 @@ public class UserMypageController {
 		HashMap<String, Object> result = new HashMap<>();
 		Object sessionId = session.getAttribute("sessionId");
 
-		// 로그인 안 된 경우 빈 포인트 정보 반환
 		if (sessionId == null) {
 			result.put("result", "fail");
 			result.put("message", "로그인이 필요합니다.");
@@ -386,23 +503,21 @@ public class UserMypageController {
 
 	@PostMapping("/user/point-use-list.dox")
 	@ResponseBody
-	public HashMap<String, Object> getPointUseList(HttpSession session) {
-
-		HashMap<String, Object> result = new HashMap<>();
+	public HashMap<String, Object> getPointUseList(@RequestParam HashMap<String, Object> map,
+	                                               HttpSession session) {
 		Object sessionId = session.getAttribute("sessionId");
 
 		if (sessionId == null) {
+			HashMap<String, Object> result = new HashMap<>();
 			result.put("result", "fail");
 			result.put("pointUseList", new ArrayList<>());
 			return result;
 		}
 
-		HashMap<String, Object> map = new HashMap<>();
 		map.put("userId", sessionId);
 
 		return userMypageService.getPointUseList(map);
 	}
-
 	// 쿠폰 목록 조회
 	@PostMapping("/user/coupon-list.dox")
 	@ResponseBody
@@ -411,7 +526,6 @@ public class UserMypageController {
 		HashMap<String, Object> result = new HashMap<>();
 		Object sessionId = session.getAttribute("sessionId");
 
-		// 로그인 안 된 경우 빈 쿠폰 목록 반환
 		if (sessionId == null) {
 			result.put("result", "fail");
 			result.put("couponList", new java.util.ArrayList<>());
@@ -426,25 +540,29 @@ public class UserMypageController {
 
 		return result;
 	}
-	
+
 	// 환불 완료 후 주문/배송 상태 변경
 	@PostMapping("/user/update-order-refund.dox")
 	@ResponseBody
 	public HashMap<String, Object> updateOrderRefund(@RequestParam HashMap<String, Object> map, HttpSession session) {
 
-	    Object sessionId = session.getAttribute("sessionId");
+		Object sessionId = session.getAttribute("sessionId");
 
-	    if (sessionId == null) {
-	        HashMap<String, Object> result = new HashMap<>();
-	        result.put("result", "loginRequired");
-	        result.put("message", "로그인 후 이용해주세요.");
-	        return result;
-	    }
+		if (sessionId == null) {
+			HashMap<String, Object> result = new HashMap<>();
+			result.put("result", "loginRequired");
+			result.put("message", "로그인 후 이용해주세요.");
+			return result;
+		}
 
-	    map.put("userId", sessionId);
+		map.put("userId", sessionId);
 
-	    return userMypageService.updateOrderRefund(map);
+		return userMypageService.updateOrderRefund(map);
 	}
-
-	
+	// 품종 자동완성 조회
+	@RequestMapping("user/breed-list.dox")
+	@ResponseBody
+	public HashMap<String, Object> breedList(@RequestParam HashMap<String, Object> map) {
+	    return userMypageService.selectBreedList(map);
+	}
 }

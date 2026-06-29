@@ -144,6 +144,7 @@
 
 .time-btn:hover:not(:disabled) {
     background-color: #fff1f3;
+    color: var(--main);
 }
 
 .time-btn.selected {
@@ -283,11 +284,11 @@ textarea{
 /* 요청사항 글자수 카운트 */
 .char-count {
     position: absolute;
-    right: 15px;      /* 오른쪽에서 15px 띄움 */
-    bottom: 15px;     /* 아래에서 15px 띄움 (안쪽처럼 보임) */
+    right: 15px;
+    bottom: 15px;
     font-size: 13px;
-    color: #adb5bd;   /* 너무 튀지 않는 연한 회색 */
-    pointer-events: none; /* 클릭 이벤트가 텍스트박스로 전달되게 함 */
+    color: #adb5bd;
+    pointer-events: none;
 }
 
 /* 버튼 */
@@ -305,7 +306,7 @@ textarea{
 }
 
 .button:hover{
-    opacity: 0.9;
+    background-color: var(--btnh);
 }
 
 .menu-item.selected {

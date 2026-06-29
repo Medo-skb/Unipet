@@ -32,7 +32,8 @@ public interface ProductMapper {
 	public List<Product> selectQnaList(HashMap<String, Object> map);
 
 	public List<Product> selectCartList(HashMap<String, Object> map);
-	
+
+	public List<Product> selectProductWishList(HashMap<String, Object> map);
 
 	// 한개 리턴 -> selectXXX
 	public Product selectProductView(HashMap<String, Object> map);
@@ -41,32 +42,46 @@ public interface ProductMapper {
 
 	public Product selectReviewSummary(HashMap<String, Object> map);
 
+	public Product selectReviewOne(HashMap<String, Object> map);
+
 	public Product selectQnaOne(HashMap<String, Object> map);
 
 	public Product selectCartOne(HashMap<String, Object> map);
 
-	public int selectCartCount(HashMap<String, Object> map);
-	
 	public Product selectReviewReportCheck(HashMap<String, Object> map);
 
-	// 리뷰 신고 등록
+	public int selectCartCount(HashMap<String, Object> map);
+
+	// 상품 찜하기
+	public int selectProductWishCount(HashMap<String, Object> map);
+
+	public int selectMyProductWish(HashMap<String, Object> map);
+
+	// 삽입 -> insertXXX
+	public int insertQna(HashMap<String, Object> map);
+
+	public int insertCart(HashMap<String, Object> map);
+
 	public int insertReviewReport(HashMap<String, Object> map);
 
-	// 삭제
-	public int deleteQna(HashMap<String, Object> map);
+	public int insertProductWish(HashMap<String, Object> map);
 
-	public int deleteCart(HashMap<String, Object> map);
-
-	// 수정
+	// 수정 -> updateXXX
 	public int updateQna(HashMap<String, Object> map);
 
 	public int updateCartPlusQty(HashMap<String, Object> map);
 
 	public int updateCartQty(HashMap<String, Object> map);
 
-	// 삽입
-	public int insertQna(HashMap<String, Object> map);
+	public int updateReview(HashMap<String, Object> map);
 
-	public int insertCart(HashMap<String, Object> map);
+	// 삭제 -> deleteXXX
+	public int deleteQna(HashMap<String, Object> map);
+
+	public int deleteCart(HashMap<String, Object> map);
+
+	public int deleteReview(HashMap<String, Object> map);
+
+	public int deleteProductWish(HashMap<String, Object> map);
 
 }

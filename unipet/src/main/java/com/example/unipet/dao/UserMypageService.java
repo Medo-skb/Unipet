@@ -92,19 +92,44 @@ public class UserMypageService {
 	public HashMap<String, Object> addPet(HashMap<String, Object> map) {
 		HashMap<String, Object> result = new HashMap<>();
 
+		// 대표동물 체크 시 기존 대표 해제
+		if ("Y".equals(String.valueOf(map.get("isMain")))) {
+			userMypageMapper.resetMainPet(map);
+		}
+
 		int cnt = userMypageMapper.insertPet(map);
+
+		// 등록 후 대표동물 지정
+		if (cnt > 0 && "Y".equals(String.valueOf(map.get("isMain")))) {
+			List<HashMap<String, Object>> list = userMypageMapper.selectPetList(map);
+
+			if (!list.isEmpty()) {
+				HashMap<String, Object> lastPet = list.get(0); // DESC 조회라 첫 번째가 방금 등록한 반려동물
+				HashMap<String, Object> param = new HashMap<>();
+				param.put("userId", map.get("userId"));
+				param.put("petNo", lastPet.get("petNo"));
+
+				userMypageMapper.changeMainPet(param);
+			}
+		}
 
 		result.put("result", cnt > 0 ? "success" : "fail");
 		result.put("message", cnt > 0 ? "반려동물이 등록되었습니다." : "반려동물 등록 실패");
 
 		return result;
 	}
-
+	
 	// 반려동물 수정
 	public HashMap<String, Object> updatePet(HashMap<String, Object> map) {
 		HashMap<String, Object> result = new HashMap<>();
 
 		int cnt = userMypageMapper.updatePet(map);
+
+		// 대표동물 체크 시
+		if (cnt > 0 && "Y".equals(String.valueOf(map.get("isMain")))) {
+			userMypageMapper.resetMainPet(map);
+			userMypageMapper.changeMainPet(map);
+		}
 
 		result.put("result", cnt > 0 ? "success" : "fail");
 		result.put("message", cnt > 0 ? "반려동물 정보가 수정되었습니다." : "반려동물 수정 실패");
@@ -232,6 +257,8 @@ public class UserMypageService {
 
 		return result;
 	}
+	
+	
 
 	public HashMap<String, Object> getVaccineList(HashMap<String, Object> map) {
 		HashMap<String, Object> result = new HashMap<>();
@@ -278,7 +305,68 @@ public class UserMypageService {
 
 		return result;
 	}
+	// 몸무게 기록 수정
+	public HashMap<String, Object> updateWeight(HashMap<String, Object> map) {
+		HashMap<String, Object> result = new HashMap<>();
 
+		int cnt = userMypageMapper.updateWeight(map);
+
+		result.put("result", cnt > 0 ? "success" : "fail");
+		result.put("message", cnt > 0 ? "몸무게 기록이 수정되었습니다." : "몸무게 기록 수정 실패");
+
+		return result;
+	}
+
+	// 몸무게 기록 삭제
+	public HashMap<String, Object> deleteWeight(HashMap<String, Object> map) {
+		HashMap<String, Object> result = new HashMap<>();
+
+		int cnt = userMypageMapper.deleteWeight(map);
+
+		result.put("result", cnt > 0 ? "success" : "fail");
+		result.put("message", cnt > 0 ? "몸무게 기록이 삭제되었습니다." : "몸무게 기록 삭제 실패");
+
+		return result;
+	}
+
+	// 건강 기록 수정
+	public HashMap<String, Object> updateHealth(HashMap<String, Object> map) {
+		HashMap<String, Object> result = new HashMap<>();
+
+		int cnt = userMypageMapper.updateHealth(map);
+
+		result.put("result", cnt > 0 ? "success" : "fail");
+		result.put("message", cnt > 0 ? "건강기록이 수정되었습니다." : "건강기록 수정 실패");
+
+		return result;
+	}
+
+	// 건강 기록 삭제
+	public HashMap<String, Object> deleteHealth(HashMap<String, Object> map) {
+		HashMap<String, Object> result = new HashMap<>();
+
+		int cnt = userMypageMapper.deleteHealth(map);
+
+		result.put("result", cnt > 0 ? "success" : "fail");
+		result.put("message", cnt > 0 ? "건강기록이 삭제되었습니다." : "건강기록 삭제 실패");
+
+		return result;
+	}
+
+	// 접종 기록 수정
+	public HashMap<String, Object> updateVaccine(HashMap<String, Object> map) {
+		HashMap<String, Object> result = new HashMap<>();
+
+		int cnt = userMypageMapper.updateVaccine(map);
+
+		result.put("result", cnt > 0 ? "success" : "fail");
+		result.put("message", cnt > 0 ? "백신 기록이 수정되었습니다." : "백신 기록 수정 실패");
+
+		return result;
+	}
+
+	
+	
 	public HashMap<String, Object> getMyReviewList(HashMap<String, Object> map) {
 		HashMap<String, Object> result = new HashMap<>();
 
@@ -430,5 +518,17 @@ public class UserMypageService {
 
 	public List<HashMap<String, Object>> getCouponList(HashMap<String, Object> map) {
 		return userMypageMapper.selectCouponList(map);
+	}
+	// 품종 자동완성 목록 조회
+	public HashMap<String, Object> selectBreedList(HashMap<String, Object> map) {
+
+	    HashMap<String, Object> resultMap = new HashMap<>();
+
+	    List<HashMap<String, Object>> list = userMypageMapper.selectBreedList(map);
+
+	    resultMap.put("list", list);
+	    resultMap.put("result", "success");
+
+	    return resultMap;
 	}
 }

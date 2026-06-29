@@ -70,6 +70,27 @@ public interface UserMypageMapper {
 
 	List<HashMap<String, Object>> selectMyCommentList(HashMap<String, Object> map);
 
+	
+	// =====================
+	// 몸무게
+	// =====================
+	int updateWeight(HashMap<String, Object> map);
+
+	int deleteWeight(HashMap<String, Object> map);
+
+	// =====================
+	// 건강기록
+	// =====================
+	int updateHealth(HashMap<String, Object> map);
+
+	int deleteHealth(HashMap<String, Object> map);
+
+	// =====================
+	// 백신
+	// =====================
+	int updateVaccine(HashMap<String, Object> map);
+	
+	
 	// 현재 포인트 조회
 	HashMap<String, Object> selectPointInfo(HashMap<String, Object> map);
 
@@ -79,5 +100,6 @@ public interface UserMypageMapper {
 	List<HashMap<String, Object>> selectCouponList(HashMap<String, Object> map);
 	// 주문 취소
 	int updateOrderRefund(HashMap<String, Object> map);
-	
+	// 품종 자동완성 목록 조회
+	List<HashMap<String, Object>> selectBreedList(HashMap<String, Object> map);
 }

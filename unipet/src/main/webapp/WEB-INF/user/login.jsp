@@ -8,7 +8,7 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <title>로그인</title>
+    <title>UNIPET</title>
 </head>
 
 <body>
@@ -113,16 +113,21 @@
                 pwd: pwd
             },
             success: function (res) {
-                console.log("로그인 응답:", res);
+              
 
                 let data = (typeof res === "string") ? JSON.parse(res) : res;
 
                 if (data.result === true || data.result === "success") {
                     alert(data.message);
-                    location.href = "/main.do";
+                    if (data.needPhoneVerify === true || data.needPhoneVerify === "true") {
+                        alert("휴대폰 번호 확인이 필요합니다.");
+                        location.href = "/user/phone-verify.do";
+                    } else {
+                        location.href = "/main.do";
+                    }
                 } else {
                     alert(data.message || "아이디 또는 비밀번호를 확인해주세요.");
-                    console.log(pwd)
+ 
                 }
             },
             error: function () {

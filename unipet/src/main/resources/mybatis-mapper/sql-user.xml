@@ -11,17 +11,18 @@
 	        (SELECT COUNT(*) FROM store_user WHERE S_USER_ID = #{userId})
 	    ) AS totalCount
 	</select>
-
+	
+	<!-- 사업자번호 중복체크 -->
+	<select id="checkBiznum" parameterType="hashmap" resultType="int">
+	    SELECT COUNT(*)
+	    FROM unipet.store
+	    WHERE BIZNUM = #{biznum}
+	</select>
+	
 	<!-- 휴대폰 중복체크 -->
 	<select id="checkPhone" parameterType="hashmap" resultType="int">
 	    SELECT COUNT(*)
-	    FROM (
-	        SELECT PHONE FROM unipet.users
-	        UNION ALL
-	        SELECT PHONE FROM unipet.admin
-	        UNION ALL
-	        SELECT PHONE FROM unipet.store_user
-	    ) AS all_phones
+	    FROM unipet.users
 	    WHERE PHONE = #{phone}
 	</select>
 
@@ -63,7 +64,7 @@
 			BIZ_FILE_NAME,
 			U_STATUS
 		) VALUES (
-		#{userId},
+			#{userId},
 			#{pwd},
 			#{userName},
 			#{bizFileName},
@@ -194,6 +195,14 @@
 		WHERE USER_ID = #{userId}
 	</update>
 
+	<!-- 다른 일반 사용자 휴대폰 점유 해제 -->
+	<update id="clearUserPhoneOwner" parameterType="hashmap">
+		UPDATE unipet.users
+		SET PHONE = NULL
+		WHERE PHONE = #{phone}
+		  AND USER_ID != #{userId}
+	</update>
+
 	<!-- 휴대폰 인증번호 저장 -->
 	<insert id="insertPhoneVerify" parameterType="hashmap">
 		INSERT INTO unipet.phone_verify (
@@ -228,43 +237,6 @@
 		SET VERIFIED_YN = 'Y'
 		WHERE VERIFY_NO = #{verifyNo}
 	</update>
-	<!-- 매장 등록 후 생성된 STORE_NO 조회 -->
-	<select id="selectStoreNoByUserId" parameterType="hashmap" resultType="int">
-		SELECT STORE_NO
-		FROM unipet.store
-		WHERE S_USER_ID = #{userId}
-		ORDER BY STORE_NO DESC
-		LIMIT 1
-	</select>
-	<!-- 매장 정보 저장 -->
-	<insert id="insertStore"> INSERT INTO unipet.store ( S_USER_ID, STORE_NAME,
-		S_CATEGORY, S_ADDR, S_FULL_ADDR, LAT, LNG, S_STATUS, IS_OPEN <!-- 🔥 추가 --> ) VALUES (
-		#{userId}, #{storeName}, #{sCategory}, #{sAddr}, #{sFullAddr}, #{lat},
-		#{lng}, #{sStatus}, 'Y' <!-- 🔥 추가 --> ) </insert>
-
-
-	<!-- 사업자등록증 파일 저장 -->
-	<insert id="insertStoreFile" parameterType="hashmap">
-		INSERT INTO unipet.store_file (
-		STORE_NO,
-		FILE_NAME,
-		ORIGIN_NAME,
-		FILE_PATH,
-		FILE_EXT,
-		FILE_SIZE,
-		IS_MAIN,
-		IS_PROOF
-		) VALUES (
-		#{storeNo},
-		#{fileName},
-		#{originName},
-		#{filePath},
-		#{fileExt},
-		#{fileSize},
-		'N',
-		'Y'
-		)
-	</insert>
 
 	<select id="selectUserCheckCount" parameterType="hashmap" resultType="int">
 	    SELECT COUNT(*)
@@ -279,6 +251,105 @@
 	        phone = #{phone}	
 	    WHERE 
 	        user_id = #{userId}
+	</update>
+
+	<!-- 외부업체 검색 -->
+	<select id="selectExternalStoreList" parameterType="hashmap" resultType="com.example.unipet.model.Store">
+	    SELECT
+	        STORE_NO AS storeNo,
+	        STORE_NAME AS storeName,
+	        S_CATEGORY AS sCategory,
+	        S_ADDR AS sAddr,
+	        S_FULL_ADDR AS sFullAddr,
+	        LAT AS lat,
+	        LNG AS lng,
+	        S_STATUS AS sStatus
+	    FROM unipet.store
+	    WHERE S_STATUS = 'EXT'
+	      AND S_USER_ID IS NULL
+	      AND STORE_NAME LIKE CONCAT('%', #{keyword}, '%')
+	      AND (#{sCategory} IS NULL OR #{sCategory} = '' OR S_CATEGORY = #{sCategory})
+	      AND (#{region} IS NULL OR #{region} = '' OR S_ADDR LIKE CONCAT('%', #{region}, '%'))
+	    ORDER BY STORE_NAME
+	    LIMIT 50
+	</select>
+
+	<!-- 선택한 업체가 신청 가능한 상태인지 확인 -->
+	<select id="selectAvailableStoreCount" parameterType="hashmap" resultType="int">
+	    SELECT COUNT(*)
+	    FROM unipet.store
+	    WHERE STORE_NO = #{storeNo}
+	      AND S_STATUS = 'EXT'
+	      AND S_USER_ID IS NULL
+	</select>
+
+	<!-- 같은 업체에 진행 중인 신청이 있는지 확인 -->
+	<select id="selectPendingSubmitCountByStore" parameterType="hashmap" resultType="int">
+	    SELECT COUNT(*)
+	    FROM unipet.store_submit
+	    WHERE STORE_NO = #{storeNo}
+	      AND SUBMIT_STATUS = 'PND'
+	</select>
+
+	<!-- 같은 사업자 계정에 진행 중인 신청이 있는지 확인 -->
+	<select id="selectPendingSubmitCountByUser" parameterType="hashmap" resultType="int">
+	    SELECT COUNT(*)
+	    FROM unipet.store_submit
+	    WHERE S_USER_ID = #{userId}
+	      AND SUBMIT_STATUS = 'PND'
+	</select>
+
+	<!-- 사업자등록증 증빙 파일 저장 -->
+	<insert id="insertStoreFile"
+	        parameterType="hashmap"
+	        useGeneratedKeys="true"
+	        keyProperty="proofFileNo"
+	        keyColumn="FILE_NO">
+	    INSERT INTO unipet.store_file (
+	        STORE_NO,
+	        FILE_PATH,
+	        FILE_NAME,
+	        ORIGIN_NAME,
+	        FILE_SIZE,
+	        FILE_EXT,
+	        IS_MAIN,
+	        IS_PROOF
+	    ) VALUES (
+	        #{storeNo},
+	        #{filePath},
+	        #{fileName},
+	        #{originName},
+	        #{fileSize},
+	        #{fileExt},
+	        'N',
+	        'Y'
+	    )
+	</insert>
+
+	<!-- 사업자 업체 신청 내역 저장 -->
+	<insert id="insertStoreSubmit" parameterType="hashmap">
+	    INSERT INTO unipet.store_submit (
+	        STORE_NO,
+	        S_USER_ID,
+	        PROOF_FILE_NO,
+	        SUBMIT_STATUS
+	    ) VALUES (
+	        #{storeNo},
+	        #{userId},
+	        #{proofFileNo},
+	        'PND'
+	    )
+	</insert>
+
+	<!-- 신청한 업체 상태를 검토 대기 상태로 변경 -->
+	<update id="updateStoreStatusToPending" parameterType="hashmap">
+	    UPDATE unipet.store
+	    SET S_STATUS = 'PND',
+	        S_USER_ID = #{userId},
+	        BIZNUM = #{biznum}
+	    WHERE STORE_NO = #{storeNo}
+	      AND S_STATUS = 'EXT'
+	      AND S_USER_ID IS NULL
 	</update>
 
 </mapper>

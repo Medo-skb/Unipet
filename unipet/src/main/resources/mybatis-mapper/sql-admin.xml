@@ -13,32 +13,79 @@
 		AND ADMIN_PWD = #{adminPwd}
 	</select>
 	
-	<!-- 쇼핑몰 문의 미답변 목록 -->
+	<!-- 통합 문의 목록: 상품 문의 + 홈페이지 문의 -->
 	<select id="selectQnaAnswerList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
-		SELECT
-		    Q.QNA_NO AS qnaNo,
-		    Q.PRODUCT_NO AS productNo,
-		    P.PRODUCT_NAME AS productName,
-		    Q.QNA_TITLE AS qnaTitle,
-		    Q.Q_CONTENTS AS qContents,
-		    Q.IS_SECRET AS isSecret,
-		    Q.ANS_STATUS AS ansStatus,
-		
-		    Q.USER_ID AS userId,
-		    Q.CDATE AS cdate,
-		
-		    U.USER_NAME AS userName,
-		    U.NICKNAME AS nickname
-		
-		FROM QNA Q
-		LEFT JOIN PRODUCT P
-		    ON Q.PRODUCT_NO = P.PRODUCT_NO
-		
-		LEFT JOIN USERS U
-		    ON Q.USER_ID = U.USER_ID
-		
-		WHERE Q.ANS_STATUS = 'N'
-		ORDER BY Q.QNA_NO DESC
+	    SELECT *
+	    FROM (
+	        SELECT
+	            'PRODUCT' AS qnaCategory,
+	            '상품 문의' AS qnaCategoryName,
+	            Q.QNA_NO AS qnaNo,
+	            Q.PRODUCT_NO AS productNo,
+	            P.PRODUCT_NAME AS productName,
+	            NULL AS unaType,
+	            Q.QNA_TITLE AS qnaTitle,
+	            Q.Q_CONTENTS AS qContents,
+	            Q.A_CONTENTS AS aContents,
+	            Q.IS_SECRET AS isSecret,
+	            Q.ANS_STATUS AS ansStatus,
+	            Q.USER_ID AS userId,
+	            Q.CDATE AS cdate,
+	            U.USER_NAME AS userName,
+	            U.NICKNAME AS nickname
+	        FROM QNA Q
+	        LEFT JOIN PRODUCT P
+	            ON Q.PRODUCT_NO = P.PRODUCT_NO
+	        LEFT JOIN USERS U
+	            ON Q.USER_ID = U.USER_ID
+	
+	        UNION ALL
+	
+	        SELECT
+	            'HOME' AS qnaCategory,
+	            '홈페이지 문의' AS qnaCategoryName,
+	            UQ.UNA_NO AS qnaNo,
+	            NULL AS productNo,
+	            UQ.UNA_TYPE AS productName,
+	            UQ.UNA_TYPE AS unaType,
+	            UQ.UNA_TITLE AS qnaTitle,
+	            UQ.UNA_CONTENT AS qContents,
+	            UQ.UNA_ANSWER AS aContents,
+	            'Y' AS isSecret,
+	            UQ.ANSWER_YN AS ansStatus,
+	            UQ.USER_ID AS userId,
+	            UQ.CDATE AS cdate,
+	            U.USER_NAME AS userName,
+	            U.NICKNAME AS nickname
+	        FROM QNA_UNIPET UQ
+	        LEFT JOIN USERS U
+	            ON UQ.USER_ID = U.USER_ID
+	    ) QNA_ALL
+	    WHERE 1 = 1
+	
+	    <if test="ansStatus != null and ansStatus != ''">
+	        AND ansStatus = #{ansStatus}
+	    </if>
+	
+	    <if test="qnaCategory != null and qnaCategory != ''">
+	        AND qnaCategory = #{qnaCategory}
+	    </if>
+	
+	    <if test="unaType != null and unaType != ''">
+	        AND qnaCategory = 'HOME'
+	        AND unaType = #{unaType}
+	    </if>
+	
+	    <if test="keyword != null and keyword != ''">
+	        AND (
+	            productName LIKE CONCAT('%', #{keyword}, '%')
+	            OR qnaTitle LIKE CONCAT('%', #{keyword}, '%')
+	            OR qContents LIKE CONCAT('%', #{keyword}, '%')
+	            OR userId LIKE CONCAT('%', #{keyword}, '%')
+	        )
+	    </if>
+	
+	    ORDER BY cdate DESC, qnaNo DESC
 	</select>
 	
 	<!-- 쇼핑몰 문의 답변 등록 -->
@@ -49,6 +96,15 @@
 	    WHERE QNA_NO = #{qnaNo}
 	</update>
 	
+	<!-- 홈페이지 문의 답변 등록 -->
+	<update id="updateUnipetQnaAnswer" parameterType="hashmap">
+	    UPDATE QNA_UNIPET
+	    SET UNA_ANSWER = #{aContents},
+	        ANSWER_YN = 'Y',
+	        UDATE = NOW()
+	    WHERE UNA_NO = #{qnaNo}
+	</update>
+	
 	<!-- 쇼핑몰 문의 삭제 -->
 	<delete id="deleteQna" parameterType="hashmap">
 	    DELETE FROM QNA
@@ -56,134 +112,133 @@
 	</delete>
 
 	<!-- 사업자 승인 리스트 -->
-	<select id="selectAdminBiz" parameterType="hashmap"
-		resultType="com.example.unipet.model.Admin">
-		SELECT
-		S.STORE_NO,
-		SU.S_USER_ID,
-		SU.U_STATUS,
-		S.STORE_NAME,
-		S.S_CATEGORY,
-		S.S_ADDR,
-		S.S_FULL_ADDR,
-		S.S_STATUS,
-		SF.FILE_PATH,
-		SF.FILE_NAME,
-		SF.ORIGIN_NAME
-		FROM STORE S
-		LEFT JOIN STORE_USER SU ON S.S_USER_ID = SU.S_USER_ID
-		LEFT JOIN STORE_FILE SF
-		ON S.STORE_NO = SF.STORE_NO
-		AND SF.IS_PROOF = 'Y'
-		WHERE SU.U_STATUS = 'PND'
-   			AND S.S_STATUS = 'PND';
+	<select id="selectAdminBiz" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        S.STORE_NO AS storeNo,
+	        SU.S_USER_ID AS sUserId,
+	        S.BIZNUM AS biznum,
+	        SU.CEO_NAME AS ceoName,
+	        SU.BIZ_FILE_NAME AS bizFileName,
+	        S.STORE_NAME AS storeName,
+	        S.S_CATEGORY AS sCategory,
+	        S.S_ADDR AS sAddr,
+	        S.S_FULL_ADDR AS sFullAddr,
+	        S.LAT AS lat,
+	        S.LNG AS lng,
+	        SU.U_STATUS AS uStatus,
+	        S.S_STATUS AS sStatus,
+	        SS.SUBMIT_STATUS AS submitStatus
+	    FROM STORE_SUBMIT SS
+	    INNER JOIN STORE S
+	        ON SS.STORE_NO = S.STORE_NO
+	    INNER JOIN STORE_USER SU
+	        ON SS.S_USER_ID = SU.S_USER_ID
+	    WHERE SS.SUBMIT_STATUS = 'PND'
+	      AND S.S_STATUS = 'PND'
+	      AND SU.U_STATUS = 'PND'
+	    ORDER BY S.STORE_NO DESC
 	</select>
 	
-	<!-- 사업자 승인 -->
-	<update id="updateBizStatusApr" parameterType="hashmap">
-		UPDATE STORE S
-		JOIN STORE_USER SU ON S.S_USER_ID = SU.S_USER_ID
-		SET
-		S.S_STATUS = 'GEN',
-		SU.U_STATUS = 'APR'
-		WHERE S.STORE_NO = #{storeNo}
-		AND SU.S_USER_ID = #{sUserId};
+	<!-- 사업자 승인: STORE_USER 상태 변경 -->
+	<update id="updateStoreUserStatusApr" parameterType="hashmap">
+		UPDATE STORE_USER
+		SET U_STATUS = 'APR'
+		WHERE S_USER_ID = #{sUserId}
+	</update>
+
+	<!-- 사업자 승인: STORE 상태/사업자 아이디/사업자 번호 변경 -->
+	<update id="updateStoreStatusApr" parameterType="hashmap">
+		UPDATE STORE
+		SET S_STATUS = 'GEN',
+			S_USER_ID = #{sUserId},
+			BIZNUM = #{bizNum}
+		WHERE STORE_NO = #{storeNo}
+	</update>
+
+	<!-- 사업자 승인: STORE_SUBMIT 상태 변경 -->
+	<update id="updateStoreSubmitStatusApr" parameterType="hashmap">
+		UPDATE STORE_SUBMIT
+		SET SUBMIT_STATUS = 'APR'
+		WHERE STORE_NO = #{storeNo}
+		AND S_USER_ID = #{sUserId}
 	</update>
 
 	<!-- 사업자 승인하면서 부가적인 데이터 생성 -->
 	<insert id="insertDefaultStoreDetail" parameterType="hashmap">
 		INSERT INTO STORE_DETAIL (
-		STORE_NO,
-		SUB_TITLE,
-		S_CONTENTS
+			STORE_NO
 		)
 		VALUES (
-		#{storeNo},
-		'소개 소제목을 입력해주세요.',
-		'소개글을 작성해주세요.'
+			#{storeNo}
 		)
 	</insert>
 
 	<insert id="insertDefaultStorePolicy" parameterType="hashmap">
 		INSERT INTO STORE_POLICY (
-		STORE_NO,
-		REFUND_POLICY
+			STORE_NO
 		)
 		VALUES (
-		#{storeNo},
-		NULL
+			#{storeNo}
 		)
 	</insert>
 
-	<!-- 사업자 비승인 -->
-	<update id="updateBizStatusRej" parameterType="hashmap">
-		UPDATE STORE S
-		JOIN STORE_USER SU ON S.S_USER_ID = SU.S_USER_ID
-		SET
-		S.S_STATUS = 'REJ',
-		S.REJ_REASON = #{rejReason},
-		SU.U_STATUS = 'REJ'
-		WHERE S.STORE_NO = #{storeNo}
-		AND SU.S_USER_ID = #{sUserId}
+	<!-- 사업자 반려: STORE_USER 상태 변경 -->
+	<update id="updateStoreUserStatusRej" parameterType="hashmap">
+	    UPDATE STORE_USER
+	    SET U_STATUS = 'REJ'
+	    WHERE S_USER_ID = #{sUserId}
+	</update>
+	
+	<!-- 사업자 반려: STORE 상태/사업자 아이디/반려 사유 변경 -->
+	<update id="updateStoreStatusRej" parameterType="hashmap">
+	    UPDATE STORE
+	    SET S_STATUS = 'REJ',
+	        S_USER_ID = #{sUserId},
+	        BIZNUM = NULL,
+	        REJ_REASON = #{rejReason}
+	    WHERE STORE_NO = #{storeNo}
+	</update>
+	
+	<!-- 사업자 반려: STORE_SUBMIT 상태 변경 -->
+	<update id="updateStoreSubmitStatusRej" parameterType="hashmap">
+	    UPDATE STORE_SUBMIT
+	    SET SUBMIT_STATUS = 'REJ'
+	    WHERE STORE_NO = #{storeNo}
+	    AND S_USER_ID = #{sUserId}
 	</update>
 
-	<!-- 상품 리뷰 신고 -->
-	<select id="selectProductReviewReportList" parameterType="hashmap"
-		resultType="com.example.unipet.model.Admin">
-		SELECT
-		RR.REPORT_NO AS reportNo,
-		RR.REVIEW_NO AS reviewNo,
-		R.USER_ID AS userId,
-		RR.REPORTER_ID AS reporterId,
-		RR.REP_STATUS AS repStatus,
-		R.R_CONTENTS AS rContents,
-		(
-		SELECT RF.FILE_PATH
-		FROM REVIEW_FILE RF
-		WHERE RF.REVIEW_NO = R.REVIEW_NO
-		LIMIT 1
-		) AS filePath,
-		P.PRODUCT_NAME AS productName,
-		R.ORD_NO AS ordNo
-		FROM REVIEW_REPORT RR
-		INNER JOIN REVIEW R
-		ON RR.REVIEW_NO = R.REVIEW_NO
-		LEFT JOIN PRODUCT P
-		ON R.PRODUCT_NO = P.PRODUCT_NO
-		WHERE R.STORE_NO IS NULL
-		AND R.RSV_NO IS NULL
-		AND RR.REP_STATUS = 'WAI'
-		ORDER BY RR.REPORT_NO DESC;
-	</select>
-
-	<!-- 예약 리뷰 신고 -->
+	<!-- 예약 리뷰 신고 목록 -->
 	<select id="selectReservationReviewReportList" parameterType="hashmap"
 		resultType="com.example.unipet.model.Admin">
 		SELECT
-		RR.REPORT_REASON AS reportReason,
-		RR.REPORT_NO AS reportNo,
-		RR.REVIEW_NO AS reviewNo,
-		R.USER_ID AS userId,
-		RR.REPORTER_ID AS reporterId,
-		RR.REP_STATUS AS repStatus,
-		R.R_CONTENTS AS rContents,
-		(
-		SELECT RF.FILE_PATH
-		FROM REVIEW_FILE RF
-		WHERE RF.REVIEW_NO = R.REVIEW_NO
-		LIMIT 1
-		) AS filePath,
-		S.STORE_NAME AS storeName,
-		R.RSV_NO AS rsvNo
+			RR.REPORT_NO AS reportNo,
+			RR.REVIEW_NO AS reviewNo,
+			RR.REPORTER_ID AS reporterId,
+			RR.REPORT_REASON AS reportReason,
+			RR.REP_STATUS AS repStatus,
+			R.USER_ID AS userId,
+			R.R_CONTENTS AS rContents,
+			R.RSV_NO AS rsvNo,
+			S.STORE_NAME AS storeName,
+			IFNULL(SM.MENU_NAME, '삭제된 메뉴') AS menuName,
+			(
+				SELECT GROUP_CONCAT(CONCAT(RF.FILE_PATH, RF.FILE_NAME) ORDER BY RF.FILE_NO ASC SEPARATOR '|')
+				FROM REVIEW_FILE RF
+				WHERE RF.REVIEW_NO = R.REVIEW_NO
+			) AS filePath
 		FROM REVIEW_REPORT RR
 		INNER JOIN REVIEW R
-		ON RR.REVIEW_NO = R.REVIEW_NO
+			ON RR.REVIEW_NO = R.REVIEW_NO
 		LEFT JOIN STORE S
-		ON R.STORE_NO = S.STORE_NO
+			ON R.STORE_NO = S.STORE_NO
+		LEFT JOIN RESERVATION RSV
+			ON R.RSV_NO = RSV.RSV_NO
+		LEFT JOIN STORE_MENU SM
+			ON RSV.MENU_NO = SM.MENU_NO
 		WHERE R.PRODUCT_NO IS NULL
-		AND R.ORD_NO IS NULL
-		AND RR.REP_STATUS = 'WAI'
-		ORDER BY RR.REPORT_NO DESC;
+			AND R.ORD_NO IS NULL
+			AND RR.REP_STATUS = 'WAI'
+			ORDER BY RR.REPORT_NO DESC
 	</select>
 
 	<!-- 리뷰 신고 반려 -->
@@ -219,50 +274,47 @@
 		WHERE REVIEW_NO = #{reviewNo}
 	</delete>
 
-	<!-- 커뮤니티 글 신고 리스트 -->
+	<!-- 커뮤니티 글 신고 목록 -->
 	<select id="selectCommunityPostReportList" parameterType="hashmap"
 		resultType="com.example.unipet.model.Admin">
 		SELECT
-		BR.REPORT_NO AS reportNo,
-		BR.BOARD_NO AS targetNo,
-		BR.REPORTER_ID AS reporterId,
-		B.USER_ID AS reportedUserId,
-		BR.REPORT_REASON AS reportReason,
-		BR.REP_STATUS AS repStatus,
-		(
-		SELECT BF.FILE_PATH
-		FROM BOARD_FILE BF
-		WHERE BF.BOARD_NO = BR.BOARD_NO
-		ORDER BY BF.FILE_NO ASC
-		LIMIT 1
-		) AS filePath
+			BR.REPORT_NO AS reportNo,
+			BR.BOARD_NO AS targetNo,
+			BR.BOARD_NO AS boardNo,
+			BR.REPORTER_ID AS reporterId,
+			B.USER_ID AS reportedUserId,
+			BR.REPORT_REASON AS reportReason,
+			BR.REP_STATUS AS repStatus,
+			B.TITLE AS title
 		FROM BOARD_REPORT BR
 		INNER JOIN BOARD B
-		ON BR.BOARD_NO = B.BOARD_NO
-		WHERE BR.REP_STATUS = 'WAI'
-		ORDER BY BR.REPORT_NO DESC
+			ON BR.BOARD_NO = B.BOARD_NO
+		WHERE BR.BOARD_NO IS NOT NULL
+			AND BR.REP_STATUS = 'WAI'
+			ORDER BY BR.REPORT_NO DESC
 	</select>
 
-	<!-- 커뮤니티 댓글 신고 리스트 -->
+	<!-- 커뮤니티 댓글 신고 목록 -->
 	<select id="selectCommunityCommentReportList" parameterType="hashmap"
 		resultType="com.example.unipet.model.Admin">
 		SELECT
-		BR.REPORT_NO AS reportNo,
-		BR.COMMENT_NO AS targetNo,
-		BR.REPORTER_ID AS reporterId,
-		BR.REPORT_REASON AS reportReason,
-		BR.REP_STATUS AS repStatus,
-		C.USER_ID AS reportedUserId,
-		C.C_CONTENT AS contents,
-		B.BOARD_NO AS boardNo,
-		B.TITLE AS title
+		    BR.REPORT_NO AS reportNo,
+		    BR.COMMENT_NO AS targetNo,
+		    BR.REPORTER_ID AS reporterId,
+		    BR.REPORT_REASON AS reportReason,
+		    BR.REP_STATUS AS repStatus,
+		    C.USER_ID AS reportedUserId,
+		    C.C_CONTENT AS contents,
+		    C.CREATE_TIME AS createTime,
+		    B.BOARD_NO AS boardNo,
+		    B.TITLE AS title
 		FROM BOARD_REPORT BR
 		LEFT JOIN COMMENT C
-		ON C.COMMENT_NO = BR.COMMENT_NO
+			ON C.COMMENT_NO = BR.COMMENT_NO
 		LEFT JOIN BOARD B
-		ON C.BOARD_NO = B.BOARD_NO
-		WHERE BR.REP_STATUS = 'WAI'
-		AND BR.COMMENT_NO IS NOT NULL
+			ON C.BOARD_NO = B.BOARD_NO
+		WHERE BR.COMMENT_NO IS NOT NULL
+		AND BR.REP_STATUS = 'WAI'
 		ORDER BY BR.REPORT_NO DESC
 	</select>
 
@@ -305,4 +357,1219 @@
 		WHERE USER_ID = #{reportedUserId}
 	</update>
 
+	<!-- 사업자 재신청 정보 조회 -->
+	<select id="selectBizReapplyInfo" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        S.STORE_NO AS storeNo,
+	        S.STORE_NAME AS storeName,
+	        S.S_CATEGORY AS sCategory,
+	        S.S_ADDR AS sAddr,
+	        S.S_FULL_ADDR AS sFullAddr,
+	        S.S_STATUS AS sStatus,
+	        S.REJ_REASON AS reportReason,
+	        SU.S_USER_ID AS sUserId,
+	        SU.CEO_NAME AS ceoName,
+	        SU.BIZ_FILE_NAME AS bizFileName,
+	        SU.U_STATUS AS uStatus,
+	        SS.SUBMIT_STATUS AS submitStatus
+	    FROM STORE_SUBMIT SS
+	    INNER JOIN STORE S
+	        ON SS.STORE_NO = S.STORE_NO
+	    INNER JOIN STORE_USER SU
+	        ON SS.S_USER_ID = SU.S_USER_ID
+	    WHERE SS.S_USER_ID = #{oldSUserId}
+	      AND SS.SUBMIT_STATUS = 'REJ'
+	      AND S.S_STATUS = 'REJ'
+	      AND SU.U_STATUS = 'REJ'
+	    ORDER BY SS.STORE_NO DESC
+	    LIMIT 1
+	</select>
+
+	<!-- 사업자 재신청 업체 검색 -->
+	<select id="selectBizExternalStoreList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        STORE_NO AS storeNo,
+	        STORE_NAME AS storeName,
+	        S_CATEGORY AS sCategory,
+	        S_ADDR AS sAddr,
+	        S_FULL_ADDR AS sFullAddr,
+	        LAT AS lat,
+	        LNG AS lng,
+	        S_STATUS AS sStatus
+	    FROM STORE
+	    WHERE (
+	            (S_STATUS = 'EXT' AND S_USER_ID IS NULL)
+	            OR
+	            (S_STATUS = 'REJ' AND S_USER_ID = #{oldSUserId})
+	          )
+	      AND STORE_NAME LIKE CONCAT('%', #{keyword}, '%')
+	      AND (#{sCategory} IS NULL OR #{sCategory} = '' OR S_CATEGORY = #{sCategory})
+	      AND (#{region} IS NULL OR #{region} = '' OR S_ADDR LIKE CONCAT('%', #{region}, '%'))
+	    ORDER BY STORE_NAME
+	    LIMIT 50
+	</select>
+
+	<!-- 재신청 업체 선택 가능 여부 -->
+	<select id="selectBizReapplyStoreCount" parameterType="hashmap" resultType="int">
+	    SELECT COUNT(*)
+	    FROM STORE
+	    WHERE STORE_NO = #{storeNo}
+	      AND (
+	            (STORE_NO = #{oldStoreNo} AND S_STATUS = 'REJ' AND S_USER_ID = #{oldSUserId})
+	            OR
+	            (S_STATUS = 'EXT' AND S_USER_ID IS NULL)
+	          )
+	</select>
+
+	<!-- 재신청 사업자등록증 파일 저장 -->
+	<insert id="insertBizReapplyStoreFile"
+	        parameterType="hashmap"
+	        useGeneratedKeys="true"
+	        keyProperty="proofFileNo"
+	        keyColumn="FILE_NO">
+	    INSERT INTO STORE_FILE (
+	        STORE_NO,
+	        FILE_PATH,
+	        FILE_NAME,
+	        ORIGIN_NAME,
+	        FILE_SIZE,
+	        FILE_EXT,
+	        IS_MAIN,
+	        IS_PROOF
+	    ) VALUES (
+	        #{storeNo},
+	        #{filePath},
+	        #{fileName},
+	        #{originName},
+	        #{fileSize},
+	        #{fileExt},
+	        'N',
+	        'Y'
+	    )
+	</insert>
+
+	<!-- 재신청 STORE_USER 수정 -->
+	<update id="updateStoreUserReapply" parameterType="hashmap">
+	    UPDATE STORE_USER
+	    SET CEO_NAME = #{ceoName},
+	        U_STATUS = 'PND'
+	        <if test="bizFileName != null and bizFileName != ''">
+	            , BIZ_FILE_NAME = #{bizFileName}
+	        </if>
+	    WHERE S_USER_ID = #{oldSUserId}
+	      AND U_STATUS = 'REJ'
+	</update>
+
+	<!-- 기존 반려 업체가 바뀐 경우 기존 업체 초기화 -->
+	<update id="updateOldStoreReapplyReset" parameterType="hashmap">
+	    UPDATE STORE
+	    SET S_STATUS = 'EXT',
+	        S_USER_ID = NULL,
+	        BIZNUM = NULL,
+	        REJ_REASON = NULL
+	    WHERE STORE_NO = #{oldStoreNo}
+	      AND STORE_NO != #{storeNo}
+	      AND S_STATUS = 'REJ'
+	</update>
+
+	<!-- 재신청 STORE 수정 -->
+	<update id="updateStoreReapplyPending" parameterType="hashmap">
+	    UPDATE STORE
+	    SET S_STATUS = 'PND',
+	        S_USER_ID = #{sUserId},
+	        BIZNUM = #{biznum},
+	        REJ_REASON = NULL
+	    WHERE STORE_NO = #{storeNo}
+	</update>
+
+	<!-- 재신청 STORE_SUBMIT 수정 -->
+	<update id="updateStoreSubmitReapplyPending" parameterType="hashmap">
+	    UPDATE STORE_SUBMIT
+	    SET STORE_NO = #{storeNo},
+	        SUBMIT_STATUS = 'PND'
+	        <if test="proofFileNo != null">
+	            , PROOF_FILE_NO = #{proofFileNo}
+	        </if>
+	    WHERE STORE_NO = #{oldStoreNo}
+	      AND S_USER_ID = #{oldSUserId}
+	      AND SUBMIT_STATUS = 'REJ'
+	</update>
+
+	<!-- 사업자 회원조회 및 관리 리스트 -->
+	<select id="selectAdminBusinessUserList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    <choose>
+	        <when test="sStatus == 'PND'">
+	            SELECT
+	                SU.S_USER_ID AS sUserId,
+	                SU.CEO_NAME AS ceoName,
+	                SU.U_STATUS AS uStatus,
+	                S.STORE_NO AS storeNo,
+	                S.STORE_NAME AS storeName,
+	                S.S_STATUS AS sStatus,
+	                S.IS_OPEN AS isOpen,
+	
+	                IFNULL(ROUND(AVG(R.RATING), 1), 0) AS avgRating,
+	
+	                (
+	                    SELECT COUNT(*)
+	                    FROM REVIEW_REPORT RR
+	                    INNER JOIN REVIEW RV
+	                        ON RR.REVIEW_NO = RV.REVIEW_NO
+	                    WHERE RV.STORE_NO = S.STORE_NO
+	                      AND RR.REP_STATUS = 'ACC'
+	                ) AS accReportCount,
+	
+	                (
+	                    SELECT COUNT(*)
+	                    FROM REVIEW_REPORT RR
+	                    INNER JOIN REVIEW RV
+	                        ON RR.REVIEW_NO = RV.REVIEW_NO
+	                    WHERE RV.STORE_NO = S.STORE_NO
+	                      AND RR.REP_STATUS = 'REJ'
+	                ) AS rejReportCount,
+	
+	                (
+	                    SELECT COUNT(*)
+	                    FROM RESERVATION RSV
+	                    WHERE RSV.STORE_NO = S.STORE_NO
+	                ) AS totalReservationCount,
+	
+	                (
+	                    SELECT COUNT(*)
+	                    FROM RESERVATION RSV
+	                    WHERE RSV.STORE_NO = S.STORE_NO
+	                      AND RSV.RSV_STATUS != 'CAN'
+	                ) AS activeReservationCount,
+	
+	                (
+	                    SELECT COUNT(*)
+	                    FROM RESERVATION RSV
+	                    WHERE RSV.STORE_NO = S.STORE_NO
+	                      AND RSV.RSV_STATUS = 'CAN'
+	                ) AS cancelReservationCount
+	
+	            FROM STORE_SUBMIT SS
+	            INNER JOIN STORE S
+	                ON SS.STORE_NO = S.STORE_NO
+	            INNER JOIN STORE_USER SU
+	                ON SS.S_USER_ID = SU.S_USER_ID
+	            LEFT JOIN REVIEW R
+	                ON S.STORE_NO = R.STORE_NO
+	            WHERE SS.SUBMIT_STATUS = 'PND'
+	              AND SU.U_STATUS = 'PND'
+	              AND S.S_STATUS = 'PND'
+	            <if test="keyword != null and keyword != ''">
+	                AND (
+	                    SU.S_USER_ID LIKE CONCAT('%', #{keyword}, '%')
+	                    OR SU.CEO_NAME LIKE CONCAT('%', #{keyword}, '%')
+	                    OR S.STORE_NAME LIKE CONCAT('%', #{keyword}, '%')
+	                )
+	            </if>
+	            <if test="isOpen != null and isOpen != ''">
+	                AND S.IS_OPEN = #{isOpen}
+	            </if>
+	            GROUP BY
+	                SU.S_USER_ID,
+	                SU.CEO_NAME,
+	                SU.U_STATUS,
+	                S.STORE_NO,
+	                S.STORE_NAME,
+	                S.S_STATUS,
+	                S.IS_OPEN
+	
+	            <choose>
+	                <when test="sortType == 'ratingDesc'">
+	                    ORDER BY avgRating DESC, S.STORE_NO DESC
+	                </when>
+	                <when test="sortType == 'ratingAsc'">
+	                    ORDER BY avgRating ASC, S.STORE_NO DESC
+	                </when>
+	                <when test="sortType == 'reservationDesc'">
+	                    ORDER BY activeReservationCount DESC, S.STORE_NO DESC
+	                </when>
+	                <when test="sortType == 'reservationAsc'">
+	                    ORDER BY activeReservationCount ASC, S.STORE_NO DESC
+	                </when>
+	                <otherwise>
+	                    ORDER BY S.STORE_NO DESC
+	                </otherwise>
+	            </choose>
+	
+	            LIMIT #{startIndex}, #{pageSize}
+	        </when>
+	
+	        <otherwise>
+	            SELECT
+	                SU.S_USER_ID AS sUserId,
+	                SU.CEO_NAME AS ceoName,
+	                SU.U_STATUS AS uStatus,
+	                S.STORE_NO AS storeNo,
+	                S.STORE_NAME AS storeName,
+	                S.S_STATUS AS sStatus,
+	                S.IS_OPEN AS isOpen,
+	
+	                IFNULL(ROUND(AVG(R.RATING), 1), 0) AS avgRating,
+	
+	                (
+	                    SELECT COUNT(*)
+	                    FROM REVIEW_REPORT RR
+	                    INNER JOIN REVIEW RV
+	                        ON RR.REVIEW_NO = RV.REVIEW_NO
+	                    WHERE RV.STORE_NO = S.STORE_NO
+	                      AND RR.REP_STATUS = 'ACC'
+	                ) AS accReportCount,
+	
+	                (
+	                    SELECT COUNT(*)
+	                    FROM REVIEW_REPORT RR
+	                    INNER JOIN REVIEW RV
+	                        ON RR.REVIEW_NO = RV.REVIEW_NO
+	                    WHERE RV.STORE_NO = S.STORE_NO
+	                      AND RR.REP_STATUS = 'REJ'
+	                ) AS rejReportCount,
+	
+	                (
+	                    SELECT COUNT(*)
+	                    FROM RESERVATION RSV
+	                    WHERE RSV.STORE_NO = S.STORE_NO
+	                ) AS totalReservationCount,
+	
+	                (
+	                    SELECT COUNT(*)
+	                    FROM RESERVATION RSV
+	                    WHERE RSV.STORE_NO = S.STORE_NO
+	                      AND RSV.RSV_STATUS != 'CAN'
+	                ) AS activeReservationCount,
+	
+	                (
+	                    SELECT COUNT(*)
+	                    FROM RESERVATION RSV
+	                    WHERE RSV.STORE_NO = S.STORE_NO
+	                      AND RSV.RSV_STATUS = 'CAN'
+	                ) AS cancelReservationCount
+	
+	            FROM STORE_USER SU
+	            INNER JOIN STORE S
+	                ON SU.S_USER_ID = S.S_USER_ID
+	            LEFT JOIN REVIEW R
+	                ON S.STORE_NO = R.STORE_NO
+	            WHERE S.S_STATUS != 'EXT'
+	            <if test="keyword != null and keyword != ''">
+	                AND (
+	                    SU.S_USER_ID LIKE CONCAT('%', #{keyword}, '%')
+	                    OR SU.CEO_NAME LIKE CONCAT('%', #{keyword}, '%')
+	                    OR S.STORE_NAME LIKE CONCAT('%', #{keyword}, '%')
+	                )
+	            </if>
+	            <if test="sStatus != null and sStatus != ''">
+	                AND S.S_STATUS = #{sStatus}
+	            </if>
+	            <if test="isOpen != null and isOpen != ''">
+	                AND S.IS_OPEN = #{isOpen}
+	            </if>
+	            GROUP BY
+	                SU.S_USER_ID,
+	                SU.CEO_NAME,
+	                SU.U_STATUS,
+	                S.STORE_NO,
+	                S.STORE_NAME,
+	                S.S_STATUS,
+	                S.IS_OPEN
+	
+	            <choose>
+	                <when test="sortType == 'ratingDesc'">
+	                    ORDER BY avgRating DESC, S.STORE_NO DESC
+	                </when>
+	                <when test="sortType == 'ratingAsc'">
+	                    ORDER BY avgRating ASC, S.STORE_NO DESC
+	                </when>
+	                <when test="sortType == 'reservationDesc'">
+	                    ORDER BY activeReservationCount DESC, S.STORE_NO DESC
+	                </when>
+	                <when test="sortType == 'reservationAsc'">
+	                    ORDER BY activeReservationCount ASC, S.STORE_NO DESC
+	                </when>
+	                <otherwise>
+	                    ORDER BY S.STORE_NO DESC
+	                </otherwise>
+	            </choose>
+	
+	            LIMIT #{startIndex}, #{pageSize}
+	        </otherwise>
+	    </choose>
+	</select>
+	
+	<select id="selectAdminBusinessUserCount" parameterType="hashmap" resultType="int">
+	    <choose>
+	        <when test="sStatus == 'PND'">
+	            SELECT COUNT(*)
+	            FROM STORE_SUBMIT SS
+	            INNER JOIN STORE S
+	                ON SS.STORE_NO = S.STORE_NO
+	            INNER JOIN STORE_USER SU
+	                ON SS.S_USER_ID = SU.S_USER_ID
+	            WHERE SS.SUBMIT_STATUS = 'PND'
+	              AND SU.U_STATUS = 'PND'
+	              AND S.S_STATUS = 'PND'
+	            <if test="keyword != null and keyword != ''">
+	                AND (
+	                    SU.S_USER_ID LIKE CONCAT('%', #{keyword}, '%')
+	                    OR SU.CEO_NAME LIKE CONCAT('%', #{keyword}, '%')
+	                    OR S.STORE_NAME LIKE CONCAT('%', #{keyword}, '%')
+	                )
+	            </if>
+	            <if test="isOpen != null and isOpen != ''">
+	                AND S.IS_OPEN = #{isOpen}
+	            </if>
+	        </when>
+	
+	        <otherwise>
+	            SELECT COUNT(*)
+	            FROM STORE_USER SU
+	            INNER JOIN STORE S
+	                ON SU.S_USER_ID = S.S_USER_ID
+	            WHERE S.S_STATUS != 'EXT'
+	            <if test="keyword != null and keyword != ''">
+	                AND (
+	                    SU.S_USER_ID LIKE CONCAT('%', #{keyword}, '%')
+	                    OR SU.CEO_NAME LIKE CONCAT('%', #{keyword}, '%')
+	                    OR S.STORE_NAME LIKE CONCAT('%', #{keyword}, '%')
+	                )
+	            </if>
+	            <if test="sStatus != null and sStatus != ''">
+	                AND S.S_STATUS = #{sStatus}
+	            </if>
+	            <if test="isOpen != null and isOpen != ''">
+	                AND S.IS_OPEN = #{isOpen}
+	            </if>
+	        </otherwise>
+	    </choose>
+	</select>
+	
+	<!-- 사업자 기본 정보 상세 -->
+	<select id="selectAdminBusinessUserBasic" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        S_USER_ID AS sUserId,
+	        CEO_NAME AS ceoName,
+	        BIZ_FILE_NAME AS bizFileName,
+	        U_STATUS AS uStatus
+	    FROM STORE_USER
+	    WHERE S_USER_ID = #{sUserId}
+	</select>
+	
+	<!-- 사업자 업체 상세 -->
+	<select id="selectAdminBusinessUserStoreDetail" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        S.STORE_NO AS storeNo,
+	        S.STORE_NAME AS storeName,
+	        S.S_CATEGORY AS sCategory,
+	        S.BIZNUM AS biznum,
+	        S.IS_OPEN AS isOpen,
+	        S.ACC_NAME AS accName,
+	        S.ACC_NO AS accNo,
+	        S.ACC_HOLDER AS accHolder,
+	        S.S_ADDR AS sAddr,
+	        S.S_FULL_ADDR AS sFullAddr,
+	        S.LAT AS lat,
+	        S.LNG AS lng,
+	        S.S_STATUS AS sStatus,
+	
+	        SP.SLOT AS slot,
+	        SP.CAPACITY AS capacity,
+	        SP.OPEN_TIME AS openTime,
+	        SP.CLOSE_TIME AS closeTime,
+	        SP.BREAK_START AS breakStart,
+	        SP.BREAK_END AS breakEnd,
+	
+	        SD.SUB_TITLE AS subTitle,
+	        SD.S_CONTENTS AS sContents
+	
+	    FROM STORE S
+	    LEFT JOIN STORE_POLICY SP
+	        ON S.STORE_NO = SP.STORE_NO
+	    LEFT JOIN STORE_DETAIL SD
+	        ON S.STORE_NO = SD.STORE_NO
+	    WHERE S.STORE_NO = #{storeNo}
+	</select>
+	
+	<!-- 사업자 업체 메뉴 목록 -->
+	<select id="selectAdminBusinessUserMenuList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        MENU_NO AS menuNo,
+	        MENU_NAME AS menuName,
+	        MENU_PRICE AS menuPrice,
+	        M_STATUS AS menuStatus
+	    FROM STORE_MENU
+	    WHERE STORE_NO = #{storeNo}
+	    ORDER BY MENU_NO DESC
+	</select>
+	
+	<!-- 사업자 업체 이미지 목록 -->
+	<select id="selectAdminBusinessUserStoreFileList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        FILE_PATH AS filePath,
+	        FILE_NAME AS fileName,
+	        ORIGIN_NAME AS originName,
+	        IS_PROOF AS isProof,
+	        IS_MAIN AS isMain
+	    FROM STORE_FILE
+	    WHERE STORE_NO = #{storeNo}
+	      AND IS_PROOF = 'N'
+	    ORDER BY
+	        CASE WHEN IS_MAIN = 'Y' THEN 0 ELSE 1 END,
+	        FILE_NO DESC
+	</select>
+	
+	<!-- 사업자 리뷰 상세 -->
+	<select id="selectAdminBusinessUserReviewList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        USER_ID AS userId,
+	        RATING AS rating,
+	        R_CONTENTS AS rContents,
+	        CDATE AS cdate
+	    FROM REVIEW
+	    WHERE STORE_NO = #{storeNo}
+	    ORDER BY CDATE DESC
+	</select>
+	
+	<!-- 사업자 리뷰 신고 상세 -->
+	<select id="selectAdminBusinessUserReportList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        RR.REVIEW_NO AS reviewNo,
+	        RR.REP_STATUS AS repStatus,
+	        RR.REPORTER_ID AS reporterId,
+	        R.USER_ID AS userId,
+	        RR.REPORT_REASON AS reportReason,
+	        RR.CDATE AS cdate
+	    FROM REVIEW_REPORT RR
+	    INNER JOIN REVIEW R
+	        ON RR.REVIEW_NO = R.REVIEW_NO
+	    WHERE R.STORE_NO = #{storeNo}
+	      AND RR.REP_STATUS IN ('ACC', 'REJ')
+	    ORDER BY RR.CDATE DESC
+	</select>
+	
+	<!-- 사업자 예약 상세 -->
+	<select id="selectAdminBusinessUserReservationList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        RSV.RSV_NO AS rsvNo,
+	        RSV.RSV_DATE AS rsvDate,
+	        RSV.RSV_START_TIME AS rsvStartTime,
+	        RSV.RSV_END_TIME AS rsvEndTime,
+	        RSV.USER_ID AS userId,
+	        RSV.RSV_STATUS AS rsvStatus,
+	        RSV.CDATE AS cdate
+	    FROM RESERVATION RSV
+	    WHERE RSV.STORE_NO = #{storeNo}
+	    ORDER BY RSV.RSV_DATE DESC, RSV.RSV_START_TIME DESC
+	</select>
+	
+	<!-- 회원조회 및 관리 리스트 -->
+	<select id="selectAdminUserList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	SELECT
+	    U.USER_ID AS userId,
+	    U.USER_NAME AS userName,
+	    U.NICKNAME AS nickname,
+	    U.USER_STATUS AS userStatus,
+	    U.REP_COUNT AS repCount,
+
+		(
+			SELECT COUNT(*)
+			FROM PET P
+			WHERE P.USER_ID = U.USER_ID
+		) AS petCount,
+
+			CASE
+				WHEN EXISTS (
+					SELECT 1
+					FROM SUBSCRIPTION S
+					WHERE S.USER_ID = U.USER_ID
+				)
+				THEN 'Y'
+				ELSE 'N'
+			END AS subscriptionYn,
+
+			IFNULL((
+				SELECT SUM(UP.POINT_AMOUNT)
+				FROM USER_POINT UP
+				WHERE UP.USER_ID = U.USER_ID
+			), 0) AS pointTotal,
+
+			(
+				SELECT COUNT(*)
+				FROM USER_COUPON UC
+				WHERE UC.USER_ID = U.USER_ID
+			) AS couponCount,
+
+			(
+				SELECT COUNT(*)
+				FROM ORDERS O
+				WHERE O.USER_ID = U.USER_ID
+			) AS orderCount,
+
+			(
+				SELECT COUNT(*)
+				FROM RESERVATION R
+				WHERE R.USER_ID = U.USER_ID
+			) AS reservationCount,
+
+			(
+				SELECT COUNT(*)
+				FROM REVIEW R
+				WHERE R.USER_ID = U.USER_ID
+			) AS reviewCount,
+
+			(
+				SELECT COUNT(*)
+				FROM BOARD B
+				WHERE B.USER_ID = U.USER_ID
+			)
+			+
+			(
+				SELECT COUNT(*)
+				FROM `COMMENT` C
+				WHERE C.USER_ID = U.USER_ID
+			) AS communityCount
+
+		FROM USERS U
+		WHERE 1 = 1
+		<if test="keyword != null and keyword != ''">
+		    AND (
+		        U.USER_ID LIKE CONCAT('%', #{keyword}, '%')
+		        OR U.USER_NAME LIKE CONCAT('%', #{keyword}, '%')
+		        OR U.NICKNAME LIKE CONCAT('%', #{keyword}, '%')
+		    )
+		</if>
+		<if test="userStatus != null and userStatus != ''">
+		    AND U.USER_STATUS = #{userStatus}
+		</if>
+		
+		<choose>
+		    <when test="sortType == 'reportDesc'">
+		        ORDER BY U.REP_COUNT DESC, U.CDATE DESC
+		    </when>
+		    <when test="sortType == 'reservationDesc'">
+		        ORDER BY reservationCount DESC, U.CDATE DESC
+		    </when>
+		    <when test="sortType == 'orderDesc'">
+		        ORDER BY orderCount DESC, U.CDATE DESC
+		    </when>
+		    <when test="sortType == 'reviewDesc'">
+		        ORDER BY reviewCount DESC, U.CDATE DESC
+		    </when>
+		    <otherwise>
+		        ORDER BY U.CDATE DESC
+		    </otherwise>
+		</choose>
+		
+		LIMIT #{startIndex}, #{pageSize}
+	</select>
+
+	<!-- 회원 기본 정보 상세 -->
+	<select id="selectAdminUserBasic" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+		SELECT
+			USER_ID AS userId,
+			EMAIL AS email,
+			USER_NAME AS userName,
+			NICKNAME AS nickname,
+			PHONE AS phone,
+			USER_ADDR AS userAddr,
+			FULL_ADDR AS fullAddr,
+			ZIPCODE AS zipcode,
+			SOCIALTYPE AS socialtype,
+			USER_STATUS AS userStatus,
+			CDATE AS cdate
+		FROM USERS
+		WHERE USER_ID = #{userId}
+	</select>
+	
+	<!-- 회원 상태 수정 -->
+	<update id="updateAdminUserStatus" parameterType="hashmap">
+	    UPDATE USERS
+	    SET USER_STATUS = #{userStatus}
+	    WHERE USER_ID = #{userId}
+	</update>
+	
+	<!-- 회원 닉네임 수정 -->
+	<update id="updateAdminUserNickname" parameterType="hashmap">
+	    UPDATE USERS
+	    SET NICKNAME = #{nickname}
+	    WHERE USER_ID = #{userId}
+	</update>
+
+	<!-- 회원 반려동물 상세 -->
+	<select id="selectAdminUserPetList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        P.PET_NO AS petNo,
+	        P.PET_NAME AS petName,
+	        P.SPECIES AS species,
+	        P.BREED AS breed,
+	        PB.CAUTION AS caution,
+	        P.BIRTHDATE AS birthdate,
+	        P.GENDER AS gender,
+	        P.CDATE AS cdate
+	    FROM PET P
+	    LEFT JOIN PET_BREED PB
+	        ON P.BREED = PB.BREED_NAME
+	    WHERE P.USER_ID = #{userId}
+	    ORDER BY P.PET_NO DESC
+	</select>
+
+	<!-- 회원 구독 상세 -->
+	<select id="selectAdminUserSubscription" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+		SELECT
+			S_DATE AS sDate,
+			E_DATE AS eDate,
+			N_DATE AS nDate,
+			SUB_PRICE AS subPrice,
+			SUB_STATUS AS subStatus
+		FROM SUBSCRIPTION
+		WHERE USER_ID = #{userId}
+		ORDER BY S_DATE DESC
+		LIMIT 1
+	</select>
+
+	<!-- 회원 포인트 상세 -->
+	<select id="selectAdminUserPointList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+		SELECT
+			POINT_NO AS pointNo,
+			POINT_AMOUNT AS pointAmount,
+			ORD_NO AS ordNo,
+			REVIEW_NO AS reviewNo,
+			CDATE AS cdate
+		FROM USER_POINT
+		WHERE USER_ID = #{userId}
+		ORDER BY POINT_NO DESC
+	</select>
+
+	<!-- 회원 쿠폰 상세 -->
+	<select id="selectAdminUserCouponList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+		SELECT
+			UC.UCP_NO AS ucpNo,
+			C.COUPON_NAME AS couponName,
+			UC.CP_STATUS AS cpStatus,
+			UC.USE_DATE AS useDate,
+			UC.EXP_DATE AS expDate,
+			UC.CDATE AS cdate
+		FROM USER_COUPON UC
+		LEFT JOIN COUPON C
+			ON UC.COUPON_NO = C.COUPON_NO
+		WHERE UC.USER_ID = #{userId}
+		ORDER BY UC.UCP_NO DESC
+	</select>
+
+	<!-- 회원 주문 상세 -->
+	<select id="selectAdminUserOrderList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        O.ORD_NO AS ordNo,
+	        O.COUPON_NO AS couponNo,
+	        O.POINT_NO AS pointNo,
+	        O.DIS_PRICE AS disPrice,
+	
+	        (
+	            SELECT P.PRODUCT_NAME
+	            FROM ORDER_DETAIL OD
+	            INNER JOIN PRODUCT P
+	                ON OD.PRODUCT_NO = P.PRODUCT_NO
+	            WHERE OD.ORD_NO = O.ORD_NO
+	            ORDER BY OD.PRODUCT_NO ASC
+	            LIMIT 1
+	        ) AS productName,
+	
+	        (
+	            SELECT COUNT(DISTINCT OD.PRODUCT_NO)
+	            FROM ORDER_DETAIL OD
+	            WHERE OD.ORD_NO = O.ORD_NO
+	        ) AS productKindCount,
+	
+	        O.TOTAL_PRICE AS totalPrice,
+	        O.ORD_STATUS AS ordStatus,
+	        O.ORD_ADDR AS ordAddr,
+	        O.DELI_STATUS AS deliStatus,
+	        O.ORD_DATE AS ordDate
+	    FROM ORDERS O
+	    WHERE O.USER_ID = #{userId}
+	    ORDER BY O.ORD_NO DESC
+	</select>
+	
+	<!-- 회원 주문 상품 상세 -->
+	<select id="selectAdminUserOrderProductList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        OD.ORD_NO AS ordNo,
+	        OD.PRODUCT_NO AS productNo,
+	        P.PRODUCT_NAME AS productName,
+	        OD.ORD_QTY AS ordQty,
+	        OD.UNIT_PRICE AS unitPrice,
+	        (OD.ORD_QTY * OD.UNIT_PRICE) AS productTotalPrice
+	    FROM ORDER_DETAIL OD
+	    INNER JOIN PRODUCT P
+	        ON OD.PRODUCT_NO = P.PRODUCT_NO
+	    WHERE OD.ORD_NO = #{ordNo}
+	    ORDER BY OD.PRODUCT_NO ASC
+	</select>
+	
+	<!-- 최근 30일 위험 동물 등록 회원 수 -->
+	<select id="selectRecentDangerPetUserCount" parameterType="hashmap" resultType="int">
+	    SELECT COUNT(DISTINCT P.USER_ID)
+	    FROM PET P
+	    INNER JOIN PET_BREED PB
+	        ON P.BREED = PB.BREED_NAME
+	    WHERE PB.CAUTION = 'Y'
+	      AND P.CDATE >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+	</select>
+	
+	<!-- 최근 30일 위험 동물 등록 회원 상세 -->
+	<select id="selectRecentDangerPetUserList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        U.USER_ID AS userId,
+	        U.USER_NAME AS userName,
+	        GROUP_CONCAT(DISTINCT P.BREED ORDER BY P.BREED SEPARATOR ', ') AS breed
+	    FROM PET P
+	    INNER JOIN PET_BREED PB
+	        ON P.BREED = PB.BREED_NAME
+	    INNER JOIN USERS U
+	        ON P.USER_ID = U.USER_ID
+	    WHERE PB.CAUTION = 'Y'
+	      AND P.CDATE >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+	    GROUP BY
+	        U.USER_ID,
+	        U.USER_NAME
+	    ORDER BY U.USER_ID ASC
+	</select>
+
+	<!-- 회원 예약 상세 -->
+	<select id="selectAdminUserReservationList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+		SELECT
+			R.RSV_NO AS rsvNo,
+			R.RSV_DATE AS rsvDate,
+			R.RSV_START_TIME AS rsvStartTime,
+			R.RSV_END_TIME AS rsvEndTime,
+			R.STORE_NO AS storeNo,
+			S.STORE_NAME AS storeName,
+			R.PET_NO AS petNoObj,
+			R.MENU_NO AS menuNo,
+			SM.MENU_NAME AS menuName,
+			R.RSV_STATUS AS rsvStatus,
+			R.CDATE AS cdate
+		FROM RESERVATION R
+		LEFT JOIN STORE S
+			ON R.STORE_NO = S.STORE_NO
+		LEFT JOIN STORE_MENU SM
+			ON R.STORE_NO = SM.STORE_NO
+			AND R.MENU_NO = SM.MENU_NO
+		WHERE R.USER_ID = #{userId}
+		ORDER BY R.RSV_NO DESC
+	</select>
+
+	<!-- 회원 리뷰 상세 -->
+	<select id="selectAdminUserReviewList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+		SELECT
+			R.REVIEW_NO AS reviewNo,
+			R.STORE_NO AS storeNo,
+			S.STORE_NAME AS storeName,
+			R.PRODUCT_NO AS productNo,
+			P.PRODUCT_NAME AS productName,
+			R.RATING AS rating,
+			R.R_CONTENTS AS rContents,
+			R.CDATE AS cdate
+		FROM REVIEW R
+		LEFT JOIN STORE S
+			ON R.STORE_NO = S.STORE_NO
+		LEFT JOIN PRODUCT P
+			ON R.PRODUCT_NO = P.PRODUCT_NO
+		WHERE R.USER_ID = #{userId}
+		ORDER BY R.REVIEW_NO DESC
+	</select>
+
+	<!-- 회원 신고 상세 -->
+	<select id="selectAdminUserReportList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+		SELECT
+			'REVIEW' AS reportType,
+			RR.REPORTER_ID AS reporterId,
+			RR.REPORT_REASON AS reportReason,
+			R.R_CONTENTS AS targetContent,
+			NULL AS targetTitle,
+			RR.CDATE AS cdate
+		FROM REVIEW_REPORT RR
+		INNER JOIN REVIEW R
+			ON RR.REVIEW_NO = R.REVIEW_NO
+		WHERE R.USER_ID = #{userId}
+		  AND RR.REP_STATUS = 'ACC'
+
+		UNION ALL
+
+		SELECT
+			'BOARD' AS reportType,
+			BR.REPORTER_ID AS reporterId,
+			BR.REPORT_REASON AS reportReason,
+			NULL AS targetContent,
+			B.TITLE AS targetTitle,
+			BR.CDATE AS cdate
+		FROM BOARD_REPORT BR
+		INNER JOIN BOARD B
+			ON BR.BOARD_NO = B.BOARD_NO
+		WHERE B.USER_ID = #{userId}
+		  AND BR.REP_STATUS = 'ACC'
+		  AND BR.BOARD_NO IS NOT NULL
+
+		UNION ALL
+
+		SELECT
+			'COMMENT' AS reportType,
+			BR.REPORTER_ID AS reporterId,
+			BR.REPORT_REASON AS reportReason,
+			C.C_CONTENT AS targetContent,
+			B.TITLE AS targetTitle,
+			BR.CDATE AS cdate
+		FROM BOARD_REPORT BR
+		INNER JOIN COMMENT C
+			ON BR.COMMENT_NO = C.COMMENT_NO
+		LEFT JOIN BOARD B
+			ON C.BOARD_NO = B.BOARD_NO
+		WHERE C.USER_ID = #{userId}
+		  AND BR.REP_STATUS = 'ACC'
+		  AND BR.COMMENT_NO IS NOT NULL
+
+		ORDER BY cdate DESC
+	</select>
+
+	<!-- 회원 커뮤니티 글 상세 -->
+	<select id="selectAdminUserCommunityPostList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+		SELECT
+			BOARD_NO AS boardNo,
+			TITLE AS title,
+			CREATE_TIME AS cdate,
+			UPDATE_TIME AS udate
+		FROM BOARD
+		WHERE USER_ID = #{userId}
+		ORDER BY BOARD_NO DESC
+	</select>
+
+	<!-- 회원 커뮤니티 댓글 상세 -->
+	<select id="selectAdminUserCommunityCommentList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+		SELECT
+			C.COMMENT_NO AS commentNo,
+			C.BOARD_NO AS boardNo,
+			B.TITLE AS title,
+			C.C_CONTENT AS cContent,
+			C.CREATE_TIME AS cdate,
+			C.UPDATE_TIME AS udate
+		FROM `COMMENT` C
+		LEFT JOIN BOARD B
+			ON C.BOARD_NO = B.BOARD_NO
+		WHERE C.USER_ID = #{userId}
+		ORDER BY C.COMMENT_NO DESC
+	</select>
+	
+	<!-- 회원 신고 누적 증가 -->
+	<update id="updateUserRepCount" parameterType="map">
+	    UPDATE USERS
+	    SET REP_COUNT = REP_COUNT + #{repCount}
+	    WHERE USER_ID = #{reportedUserId}
+	</update>
+	
+	<select id="selectAdminUserCount" parameterType="hashmap" resultType="int">
+	    SELECT COUNT(*)
+	    FROM USERS U
+	    WHERE 1 = 1
+	    <if test="keyword != null and keyword != ''">
+	        AND (
+	            U.USER_ID LIKE CONCAT('%', #{keyword}, '%')
+	            OR U.USER_NAME LIKE CONCAT('%', #{keyword}, '%')
+	            OR U.NICKNAME LIKE CONCAT('%', #{keyword}, '%')
+	        )
+	    </if>
+	    <if test="userStatus != null and userStatus != ''">
+	        AND U.USER_STATUS = #{userStatus}
+	    </if>
+	</select>
+	
+	<select id="selectBusinessActiveReservationCount" parameterType="hashmap" resultType="int">
+	    SELECT COUNT(*)
+	    FROM RESERVATION RSV
+	    INNER JOIN STORE S ON RSV.STORE_NO = S.STORE_NO
+	    WHERE S.S_USER_ID = #{sUserId}
+	      AND RSV.RSV_STATUS IN ('WAI', 'CNF')
+	</select>
+	
+	<update id="updateAdminBusinessUserStatus" parameterType="hashmap">
+	    UPDATE STORE_USER
+	    SET U_STATUS = #{uStatus}
+	    WHERE S_USER_ID = #{sUserId}
+	</update>
+	
+	<update id="updateAdminBusinessStoreStatus" parameterType="hashmap">
+	    UPDATE STORE
+	    SET S_STATUS = #{sStatus}
+	    WHERE STORE_NO = #{storeNo}
+	</update>
+	
+	<!-- 상품 목록 개수 -->
+	<select id="selectAdminProductCount" parameterType="hashmap" resultType="int">
+	    SELECT COUNT(*)
+	    FROM PRODUCT P
+	    LEFT JOIN PC_ANIMAL_SUB PAS
+	        ON P.A_SUB_NO = PAS.A_SUB_NO
+	    LEFT JOIN PC_ANIMAL_MAIN PAM
+	        ON PAS.A_MAIN_NO = PAM.A_MAIN_NO
+	    LEFT JOIN PC_ITEM_SUB PIS
+	        ON P.I_SUB_NO = PIS.I_SUB_NO
+	    LEFT JOIN PC_ITEM_MAIN PIM
+	        ON PIS.I_MAIN_NO = PIM.I_MAIN_NO
+	    WHERE 1 = 1
+	    <if test="keyword != null and keyword != ''">
+	        AND (
+	            P.PRODUCT_NAME LIKE CONCAT('%', #{keyword}, '%')
+	            OR P.BRAND LIKE CONCAT('%', #{keyword}, '%')
+	        )
+	    </if>
+	    <if test="productStatus != null and productStatus != ''">
+	        AND P.PRODUCT_STATUS = #{productStatus}
+	    </if>
+	</select>
+	
+	<!-- 상품 목록 조회 -->
+	<select id="selectAdminProductList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        P.PRODUCT_NO AS productNo,
+	        P.A_SUB_NO AS aSubNo,
+	        P.I_SUB_NO AS iSubNo,
+	        P.PRODUCT_NAME AS productName,
+	        P.BRAND AS brand,
+	        P.PRODUCT_PRICE AS productPrice,
+	        P.STOCK_QTY AS stockQty,
+	        P.PRODUCT_STATUS AS productStatus,
+	        P.CDATE AS cdate,
+			PAM.A_MAIN_TYPE AS aMainType,
+			PAS.A_SUB_TYPE AS aSubType,
+			PIM.I_MAIN_TYPE AS iMainType,
+			PIS.I_SUB_TYPE AS iSubType
+	    FROM PRODUCT P
+	    LEFT JOIN PC_ANIMAL_SUB PAS
+	        ON P.A_SUB_NO = PAS.A_SUB_NO
+	    LEFT JOIN PC_ANIMAL_MAIN PAM
+	        ON PAS.A_MAIN_NO = PAM.A_MAIN_NO
+	    LEFT JOIN PC_ITEM_SUB PIS
+	        ON P.I_SUB_NO = PIS.I_SUB_NO
+	    LEFT JOIN PC_ITEM_MAIN PIM
+	        ON PIS.I_MAIN_NO = PIM.I_MAIN_NO
+	    WHERE 1 = 1
+	    <if test="keyword != null and keyword != ''">
+	        AND (
+	            P.PRODUCT_NAME LIKE CONCAT('%', #{keyword}, '%')
+	            OR P.BRAND LIKE CONCAT('%', #{keyword}, '%')
+	        )
+	    </if>
+	    <if test="productStatus != null and productStatus != ''">
+	        AND P.PRODUCT_STATUS = #{productStatus}
+	    </if>
+	    ORDER BY P.PRODUCT_NO DESC
+	    LIMIT #{startIndex}, #{pageSize}
+	</select>
+	
+	<!-- 상품 상세 조회 -->
+	<select id="selectAdminProductDetail" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        P.PRODUCT_NO AS productNo,
+	        P.A_SUB_NO AS aSubNo,
+	        P.I_SUB_NO AS iSubNo,
+	        P.PRODUCT_NAME AS productName,
+	        P.BRAND AS brand,
+	        P.PRODUCT_PRICE AS productPrice,
+	        P.STOCK_QTY AS stockQty,
+	        P.PRODUCT_STATUS AS productStatus,
+	        P.CDATE AS cdate,
+			PAM.A_MAIN_TYPE AS aMainType,
+			PAS.A_SUB_TYPE AS aSubType,
+			PIM.I_MAIN_TYPE AS iMainType,
+			PIS.I_SUB_TYPE AS iSubType
+	    FROM PRODUCT P
+	    LEFT JOIN PC_ANIMAL_SUB PAS
+	        ON P.A_SUB_NO = PAS.A_SUB_NO
+	    LEFT JOIN PC_ANIMAL_MAIN PAM
+	        ON PAS.A_MAIN_NO = PAM.A_MAIN_NO
+	    LEFT JOIN PC_ITEM_SUB PIS
+	        ON P.I_SUB_NO = PIS.I_SUB_NO
+	    LEFT JOIN PC_ITEM_MAIN PIM
+	        ON PIS.I_MAIN_NO = PIM.I_MAIN_NO
+	    WHERE P.PRODUCT_NO = #{productNo}
+	</select>
+	
+	<!-- 상품 이미지 목록 조회 -->
+	<select id="selectAdminProductFileList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        PRODUCT_NO AS productNo,
+	        CONCAT(FILE_PATH, FILE_NAME) AS filePath,
+	        FILE_NAME AS fileName,
+	        ORIGIN_NAME AS originName,
+	        FILE_SIZE AS fileSize,
+	        FILE_EXT AS fileExt,
+	        IS_MAIN AS isMain,
+	        IS_DETAIL AS isDetail,
+	        CDATE AS cdate
+	    FROM PRODUCT_FILE
+	    WHERE PRODUCT_NO = #{productNo}
+	    ORDER BY
+	        CASE
+	            WHEN IS_MAIN = 'Y' THEN 1
+	            WHEN IS_DETAIL = 'Y' THEN 2
+	            ELSE 3
+	        END,
+	        CDATE DESC
+	</select>
+	
+	<!-- 상품 메뉴 -->
+	<update id="updateAdminProduct" parameterType="hashmap">
+	    UPDATE PRODUCT
+	    SET
+	        PRODUCT_PRICE = #{productPrice},
+	        STOCK_QTY = #{stockQty},
+	        PRODUCT_STATUS = #{productStatus}
+	    WHERE PRODUCT_NO = #{productNo}
+	</update>
+	
+	<select id="selectAdminProductMainImageCount" parameterType="hashmap" resultType="int">
+	    SELECT COUNT(*)
+	    FROM PRODUCT_FILE
+	    WHERE PRODUCT_NO = #{productNo}
+	      AND IS_MAIN = 'Y'
+	</select>
+	
+	<select id="selectAdminProductDetailImageCount" parameterType="hashmap" resultType="int">
+	    SELECT COUNT(*)
+	    FROM PRODUCT_FILE
+	    WHERE PRODUCT_NO = #{productNo}
+	      AND IS_DETAIL = 'Y'
+	</select>
+	
+	<update id="updateAdminProductMainImage" parameterType="hashmap">
+	    UPDATE PRODUCT_FILE
+	    SET FILE_PATH = #{mainImagePath}
+	    WHERE PRODUCT_NO = #{productNo}
+	      AND IS_MAIN = 'Y'
+	</update>
+	
+	<update id="updateAdminProductDetailImage" parameterType="hashmap">
+	    UPDATE PRODUCT_FILE
+	    SET FILE_PATH = #{detailImagePath}
+	    WHERE PRODUCT_NO = #{productNo}
+	      AND IS_DETAIL = 'Y'
+	</update>
+	
+	<insert id="insertAdminProductMainImage" parameterType="hashmap">
+	    INSERT INTO PRODUCT_FILE (
+	        PRODUCT_NO,
+	        FILE_PATH,
+	        IS_MAIN,
+	        IS_DETAIL
+	    ) VALUES (
+	        #{productNo},
+	        #{mainImagePath},
+	        'Y',
+	        'N'
+	    )
+	</insert>
+	
+	<insert id="insertAdminProductDetailImage" parameterType="hashmap">
+	    INSERT INTO PRODUCT_FILE (
+	        PRODUCT_NO,
+	        FILE_PATH,
+	        IS_MAIN,
+	        IS_DETAIL
+	    ) VALUES (
+	        #{productNo},
+	        #{detailImagePath},
+	        'N',
+	        'Y'
+	    )
+	</insert>
+	
+	<select id="selectAdminAnimalMainCategoryList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        A_MAIN_NO AS aMainNo,
+	        A_MAIN_TYPE AS aMainType
+	    FROM PC_ANIMAL_MAIN
+	    ORDER BY A_MAIN_NO ASC
+	</select>
+	
+	<select id="selectAdminAnimalSubCategoryList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        A_SUB_NO AS aSubNo,
+	        A_MAIN_NO AS aMainNo,
+	        A_SUB_TYPE AS aSubType
+	    FROM PC_ANIMAL_SUB
+	    WHERE 1 = 1
+	    <if test="aMainNo != null and aMainNo != ''">
+	        AND A_MAIN_NO = #{aMainNo}
+	    </if>
+	    ORDER BY A_SUB_NO ASC
+	</select>
+	
+	<select id="selectAdminItemMainCategoryList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        I_MAIN_NO AS iMainNo,
+	        I_MAIN_TYPE AS iMainType
+	    FROM PC_ITEM_MAIN
+	    ORDER BY I_MAIN_NO ASC
+	</select>
+	
+	<select id="selectAdminItemSubCategoryList" parameterType="hashmap" resultType="com.example.unipet.model.Admin">
+	    SELECT
+	        I_SUB_NO AS iSubNo,
+	        I_MAIN_NO AS iMainNo,
+	        I_SUB_TYPE AS iSubType
+	    FROM PC_ITEM_SUB
+	    WHERE 1 = 1
+	    <if test="iMainNo != null and iMainNo != ''">
+	        AND I_MAIN_NO = #{iMainNo}
+	    </if>
+	    ORDER BY I_SUB_NO ASC
+	</select>
+	
+	<insert id="insertAdminProduct"
+	        parameterType="hashmap"
+	        useGeneratedKeys="true"
+	        keyProperty="productNo"
+	        keyColumn="PRODUCT_NO">
+	    INSERT INTO PRODUCT (
+	        A_SUB_NO,
+	        I_SUB_NO,
+	        PRODUCT_NAME,
+	        BRAND,
+	        PRODUCT_PRICE,
+	        STOCK_QTY,
+	        PRODUCT_STATUS
+	    ) VALUES (
+	        #{aSubNo},
+	        #{iSubNo},
+	        #{productName},
+	        #{brand},
+	        #{productPrice},
+	        #{stockQty},
+	        #{productStatus}
+	    )
+	</insert>
+	
+	<insert id="insertAdminProductFile" parameterType="hashmap">
+	    INSERT INTO PRODUCT_FILE (
+	        PRODUCT_NO,
+	        FILE_PATH,
+	        FILE_NAME,
+	        ORIGIN_NAME,
+	        FILE_SIZE,
+	        FILE_EXT,
+	        IS_MAIN,
+	        IS_DETAIL
+	    ) VALUES (
+	        #{productNo},
+	        #{filePath},
+	        #{fileName},
+	        #{originName},
+	        #{fileSize},
+	        #{fileExt},
+	        #{isMain},
+	        #{isDetail}
+	    )
+	</insert>
+	
 </mapper>

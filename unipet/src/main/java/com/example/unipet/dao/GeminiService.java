@@ -1,8 +1,6 @@
 package com.example.unipet.dao;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,17 +10,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import com.example.unipet.mapper.GeminiMapper;
+import com.example.unipet.model.AiRecommendRequest;
 import com.example.unipet.model.ChatRequest;
 import com.example.unipet.model.ChatResponse;
-import com.example.unipet.model.StoreRecommend;
 
 @Service
 public class GeminiService {
 
-	private AtomicInteger requestCount = new AtomicInteger(0);
-	private LocalDate currentDate = LocalDate.now();
-	
+    private AtomicInteger requestCount = new AtomicInteger(0);
+    private LocalDate currentDate = LocalDate.now();
+
     @Qualifier("geminiRestTemplate")
     @Autowired
     private RestTemplate restTemplate;
@@ -32,9 +29,6 @@ public class GeminiService {
 
     @Value("${gemini.api.key}")
     private String geminiApiKey;
-
-    @Autowired
-    private GeminiMapper geminiMapper;
 
     public String getContents(String prompt) {
 
@@ -48,12 +42,7 @@ public class GeminiService {
             return fixedAnswer;
         }
 
-        // 추천 의도가 있으면 지역이 없어도 추천 실행
-        if (isStoreRecommendPrompt(prompt)) {
-            return getStoreRecommendAnswer(prompt);
-        }
-
-        // 그 외 반려동물 질문만 Gemini 호출
+        // 반려동물 질문만 Gemini 호출
         return getPetAnswer(prompt);
     }
 
@@ -91,29 +80,6 @@ public class GeminiService {
 
         return null;
     }
-    
-    private boolean isStoreRecommendPrompt(String prompt) {
-
-        String text = prompt.replaceAll("\\s", "");
-
-        return text.contains("추천")
-                || text.contains("추천해")
-                || text.contains("부탁")
-                || text.contains("어디가좋")
-                || text.contains("어디가괜찮")
-                || text.contains("괜찮은곳")
-                || text.contains("좋은곳")
-                || text.contains("찾아줘")
-                || text.contains("알려줘")
-                || text.contains("업체")
-                || text.contains("동물병원")
-                || text.contains("병원")
-                || text.contains("미용")
-                || text.contains("호텔")
-                || text.contains("건강검진")
-                || text.contains("저렴")
-                || text.contains("싼곳");
-    }
 
     private String getPetAnswer(String prompt) {
 
@@ -125,6 +91,7 @@ public class GeminiService {
             - 반려동물 보호자가 이해하기 쉽게 설명한다.
             - 일반적인 관리, 산책, 식사, 목욕, 놀이, 훈련, 생활 팁을 안내한다.
             - UNIPET 서비스 이용과 관련된 질문도 도와준다.
+            - 업체 추천, 특정 업체 안내, 예약 가능 업체 조회, 쇼핑 상품 추천은 제공하지 않는다.
 
             답변 규칙:
             - 답변은 한국어로 한다.
@@ -133,7 +100,8 @@ public class GeminiService {
             - 질문이 모호하면 가능한 범위에서 일반적인 기준으로 답변한다.
             - 확실하지 않은 정보는 추측하지 말고 모른다고 답한다.
             - 실시간 정보는 제공하지 않는다.
-            - 특정 상품, 업체, 예약 가능 여부는 실제 DB 조회 결과가 없으면 단정하지 않는다.
+            - 특정 상품, 특정 업체, 예약 가능 여부는 단정하지 않는다.
+            - 업체 추천을 요청받으면 직접 추천은 어렵고, UNIPET에서 지역과 카테고리를 선택해 확인하라고 안내한다.
 
             건강/의료 관련 규칙:
             - 질병을 단정 진단하지 않는다.
@@ -152,207 +120,7 @@ public class GeminiService {
         return callGemini(finalPrompt);
     }
 
-    private String getStoreRecommendAnswer(String prompt) {
-
-        HashMap<String, Object> map = new HashMap<>();
-
-        String animalKeyword = extractAnimalKeyword(prompt);
-        String locationKeyword = extractLocationKeyword(prompt);
-        String serviceKeyword = extractServiceKeyword(prompt);
-        String categoryKeyword = extractCategoryKeyword(prompt);
-        String interestKeyword = extractInterestKeyword(prompt);
-
-        map.put("animalKeyword", animalKeyword);
-        map.put("locationKeyword", locationKeyword);
-        map.put("serviceKeyword", serviceKeyword);
-        map.put("categoryKeyword", categoryKeyword);
-        map.put("interestKeyword", interestKeyword);
-
-        List<StoreRecommend> storeList = geminiMapper.selectStoreRecommendList(map);
-
-        if (storeList == null || storeList.isEmpty()) {
-            return "조건에 맞는 업체를 찾지 못했습니다. 지역명이나 원하는 서비스명을 조금 더 구체적으로 입력해 주세요.";
-        }
-
-        StringBuilder answer = new StringBuilder();
-
-        int count = 0;
-
-        for (StoreRecommend store : storeList) {
-            if (count >= 3) {
-                break;
-            }
-
-            answer.append(count + 1).append(". ")
-                  .append(store.getStoreName()).append("\n");
-
-            answer.append("상세보기|")
-                  .append(store.getStoreNo()).append("\n");
-
-            answer.append("추천 이유: ")
-	            .append(makeRecommendReason(store, prompt))
-	            .append("\n\n");
-
-            count++;
-        }
-
-        return answer.toString().trim();
-    }
-    
-    private String makeRecommendReason(StoreRecommend store, String prompt) {
-
-        String interestKeyword = extractInterestKeyword(prompt);
-
-        String matchedReview = extractMatchedReview(
-            store.getReviewContents(),
-            interestKeyword
-        );
-
-        String sourceText = "";
-
-        if (store.getReviewContents() != null 
-                && !store.getReviewContents().trim().isEmpty()) {
-
-            sourceText += "전체 리뷰: "
-                    + store.getReviewContents()
-                    + "\n";
-        }
-
-        if (matchedReview != null && !matchedReview.isEmpty()) {
-            sourceText += "핵심 리뷰: "
-                    + matchedReview
-                    + "\n";
-        }
-
-        if (store.getMenuNames() != null 
-                && !store.getMenuNames().trim().isEmpty()) {
-
-            sourceText += "등록 메뉴: "
-                    + store.getMenuNames()
-                    + "\n";
-        }
-
-        if (sourceText.trim().isEmpty()) {
-            sourceText += "업체 소개: " + nullToBlank(store.getContents()) + "\n";
-        }
-
-        return makeRecommendReasonByGemini(sourceText, prompt, interestKeyword);
-    }
-    
-    private String makeRecommendReasonByGemini(String sourceText, String userPrompt, String interestKeyword) {
-
-    	String prompt = """
-    		    사용자의 요청과 가장 관련 있는 리뷰 내용을 중심으로
-    		    업체 추천 이유를 자연스럽게 작성해라.
-
-    		    매우 중요:
-    		    - 메뉴 설명보다 리뷰 내용을 우선 사용한다.
-    		    - 리뷰에 있는 표현을 자연스럽게 바꿔 사용한다.
-    		    - "서비스를 받을 수 있어 추천드립니다" 같은 뻔한 문장은 사용하지 않는다.
-    		    - 실제 이용 경험이 느껴지는 문장으로 작성한다.
-    		    - 리뷰 기반 문장을 우선 작성한다.
-    		    - 반드시 한 문장만 작성한다.
-    		    - 반드시 마지막은 "추천드립니다."로 끝낸다.
-    		    - 없는 내용은 만들지 않는다.
-
-    		    사용자 질문:
-    		    """ + userPrompt + """
-
-    		    업체 정보:
-    		    """ + sourceText;
-
-        String result = callGemini(prompt);
-
-        if (result == null || result.trim().isEmpty()) {
-            return "";
-        }
-
-        return result.trim();
-    }
-    
-    private String extractInterestKeyword(String prompt) {
-
-        String text = prompt.replaceAll("\\s", "");
-
-        if (text.contains("안과") || text.contains("눈") || text.contains("눈병") || text.contains("결막염")) {
-            return "안과";
-        }
-
-        if (text.contains("피부") || text.contains("피부병") || text.contains("피부염")) {
-            return "피부";
-        }
-
-        if (text.contains("치과") || text.contains("이빨") || text.contains("치아") || text.contains("스케일링")) {
-            return "치과";
-        }
-
-        if (text.contains("슬개골") || text.contains("관절") || text.contains("다리")) {
-            return "관절";
-        }
-
-        if (text.contains("건강검진") || text.contains("검진")) {
-            return "건강검진";
-        }
-
-        if (text.contains("응급") || text.contains("24시") || text.contains("야간")) {
-            return "응급";
-        }
-
-        return "";
-    }
-    
-    private String extractMatchedReview(String reviewContents, String keyword) {
-
-        if (reviewContents == null || reviewContents.trim().isEmpty()) {
-            return "";
-        }
-
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return "";
-        }
-
-        String[] reviews = reviewContents.split(" / ");
-
-        String[] searchWords;
-
-        if (keyword.equals("안과")) {
-            searchWords = new String[] {"안과", "눈", "눈물", "눈병", "결막염", "안구"};
-        } else if (keyword.equals("피부")) {
-            searchWords = new String[] {"피부", "피부병", "피부염", "가려움", "털빠짐"};
-        } else if (keyword.equals("치과")) {
-            searchWords = new String[] {"치과", "치아", "이빨", "스케일링", "구강"};
-        } else if (keyword.equals("관절")) {
-            searchWords = new String[] {"관절", "슬개골", "다리", "절뚝", "수술"};
-        } else if (keyword.equals("건강검진")) {
-            searchWords = new String[] {"건강검진", "검진", "검사", "피검사"};
-        } else if (keyword.equals("응급")) {
-            searchWords = new String[] {"응급", "24시", "야간", "급히", "위급"};
-        } else {
-            searchWords = new String[] {keyword};
-        }
-
-        for (String review : reviews) {
-            String cleanReview = review.trim().replaceAll("\\s+", " ");
-
-            if (cleanReview.isEmpty()) {
-                continue;
-            }
-
-            for (String word : searchWords) {
-                if (cleanReview.contains(word)) {
-                    if (cleanReview.length() > 70) {
-                        cleanReview = cleanReview.substring(0, 70) + "...";
-                    }
-
-                    return cleanReview;
-                }
-            }
-        }
-
-        return "";
-    }
-
-    private String callGemini(String prompt) {
+   public String callGemini(String prompt) {
 
         if (isOverLimit()) {
             return "오늘 사용량이 초과되었습니다. 내일 다시 이용해주세요.";
@@ -378,7 +146,7 @@ public class GeminiService {
                     return "현재 응답을 가져오지 못했습니다. 다시 시도해주세요.";
                 }
 
-                requestCount.incrementAndGet(); // 🔥 성공 시 카운트 증가
+                requestCount.incrementAndGet();
 
                 StringBuilder result = new StringBuilder();
 
@@ -397,14 +165,13 @@ public class GeminiService {
 
             } catch (Exception e) {
 
-                // 429 (쿼터 초과) 처리
-            	if (e instanceof HttpClientErrorException.TooManyRequests) {
-            	    try {
-            	        Thread.sleep(35000);
-            	    } catch (InterruptedException ie) {
-            	        Thread.currentThread().interrupt();
-            	    }
-            	}
+                if (e instanceof HttpClientErrorException.TooManyRequests) {
+                    try {
+                        Thread.sleep(35000);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
 
                 if (i == maxRetry - 1) {
                     e.printStackTrace();
@@ -416,82 +183,6 @@ public class GeminiService {
         return "현재 챗봇 응답이 불안정합니다. 잠시 후 다시 시도해주세요.";
     }
 
-    private String nullToBlank(String value) {
-        return value == null ? "" : value;
-    }
-
-    private String extractAnimalKeyword(String prompt) {
-
-        if (prompt.contains("강아지") || prompt.contains("반려견") || prompt.contains("개 ")) {
-            return "강아지";
-        }
-
-        if (prompt.contains("고양이") || prompt.contains("반려묘") || prompt.contains("냥이")) {
-            return "고양이";
-        }
-
-        return "";
-    }
-
-    private String extractLocationKeyword(String prompt) {
-
-        String[] locations = {
-            "서울", "인천", "부평", "부천", "강남", "홍대", "마포", "송도",
-            "부산", "대구", "대전", "광주", "울산", "수원", "용인", "성남",
-            "일산", "김포", "시흥", "안산", "안양", "천안", "청주"
-        };
-
-        for (String location : locations) {
-            if (prompt.contains(location)) {
-                return location;
-            }
-        }
-
-        return "";
-    }
-
-    private String extractServiceKeyword(String prompt) {
-
-        String text = prompt.replaceAll("\\s", "");
-
-        if (text.contains("건강검진")) {
-            return "건강검진";
-        }
-
-        if (text.contains("미용") || text.contains("컷") || text.contains("목욕") || text.contains("스파") || text.contains("샴푸")) {
-            return "미용";
-        }
-
-        if (text.contains("호텔") || text.contains("위탁") || text.contains("훈련")) {
-            return "호텔";
-        }
-
-        if (text.contains("동물병원") || text.contains("병원") || text.contains("진료") || text.contains("접종") || text.contains("응급")) {
-            return "";
-        }
-
-        return "";
-    }
-    
-    private String extractCategoryKeyword(String prompt) {
-
-        String text = prompt.replaceAll("\\s", "");
-
-        if (text.contains("미용") || text.contains("컷") || text.contains("목욕") || text.contains("스파") || text.contains("샴푸")) {
-            return "SAL";
-        }
-
-        if (text.contains("호텔") || text.contains("위탁") || text.contains("훈련")) {
-            return "BRD";
-        }
-
-        if (text.contains("동물병원") || text.contains("병원") || text.contains("진료") || text.contains("건강검진") || text.contains("접종") || text.contains("응급")) {
-            return "HOS";
-        }
-
-        return "";
-    }
-    
     private boolean isOverLimit() {
 
         LocalDate today = LocalDate.now();
@@ -502,7 +193,55 @@ public class GeminiService {
             currentDate = today;
         }
 
-        return requestCount.get() >= 100; // 하루 100번 제한
+        return requestCount.get() >= 100;
+    }
+    
+    public String callGeminiForRecommend(String prompt) {
+
+        if (isOverLimit()) {
+            return "오늘 사용량이 초과되었습니다. 내일 다시 이용해주세요.";
+        }
+
+        String requestUrl = apiUrl + "?key=" + geminiApiKey;
+        
+        AiRecommendRequest request = new AiRecommendRequest(prompt); 
+
+        int maxRetry = 2;
+        for (int i = 0; i < maxRetry; i++) {
+            try {
+                // 구글 서버로 전송 (ChatResponse 구조는 동일하므로 그대로 재사용 가능)
+                ChatResponse response = restTemplate.postForObject(requestUrl, request, ChatResponse.class);
+
+                if (response == null || response.getCandidates() == null || response.getCandidates().isEmpty() ||
+                    response.getCandidates().get(0).getContent() == null ||
+                    response.getCandidates().get(0).getContent().getParts() == null ||
+                    response.getCandidates().get(0).getContent().getParts().isEmpty() ||
+                    response.getCandidates().get(0).getContent().getParts().get(0).getText() == null) {
+                    return "현재 응답을 가져오지 못했습니다. 다시 시도해주세요.";
+                }
+
+                requestCount.incrementAndGet();
+                StringBuilder result = new StringBuilder();
+                var parts = response.getCandidates().get(0).getContent().getParts();
+
+                for (var part : parts) {
+                    if (part.getText() != null) {
+                        result.append(part.getText());
+                    }
+                }
+                return result.toString();
+
+            } catch (Exception e) {
+                if (e instanceof HttpClientErrorException.TooManyRequests) {
+                    try { Thread.sleep(35000); } catch (InterruptedException ie) { Thread.currentThread().interrupt(); }
+                }
+                if (i == maxRetry - 1) {
+                    e.printStackTrace();
+                    return "요청이 많아 잠시 후 다시 시도해주세요.";
+                }
+            }
+        }
+        return "현재 추천 응답이 불안정합니다. 잠시 후 다시 시도해주세요.";
     }
 
 }

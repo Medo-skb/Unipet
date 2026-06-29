@@ -3,12 +3,55 @@
 	
 <mapper namespace="com.example.unipet.mapper.ReservationMapper">
 	<!-- 여러개 검색 -->
-	<select id="selectStoreList" parameterType="hashmap" resultType="com.example.unipet.model.Store">
+	<!-- <select id="selectStoreList" parameterType="hashmap" resultType="com.example.unipet.model.Store">
 	    SELECT S.*, C.KOR AS STORE_TYPE
 	    FROM STORE S
 	    LEFT JOIN CODE C ON S.S_CATEGORY = C.VALUE AND C.TYPE = 'S_CATEGORY'
-	    -- 업체 정책 테이블 JOIN
 	    LEFT JOIN STORE_POLICY SP ON S.STORE_NO = SP.STORE_NO 
+	    WHERE S.LAT BETWEEN #{swLat} AND #{neLat}
+	      AND S.LNG BETWEEN #{swLng} AND #{neLng}
+	    
+	    <if test="storeType != null and storeType != ''">
+	      AND C.KOR = #{storeType}
+	    </if>
+	
+	    <if test="startDate != null and startDate != ''">
+	      AND (
+	          S.S_STATUS = 'ext'
+	          
+	          OR 
+	          
+	          (S.S_STATUS = 'gen' AND EXISTS (
+	              SELECT 1 
+	              FROM RSV_SLOT RS 
+	              WHERE RS.STORE_NO = S.STORE_NO 
+	                AND RS.SLOT_DATE BETWEEN #{startDate} AND #{endDate}
+	                AND RS.SLOT_TIME BETWEEN #{startTime} AND #{endTime}
+	                AND RS.IS_AVAILABLE = 'Y'
+	                
+	                AND TIMESTAMP(RS.SLOT_DATE, RS.SLOT_TIME) > DATE_ADD(NOW(), INTERVAL COALESCE(SP.CUTOFF, 0) HOUR)
+	          ))
+	      )
+	    </if>
+	</select> -->
+	
+	<select id="selectStoreList" parameterType="hashmap" resultType="com.example.unipet.model.Store">
+	    SELECT S.*, 
+	           C.KOR AS STORE_TYPE,
+	           IFNULL(R.REVIEW_COUNT, 0) AS REVIEW_COUNT,
+	           IFNULL(R.REVIEW_AVG, 0.0) AS REVIEW_AVG
+	    FROM STORE S
+	    LEFT JOIN CODE C ON S.S_CATEGORY = C.VALUE AND C.TYPE = 'S_CATEGORY'
+	    LEFT JOIN STORE_POLICY SP ON S.STORE_NO = SP.STORE_NO
+	    LEFT JOIN (
+	        SELECT 
+	            STORE_NO,
+	            COUNT(*) AS REVIEW_COUNT,
+	            ROUND(AVG(RATING), 1) AS REVIEW_AVG
+	        FROM REVIEW
+	        GROUP BY STORE_NO
+	    ) R ON S.STORE_NO = R.STORE_NO
+	    
 	    WHERE S.LAT BETWEEN #{swLat} AND #{neLat}
 	      AND S.LNG BETWEEN #{swLng} AND #{neLng}
 	    
@@ -38,7 +81,7 @@
 	          ))
 	      )
 	    </if>
-	</select>
+	</select> 
 	
 	<select id="selectStoreMenuList" parameterType="hashmap" resultType="com.example.unipet.model.Store">
 	    SELECT S.STORE_NO, STORE_NAME, MENU_NO, MENU_NAME, MENU_PRICE, M_STATUS 
@@ -56,26 +99,32 @@
         STORE_FILE
     WHERE 
         STORE_NO = #{storeNo}
+    And
+    	IS_PROOF = 'N'
     ORDER BY 
         IS_MAIN DESC, FILE_NO ASC
    </select>
    
    <select id="selectStoreReviewList" parameterType="hashmap" resultType="com.example.unipet.model.Review">
 	    SELECT 
+	        R.REVIEW_NO,
 	        R.USER_ID,
-	        NICKNAME,
-	        RATING,
-	        R_CONTENTS,
+	        U.NICKNAME,
+	        R.RATING,
+	        R.R_CONTENTS,
 	        DATE_FORMAT(R.CDATE, '%Y-%m-%d %H:%i') AS cdate,
-	        RSV_NO
+	        R.RSV_NO,
+	        -- 🎯 핵심 수정: FILE_PATH와 FILE_NAME을 합친(CONCAT) 후 쉼표로 묶습니다.
+	        GROUP_CONCAT(CONCAT(RF.FILE_PATH, RF.FILE_NAME) SEPARATOR ',') AS filePaths
 	    FROM REVIEW R
 	    JOIN USERS U ON R.USER_ID = U.USER_ID
-	    WHERE STORE_NO = #{storeNo}
+	    LEFT JOIN REVIEW_FILE RF ON R.REVIEW_NO = RF.REVIEW_NO
+	    WHERE R.STORE_NO = #{storeNo}
 	    <if test="rsvNo != null and rsvNo != ''">
-	        AND RSV_NO = #{rsvNo}
+	        AND R.RSV_NO = #{rsvNo}
 	    </if>
+	    GROUP BY R.REVIEW_NO
 	    ORDER BY R.CDATE DESC
-	    LIMIT 2
 	</select>
 	
 	<select id="selectStoreSlotList" parameterType="hashmap" resultType="com.example.unipet.model.Store">
@@ -104,18 +153,14 @@
 	    WHERE RSV_STATUS = 'WAI'
 	      AND CDATE &lt; DATE_SUB(NOW(), INTERVAL #{minutes} MINUTE)
 	</select>
-
-	
-	<!-- 한개 검색 -->
-	<select id="selectUser" parameterType="hashmap" resultType="com.example.unipet.model.Default">
-	</select>
 	
 	<select id="selectStoreInfo" parameterType="hashmap" resultType="com.example.unipet.model.Store">
 	    SELECT S.STORE_NO, STORE_NAME, S_ADDR, S_STATUS, LAT, LNG, C.KOR AS STORE_TYPE,
-	    		SUB_TITLE, S_CONTENTS
+	    		SUB_TITLE, S_CONTENTS, OPEN_TIME, CLOSE_TIME
 	    FROM STORE S
 	    LEFT JOIN CODE C ON S.S_CATEGORY = C.VALUE
 	    LEFT JOIN STORE_DETAIL D ON S.STORE_NO = D.STORE_NO
+	    LEFT JOIN STORE_POLICY P ON S.STORE_NO = P.STORE_NO
 	    WHERE
 	    	TYPE = 'S_CATEGORY'
 		    AND S.STORE_NO = #{storeNo}
@@ -130,13 +175,17 @@
 	      AND CUR_COUNT < CAPACITY
 	    ]]>
 	</select>
-
 	<select id="selectStoreReviewSummary" parameterType="hashmap" resultType="hashmap">
 	    SELECT 
-	        COUNT(*) AS REVIEW_COUNT,
-	        IFNULL(ROUND(AVG(RATING), 1), 0) AS REVIEW_AVG
-	    FROM REVIEW
-	    WHERE STORE_NO = #{storeNo}
+	        COUNT(R.REVIEW_NO) AS REVIEW_COUNT,
+	        IFNULL(ROUND(AVG(R.RATING), 1), 0) AS REVIEW_AVG,
+	        MAX(RS.SUMMARY_TEXT) AS REVIEW_SUMMARY_TEXT
+	    FROM REVIEW R
+	    LEFT JOIN review_summary RS
+	        ON RS.TARGET_TYPE = 'STO'
+	       AND RS.TARGET_NO = R.STORE_NO
+	       AND RS.SUMMARY_STATUS = 'S'
+	    WHERE R.STORE_NO = #{storeNo}
 	</select>
 
 	<select id="selectExpiredReservations" parameterType="hashmap" resultType="com.example.unipet.model.Reservation">
@@ -211,6 +260,11 @@
 	<delete id="deleteUser" parameterType="hashmap">
 	</delete>
 	
+	<delete id="removeReview" parameterType="hashmap">
+	    DELETE FROM REVIEW 
+	    WHERE RSV_NO = #{rsvNo}
+	</delete>
+	
 	<!-- 수정 -->
 	<update id="updateUser" parameterType="hashmap">
 	</update>
@@ -272,6 +326,12 @@
 	    UPDATE RESERVATION 
 	    SET RSV_STATUS = 'CAN' 
 	    WHERE RSV_NO = #{rsvNo}
+	</update>
+	
+	<update id="updateReview" parameterType="hashmap">
+	    UPDATE REVIEW 
+	    SET R_CONTENTS = #{rContents} 
+	    WHERE RSV_NO = #{rsvNo} 
 	</update>
 	
 </mapper>

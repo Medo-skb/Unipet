@@ -167,13 +167,13 @@
 				<table>
 					<thead>
 						<tr>
-							<th width="90">번호</th>
+							<th class="col-no">번호</th>
 							<th>제목</th>
-							<th width="120">작성자</th>
-							<th width="90">조회수</th>
-							<th width="90">추천수</th>
-							<th width="90">댓글수</th>
-							<th width="150">작성일</th>
+							<th class="col-writer">작성자</th>
+							<th class="col-count">조회수</th>
+							<th class="col-count">추천수</th>
+							<th class="col-count">댓글수</th>
+							<th class="col-date">작성일</th>
 						</tr>
 					</thead>
 
@@ -225,11 +225,10 @@
 							<td>{{item.likeCnt}}</td>
 							<td>{{item.commentCnt}}</td>
 
-							<td>
-								<div class="date-box" v-if="item.createTime != null && item.createTime != ''">
-									<div>{{item.createTime.substring(0,10)}}</div>
-									<div>{{item.createTime.substring(11,16)}}</div>
-								</div>
+							<td class="date-cell">
+								<span v-if="item.createTime != null && item.createTime != ''">
+									{{fnFormatCreateTime(item.createTime)}}
+								</span>
 							</td>
 						</tr>
 					</tbody>
@@ -355,7 +354,6 @@
 							}
 						},
 						error: function (xhr) {
-							console.log(xhr.responseText);
 							alert("게시글 목록 조회 중 오류가 발생했습니다.");
 						}
 					});
@@ -599,6 +597,27 @@
 					}
 
 					return "지역";
+				},
+				
+				fnFormatCreateTime: function (createTime) {
+					if (createTime == null || createTime == "") {
+						return "";
+					}
+
+					let value = String(createTime).trim();
+					value = value.replace("T", " ");
+
+					// yyyy-MM-dd HH:mm 형태가 제대로 있으면 날짜+시간 표시
+					if (value.length >= 16 && value.substring(13, 16).indexOf(":") == 0) {
+						return value.substring(0, 16);
+					}
+
+					// 시간이 01: 처럼 깨져 있으면 날짜만 표시
+					if (value.length >= 10) {
+						return value.substring(0, 10);
+					}
+
+					return value;
 				},
 
 				fnShowLocalBadge: function (item) {

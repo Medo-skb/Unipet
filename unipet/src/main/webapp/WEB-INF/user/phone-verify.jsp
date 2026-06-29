@@ -6,7 +6,7 @@
     <!-- <link href="/css/user/phone-verify2.css" rel="stylesheet"> -->
     <link href="/css/user/phone-verify.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <title>휴대폰 인증</title>
+    <title>UNIPET</title>
 </head>
 
 <body>

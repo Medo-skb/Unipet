@@ -218,7 +218,7 @@
                         }
 
                         $.post("/user/sendSms.dox", { phone: this.phone }, (res) => {
-                            console.log("SMS 응답:", res);
+                            
 
                             if (res.result === true || res.result === "true" || res.result === "success") {
                                 alert(res.message || "인증번호가 발송되었습니다.");

@@ -62,7 +62,7 @@
 
         <script src="${pageContext.request.contextPath}/js/main/main.js"></script>
 
-        <div id="app">
+        <div id="app" v-cloak>
 
             <div class="basic-info-modal-wrap" v-if="showBasicInfoModal">
                 <div class="basic-info-modal-box">
@@ -88,9 +88,93 @@
                     </a>
                 </div>
                 
+                <section class="main-ai-section" v-if="aiStoreList.length > 0">
+                    <div class="section-header">
+                        <h2 class="section-title">✨ AI 맞춤 추천 업체</h2>
+                        <div class="section-desc">회원님의 최근 활동과 지역을 분석하여 선별했어요.</div>
+                    </div>
+
+                    <div class="store-card-list">
+                        <div class="store-card"
+                            v-for="(item, index) in aiStoreList"
+                            :key="'ai-store-' + index"
+                            @click="fnGoStoreDetail(item.storeNo)">
+
+                            <div class="store-image-box">
+                                <img v-if="item.filePath && item.fileName"
+                                    :src="item.filePath + item.fileName"
+                                    class="store-image"
+                                    @error="handleImgError">
+
+                                <div v-else class="no-image-box">
+                                    등록된 이미지가<br>없습니다.
+                                </div>
+
+                                <div class="store-rank-badge">
+                                    AI Pick
+                                </div>
+                            </div>
+
+                            <div class="store-card-body">
+                                <div class="store-name-row">
+                                    <div class="store-name">{{ item.storeName || item.name }}</div>
+                                    <div class="store-category">{{ item.sCategoryName || item.type }}</div>
+                                </div>
+
+                                <div class="store-best-menu">
+                                    {{ item.subTitle || '회원님을 위한 완벽한 맞춤 공간' }}
+                                </div>
+
+                                <div class="store-address">
+                                    {{ item.sAddr }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="main-ai-section product-ai-section" v-if="aiProductList.length > 0">
+                    <div class="section-header">
+                        <h2 class="section-title">✨ AI 맞춤 추천 상품</h2>
+                        <div class="section-desc">회원님의 최근 활동과 지역을 분석하여 선별했어요.</div>
+                    </div>
+
+                    <div class="recommend-card-list">
+                        <div class="recommend-card"
+                            v-for="(item, index) in aiProductList"
+                            :key="'ai-product-' + index"
+                            @click="fnGoProductDetail(item.productNo)">
+
+                            <div class="recommend-image-box">
+                                <img v-if="item.filePath && item.fileName"
+                                    :src="item.filePath + item.fileName"
+                                    class="recommend-image"
+                                    @error="handleImgError">
+
+                                <div v-else class="no-image-box">
+                                    등록된 이미지가<br>없습니다.
+                                </div>
+
+                                <div class="store-rank-badge badge-ai-pick">
+                                    AI Pick
+                                </div>
+                            </div>
+
+                            <div class="product-card-body">
+                                <div class="product-name">{{ item.productName || item.name }}</div>
+                                
+                                <div class="product-price">
+                                    {{ fnFormatPrice(item.productPrice) }}원
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 <section class="main-store-section scroll-fade-up">
                     <div class="section-header">
-                        <h2 class="section-title">최근 예약이 많은 업체</h2>
+                        <h2 class="section-title">예약이 많은 업체</h2>
+                        <div class="section-desc">최근 예약이 많이 들어온 인기 업체를 모았어요.</div>
                     </div>
 
                     <div class="store-card-list">
@@ -133,6 +217,7 @@
                 <section class="main-product-section scroll-fade-up">
                     <div class="section-header">
                         <h2 class="section-title">최다 주문 상품</h2>
+                        <div class="section-desc">회원들이 가장 많이 주문한 인기 상품이에요.</div>
                     </div>
 
                     <div class="product-card-list">
@@ -167,6 +252,7 @@
 
                         <div class="section-header">
                             <h2 class="section-title">카테고리별 인기 업체</h2>
+                            <div class="section-desc">카테고리별로 많은 관심을 받은 업체를 확인해보세요.</div>
                         </div>
 
                         <div class="category-tab-wrap">
@@ -224,6 +310,7 @@
                 <div class="recommend-section-block scroll-fade-up">
                     <div class="section-header">
                         <h2 class="section-title">동물별 인기 상품</h2>
+                        <div class="section-desc">반려동물 유형에 맞춰 인기 상품을 선별했어요.</div>
                     </div>
 
                     <div class="category-tab-wrap">
@@ -272,12 +359,12 @@
             </div>
         </div>
 
-        <!-- 챗봇 플로팅 버튼 -->
-        <div class="chatbot-floating-btn" onclick="location.href='/unipet/chatbot.do'">
+        <!-- 고객 센터 -->
+        <div class="chatbot-floating-btn" onclick="location.href='/unipet/customer.do'">
             <div class="chatbot-icon">💬</div>
             <div class="chatbot-text">
-                <strong>챗봇 상담</strong>
-                <span>궁금한 점을 물어보세요</span>
+                <strong>고객 센터</strong>
+                <span>무엇이든 편하게 문의해 주세요</span>
             </div>
         </div>
 
@@ -318,7 +405,10 @@
 
                 selectedCategory: "HOS",
                 categoryStoreCache: {},
-                isCategoryStoreLoaded: false
+                isCategoryStoreLoaded: false,
+
+                aiStoreList: [],
+                aiProductList: []
             };
         },
         methods: {
@@ -347,7 +437,7 @@
                 let self = this;
                 let param = {};
                 $.ajax({
-                    url: "http://localhost:8080/getMainBasicList.dox",
+                    url: "/getMainBasicList.dox",
                     dataType: "json",
                     type: "POST",
                     data: param,
@@ -359,6 +449,24 @@
                     },
                     error: function (xhr, status, error) {
                 }
+                });
+            },
+
+            fnGetAiRecommendation: function() {
+                let self = this;
+                $.ajax({
+                    url: "/getAiRecommendation.dox",
+                    dataType: "json",
+                    type: "POST",
+                    success: function (data) {
+                        if (data.result === "success") {
+                            self.aiStoreList = data.aiServices || [];
+                            self.aiProductList = data.aiProducts || [];
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("AI 추천 데이터를 불러오는데 실패했습니다.");
+                    }
                 });
             },
 
@@ -468,6 +576,7 @@
             self.fnCategoryStoreList(self.selectedCategory);
             <c:if test="${not empty sessionScope.sessionId and sessionScope.sessionRole eq 'USER'}">
                 self.fnCheckSocialBasicInfo();
+                self.fnGetAiRecommendation();
             </c:if>
             
         }

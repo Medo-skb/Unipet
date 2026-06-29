@@ -6,6 +6,7 @@
     --point: #da120d;
     --soft-pink: #fff0f3;
     --soft-pink-2: #fff7f9;
+    --btnh: #f83f5f;
 
     --text-main: #222;
     --text-sub: #777;
@@ -15,7 +16,10 @@
     --line: #e5e5e5;
     --line-soft: #eeeeee;
     --image-soft: #f8f8f8;
+    --text-cancel: #374151;
 }
+
+[v-cloak] { display: none; }
 
 .site-header {
     position: sticky;

@@ -39,7 +39,8 @@ public class WebConfig implements WebMvcConfigurer {
 					"/editBizStatusRej.dox",
 					"/getReservationReviewReportList.dox",
 					"/getProductReviewReportList.dox",
-					"/admin/report/**"
+					"/admin/report/**",
+					"/admin/review/**"
 				)
 				.excludePathPatterns(
 					"/admin/login.do",

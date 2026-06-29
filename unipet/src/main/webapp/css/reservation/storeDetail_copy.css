@@ -1,0 +1,591 @@
+@charset "UTF-8";
+
+/* ==========================================
+   1. 기본 레이아웃 및 컨테이너
+   ========================================== */
+#container {
+    width: 1000px;
+    margin: 40px auto 80px;
+    padding: 34px;
+    box-sizing: border-box;
+    background: #fff;
+    border: 1px solid var(--line-soft);
+    border-radius: 22px;
+}
+
+#contents {
+    padding-top: 24px;
+}
+
+/* [공통 요소] 각 섹션 타이틀 및 구분선 */
+.intro > div:first-child,
+.menu > div:first-child,
+.review-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 14px;
+}
+
+.intro hr,
+.menu hr,
+.review hr,
+.time hr {
+    border: 0;
+    border-top: 1px solid var(--line-soft);
+    margin: 0 0 18px;
+}
+
+
+/* ==========================================
+   2. 상단 영역 (#top)
+   ========================================== */
+.top-wrapper {
+    display: flex;       
+    align-items: center; 
+    gap: 8px;            
+}
+
+.top-wrapper > div:first-child {
+    font-size: 24px;      
+    font-weight: bold;
+}
+
+.s-type {
+    font-size: 15px;
+    line-height: 28px;
+    color: var(--text-sub);
+}
+
+#top-sub {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--line-soft);
+}
+
+.button {
+    width: 110px;
+    height: 38px;
+    line-height: 38px;
+    background-color: #fff;
+    color: var(--main);
+    border: 1px solid var(--main);
+    border-radius: 999px;
+    cursor: pointer;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.button:hover {
+    background-color: var(--main);
+    color: #fff;
+}
+
+
+/* ==========================================
+   3. 이미지 슬라이드 영역 (.img-area)
+   ========================================== */
+.img-area {
+    display: flex;
+    overflow-x: auto;
+    gap: 14px;
+    padding: 6px 0 18px;
+    scroll-behavior: smooth;
+}
+
+.img-area::-webkit-scrollbar {
+    height: 8px;
+}
+
+.img-area::-webkit-scrollbar-thumb {
+    background: #ddd;
+    border-radius: 999px;
+}
+
+.img-area::-webkit-scrollbar-track {
+    background: #f7f7f7;
+    border-radius: 999px;
+}
+
+.image-item {
+    flex: 0 0 auto;
+    width: 250px;
+    height: 250px;
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid var(--line-soft);
+    background: #f8f8f8;
+}
+
+.image-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.25s ease;
+}
+
+.image-item:hover img {
+    transform: scale(1.04);
+}
+
+
+/* ==========================================
+   4. 중단 그리드 영역 (#middle-section)
+   ========================================== */
+#middle-section {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 400px;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+/* 소개 (intro) */
+.intro {
+    margin-bottom: 30px;
+}
+
+.sContents {
+    white-space: pre-wrap;
+    font-size: 15px;
+    color: var(--text-sub);
+    line-height: 1.8;
+}
+
+/* 영업시간 (time) */
+.time-header {
+    display: flex;
+    align-items: center; 
+    gap: 10px; 
+    margin-bottom: 14px;
+}
+
+.time-header .label {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.time-header .value {
+    font-size: 20px;
+    font-weight: 600;
+    color: #555;
+}
+
+/* 카카오 맵 (#map) */
+#map {
+    width: 100%;
+    max-width: 100%;
+    height: 300px; 
+    border: 1px solid var(--line-soft);
+    border-radius: 18px;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+
+/* ==========================================
+   5. 가격표 영역 (.menu)
+   ========================================== */
+.menu {
+    margin: 20px 0;
+}
+
+#MenuList {
+    display: flex;
+    list-style: none;
+    padding: 0;
+}
+
+#MenuList li {
+    padding: 0 15px;
+    border-right: 1px solid #ccc;
+}
+
+#MenuList li:last-child {
+    border-right: none; 
+}
+
+
+/* ==========================================
+   6. 리뷰 영역 (.review-section)
+   ========================================== */
+.review-section {
+    margin-top: 40px;
+}
+
+.title-stats {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-sub);
+}
+
+.total-count,
+.avg-score {
+    color: var(--text-sub);
+}
+
+.no-review {
+    padding: 36px 0;
+    text-align: center;
+    color: #bbb;
+    font-size: 14px;
+}
+
+/* 리뷰 개별 카드 (.rev-cont) */
+.rev-cont {
+    padding: 18px 4px;
+    border-bottom: 1px solid var(--line-soft);
+}
+
+.rev-cont:last-child {
+    border-bottom: none;
+}
+
+/* 리뷰 헤더 및 정렬 */
+.rev-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+/* 상단 레이아웃 (좌우 분할) */
+.rev-top-layout {
+    display: flex;
+    /* justify-content: space-between; */
+    justify-content: flex-start;
+    align-items: flex-start; /* 내용물들을 위쪽 기준으로 정렬 */
+    margin-bottom: 12px; /* 본문 텍스트와의 간격 */
+}
+
+/* 왼쪽 정보 그룹 (헤더 + 별점) */
+.info-group {
+    /* flex: 1;  */
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column; /* 세로로 배치 (1행: 헤더, 2행: 별점) */
+    gap: 8px; /* 헤더와 별점 사이의 간격 */
+}
+
+/* 오른쪽 썸네일 그룹 */
+.thumb-group {
+    display: flex;
+    gap: 8px;
+    margin-left: 20px; /* 좌측 정보 박스와의 간격 */
+}
+
+/* 🎯 시원하게 커진 썸네일 이미지 */
+.thumb-img-large {
+    width: 60px; /* 원하는 만큼 더 키우셔도 됩니다 (예: 70px, 80px) */
+    height: 60px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid #e0e0e0;
+    cursor: pointer;
+    transition: filter 0.2s;
+}
+
+.thumb-img-large:hover {
+    filter: brightness(0.8);
+}
+
+/* 화살표 내비게이션 버튼 공통 스타일 */
+.modal-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.3); /* 배경에 자연스럽게 묻히는 반투명 블랙 */
+    color: #ffffff;
+    border: none;
+    font-size: 30px;
+    padding: 16px;
+    cursor: pointer;
+    user-select: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background 0.2s, color 0.2s;
+}
+
+.modal-nav-btn:hover {
+    background: rgba(255, 255, 255, 0.9);
+    color: #333333; /* 마우스 올리면 반전 효과 */
+}
+
+/* 왼쪽 버튼 위치 */
+.btn-left {
+    left: 40px;
+}
+
+/* 오른쪽 버튼 위치 */
+.btn-right {
+    right: 40px;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px; 
+}
+
+.rev-header .nickname {
+    font-weight: 700;
+    color: var(--text-main);
+    font-size: 15px;
+}
+
+.rev-header .date {
+    font-size: 12px;
+    color: #999;
+}
+
+.rev-thumbnails {
+    display: flex;
+    gap: 6px;
+    margin-left: 4px; /* 날짜와 사진 그룹 사이의 약간의 여백 */
+}
+
+.thumb-img {
+    width: 32px; /* 썸네일 크기 (디자인에 맞게 조절하세요) */
+    height: 32px;
+    border-radius: 6px;
+    object-fit: cover; /* 이미지가 찌그러지지 않고 꽉 차게 */
+    border: 1px solid #e0e0e0;
+    cursor: pointer;
+    transition: filter 0.2s;
+}
+
+.thumb-img:hover {
+    filter: brightness(0.8); /* 마우스 올렸을 때 살짝 어두워지는 클릭 유도 효과 */
+}
+
+/* 모달 영역 전체 덮기 */
+.img-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.387); /* 반투명 검은 배경 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* 화면 최상단으로 올리기 */
+}
+
+/* 띄워지는 큰 이미지 */
+.modal-large-img {
+    max-width: 90vw; /* 화면을 넘지 않도록 제한 */
+    max-height: 90vh;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* 닫기 (X) 버튼 */
+.modal-close-btn {
+    position: absolute;
+    top: 20px;
+    right: 40px;
+    color: #ffffff;
+    font-size: 40px;
+    font-weight: 300;
+    cursor: pointer;
+    user-select: none;
+}
+
+.modal-close-btn:hover {
+    color: #cccccc;
+}
+
+/* 리뷰 액션 버튼 (수정/삭제) */
+.rev-actions {
+    display: flex;
+    gap: 6px;
+    margin-left: auto; 
+    align-self: center; 
+}
+
+.rev-actions button {
+    height: 40px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    padding: 0 16px;
+    font-weight: 700;
+    background: var(--bg);
+    color: var(--text-main);
+    border: 1px solid var(--line-soft) !important;
+}
+
+.rev-actions button:hover {
+    color: var(--main);
+    border-color: var(--main) !important;
+}
+
+/* 별점 및 텍스트 본문 */
+.rev-star {
+    margin-bottom: 12px;
+    color: #f1c40f;
+    font-size: 14px;
+}
+
+.review-score {
+    margin-left: 6px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #555555;
+}
+
+.rev-text {
+    padding: 14px 16px;
+    border-radius: 12px;
+    background-color: #fafafa;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #333333;
+    white-space: pre-wrap;
+}
+
+
+/* ==========================================
+   7. 리뷰 인라인 수정 영역 (.rev-edit-area)
+   ========================================== */
+.rev-edit-area {
+    margin-top: 10px;
+}
+
+.edit-textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 12px;
+    border: 1px solid var(--line-soft);
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--text-main);
+    box-sizing: border-box;
+    resize: vertical;
+    outline: none;
+    margin-bottom: 8px;
+}
+
+.edit-textarea:focus {
+    border-color: var(--main);
+}
+
+.edit-btns {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.edit-btns button {
+    padding: 6px 16px;
+    font-size: 13px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-cancel {
+    background: #fff;
+    border: 1px solid var(--line-soft);
+    color: #666;
+}
+
+.btn-save {
+    background: var(--main);
+    border: 1px solid var(--main);
+    color: #fff;
+}
+
+
+/* ==========================================
+   8. 페이징 영역 (.pagination-wrap)
+   ========================================== */
+.pagination-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    padding: 30px 0 10px; 
+}
+
+.pagination-wrap button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--line-soft);
+    background-color: #fff;
+    color: #666;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.pagination-wrap button:hover:not(:disabled) {
+    background-color: #f8f9fb;
+    border-color: #bbb;
+}
+
+.pagination-wrap button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.page-num {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-sub);
+    transition: all 0.2s ease;
+}
+
+.page-num:hover:not(.active) {
+    background-color: #f8f9fb;
+}
+
+.page-num.active {
+    background-color: #ff4b82;
+    color: #fff;
+    font-weight: bold;
+}
+/* AI 리뷰 요약 */
+.ai-review-summary {
+    margin: 18px 0 20px;
+    padding: 16px 18px;
+    border: 1px solid var(--line-soft);
+    border-radius: 12px;
+    background: #fafafa;
+}
+
+.ai-review-label {
+    margin-bottom: 8px;
+    color: var(--main);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.ai-review-text {
+    color: var(--text-main);
+    font-size: 15px;
+    line-height: 1.6;
+}
+.ai-review-summary.empty {
+    color: var(--text-sub);
+    font-size: 14px;
+}

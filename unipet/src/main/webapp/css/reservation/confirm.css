@@ -138,13 +138,13 @@
 }
 
 .btn-confirm:hover {
-    opacity: 0.9;
+    background-color: var(--btnh);
 }
 
 .btn-cancel {
     background-color: #fff;
-    color: var(--main);
-    border: 1px solid var(--main);
+    color: var(--text-main);
+    border: 1px solid var(--line-soft);
     border-radius: 999px;
     padding: 12px 40px;
     font-weight: 700;
@@ -152,5 +152,6 @@
 }
 
 .btn-cancel:hover {
-    background-color: #fff1f3;
+    border-color: var(--main);
+    color: var(--main);
 }

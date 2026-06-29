@@ -1,22 +1,20 @@
 package com.example.unipet.controller;
 
-import java.util.HashMap;
-import java.util.List;
+import java.util.HashMap; 
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.beans.factory.annotation.Autowired; 
+import org.springframework.beans.factory.annotation.Value;     
+import org.springframework.stereotype.Controller;              
+import org.springframework.ui.Model;                           
+import org.springframework.web.bind.annotation.RequestMapping;  
+import org.springframework.web.bind.annotation.RequestMethod;   
+import org.springframework.web.bind.annotation.RequestParam;   
+import org.springframework.web.bind.annotation.ResponseBody;   
 
-import com.example.unipet.dao.ReservationService;
-import com.google.gson.Gson;
+import com.example.unipet.dao.ReservationService;              
+import com.google.gson.Gson;                                   
 
-import ch.qos.logback.core.model.Model;
-import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;                
 
 @Controller
 public class ReservationController {
@@ -24,9 +22,14 @@ public class ReservationController {
 	@Autowired
 	ReservationService reservationService;
 	
-	// 웹브라우저로 접속하는 주소, return은 jsp파일
+	@Value("${kakao.maps.apikey}")
+	private String kakaoApiKey;
+	
 	@RequestMapping("/reservation/search.do") 
 	public String search(HttpServletRequest request, Model model, @RequestParam HashMap<String, Object> map) throws Exception{
+		
+		model.addAttribute("kakaoApiKey", kakaoApiKey);
+		
 		return "/reservation/search";
 	}
 
@@ -44,6 +47,7 @@ public class ReservationController {
 	@RequestMapping("/reservation/store-detail.do")
 	public String detail(HttpServletRequest request, Model model,  @RequestParam HashMap<String, Object> map) throws Exception{
 		request.setAttribute("map", map);
+		model.addAttribute("kakaoApiKey", kakaoApiKey);
 		return "/reservation/storeDetail";
 	}
 	
@@ -67,7 +71,42 @@ public class ReservationController {
 	    HashMap<String, Object> reviewSummary = reservationService.getStoreReviewSummary(map);
 	    resultMap.put("reviewCount", reviewSummary.get("count"));
 	    resultMap.put("reviewAvg", reviewSummary.get("avg"));
+	    resultMap.put("reviewSummaryText", reviewSummary.get("summaryText"));
 
+	    return new Gson().toJson(resultMap); 
+	}
+	
+	// 리뷰 수정
+	@RequestMapping(value = "/reservation/review-update.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String updateReview(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+	    
+	    try {
+	        reservationService.updateReview(map);
+	        resultMap.put("result", "success");
+	    } catch (Exception e) {
+	        resultMap.put("result", "fail");
+	        resultMap.put("message", e.getMessage());
+	    }
+	    
+	    return new Gson().toJson(resultMap); 
+	}
+
+	// 리뷰 삭제
+	@RequestMapping(value = "/reservation/review-remove.dox", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
+	@ResponseBody
+	public String removeReview(Model model, @RequestParam HashMap<String, Object> map) throws Exception {
+	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
+	    
+	    try {
+	        reservationService.removeReview(map);
+	        resultMap.put("result", "success");
+	    } catch (Exception e) {
+	        resultMap.put("result", "fail");
+	        resultMap.put("message", e.getMessage());
+	    }
+	    
 	    return new Gson().toJson(resultMap); 
 	}
 	
