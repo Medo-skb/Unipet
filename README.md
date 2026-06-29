@@ -48,7 +48,7 @@
 ---
 
 ## 📕 발표 PPT  
-[▶ 유니펫 발표 PPT](https://drive.google.com/file/d/1KNUw22gCWx9QLP3GXSQRj0DDWDHjEnaK/view?usp=sharing)
+[▶ 유니펫 발표 PPT](https://drive.google.com/file/d/1iF86QkdJiTOfV7UO915YyjoPSnmj4ax7/view?usp=sharing)
 
 ## 🎞 시연 영상  
 
