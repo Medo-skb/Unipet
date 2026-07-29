@@ -88,6 +88,12 @@
                         <div class="ai-review-summary empty" v-else-if="reviewCount > 0 && reviewCount <= 2">
                             리뷰가 충분하지 않아 요약 기능이 제공되지 않습니다.
                         </div>
+                        <div class="ai-review-summary empty" v-else-if="Number(reviewCount) === 0">
+                            작성된 리뷰가 없어 AI 요약이 제공되지 않습니다.
+                        </div>
+                        <div class="ai-review-summary empty" v-else>
+                            AI 리뷰 요약을 준비 중입니다.
+                        </div>
                         <div class="review-list-container">
                             <div v-if="reviewList.length === 0" class="no-review">
                                 작성된 리뷰가 없습니다.
