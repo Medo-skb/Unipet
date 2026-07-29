@@ -1444,14 +1444,16 @@
 	
 	<update id="updateAdminProductMainImage" parameterType="hashmap">
 	    UPDATE PRODUCT_FILE
-	    SET FILE_PATH = #{mainImagePath}
+	    SET FILE_PATH = #{mainImagePath},
+	        FILE_NAME = #{mainImageFileName}
 	    WHERE PRODUCT_NO = #{productNo}
 	      AND IS_MAIN = 'Y'
 	</update>
 	
 	<update id="updateAdminProductDetailImage" parameterType="hashmap">
 	    UPDATE PRODUCT_FILE
-	    SET FILE_PATH = #{detailImagePath}
+	    SET FILE_PATH = #{detailImagePath},
+	        FILE_NAME = #{detailImageFileName}
 	    WHERE PRODUCT_NO = #{productNo}
 	      AND IS_DETAIL = 'Y'
 	</update>
@@ -1460,11 +1462,13 @@
 	    INSERT INTO PRODUCT_FILE (
 	        PRODUCT_NO,
 	        FILE_PATH,
+	        FILE_NAME,
 	        IS_MAIN,
 	        IS_DETAIL
 	    ) VALUES (
 	        #{productNo},
 	        #{mainImagePath},
+	        #{mainImageFileName},
 	        'Y',
 	        'N'
 	    )
@@ -1474,11 +1478,13 @@
 	    INSERT INTO PRODUCT_FILE (
 	        PRODUCT_NO,
 	        FILE_PATH,
+	        FILE_NAME,
 	        IS_MAIN,
 	        IS_DETAIL
 	    ) VALUES (
 	        #{productNo},
 	        #{detailImagePath},
+	        #{detailImageFileName},
 	        'N',
 	        'Y'
 	    )

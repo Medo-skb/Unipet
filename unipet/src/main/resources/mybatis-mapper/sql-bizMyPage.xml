@@ -23,20 +23,21 @@
 	</select>
 	
 	<!-- 메뉴 예약 분포 -->
-	<select id="selectMenuChartList" parameterType="hashmap" resultType="com.example.unipet.model.BizMyPage">
-		SELECT
-		    SM.MENU_NAME AS menuName,
-		    COUNT(R.RSV_NO) AS reserveCount
-		FROM RESERVATION R
-		LEFT JOIN STORE S ON S.STORE_NO = R.STORE_NO
-		LEFT JOIN STORE_USER SU ON SU.S_USER_ID = S.S_USER_ID
-		LEFT JOIN STORE_MENU SM ON SM.MENU_NO = R.MENU_NO
-		WHERE S.S_USER_ID = #{sUserId}
-		  AND S.S_STATUS IN ('GEN', 'AFF')
-		  AND SU.U_STATUS = 'APR'
-		  AND R.RSV_STATUS = 'FIN'
-		GROUP BY SM.MENU_NO, SM.MENU_NAME
-		ORDER BY reserveCount DESC
+	<select id="selectMenuChartList" parameterType="hashmap"
+	        resultType="com.example.unipet.model.BizMyPage">
+	    SELECT
+	        SM.MENU_NAME AS menuName,
+	        COUNT(R.RSV_NO) AS reserveCount
+	    FROM RESERVATION R
+	    LEFT JOIN STORE S ON S.STORE_NO = R.STORE_NO
+	    LEFT JOIN STORE_USER SU ON SU.S_USER_ID = S.S_USER_ID
+	    LEFT JOIN STORE_MENU SM ON SM.MENU_NO = R.MENU_NO
+	    WHERE S.S_USER_ID = #{sUserId}
+	      AND S.S_STATUS IN ('GEN', 'AFF')
+	      AND SU.U_STATUS = 'APR'
+	      AND R.RSV_STATUS IN ('CNF', 'FIN')
+	    GROUP BY SM.MENU_NO, SM.MENU_NAME
+	    ORDER BY reserveCount DESC
 	</select>
 	
 	<!-- 하루 예약 건수 차트 -->
@@ -442,37 +443,42 @@
 	</update>
 	
 	<!-- 예약 요약 -->
-	<select id="selectReservationSummary" parameterType="hashmap" resultType="com.example.unipet.model.BizMyPage">
-		SELECT
-			SUM(
-				CASE
-					WHEN R.RSV_DATE = CURDATE()
-					 AND R.RSV_STATUS IN ('CNF', 'FIN')
-					THEN 1
-					ELSE 0
-				END
-			) AS todayReservationCount,
-			SUM(
-				CASE
-					WHEN R.RSV_DATE BETWEEN DATE_SUB(CURDATE(), INTERVAL 6 DAY) AND CURDATE()
-					 AND R.RSV_STATUS IN ('CNF', 'FIN')
-					THEN 1
-					ELSE 0
-				END
-			) AS weekReservationCount,
-			SUM(
-				CASE
-					WHEN R.RSV_STATUS = 'FIN'
-					THEN 1
-					ELSE 0
-				END
-			) AS completeReservationCount
-		FROM RESERVATION R
-		LEFT JOIN STORE S ON S.STORE_NO = R.STORE_NO
-		LEFT JOIN STORE_USER SU ON SU.S_USER_ID = S.S_USER_ID
-		WHERE S.S_USER_ID = #{sUserId}
-		  AND S.S_STATUS IN ('GEN', 'AFF')
-		  AND SU.U_STATUS = 'APR'
+	<select id="selectReservationSummary" parameterType="hashmap"
+	        resultType="com.example.unipet.model.BizMyPage">
+	    SELECT
+	        SUM(
+	            CASE
+	                WHEN R.RSV_DATE = CURDATE()
+	                 AND R.RSV_STATUS IN ('CNF', 'FIN')
+	                THEN 1
+	                ELSE 0
+	            END
+	        ) AS todayReservationCount,
+	
+	        SUM(
+	            CASE
+	                WHEN DATE(R.CDATE)
+	                     BETWEEN DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+	                         AND CURDATE()
+	                 AND R.RSV_STATUS IN ('CNF', 'FIN')
+	                THEN 1
+	                ELSE 0
+	            END
+	        ) AS weekReservationCount,
+	
+	        SUM(
+	            CASE
+	                WHEN R.RSV_STATUS = 'FIN'
+	                THEN 1
+	                ELSE 0
+	            END
+	        ) AS completeReservationCount
+	    FROM RESERVATION R
+	    LEFT JOIN STORE S ON S.STORE_NO = R.STORE_NO
+	    LEFT JOIN STORE_USER SU ON SU.S_USER_ID = S.S_USER_ID
+	    WHERE S.S_USER_ID = #{sUserId}
+	      AND S.S_STATUS IN ('GEN', 'AFF')
+	      AND SU.U_STATUS = 'APR'
 	</select>
 	
 	<!-- 예약 목록 -->
