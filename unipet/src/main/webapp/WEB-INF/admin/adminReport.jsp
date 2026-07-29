@@ -42,7 +42,7 @@
                             <table class="admin-user-table admin-report-table">
                                 <thead>
                                     <tr>
-                                        <th>처리여부</th>
+                                        <th>처리</th>
                                         <th>신고 대상</th>
                                         <th>카테고리</th>
                                         <th>신고자</th>

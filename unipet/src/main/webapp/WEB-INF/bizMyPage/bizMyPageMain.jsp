@@ -188,7 +188,22 @@
                             width: 400,
                             height: 400
                         },
+
                         labels: labelData,
+
+                        colors: [
+                            '#E53935',
+                            '#1E88E5',
+                            '#43A047',
+                            '#FB8C00',
+                            '#8E24AA',
+                            '#00ACC1',
+                            '#FDD835',
+                            '#6D4C41',
+                            '#D81B60',
+                            '#3949AB'
+                        ],
+
                         legend: {
                             show: false
                         }

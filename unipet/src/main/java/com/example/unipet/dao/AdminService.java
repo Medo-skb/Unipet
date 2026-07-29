@@ -973,40 +973,68 @@ public class AdminService {
 	    return resultMap;
 	}
 	
+	@Transactional
 	public HashMap<String, Object> updateAdminProduct(HashMap<String, Object> map) {
 	    HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
 	    try {
-	    	int result = adminMapper.updateAdminProduct(map);
+	        int result = adminMapper.updateAdminProduct(map);
 
-	    	if (result > 0) {
-	    	    if (map.get("mainImagePath") != null) {
-	    	        int mainImageCount = adminMapper.selectAdminProductMainImageCount(map);
+	        if (result <= 0) {
+	            resultMap.put("result", "fail");
+	            resultMap.put("message", "수정할 상품 정보를 찾을 수 없습니다.");
+	            return resultMap;
+	        }
 
-	    	        if (mainImageCount > 0) {
-	    	            adminMapper.updateAdminProductMainImage(map);
-	    	        } else {
-	    	            adminMapper.insertAdminProductMainImage(map);
-	    	        }
-	    	    }
+	        if (map.get("mainFileName") != null
+	                && !String.valueOf(map.get("mainFileName")).isBlank()) {
 
-	    	    if (map.get("detailImagePath") != null) {
-	    	        int detailImageCount = adminMapper.selectAdminProductDetailImageCount(map);
+	            map.put("filePath", map.get("mainFilePath"));
+	            map.put("fileName", map.get("mainFileName"));
+	            map.put("originName", map.get("mainOriginName"));
+	            map.put("fileSize", map.get("mainFileSize"));
+	            map.put("fileExt", map.get("mainFileExt"));
+	            map.put("isMain", "Y");
+	            map.put("isDetail", "N");
 
-	    	        if (detailImageCount > 0) {
-	    	            adminMapper.updateAdminProductDetailImage(map);
-	    	        } else {
-	    	            adminMapper.insertAdminProductDetailImage(map);
-	    	        }
-	    	    }
+	            int mainImageCount =
+	                    adminMapper.selectAdminProductMainImageCount(map);
 
-	    	    resultMap.put("result", "success");
-	    	} else {
-	    	    resultMap.put("result", "fail");
-	    	    resultMap.put("message", "수정할 상품 정보를 찾을 수 없습니다.");
-	    	}
+	            if (mainImageCount > 0) {
+	                adminMapper.updateAdminProductMainImage(map);
+	            } else {
+	                adminMapper.insertAdminProductFile(map);
+	            }
+	        }
+
+	        if (map.get("detailFileName") != null
+	                && !String.valueOf(map.get("detailFileName")).isBlank()) {
+
+	            map.put("filePath", map.get("detailFilePath"));
+	            map.put("fileName", map.get("detailFileName"));
+	            map.put("originName", map.get("detailOriginName"));
+	            map.put("fileSize", map.get("detailFileSize"));
+	            map.put("fileExt", map.get("detailFileExt"));
+	            map.put("isMain", "N");
+	            map.put("isDetail", "Y");
+
+	            int detailImageCount =
+	                    adminMapper.selectAdminProductDetailImageCount(map);
+
+	            if (detailImageCount > 0) {
+	                adminMapper.updateAdminProductDetailImage(map);
+	            } else {
+	                adminMapper.insertAdminProductFile(map);
+	            }
+	        }
+
+	        resultMap.put("result", "success");
+	        resultMap.put("message", "상품 정보가 수정되었습니다.");
+
 	    } catch (Exception e) {
 	        e.printStackTrace();
+	        TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+
 	        resultMap.put("result", "fail");
 	        resultMap.put("message", Message.MSG_SERVER_ERR);
 	    }
